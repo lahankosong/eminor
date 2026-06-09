@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/parr4187/public_html/margonoandi-fanbase
+    - /bin/cp -R . $DEPLOYPATH
