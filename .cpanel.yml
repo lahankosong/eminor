@@ -3,3 +3,7 @@ deployment:
   tasks:
     - export DEPLOYPATH=/home/parr4187/public_html/margonoandi-fanbase
     - /bin/cp -R . $DEPLOYPATH
+    - /bin/chmod 644 $DEPLOYPATH/.htaccess
+    - /bin/chmod 644 $DEPLOYPATH/public/.htaccess
+    - /bin/chmod -R 755 $DEPLOYPATH/storage
+    - /bin/chmod -R 755 $DEPLOYPATH/bootstrap/cache
