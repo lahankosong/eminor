@@ -115,12 +115,14 @@ class KitaController extends Controller
         $post->increment('comments_count');
 
         if ($post->user_id !== Auth::id()) {
-            NotifHelper::send(
-                $post->user_id, Auth::id(),
-                'comment', Auth::user()->name . ' mengomentari postinganmu',
-                $request->body,
-                url('/kita')
-            );
+            try {
+                NotifHelper::send(
+                    $post->user_id, Auth::id(),
+                    'comment', Auth::user()->name . ' mengomentari postinganmu',
+                    $request->body,
+                    url('/kita')
+                );
+            } catch (\Throwable $e) {}
         }
 
         return response()->json([

@@ -8,7 +8,7 @@ class Message extends Model
 {
     protected $fillable = ['conversation_id', 'user_id', 'body', 'read_at'];
 
-    protected $casts = ['read_at' => 'datetime'];
+    protected $casts = ['read_at' => 'datetime', 'user_id' => 'integer'];
 
     public function user()
     {

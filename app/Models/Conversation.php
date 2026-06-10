@@ -10,7 +10,11 @@ class Conversation extends Model
         'user_one_id', 'user_two_id', 'last_message_at', 'last_message'
     ];
 
-    protected $casts = ['last_message_at' => 'datetime'];
+    protected $casts = [
+        'last_message_at' => 'datetime',
+        'user_one_id'     => 'integer',
+        'user_two_id'     => 'integer',
+    ];
 
     public function userOne()
     {
