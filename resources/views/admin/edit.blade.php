@@ -5,16 +5,16 @@
     .form-header {
         display: flex; align-items: center; gap: 12px;
         margin-bottom: 2rem; padding-bottom: 1rem;
-        border-bottom: 1px solid #1a1a1a;
+        border-bottom: 1px solid var(--border);
     }
     .btn-back {
         padding: 6px 14px; border-radius: 8px; font-size: 12px;
-        border: 1px solid #2a2a2a; color: #888; text-decoration: none;
+        border: 1px solid var(--border); color: var(--text-2); text-decoration: none;
         transition: 0.15s;
     }
-    .btn-back:hover { color: #fff; border-color: #555; }
-    .form-header h2 { font-size: 1rem; font-weight: 500; }
-    .form-header p { font-size: 12px; color: #555; margin-top: 2px; }
+    .btn-back:hover { color: var(--text); border-color: var(--text-3); }
+    .form-header h2 { font-size: 1rem; font-weight: 500; color: var(--text); }
+    .form-header p { font-size: 12px; color: var(--text-3); margin-top: 2px; }
 
     .form-grid {
         display: grid; grid-template-columns: 1fr 1fr;
@@ -22,105 +22,105 @@
     }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group.full { grid-column: 1 / -1; }
-    .form-label { font-size: 11px; color: #666; letter-spacing: 0.05em; text-transform: uppercase; }
+    .form-label { font-size: 11px; color: var(--text-3); letter-spacing: 0.05em; text-transform: uppercase; }
     .form-input {
-        background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 8px;
-        color: #fff; font-size: 13px; padding: 9px 12px; outline: none;
+        background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px;
+        color: var(--text); font-size: 13px; padding: 9px 12px; outline: none;
         transition: 0.15s; font-family: inherit;
     }
-    .form-input:focus { border-color: #555; }
+    .form-input:focus { border-color: var(--text-3); }
     .form-textarea {
-        background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 8px;
-        color: #fff; font-size: 13px; padding: 9px 12px; outline: none;
+        background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px;
+        color: var(--text); font-size: 13px; padding: 9px 12px; outline: none;
         transition: 0.15s; font-family: 'Courier New', monospace;
         resize: vertical; min-height: 200px; line-height: 1.8;
     }
-    .form-textarea:focus { border-color: #555; }
-    .form-hint { font-size: 11px; color: #444; margin-top: 2px; }
+    .form-textarea:focus { border-color: var(--text-3); }
+    .form-hint { font-size: 11px; color: var(--text-3); margin-top: 2px; }
 
     .form-section {
         margin-bottom: 2rem; padding: 1.25rem;
-        background: #0d0d0d; border: 1px solid #1a1a1a; border-radius: 10px;
+        background: var(--bg-2); border: 1px solid var(--border); border-radius: 10px;
     }
     .form-section-title {
-        font-size: 11px; color: #555; letter-spacing: 0.15em;
+        font-size: 11px; color: var(--text-3); letter-spacing: 0.15em;
         text-transform: uppercase; margin-bottom: 1.25rem;
-        padding-bottom: 0.75rem; border-bottom: 1px solid #1a1a1a;
+        padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);
     }
 
     .toggle-wrap { display: flex; align-items: center; gap: 10px; }
     .toggle-wrap input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; }
-    .toggle-label { font-size: 13px; color: #aaa; }
+    .toggle-label { font-size: 13px; color: var(--text-2); }
 
     .preview-thumb {
         width: 100%; aspect-ratio: 16/9; border-radius: 8px;
-        background: #111; object-fit: cover; display: block;
+        background: var(--bg-3); object-fit: cover; display: block;
     }
 
     .form-actions {
         display: flex; gap: 10px; padding-top: 1rem;
-        border-top: 1px solid #1a1a1a;
+        border-top: 1px solid var(--border);
     }
     .btn-save {
         padding: 9px 24px; border-radius: 8px; font-size: 13px;
-        font-weight: 500; background: #fff; color: #000;
+        font-weight: 500; background: var(--text); color: var(--bg);
         border: none; cursor: pointer; transition: 0.2s;
     }
-    .btn-save:hover { background: #ddd; }
+    .btn-save:hover { filter: brightness(0.88); }
     .btn-cancel {
         padding: 9px 20px; border-radius: 8px; font-size: 13px;
-        border: 1px solid #2a2a2a; color: #888; background: transparent;
+        border: 1px solid var(--border); color: var(--text-2); background: transparent;
         text-decoration: none; transition: 0.15s;
     }
-    .btn-cancel:hover { color: #fff; border-color: #555; }
+    .btn-cancel:hover { color: var(--text); border-color: var(--text-3); }
 
     .chord-guide {
-        background: #0a0a1a; border: 1px solid #1a1a3a; border-radius: 8px;
+        background: var(--bg-3); border: 1px solid var(--border); border-radius: 8px;
         padding: 1rem; margin-top: 8px;
     }
-    .chord-guide p { font-size: 11px; color: #4a6fa5; margin-bottom: 6px; }
-    .chord-guide code { font-size: 11px; color: #60a5fa; font-family: monospace; line-height: 1.8; display: block; }
+    .chord-guide p { font-size: 11px; color: var(--text-3); margin-bottom: 6px; }
+    .chord-guide code { font-size: 11px; color: var(--accent); font-family: monospace; line-height: 1.8; display: block; }
 
     @media (max-width: 600px) {
         .form-grid { grid-template-columns: 1fr; }
     }
 
     .chord-detector {
-    background: #0a0a1a; border: 1px solid #1a1a3a;
-    border-radius: 8px; padding: 1rem; margin-bottom: 12px;
+        background: var(--bg-3); border: 1px solid var(--accent-dim);
+        border-radius: 8px; padding: 1rem; margin-bottom: 12px;
     }
     .detector-title {
-        font-size: 11px; color: #4a6fa5; letter-spacing: 0.1em;
+        font-size: 11px; color: var(--text-3); letter-spacing: 0.1em;
         text-transform: uppercase; margin-bottom: 10px;
     }
     .detector-upload { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .btn-upload {
         padding: 6px 16px; border-radius: 6px; font-size: 12px;
-        border: 1px solid #2a2a5a; color: #60a5fa; background: transparent;
+        border: 1px solid var(--accent-dim); color: var(--accent); background: transparent;
         cursor: pointer; transition: 0.15s; white-space: nowrap;
     }
-    .btn-upload:hover { background: #1a1a3a; }
-    .file-name { font-size: 11px; color: #444; }
+    .btn-upload:hover { background: var(--accent-dim); }
+    .file-name { font-size: 11px; color: var(--text-3); }
     .progress-bar {
-        background: #1a1a1a; border-radius: 4px;
+        background: var(--bg-4); border-radius: 4px;
         height: 4px; margin: 10px 0 6px; overflow: hidden;
     }
     .progress-fill {
-        height: 100%; background: #60a5fa;
+        height: 100%; background: var(--accent);
         width: 0%; transition: width 0.3s;
     }
-    .progress-text { font-size: 11px; color: #555; }
+    .progress-text { font-size: 11px; color: var(--text-3); }
     .detector-result { margin-top: 10px; }
     .result-row { display: flex; gap: 16px; margin-bottom: 10px; }
     .result-item { display: flex; flex-direction: column; gap: 3px; }
-    .result-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.1em; }
-    .result-value { font-size: 18px; font-weight: 500; color: #60a5fa; }
+    .result-label { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.1em; }
+    .result-value { font-size: 18px; font-weight: 500; color: var(--accent); }
     .btn-apply {
         padding: 6px 16px; border-radius: 6px; font-size: 12px;
-        border: 1px solid #2a5a2a; color: #4ade80; background: transparent;
+        border: 1px solid rgba(74,222,128,0.3); color: #4ade80; background: transparent;
         cursor: pointer; transition: 0.15s;
     }
-    .btn-apply:hover { background: #0a2a0a; }
+    .btn-apply:hover { background: rgba(74,222,128,0.08); }
 </style>
 @endpush
 
@@ -170,7 +170,7 @@
                             <source src="{{ asset($song->audio_file) }}" type="audio/mpeg">
                         </audio>
                         @else
-                        <span style="font-size:12px;color:#333;">Belum ada file audio</span>
+                        <span style="font-size:12px;color:var(--text-3);">Belum ada file audio</span>
                         @endif
                         <input type="file" name="audio_file" accept="audio/mp3,audio/*" class="form-input" style="flex:1;">
                     </div>

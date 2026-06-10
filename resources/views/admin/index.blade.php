@@ -5,16 +5,16 @@
     .admin-header {
         display: flex; align-items: center; justify-content: space-between;
         margin-bottom: 2rem; padding-bottom: 1rem;
-        border-bottom: 1px solid #1a1a1a;
+        border-bottom: 1px solid var(--border);
     }
-    .admin-header h2 { font-size: 1rem; font-weight: 500; color: #fff; }
-    .admin-header p { font-size: 12px; color: #555; margin-top: 2px; }
+    .admin-header h2 { font-size: 1rem; font-weight: 500; color: var(--text); }
+    .admin-header p { font-size: 12px; color: var(--text-3); margin-top: 2px; }
     .btn-add {
         padding: 8px 18px; border-radius: 8px; font-size: 13px;
-        font-weight: 500; background: #fff; color: #000;
+        font-weight: 500; background: var(--text); color: var(--bg);
         text-decoration: none; transition: 0.2s; border: none; cursor: pointer;
     }
-    .btn-add:hover { background: #ddd; }
+    .btn-add:hover { filter: brightness(0.88); }
 
     .alert {
         padding: 10px 16px; border-radius: 8px; margin-bottom: 1.5rem;
@@ -25,40 +25,40 @@
 
     .songs-table { width: 100%; border-collapse: collapse; }
     .songs-table th {
-        font-size: 11px; color: #555; letter-spacing: 0.1em;
+        font-size: 11px; color: var(--text-3); letter-spacing: 0.1em;
         text-transform: uppercase; padding: 8px 12px;
-        border-bottom: 1px solid #1a1a1a; text-align: left;
+        border-bottom: 1px solid var(--border); text-align: left;
     }
     .songs-table td {
-        padding: 12px; border-bottom: 1px solid #111;
-        font-size: 13px; color: #ccc; vertical-align: middle;
+        padding: 12px; border-bottom: 1px solid var(--border-2);
+        font-size: 13px; color: var(--text-2); vertical-align: middle;
     }
-    .songs-table tr:hover td { background: #0d0d0d; }
-    .song-num { color: #444; font-size: 12px; }
+    .songs-table tr:hover td { background: var(--card-bg); }
+    .song-num { color: var(--text-3); font-size: 12px; }
     .song-ytid {
         font-family: monospace; font-size: 11px;
-        color: #555; background: #111; padding: 2px 6px; border-radius: 4px;
+        color: var(--text-3); background: var(--bg-3); padding: 2px 6px; border-radius: 4px;
     }
     .badge {
         display: inline-block; padding: 2px 8px; border-radius: 20px;
         font-size: 11px; font-weight: 500;
     }
-    .badge-active { background: #0d2e1a; color: #4ade80; }
-    .badge-inactive { background: #1a1a1a; color: #555; }
-    .badge-chord { background: #1a1a2e; color: #60a5fa; }
-    .badge-nochord { background: #1a1a1a; color: #444; }
+    .badge-active  { background: #0d2e1a; color: #4ade80; }
+    .badge-inactive{ background: var(--bg-3); color: var(--text-3); }
+    .badge-chord   { background: var(--accent-dim); color: var(--accent); }
+    .badge-nochord { background: var(--bg-3); color: var(--text-3); }
 
     .tbl-actions { display: flex; gap: 6px; }
     .btn-edit {
         padding: 4px 12px; border-radius: 6px; font-size: 11px;
-        font-weight: 500; background: transparent; border: 1px solid #2a2a2a;
-        color: #aaa; cursor: pointer; text-decoration: none; transition: 0.15s;
+        font-weight: 500; background: transparent; border: 1px solid var(--border);
+        color: var(--text-2); cursor: pointer; text-decoration: none; transition: 0.15s;
     }
-    .btn-edit:hover { border-color: #fff; color: #fff; }
+    .btn-edit:hover { border-color: var(--text-3); color: var(--text); }
     .btn-delete {
         padding: 4px 12px; border-radius: 6px; font-size: 11px;
-        font-weight: 500; background: transparent; border: 1px solid #2a2a2a;
-        color: #666; cursor: pointer; transition: 0.15s;
+        font-weight: 500; background: transparent; border: 1px solid var(--border);
+        color: var(--text-3); cursor: pointer; transition: 0.15s;
     }
     .btn-delete:hover { border-color: #ef4444; color: #ef4444; }
 
@@ -67,11 +67,11 @@
         gap: 12px; margin-bottom: 2rem;
     }
     .stat-card {
-        background: #0d0d0d; border: 1px solid #1a1a1a;
+        background: var(--bg-2); border: 1px solid var(--border);
         border-radius: 10px; padding: 1rem;
     }
-    .stat-num { font-size: 22px; font-weight: 500; color: #fff; }
-    .stat-label { font-size: 11px; color: #555; margin-top: 2px; }
+    .stat-num   { font-size: 22px; font-weight: 500; color: var(--text); }
+    .stat-label { font-size: 11px; color: var(--text-3); margin-top: 2px; }
 </style>
 @endpush
 
@@ -83,10 +83,10 @@
         <p>Kelola lagu, lirik, dan chord — Margonoandi</p>
     </div>
     <div style="display:flex;gap:8px;">
-        <a href="{{ route('admin.settings') }}" class="btn-add" style="background:#111;color:#888;border:1px solid #2a2a2a;">
+        <a href="{{ route('admin.settings') }}" class="btn-add" style="background:var(--bg-2);color:var(--text-2);border:1px solid var(--border);">
             &#9881; Pengaturan
         </a>
-        <a href="{{ route('admin.ai-agent') }}" class="btn-add" style="background:#0a0a1a;color:#60a5fa;border:1px solid #1a1a3a;">
+        <a href="{{ route('admin.ai-agent') }}" class="btn-add" style="background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-dim);">
             &#10024; AI Agent
         </a>
         <a href="{{ route('admin.create') }}" class="btn-add">+ Tambah Lagu</a>
@@ -132,9 +132,9 @@
         @foreach($songs as $song)
         <tr>
             <td class="song-num">{{ $song->track_number }}</td>
-            <td style="color:#fff;">{{ $song->title }}</td>
+            <td style="color:var(--text);">{{ $song->title }}</td>
             <td><span class="song-ytid">{{ $song->youtube_id }}</span></td>
-            <td style="color:#888;">{{ $song->key_signature ?? '—' }}</td>
+            <td style="color:var(--text-2);">{{ $song->key_signature ?? '—' }}</td>
             <td>
                 @if($song->chords)
                     <span class="badge badge-chord">Ada chord</span>
