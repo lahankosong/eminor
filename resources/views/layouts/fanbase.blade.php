@@ -126,11 +126,14 @@
         }
         .fb-avatar:hover { border-color:#fff; transform:scale(1.05); }
         .fb-logout {
-            font-size:11px; color:rgba(255,255,255,0.7); text-decoration:none;
+            display:flex; align-items:center; gap:6px;
+            color:rgba(255,255,255,0.7); text-decoration:none;
             padding:5px 14px; border:1px solid rgba(255,255,255,0.25);
             border-radius:20px; transition:0.2s; font-weight:500;
         }
         .fb-logout:hover { color:#fff; border-color:rgba(255,255,255,0.5); background:rgba(255,255,255,0.1); }
+        .fb-logout-text { font-size:11px; }
+        .fb-logout svg { flex-shrink:0; }
 
         /* ===== LAYOUT GRID ===== */
         .fb-layout {
@@ -533,7 +536,9 @@
             .fb-main { padding:1rem; padding-bottom:96px; }
             .fb-bottom-nav { display:block; }
             .fb-topbar { padding:0 1rem; }
-            .fb-logout { display:none; }
+            .fb-logout { padding:0; width:34px; height:34px; border-radius:50%; justify-content:center; }
+            .fb-logout-text { display:none; }
+            .fb-search-wrap { display:none; }
         }
     </style>
     @stack('styles')
@@ -548,14 +553,15 @@
 {{-- TOP BAR --}}
 <div class="fb-topbar">
     <a href="{{ route('aku') }}" class="fb-brand">MARGONOANDI <span>· fanbase</span></a>
-    <div class="fb-search-wrap">
-        <span class="fb-search-icon">&#128269;</span>
-        <input type="text" class="fb-search" placeholder="Cari di fanbase...">
-    </div>
     <div class="fb-topbar-right">
-        <button class="fb-notif-btn">&#128276;</button>
+        <button class="fb-notif-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
         <img src="{{ Auth::user()->avatar }}" class="fb-avatar" alt="">
-        <a href="{{ route('logout') }}" class="fb-logout">Keluar</a>
+        <a href="{{ route('logout') }}" class="fb-logout">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span class="fb-logout-text">Keluar</span>
+        </a>
     </div>
 </div>
 
@@ -572,27 +578,45 @@
         <nav class="fb-nav">
             <a href="{{ route('aku') }}"
                class="fb-nav-item {{ request()->routeIs('aku') ? 'active' : '' }}">
-                <span class="fb-nav-icon">&#127968;</span><span>Aku</span>
+                <span class="fb-nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                </span>
+                <span>Aku</span>
             </a>
             <a href="{{ route('kamu') }}"
                class="fb-nav-item {{ request()->routeIs('kamu') ? 'active' : '' }}">
-                <span class="fb-nav-icon">&#128100;</span><span>Kamu</span>
+                <span class="fb-nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                <span>Kamu</span>
             </a>
             <a href="{{ route('kita') }}"
                class="fb-nav-item {{ request()->routeIs('kita') ? 'active' : '' }}">
-                <span class="fb-nav-icon">&#128101;</span><span>Kita</span>
+                <span class="fb-nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </span>
+                <span>Kita</span>
             </a>
             <a href="{{ route('dia') }}"
                class="fb-nav-item {{ request()->routeIs('dia*') ? 'active' : '' }}">
-                <span class="fb-nav-icon">&#128172;</span><span>Dia</span>
+                <span class="fb-nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </span>
+                <span>Dia</span>
             </a>
             <div class="fb-nav-divider"></div>
             <a href="{{ route('home') }}" class="fb-nav-item">
-                <span class="fb-nav-icon">&#127758;</span><span>Beranda</span>
+                <span class="fb-nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </span>
+                <span>Beranda</span>
             </a>
             @if(Auth::check() && in_array(Auth::user()->email, explode(',', env('ADMIN_EMAILS',''))))
             <a href="{{ route('admin.index') }}" class="fb-nav-item">
-                <span class="fb-nav-icon">&#9881;</span><span>Admin</span>
+                <span class="fb-nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                </span>
+                <span>Admin</span>
             </a>
             @endif
         </nav>
@@ -696,21 +720,35 @@
     <div class="fb-bottom-inner">
         <a href="{{ route('aku') }}"
            class="fb-bnav-item {{ request()->routeIs('aku') ? 'active' : '' }}">
+            <span class="fb-bnav-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </span>
             <span class="fb-bnav-label">Aku</span>
         </a>
         <a href="{{ route('kamu') }}"
            class="fb-bnav-item {{ request()->routeIs('kamu') ? 'active' : '' }}">
+            <span class="fb-bnav-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
             <span class="fb-bnav-label">Kamu</span>
         </a>
         <button class="fb-bnav-play" onclick="fbTogglePlaylist()">
-            <div class="fb-bnav-play-btn" id="fbPlayBtnNav">&#9654;</div>
+            <div class="fb-bnav-play-btn" id="fbPlayBtnNav">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>
         </button>
         <a href="{{ route('kita') }}"
            class="fb-bnav-item {{ request()->routeIs('kita') ? 'active' : '' }}">
+            <span class="fb-bnav-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </span>
             <span class="fb-bnav-label">Kita</span>
         </a>
         <a href="{{ route('dia') }}"
            class="fb-bnav-item {{ request()->routeIs('dia*') ? 'active' : '' }}">
+            <span class="fb-bnav-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </span>
             <span class="fb-bnav-label">Dia</span>
         </a>
     </div>
@@ -775,7 +813,12 @@ function fbUpdateUI(){
     el=document.getElementById('fbPopupEra');if(el)el.textContent=t.era;
     el=document.getElementById('fbPopupPlayBtn');if(el)el.innerHTML=fbPlaying?'&#9646;&#9646;':'&#9654;';
     el=document.getElementById('fbPlayBtnNav');
-    if(el){el.innerHTML=fbPlaying?'&#9646;&#9646;':'&#9654;';el.classList.toggle('playing',fbPlaying);}
+    if(el){
+        el.innerHTML=fbPlaying
+            ?'<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+            :'<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+        el.classList.toggle('playing',fbPlaying);
+    }
     for(var i=0;i<fbTotal;i++){
         var tr=document.getElementById('fbPopupTrack'+i);if(tr)tr.classList.toggle('active',i===fbCurrent);
         var sb=document.getElementById('sbTrack'+i);if(sb)sb.classList.toggle('playing',i===fbCurrent);

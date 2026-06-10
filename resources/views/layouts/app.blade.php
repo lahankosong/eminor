@@ -355,38 +355,50 @@
     </div>
 </footer>
 
-{{-- BOTTOM NAV (mobile) --}}
+{{-- BOTTOM NAV (mobile) — tersembunyi di landing page --}}
+@if(!request()->routeIs('home'))
 <nav class="bottom-nav" aria-label="Navigasi mobile">
     <div class="bottom-nav-inner">
         <a href="{{ route('home') }}"
            class="bottom-nav-item {{ request()->routeIs('home') ? 'active' : '' }}">
-            <span class="bnav-icon">⌂</span>
+            <span class="bnav-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </span>
             <span class="bnav-label">Beranda</span>
         </a>
         @auth
         <a href="{{ route('community.index') }}"
            class="bottom-nav-item {{ request()->routeIs('community.*') ? 'active' : '' }}">
-            <span class="bnav-icon">◈</span>
+            <span class="bnav-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </span>
             <span class="bnav-label">Komunitas</span>
         </a>
         <a href="{{ route('chat.index') }}"
            class="bottom-nav-item {{ request()->routeIs('chat.*') ? 'active' : '' }}">
-            <span class="bnav-icon">◎</span>
+            <span class="bnav-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </span>
             <span class="bnav-label">Chat</span>
         </a>
         <a href="{{ route('profile') }}"
            class="bottom-nav-item {{ request()->routeIs('profile') ? 'active' : '' }}">
-            <span class="bnav-icon">○</span>
+            <span class="bnav-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
             <span class="bnav-label">Profil</span>
         </a>
         @else
         <a href="{{ route('google.login') }}" class="bottom-nav-item">
-            <span class="bnav-icon">→</span>
+            <span class="bnav-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            </span>
             <span class="bnav-label">Masuk</span>
         </a>
         @endauth
     </div>
 </nav>
+@endif
 
 {{-- Music Player --}}
 @if(request()->routeIs('community.*') || request()->routeIs('chat.*') || request()->routeIs('profile'))
