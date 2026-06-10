@@ -403,10 +403,28 @@ function kitaToggleLocation() {
     var el = document.getElementById('kitaLocation');
     if(!el) return;
     el.classList.toggle('show');
-    if(el.classList.contains('show') && navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(pos){
-            el.value = pos.coords.latitude.toFixed(4)+', '+pos.coords.longitude.toFixed(4);
-        }, function(){ el.placeholder='Masukkan lokasi manual...'; });
+    if (el.classList.contains('show') && !el.value) {
+        if (navigator.geolocation) {
+            el.placeholder = 'Mendeteksi lokasi...';
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='
+                    + pos.coords.latitude + '&lon=' + pos.coords.longitude + '&zoom=10', {
+                    headers: { 'Accept-Language': 'id' }
+                })
+                .then(function(r){ return r.json(); })
+                .then(function(d){
+                    var a = d.address || {};
+                    var city = a.city || a.town || a.village || a.county || a.municipality || '';
+                    el.value = city;
+                    el.placeholder = '📍 Lokasi kamu...';
+                })
+                .catch(function(){ el.placeholder = 'Ketik lokasi manual...'; });
+            }, function(){
+                el.placeholder = 'Ketik lokasi manual...';
+            }, { timeout: 8000, maximumAge: 300000 });
+        } else {
+            el.placeholder = 'Ketik lokasi manual...';
+        }
     }
 }
 

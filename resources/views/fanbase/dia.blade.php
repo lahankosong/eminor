@@ -208,12 +208,19 @@
     .dia-modal-cancel:hover { background:var(--sky-lt); color:var(--sky-dk); }
 
     @media (max-width:768px) {
-        .dia-layout { grid-template-columns:1fr; }
+        .dia-layout {
+            grid-template-columns:1fr;
+            height: calc(100vh - 56px - 84px);
+        }
         .dia-sidebar { display:flex; }
         .dia-main    { display:none; }
         .dia-layout.conv-open .dia-sidebar { display:none; }
         .dia-layout.conv-open .dia-main    { display:flex; }
         .dia-back-btn { display:block; }
+        .dia-input-area {
+            position: sticky;
+            bottom: 0;
+        }
     }
 </style>
 @endpush

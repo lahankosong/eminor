@@ -11,7 +11,7 @@ class KamuController extends Controller
 {
     public function index() {
         $user  = Auth::user();
-        $posts = Post::where('user_id',$user->id)->with(['comments.user'])->orderByDesc('created_at')->get();
+        $posts = Post::where('user_id',$user->id)->orderByDesc('created_at')->get();
         $notes = \App\Models\KamuNote::where('user_id',Auth::id())->orderByDesc('is_pinned')->orderByDesc('created_at')->get();
         $totalLikes    = $posts->sum('likes_count');
         $totalComments = $posts->sum('comments_count');
