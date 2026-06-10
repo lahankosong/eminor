@@ -1,129 +1,115 @@
 <?php
 $secret = 'margono2026';
-$key    = $_GET['key'] ?? '';
-
-if ($key !== $secret) {
-    http_response_code(403);
-    die('<h3>403 - Tambahkan ?key=margono2026 di URL.</h3>');
-}
+if (($_GET['key'] ?? '') !== $secret) { http_response_code(403); die('403'); }
 
 $base = '/home/parr4187/public_html/margonoandi-fanbase';
+$git  = "$base/.git";
 
-function runCmd($cmd) {
-    $out = '';
-    if (function_exists('exec')) {
-        exec($cmd . ' 2>&1', $lines);
-        $out = implode("\n", $lines);
-    } elseif (function_exists('shell_exec')) {
-        $out = shell_exec($cmd . ' 2>&1');
-    } elseif (function_exists('system')) {
-        ob_start(); system($cmd . ' 2>&1'); $out = ob_get_clean();
-    } elseif (function_exists('passthru')) {
-        ob_start(); passthru($cmd . ' 2>&1'); $out = ob_get_clean();
-    } elseif (function_exists('popen')) {
-        $h = popen($cmd . ' 2>&1', 'r');
-        while (!feof($h)) $out .= fgets($h);
-        pclose($h);
-    } else {
-        $out = 'DISABLED: semua fungsi exec dinonaktifkan di server ini.';
-    }
-    return trim($out) ?: '(tidak ada output)';
-}
-
-// Cek fungsi mana yang tersedia
-$available = [];
-foreach (['exec','shell_exec','system','passthru','popen','proc_open'] as $fn) {
-    if (function_exists($fn)) $available[] = $fn;
-}
-
-echo '<!DOCTYPE html><html><head>
-<meta charset="UTF-8"><title>Git Patch</title>
+echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Git Patch</title>
 <style>
 body{font-family:monospace;background:#0b1520;color:#e8f4fa;padding:2rem}
-h1{color:#38A8CC}h3{color:#F07040;margin:1.5rem 0 .5rem}
-pre{background:#0f1e2e;border:1px solid rgba(56,168,204,.2);padding:1rem;border-radius:8px;white-space:pre-wrap;word-break:break-all}
-.ok{color:#4ade80}.err{color:#f87171}.info{color:#38A8CC}
-.warn{color:#facc15;margin-top:2rem;border:1px solid #F07040;padding:1rem;border-radius:8px}
-</style></head><body>
-<h1>Git Patch — Margonoandi</h1>';
+h1{color:#38A8CC}h2{color:#F07040;margin:1.5rem 0 .4rem}
+pre{background:#0f1e2e;border:1px solid rgba(56,168,204,.2);padding:.75rem;border-radius:8px;white-space:pre-wrap;word-break:break-all;margin:0}
+.ok{color:#4ade80}.err{color:#f87171}.info{color:#7A9DB0}
+a{color:#38A8CC;font-size:1.1rem;display:inline-block;margin:.5rem 0}
+.warn{color:#facc15;margin-top:2rem;border:1px solid #F07040;padding:.75rem;border-radius:8px}
+</style></head><body><h1>Git Patch — Margonoandi</h1>';
 
-// Tampilkan fungsi yang tersedia
-echo '<h3>Fungsi Tersedia</h3>';
-echo '<pre class="info">' . (empty($available) ? 'TIDAK ADA — semua exec diblokir' : implode(', ', $available)) . '</pre>';
+// ── Tampilkan semua info diagnostik ──────────────────────────────────────────
 
-if (empty($available)) {
-    echo '<h3>⚠️ Solusi Manual</h3>
-    <pre class="err">Server memblokir semua exec function.
-Ikuti langkah manual di bawah ini.</pre>';
+$show = function($label, $content, $class = 'info') {
+    echo "<h2>$label</h2><pre class='$class'>" . htmlspecialchars(trim($content) ?: '(kosong)') . '</pre>';
+};
 
-    // Tampilkan isi .git/HEAD untuk info
-    $headFile = "$base/.git/HEAD";
-    if (file_exists($headFile)) {
-        echo '<h3>Isi .git/HEAD saat ini</h3>';
-        echo '<pre class="info">' . htmlspecialchars(file_get_contents($headFile)) . '</pre>';
+// HEAD
+$show('HEAD saat ini', file_exists("$git/HEAD") ? file_get_contents("$git/HEAD") : 'FILE TIDAK ADA');
+
+// packed-refs
+$show('packed-refs', file_exists("$git/packed-refs") ? file_get_contents("$git/packed-refs") : 'FILE TIDAK ADA');
+
+// FETCH_HEAD
+$show('FETCH_HEAD', file_exists("$git/FETCH_HEAD") ? file_get_contents("$git/FETCH_HEAD") : 'FILE TIDAK ADA');
+
+// refs/remotes/origin/
+$originDir = "$git/refs/remotes/origin";
+if (is_dir($originDir)) {
+    $files = scandir($originDir);
+    $content = '';
+    foreach ($files as $f) {
+        if ($f === '.' || $f === '..') continue;
+        $content .= "$f: " . trim(file_get_contents("$originDir/$f")) . "\n";
     }
-
-    // Coba tulis langsung ke .git/HEAD
-    if (isset($_GET['fix']) && $_GET['fix'] === '1') {
-        $headFile  = "$base/.git/HEAD";
-        $refFile   = "$base/.git/refs/heads/main";
-        $packedRef = "$base/.git/packed-refs";
-
-        $written = false;
-
-        // Baca hash commit main dari packed-refs
-        $hash = '';
-        if (file_exists($packedRef)) {
-            $lines = file($packedRef);
-            foreach ($lines as $line) {
-                if (str_contains($line, 'refs/heads/main') || str_contains($line, 'refs/remotes/origin/main')) {
-                    $parts = explode(' ', trim($line));
-                    $hash  = $parts[0];
-                    break;
-                }
-            }
-        }
-        if (!$hash && file_exists("$base/.git/refs/remotes/origin/main")) {
-            $hash = trim(file_get_contents("$base/.git/refs/remotes/origin/main"));
-        }
-
-        echo '<h3>Hash commit main</h3>';
-        echo '<pre class="info">' . ($hash ?: 'tidak ditemukan') . '</pre>';
-
-        if ($hash) {
-            // Tulis refs/heads/main
-            if (!is_dir("$base/.git/refs/heads")) mkdir("$base/.git/refs/heads", 0755, true);
-            file_put_contents($refFile, $hash . "\n");
-            // Update HEAD
-            $r1 = file_put_contents($headFile, "ref: refs/heads/main\n");
-            echo '<h3>Hasil Fix</h3>';
-            echo '<pre class="' . ($r1 !== false ? 'ok' : 'err') . '">';
-            echo $r1 !== false ? "✅ HEAD berhasil diupdate ke refs/heads/main\nHash: $hash" : '❌ Gagal menulis HEAD';
-            echo '</pre>';
-        } else {
-            echo '<pre class="err">❌ Hash commit main tidak ditemukan. Coba Update from Remote dulu di cPanel Git Version Control.</pre>';
-        }
-    } else {
-        echo '<h3>Coba Fix Otomatis</h3>
-        <pre class="info">Klik link berikut untuk mencoba fix via file manipulation:</pre>
-        <a href="?key=margono2026&fix=1" style="color:#38A8CC;font-size:1.1rem">
-        → Jalankan Fix (klik di sini)</a>';
-    }
-
+    $show('refs/remotes/origin/', $content ?: '(direktori kosong)');
 } else {
-    // Ada exec function — jalankan git commands
-    $cmds = [
-        'Git version'   => 'git --version',
-        'Fetch origin'  => "cd $base && git fetch origin",
-        'Checkout main' => "cd $base && git checkout main",
-        'Status'        => "cd $base && git status",
-    ];
-    foreach ($cmds as $label => $cmd) {
-        echo "<h3>$label</h3>";
-        $result = runCmd($cmd);
-        $class  = (str_contains($result, 'error') || str_contains($result, 'fatal') || str_contains($result, 'DISABLED')) ? 'err' : 'ok';
-        echo '<pre class="' . $class . '">' . htmlspecialchars($result) . '</pre>';
+    $show('refs/remotes/origin/', 'DIREKTORI TIDAK ADA');
+}
+
+// refs/heads/
+$headsDir = "$git/refs/heads";
+if (is_dir($headsDir)) {
+    $files = scandir($headsDir);
+    $content = '';
+    foreach ($files as $f) {
+        if ($f === '.' || $f === '..') continue;
+        $content .= "$f: " . trim(file_get_contents("$headsDir/$f")) . "\n";
     }
+    $show('refs/heads/', $content ?: '(direktori kosong — belum ada branch lokal)');
+} else {
+    $show('refs/heads/', 'DIREKTORI TIDAK ADA');
+}
+
+// ── Cari hash main dari semua sumber ─────────────────────────────────────────
+$hash = '';
+
+// 1. refs/remotes/origin/main
+if (!$hash && file_exists("$git/refs/remotes/origin/main")) {
+    $hash = trim(file_get_contents("$git/refs/remotes/origin/main"));
+}
+
+// 2. packed-refs — cari baris yang ada 'main'
+if (!$hash && file_exists("$git/packed-refs")) {
+    foreach (file("$git/packed-refs") as $line) {
+        $line = trim($line);
+        if (str_starts_with($line, '#')) continue;
+        if (str_ends_with($line, 'refs/remotes/origin/main') || str_ends_with($line, 'refs/heads/main')) {
+            [$hash] = explode(' ', $line);
+            break;
+        }
+    }
+}
+
+// 3. FETCH_HEAD — baris pertama (biasanya HEAD yang di-fetch)
+if (!$hash && file_exists("$git/FETCH_HEAD")) {
+    $line = trim(fgets(fopen("$git/FETCH_HEAD", 'r')));
+    if (preg_match('/^([a-f0-9]{40})/', $line, $m)) {
+        $hash = $m[1];
+    }
+}
+
+echo "<h2>Hash yang ditemukan</h2>";
+echo '<pre class="' . ($hash ? 'ok' : 'err') . '">' . ($hash ?: 'Tidak ditemukan — perlu Update from Remote dulu di cPanel') . '</pre>';
+
+// ── Jalankan Fix jika hash ada ───────────────────────────────────────────────
+if ($hash && isset($_GET['fix'])) {
+    echo '<h2>Menjalankan Fix...</h2>';
+
+    // Buat refs/heads/ jika belum ada
+    if (!is_dir("$git/refs/heads")) mkdir("$git/refs/heads", 0755, true);
+
+    // Tulis refs/heads/main
+    $r1 = file_put_contents("$git/refs/heads/main", $hash . "\n");
+
+    // Update HEAD ke main
+    $r2 = file_put_contents("$git/HEAD", "ref: refs/heads/main\n");
+
+    $ok = $r1 !== false && $r2 !== false;
+    echo '<pre class="' . ($ok ? 'ok' : 'err') . '">';
+    echo $ok
+        ? "✅ BERHASIL!\nHEAD sekarang: ref: refs/heads/main\nHash: $hash\n\nSekarang:\n1. Buka cPanel → Git Version Control → Basic Information\n2. Klik Update — branch 'main' akan muncul\n3. Pilih main → Update\n4. Tab Pull or Deploy → Deploy HEAD Commit"
+        : "❌ Gagal menulis file. Cek permission folder .git/";
+    echo '</pre>';
+} elseif ($hash) {
+    echo '<br><a href="?key=margono2026&fix=1">→ Klik di sini untuk jalankan Fix</a>';
 }
 
 echo '<div class="warn">⚠️ Hapus file ini setelah selesai: <strong>public/gitpatch.php</strong></div>';
