@@ -23,7 +23,17 @@ class AkuController extends Controller
         $likedIds = AkuLike::where('user_id', Auth::id())
             ->pluck('aku_post_id')->toArray();
 
-        return view('fanbase.aku', compact('posts', 'likedIds'));
+        $likersByPost = AkuLike::whereIn('aku_post_id', $posts->pluck('id'))
+            ->with('user')
+            ->latest()
+            ->get()
+            ->groupBy('aku_post_id')
+            ->map(fn($likes) => $likes->take(5)->map(fn($l) => [
+                'name'   => $l->user->name ?? '?',
+                'avatar' => $l->user->avatar ?? null,
+            ])->values());
+
+        return view('fanbase.aku', compact('posts', 'likedIds', 'likersByPost'));
     }
 
     public function store(Request $request)
@@ -72,15 +82,6 @@ class AkuController extends Controller
         $userId   = Auth::id();
         $existing = AkuLike::where('aku_post_id', $id)->where('user_id', $userId)->first();
 
-        // Di dalam method like():
-        if ($liked) {
-            NotifHelper::send(
-                $post->user_id, Auth::id(),
-                'like', Auth::user()->name . ' menyukai postinganmu',
-                $post->title ?? Str::limit($post->body, 50),
-                url('/aku')
-            );
-        }
         if ($existing) {
             $existing->delete();
             $post->decrement('likes_count');
@@ -89,11 +90,27 @@ class AkuController extends Controller
             AkuLike::create(['aku_post_id' => $id, 'user_id' => $userId]);
             $post->increment('likes_count');
             $liked = true;
+            if ($post->user_id !== $userId) {
+                NotifHelper::send(
+                    $post->user_id, $userId,
+                    'like', Auth::user()->name . ' menyukai postinganmu',
+                    $post->title ?? \Illuminate\Support\Str::limit($post->body, 50),
+                    url('/aku')
+                );
+            }
         }
+
+        $likers = AkuLike::where('aku_post_id', $id)
+            ->with('user')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn($l) => ['name' => $l->user->name ?? '?', 'avatar' => $l->user->avatar ?? null]);
 
         return response()->json([
             'liked'       => $liked,
             'likes_count' => $post->fresh()->likes_count,
+            'likers'      => $likers,
         ]);
     }
 
@@ -112,6 +129,15 @@ class AkuController extends Controller
 
         $post->increment('comments_count');
 
+        if ($post->user_id !== Auth::id()) {
+            NotifHelper::send(
+                $post->user_id, Auth::id(),
+                'comment', Auth::user()->name . ' mengomentari postinganmu',
+                $request->body,
+                url('/aku')
+            );
+        }
+
         return response()->json([
             'success' => true,
             'comment' => [
@@ -123,12 +149,6 @@ class AkuController extends Controller
                 'time'      => 'Baru saja',
             ]
         ]);
-        NotifHelper::send(
-            $post->user_id, Auth::id(),
-            'comment', Auth::user()->name . ' mengomentari postinganmu',
-            $request->body,
-            url('/aku')
-        );
     }
 
     private function isAdmin()

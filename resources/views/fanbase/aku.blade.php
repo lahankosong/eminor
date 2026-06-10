@@ -143,7 +143,7 @@
     }
     .aku-post-body {
         font-size: 14px; color: var(--text-2); line-height: 1.8;
-        padding: 0 1rem 0.875rem; word-break: break-word;
+        padding: 0 1rem 0.875rem; word-break: break-word; white-space: pre-wrap;
     }
     .aku-post-body-edit {
         width: calc(100% - 2rem); background: var(--cream);
@@ -196,6 +196,27 @@
     .aku-action-btn.liked { color: #ef4444; }
     .aku-action-btn.liked:hover { background: #fef2f2; }
     .like-icon { font-size: 14px; }
+    .aku-like-wrap { position: relative; display: inline-flex; align-items: center; gap: 2px; }
+    .like-count-btn {
+        font-size: 12px; font-weight: 500; color: var(--text-3);
+        cursor: pointer; padding: 4px 6px 4px 2px; border-radius: 6px; transition: 0.15s;
+    }
+    .like-count-btn:hover { color: var(--sky-dk); background: var(--sky-lt); }
+    .likers-tooltip {
+        display: none; position: absolute; bottom: calc(100% + 8px); left: 0;
+        background: var(--card); border: 1px solid var(--border);
+        border-radius: 12px; padding: 10px 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        z-index: 20; min-width: 140px; max-width: 220px;
+    }
+    .likers-tooltip.open { display: block; }
+    .likers-tooltip::after {
+        content: ''; position: absolute; top: 100%; left: 14px;
+        border: 6px solid transparent; border-top-color: var(--card);
+    }
+    .likers-tooltip-title { font-size: 10px; color: var(--text-4); margin-bottom: 6px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+    .likers-tooltip-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-2); padding: 3px 0; }
+    .likers-tooltip-item img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; background: var(--sky-lt); }
+    .likers-tooltip-empty { font-size: 12px; color: var(--text-4); }
 
     /* COMMENTS */
     .aku-comments {
@@ -353,13 +374,19 @@
         @endif
 
         <div class="aku-post-footer">
-            <button class="aku-action-btn {{ in_array($post->id, $likedIds) ? 'liked' : '' }}"
-                    id="akuLike{{ $post->id }}"
-                    data-liked="{{ in_array($post->id, $likedIds) ? '1' : '0' }}"
-                    onclick="akuToggleLike({{ $post->id }})">
-                <span class="like-icon">{{ in_array($post->id, $likedIds) ? '♥' : '♡' }}</span>
-                <span id="akuLikeCount{{ $post->id }}">{{ $post->likes_count }}</span>
-            </button>
+            <div class="aku-like-wrap">
+                <button class="aku-action-btn {{ in_array($post->id, $likedIds) ? 'liked' : '' }}"
+                        id="akuLike{{ $post->id }}"
+                        data-liked="{{ in_array($post->id, $likedIds) ? '1' : '0' }}"
+                        onclick="akuToggleLike({{ $post->id }})">
+                    <span class="like-icon">{{ in_array($post->id, $likedIds) ? '♥' : '♡' }}</span>
+                </button>
+                <span id="akuLikeCount{{ $post->id }}"
+                      class="like-count-btn"
+                      onclick="akuToggleLikers({{ $post->id }}, event)">{{ $post->likes_count }}</span>
+                <div class="likers-tooltip" id="akuLikers{{ $post->id }}"
+                     data-likers="{{ json_encode(($likersByPost[$post->id] ?? collect())->values()->toArray()) }}"></div>
+            </div>
             <button class="aku-action-btn" onclick="akuToggleComments({{ $post->id }})">
                 <span>&#128172;</span>
                 <span id="akuCommentCount{{ $post->id }}">{{ $post->comments_count }}</span>
@@ -470,16 +497,44 @@ function akuToggleLike(postId) {
     })
     .then(function(r){return r.json();})
     .then(function(d){
-        var btn   = document.getElementById('akuLike'+postId);
-        var count = document.getElementById('akuLikeCount'+postId);
+        var btn     = document.getElementById('akuLike'+postId);
+        var count   = document.getElementById('akuLikeCount'+postId);
+        var tooltip = document.getElementById('akuLikers'+postId);
         if(!btn||!count)return;
         count.textContent = d.likes_count;
         btn.classList.toggle('liked', d.liked);
         btn.dataset.liked = d.liked?'1':'0';
         var icon = btn.querySelector('.like-icon');
         if(icon) icon.textContent = d.liked ? '♥' : '♡';
+        if(tooltip && d.likers) tooltip.dataset.likers = JSON.stringify(d.likers);
     });
 }
+
+function akuToggleLikers(postId, evt) {
+    evt.stopPropagation();
+    var tooltip = document.getElementById('akuLikers'+postId);
+    if(!tooltip) return;
+    var isOpen = tooltip.classList.contains('open');
+    document.querySelectorAll('.likers-tooltip.open').forEach(function(t){t.classList.remove('open');});
+    if(isOpen) return;
+    var likers = [];
+    try { likers = JSON.parse(tooltip.dataset.likers||'[]'); } catch(e){}
+    if(likers.length === 0) {
+        tooltip.innerHTML = '<div class="likers-tooltip-empty">Belum ada yang suka</div>';
+    } else {
+        tooltip.innerHTML = '<div class="likers-tooltip-title">Disukai oleh</div>' +
+            likers.map(function(l){
+                return '<div class="likers-tooltip-item">' +
+                    (l.avatar ? '<img src="'+escHtml(l.avatar)+'" alt="">' : '<div style="width:20px;height:20px;border-radius:50%;background:var(--sky-lt);flex-shrink:0"></div>') +
+                    '<span>'+escHtml(l.name)+'</span></div>';
+            }).join('');
+    }
+    tooltip.classList.add('open');
+}
+
+document.addEventListener('click', function(){
+    document.querySelectorAll('.likers-tooltip.open').forEach(function(t){t.classList.remove('open');});
+});
 
 /* COMMENTS TOGGLE */
 function akuToggleComments(postId) {
