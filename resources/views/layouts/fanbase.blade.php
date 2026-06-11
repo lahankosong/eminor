@@ -718,9 +718,10 @@
     <aside class="fb-sidebar-right">
         @php
             $onlineMembers = \App\Models\User::where('id','!=',Auth::id())->get()
-                ->filter(fn($u) => $u->isOnline())
-                ->values();
+                ->filter(fn($u) => $u->isOnline())->values();
         @endphp
+
+        {{-- Online members --}}
         <div class="fb-widget">
             <p class="fb-widget-title">
                 &#128100; Online
@@ -748,6 +749,66 @@
             <p style="font-size:11px;color:var(--text-4);text-align:center;padding:0.75rem 0;">Tidak ada yang online.</p>
             @endforelse
         </div>
+
+        {{-- Obrolan & Grup (tampil di semua halaman) --}}
+        @php
+            try {
+                $sbConvs = \App\Models\Conversation::with(['userOne','userTwo'])
+                    ->where('user_one_id', Auth::id())
+                    ->orWhere('user_two_id', Auth::id())
+                    ->orderByDesc('last_message_at')
+                    ->take(6)->get();
+                $sbGroups = \App\Models\Group::whereHas('members', fn($q) => $q->where('user_id', Auth::id()))
+                    ->orderByDesc('last_message_at')
+                    ->take(4)->get();
+            } catch (\Throwable $e) {
+                $sbConvs = collect(); $sbGroups = collect();
+            }
+        @endphp
+
+        @if($sbConvs->count() > 0 || $sbGroups->count() > 0)
+        <div class="fb-widget" style="padding:0.75rem;">
+
+            @if($sbConvs->count() > 0)
+            <p class="fb-widget-title" style="margin-bottom:0.5rem;">&#128172; Obrolan</p>
+            @foreach($sbConvs as $sc)
+            @php $scOther = $sc->getOtherUser(Auth::id()); @endphp
+            <a href="{{ route('dia.conversation', $sc->id) }}"
+               class="fb-online-item" style="text-decoration:none;">
+                <div class="fb-online-avatar">
+                    <img src="{{ $scOther->avatar ?? asset('images/default-avatar.png') }}" alt="{{ $scOther->name }}">
+                    <div class="fb-online-dot {{ $scOther->isOnline() ? 'online' : '' }}"></div>
+                </div>
+                <div class="fb-online-info">
+                    <div class="fb-online-name">{{ explode(' ',$scOther->name)[0] }}</div>
+                    <div class="fb-online-status" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px;">
+                        {{ $sc->last_message ? \Illuminate\Support\Str::limit($sc->last_message, 18) : '—' }}
+                    </div>
+                </div>
+            </a>
+            @endforeach
+            @endif
+
+            @if($sbGroups->count() > 0)
+            <p class="fb-widget-title" style="margin-top:0.75rem;margin-bottom:0.5rem;">&#128101; Grup</p>
+            @foreach($sbGroups as $sg)
+            <a href="{{ route('dia.group', $sg->id) }}"
+               class="fb-online-item" style="text-decoration:none;">
+                <div class="fb-online-avatar" style="background:var(--sky-lt);color:var(--sky-dk);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="fb-online-info">
+                    <div class="fb-online-name">{{ \Illuminate\Support\Str::limit($sg->name, 14) }}</div>
+                    <div class="fb-online-status">
+                        {{ $sg->last_message ? \Illuminate\Support\Str::limit($sg->last_message, 18) : '—' }}
+                    </div>
+                </div>
+            </a>
+            @endforeach
+            @endif
+
+        </div>
+        @endif
         <div class="fb-widget">
             <p class="fb-widget-title">Tentang</p>
             <p style="font-size:11px;color:var(--text-3);line-height:1.8;">
@@ -970,11 +1031,18 @@ function fbCloseNotif() {
     fbNotifOpen = false;
 }
 
+function fbCsrfToken() {
+    var m = document.querySelector('meta[name="csrf-token"]');
+    return m ? m.content : '';
+}
+
 function fbPollNotifCount() {
-    fetch('/notifications/unread-count', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    fetch('/notifications/unread-count', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+    })
     .then(function(r) { return r.ok ? r.json() : null; })
     .then(function(d) {
-        if (!d) return;
+        if (!d || typeof d.count === 'undefined') return;
         var badge = document.getElementById('fbNotifBadge');
         if (!badge) return;
         if (d.count > 0) {
@@ -989,19 +1057,42 @@ function fbPollNotifCount() {
 function fbLoadNotifs() {
     var list = document.getElementById('fbNotifList');
     if (!list) return;
-    fetch('/notifications', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-    .then(function(r) { return r.ok ? r.json() : null; })
+    list.innerHTML = '<div class="fb-notif-empty">Memuat...</div>';
+
+    fetch('/notifications', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+    })
+    .then(function(r) { return r.ok ? r.json() : Promise.reject('HTTP ' + r.status); })
     .then(function(d) {
-        if (!d) return;
         if (!d.notifications || d.notifications.length === 0) {
             list.innerHTML = '<div class="fb-notif-empty">Belum ada notifikasi.</div>';
             return;
         }
         var defaultAvatar = '{{ asset("images/default-avatar.png") }}';
         list.innerHTML = d.notifications.map(function(n) {
-            var avatar = (n.from_user && n.from_user.avatar) ? n.from_user.avatar : defaultAvatar;
+            var avatar  = (n.from_user && n.from_user.avatar) ? n.from_user.avatar : defaultAvatar;
             var unread  = !n.read_at ? ' unread' : '';
-            return '<div class="fb-notif-item'+unread+'" onclick="fbNotifClick('+n.id+',\''+escHtml(n.url||'#')+'\')">'
+            var isInvite = n.type === 'invite';
+
+            if (isInvite) {
+                // Extract invite ID from accept URL: /dia/invite/{id}/accept
+                var inviteMatch = (n.url || '').match(/\/dia\/invite\/(\d+)\/accept/);
+                var inviteId = inviteMatch ? inviteMatch[1] : null;
+                var acceptBtn = inviteId
+                    ? '<button onclick="fbAcceptInvite('+inviteId+','+n.id+',event)" style="margin-top:6px;padding:4px 12px;font-size:11px;font-weight:600;background:linear-gradient(135deg,var(--sky),var(--sky-dk));color:#fff;border:none;border-radius:6px;cursor:pointer;margin-right:4px;">Terima</button>'
+                    + '<button onclick="fbDeclineInvite('+inviteId+','+n.id+',event)" style="padding:4px 10px;font-size:11px;background:transparent;color:var(--text-3);border:1px solid var(--border);border-radius:6px;cursor:pointer;">Tolak</button>'
+                    : '';
+                return '<div class="fb-notif-item'+unread+'" id="fbNotif'+n.id+'">'
+                    + '<img class="fb-notif-avatar" src="'+escHtml(avatar)+'" onerror="this.src=\''+defaultAvatar+'\'" alt="">'
+                    + '<div class="fb-notif-body">'
+                    + '<div class="fb-notif-title">'+escHtml(n.title||'')+'</div>'
+                    + '<div class="fb-notif-msg">'+escHtml(n.body||'')+'</div>'
+                    + acceptBtn
+                    + '<div class="fb-notif-time">'+escHtml(n.created_at_diff||'')+'</div>'
+                    + '</div></div>';
+            }
+
+            return '<div class="fb-notif-item'+unread+'" onclick="fbNotifClick('+n.id+','+JSON.stringify(n.url||'')+')">'
                 + '<img class="fb-notif-avatar" src="'+escHtml(avatar)+'" onerror="this.src=\''+defaultAvatar+'\'" alt="">'
                 + '<div class="fb-notif-body">'
                 + '<div class="fb-notif-title">'+escHtml(n.title||'')+'</div>'
@@ -1010,7 +1101,8 @@ function fbLoadNotifs() {
                 + '</div></div>';
         }).join('');
         fbPollNotifCount();
-    }).catch(function(){
+    })
+    .catch(function(err) {
         list.innerHTML = '<div class="fb-notif-empty">Gagal memuat notifikasi.</div>';
     });
 }
@@ -1018,19 +1110,56 @@ function fbLoadNotifs() {
 function fbNotifClick(id, url) {
     fetch('/notifications/'+id+'/read', {
         method: 'POST',
-        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').content : '', 'X-Requested-With': 'XMLHttpRequest' }
+        headers: { 'X-CSRF-TOKEN': fbCsrfToken(), 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
     }).catch(function(){});
     fbCloseNotif();
-    if (url && url !== '#') window.location.href = url;
+    if (url && url !== '#' && url !== '') window.location.href = url;
+}
+
+function fbAcceptInvite(inviteId, notifId, e) {
+    e.stopPropagation();
+    var btn = e.target;
+    btn.disabled = true; btn.textContent = '...';
+    fetch('/dia/invite/'+inviteId+'/accept', {
+        method:'POST',
+        headers:{'X-CSRF-TOKEN':fbCsrfToken(),'X-Requested-With':'XMLHttpRequest','Accept':'application/json'}
+    })
+    .then(function(r){
+        if (r.redirected) { window.location.href = r.url; return; }
+        return r.json();
+    })
+    .then(function(d){
+        fbCloseNotif();
+        // Redirect handled above; fallback
+        window.location.href = '/dia';
+    })
+    .catch(function(){
+        // On redirect (302) fetch follows — location.href done above
+        fbCloseNotif();
+        window.location.href = '/dia';
+    });
+}
+
+function fbDeclineInvite(inviteId, notifId, e) {
+    e.stopPropagation();
+    var btn = e.target;
+    btn.disabled = true; btn.textContent = '...';
+    fetch('/dia/invite/'+inviteId+'/decline', {
+        method:'POST',
+        headers:{'X-CSRF-TOKEN':fbCsrfToken(),'X-Requested-With':'XMLHttpRequest','Accept':'application/json'}
+    })
+    .then(function(){ return fetch('/notifications/'+notifId+'/read', {
+        method:'POST', headers:{'X-CSRF-TOKEN':fbCsrfToken(),'X-Requested-With':'XMLHttpRequest','Accept':'application/json'}
+    }); })
+    .then(function(){ fbLoadNotifs(); })
+    .catch(function(){ fbLoadNotifs(); });
 }
 
 function fbMarkAllRead() {
     fetch('/notifications/read-all', {
         method: 'POST',
-        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').content : '', 'X-Requested-With': 'XMLHttpRequest' }
-    }).then(function() {
-        fbLoadNotifs();
-    }).catch(function(){});
+        headers: { 'X-CSRF-TOKEN': fbCsrfToken(), 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+    }).then(function() { fbLoadNotifs(); }).catch(function(){});
 }
 </script>
 </body>

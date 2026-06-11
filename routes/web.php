@@ -96,6 +96,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dia/conversation/{id}/poll', [DiaController::class, 'pollMessages'])->name('dia.poll');
     Route::get('/dia/group/{id}/poll', [DiaController::class, 'pollGroupMessages'])->name('dia.group.poll');
     Route::post('/dia/ping', [DiaController::class, 'ping'])->name('dia.ping');
+    Route::post('/dia/invite/{id}/accept',  [DiaController::class, 'acceptInvite'])->name('dia.invite.accept');
+    Route::post('/dia/invite/{id}/decline', [DiaController::class, 'declineInvite'])->name('dia.invite.decline');
 
     // Catatan kamu (private notes)
     Route::post('/kamu/note', [KamuNoteController::class, 'store'])->name('kamu.note.store');
