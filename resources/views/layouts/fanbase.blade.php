@@ -224,13 +224,32 @@
         .fb-dp-info { flex:1; min-width:0; }
         .fb-dp-title { font-size:11px; font-weight:600; color:var(--text-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .fb-dp-era   { font-size:10px; color:var(--text-4); }
-        .fb-dp-controls { display:flex; justify-content:center; align-items:center; gap:4px; margin-bottom:6px; }
-        .fb-dp-btn { background:transparent; border:none; cursor:pointer; color:var(--text-3); padding:3px 7px; font-size:11px; border-radius:4px; line-height:1; }
+        .fb-dp-top { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+        .fb-dp-controls { display:flex; justify-content:center; align-items:center; gap:6px; margin-bottom:8px; }
+        .fb-dp-btn {
+            background:transparent; border:none; cursor:pointer;
+            color:var(--text-3); padding:6px; border-radius:8px;
+            line-height:0; display:flex; align-items:center; justify-content:center;
+            transition:all 0.18s;
+        }
         .fb-dp-btn:hover { background:var(--sky-lt); color:var(--sky-dk); }
-        .fb-dp-play { font-size:15px; color:var(--sky-dk); background:var(--sky-lt); border-radius:50%; padding:5px 8px; }
-        .fb-dp-play:hover { background:var(--sky); color:#fff; }
-        .fb-dp-bar { height:3px; background:var(--border-lt); border-radius:2px; cursor:pointer; position:relative; overflow:hidden; }
-        .fb-dp-fill { height:100%; background:linear-gradient(90deg,var(--sky),var(--sky-dk)); border-radius:2px; pointer-events:none; transition:width 0.3s linear; }
+        .fb-dp-play {
+            width:36px; height:36px; border-radius:50%; padding:0;
+            background:linear-gradient(145deg, var(--sky) 0%, var(--sky-dk) 100%);
+            color:#fff; box-shadow:0 3px 10px var(--sky-glow);
+        }
+        .fb-dp-play:hover { transform:scale(1.08); box-shadow:0 4px 14px var(--sky-glow); background:linear-gradient(145deg, var(--sky-dk) 0%, #1a6f8f 100%); }
+        .fb-dp-play.playing { background:linear-gradient(145deg, var(--orange) 0%, var(--orange-dk) 100%); box-shadow:0 3px 10px var(--orange-glow); }
+        .fb-dp-play.playing:hover { box-shadow:0 4px 14px var(--orange-glow); }
+        .fb-dp-stop {
+            width:26px; height:26px; border-radius:6px; padding:0; flex-shrink:0;
+            background:var(--surface); border:1px solid var(--border);
+            color:var(--text-3);
+        }
+        .fb-dp-stop:hover { background:#fef2f2; color:#ef4444; border-color:#fecaca; }
+        .fb-dp-bar { height:4px; background:var(--border-lt); border-radius:4px; cursor:pointer; position:relative; overflow:hidden; margin-top:4px; }
+        .fb-dp-bar:hover .fb-dp-fill { filter:brightness(1.15); }
+        .fb-dp-fill { height:100%; background:linear-gradient(90deg,var(--sky),var(--sky-dk)); border-radius:4px; pointer-events:none; transition:width 0.25s linear; }
 
         /* Profile card */
         .fb-profile-card {
@@ -356,6 +375,23 @@
         .fb-online-name { font-size:12px; color:var(--text-2); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .fb-online-status { font-size:10px; color:var(--text-4); margin-top:1px; }
         .fb-online-status.online { color:#16a34a; }
+
+        /* Member search widget (right sidebar desktop) */
+        .fb-msearch-input {
+            width:100%; background:var(--surface);
+            border:1px solid var(--border); border-radius:10px;
+            color:var(--text-1); font-size:11px; padding:7px 10px 7px 28px;
+            outline:none; font-family:'DM Sans',sans-serif; transition:0.2s;
+        }
+        .fb-msearch-input:focus { border-color:var(--sky); box-shadow:0 0 0 2px var(--sky-glow); }
+        .fb-msearch-input::placeholder { color:var(--text-4); }
+        .fb-msearch-wrap { position:relative; margin-bottom:6px; }
+        .fb-msearch-icon {
+            position:absolute; left:8px; top:50%; transform:translateY(-50%);
+            color:var(--text-4); pointer-events:none; line-height:0;
+        }
+        .fb-msearch-results { min-height:0; }
+        .fb-msearch-empty { font-size:11px; color:var(--text-4); padding:6px 4px; text-align:center; }
 
         /* ===== GLOBAL ALERT ===== */
         .fb-alert { padding:10px 16px; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:13px; }
@@ -743,11 +779,22 @@
                 <div id="fbDpTitle" class="fb-dp-title">Pilih lagu</div>
                 <div id="fbDpEra" class="fb-dp-era"></div>
             </div>
+            {{-- Stop button —— tampil saat ada lagu dipilih --}}
+            <button class="fb-dp-btn fb-dp-stop" id="fbDpStopBtn" onclick="fbStopDesk()" title="Berhenti"
+                    style="display:none;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+            </button>
         </div>
         <div class="fb-dp-controls">
-            <button class="fb-dp-btn" onclick="fbPrev()" title="Sebelumnya">&#9664;&#9664;</button>
-            <button class="fb-dp-btn fb-dp-play" id="fbDpPlayBtn" onclick="fbTogglePlay()" title="Play/Pause">&#9654;</button>
-            <button class="fb-dp-btn" onclick="fbNext()" title="Selanjutnya">&#9654;&#9654;</button>
+            <button class="fb-dp-btn" onclick="fbPrev()" title="Sebelumnya">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            </button>
+            <button class="fb-dp-btn fb-dp-play" id="fbDpPlayBtn" onclick="fbTogglePlay()" title="Play/Pause">
+                <svg id="fbDpPlayIcon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+            <button class="fb-dp-btn" onclick="fbNext()" title="Selanjutnya">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            </button>
         </div>
         <div class="fb-dp-bar" id="fbDpBar" onclick="fbSeekDesk(event)">
             <div class="fb-dp-fill" id="fbDpFill" style="width:0%"></div>
@@ -772,7 +819,39 @@
         @php
             $onlineMembers = \App\Models\User::where('id','!=',Auth::id())->get()
                 ->filter(fn($u) => $u->isOnline())->values();
+            try {
+                $allMembersForSearch = \App\Models\User::where('id','!=',Auth::id())
+                    ->orderBy('name')->get(['id','name','avatar'])
+                    ->map(function($u) use ($onlineMembers) {
+                        return [
+                            'id'     => $u->id,
+                            'name'   => $u->name,
+                            'first'  => explode(' ', $u->name)[0],
+                            'avatar' => $u->avatar ?: '',
+                            'online' => $onlineMembers->contains('id', $u->id),
+                        ];
+                    });
+            } catch (\Throwable $e) {
+                $allMembersForSearch = collect();
+            }
         @endphp
+
+        {{-- Search member untuk ngobrol --}}
+        <div class="fb-widget">
+            <p class="fb-widget-title">&#128172; Cari untuk ngobrol</p>
+            <div class="fb-msearch-wrap">
+                <span class="fb-msearch-icon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input type="text" class="fb-msearch-input" id="fbMsearchInput"
+                       placeholder="Ketik nama member..."
+                       oninput="fbMemberSearch(this.value)"
+                       autocomplete="off">
+            </div>
+            <div id="fbMsearchResults" class="fb-msearch-results">
+                <p class="fb-msearch-empty" style="margin:0;">Ketik nama untuk mencari</p>
+            </div>
+        </div>
 
         {{-- Online members --}}
         <div class="fb-widget">
@@ -1053,7 +1132,15 @@ function fbUpdateUI(){
     el=document.getElementById('fbDpThumb');if(el)el.src=t.thumb;
     el=document.getElementById('fbDpTitle');if(el)el.textContent=t.title;
     el=document.getElementById('fbDpEra');if(el)el.textContent=t.era;
-    el=document.getElementById('fbDpPlayBtn');if(el)el.innerHTML=fbPlaying?'&#9646;&#9646;':'&#9654;';
+    el=document.getElementById('fbDpPlayBtn');
+    if(el){
+        el.classList.toggle('playing',fbPlaying);
+        var ico=document.getElementById('fbDpPlayIcon');
+        if(ico)ico.outerHTML=fbPlaying
+            ?'<svg id="fbDpPlayIcon" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>'
+            :'<svg id="fbDpPlayIcon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    }
+    el=document.getElementById('fbDpStopBtn');if(el)el.style.display=fbCurrent>=0?'flex':'none';
     el=document.getElementById('fbPlayBtnNav');
     if(el){
         el.innerHTML=fbPlaying
@@ -1098,6 +1185,15 @@ function fbSeekDesk(e){
     if(!bar||!fbAudio.duration)return;
     var rect=bar.getBoundingClientRect();
     fbAudio.currentTime=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width))*fbAudio.duration;
+}
+function fbStopDesk(){
+    fbAudio.pause();
+    fbAudio.currentTime=0;
+    fbPlaying=false;
+    fbClearState();
+    var fill=document.getElementById('fbDpFill');if(fill)fill.style.width='0%';
+    var stop=document.getElementById('fbDpStopBtn');if(stop)stop.style.display='none';
+    fbUpdateUI();
 }
 function fbTogglePlaylist(){
     var p=document.getElementById('fbPlaylistPopup');
@@ -1331,6 +1427,42 @@ if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
         navigator.serviceWorker.register('/sw.js').catch(function(){});
     });
+}
+
+// ===== MEMBER SEARCH (right sidebar desktop) =====
+var fbAllMembers = {!! json_encode($allMembersForSearch ?? [], JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP) !!};
+function fbMemberSearch(q){
+    var box=document.getElementById('fbMsearchResults');
+    if(!box)return;
+    q=(q||'').trim().toLowerCase();
+    if(!q){
+        box.innerHTML='<p class="fb-msearch-empty" style="margin:0;">Ketik nama untuk mencari</p>';
+        return;
+    }
+    var members=Array.isArray(fbAllMembers)?fbAllMembers:Object.values(fbAllMembers);
+    var results=members.filter(function(m){return m.name.toLowerCase().indexOf(q)>=0;}).slice(0,8);
+    if(!results.length){
+        box.innerHTML='<p class="fb-msearch-empty" style="margin:0;">Member tidak ditemukan</p>';
+        return;
+    }
+    var csrf=document.querySelector("meta[name='csrf-token']").content;
+    var html='';
+    results.forEach(function(m){
+        var dot=m.online?'<span style="width:7px;height:7px;border-radius:50%;background:var(--sky);flex-shrink:0;display:inline-block;margin-left:auto;"></span>':'';
+        var fallback="https://ui-avatars.com/api/?name="+encodeURIComponent(m.first)+"&background=38A8CC&color=fff&size=28";
+        var av=m.avatar
+            ?'<img src="'+m.avatar+'" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.src=\''+fallback+'\'">'
+            :'<img src="'+fallback+'" style="width:28px;height:28px;border-radius:50%;flex-shrink:0;">';
+        html+='<form method="POST" action="/dia/start/'+m.id+'" style="margin:0;">'
+            +'<input type="hidden" name="_token" value="'+csrf+'">'
+            +'<button type="submit" style="width:100%;display:flex;align-items:center;gap:8px;background:none;border:none;padding:5px 6px;border-radius:8px;cursor:pointer;text-align:left;color:var(--text-1);transition:background 0.15s;" onmouseover="this.style.background=\'var(--sky-lt)\'" onmouseout="this.style.background=\'none\'">'
+            +av
+            +'<span style="font-size:13px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+m.first+'</span>'
+            +dot
+            +'</button>'
+            +'</form>';
+    });
+    box.innerHTML=html;
 }
 </script>
 </body>

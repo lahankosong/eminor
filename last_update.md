@@ -29,6 +29,28 @@
 
 ---
 
+## 2026-06-11 — Stop Button Player Desktop + Member Search Right Sidebar
+
+### Yang Dikerjakan
+
+#### 1. Stop Button di Player Desktop (Left Sidebar)
+- `fanbase.blade.php`: player desktop dibangun ulang dengan SVG icons menggantikan karakter Unicode (▶/▮▮)
+- Tambah tombol Stop `id="fbDpStopBtn"` (kotak merah) di pojok kanan thumbnail, awalnya `display:none`
+- Play button `id="fbDpPlayBtn"` sekarang lingkaran gradient, berubah jadi orange saat `.playing`
+- SVG `id="fbDpPlayIcon"` di-swap lewat `outerHTML` antara play icon dan pause icon saat `fbUpdateUI()` dipanggil
+- `fbStopDesk()`: pause audio, reset `currentTime=0`, `fbClearState()`, sembunyikan stop button, reset progress bar
+- `fbUpdateUI()`: tambah `classList.toggle('playing')` di play button, show/hide stop button berdasarkan `fbCurrent>=0`
+
+#### 2. Member Search di Right Sidebar Desktop
+- `fanbase.blade.php`: tambah widget "Cari untuk ngobrol" di right sidebar, posisi tepat di atas widget Online
+- PHP: `$allMembersForSearch` = semua member selain diri sendiri, dimap dengan `id/name/first/avatar/online`
+- Data PHP di-pass ke JS via `{!! json_encode($allMembersForSearch, JSON_HEX_*) !!}` → `fbAllMembers`
+- `fbMemberSearch(q)`: filter client-side dari `fbAllMembers`, tampilkan max 8 hasil
+- Setiap hasil ditampilkan sebagai form POST ke `/dia/start/{id}` — klik langsung membuka percakapan
+- Avatar dengan fallback ke UI Avatars API, dot online biru untuk member yang sedang aktif
+
+---
+
 ## 2026-06-11 — Pencarian User + Online Sekarang di Dia (Mobile/Tablet)
 
 ### Yang Dikerjakan
