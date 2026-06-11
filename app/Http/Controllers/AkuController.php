@@ -96,7 +96,7 @@ class AkuController extends Controller
                         $post->user_id, $userId,
                         'like', Auth::user()->name . ' menyukai postinganmu',
                         $post->title ?? \Illuminate\Support\Str::limit($post->body, 50),
-                        url('/aku')
+                        url('/aku') . '#akuPost' . $id
                     );
                 } catch (\Throwable $e) {}
             }
@@ -137,7 +137,7 @@ class AkuController extends Controller
                     $post->user_id, Auth::id(),
                     'comment', Auth::user()->name . ' mengomentari postinganmu',
                     $request->body,
-                    url('/aku')
+                    url('/aku') . '#akuPost' . $id
                 );
             } catch (\Throwable $e) {}
         }

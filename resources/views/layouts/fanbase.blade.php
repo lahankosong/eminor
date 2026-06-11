@@ -1092,7 +1092,9 @@ function fbLoadNotifs() {
                     + '</div></div>';
             }
 
-            return '<div class="fb-notif-item'+unread+'" onclick="fbNotifClick('+n.id+','+JSON.stringify(n.url||'')+')">'
+            // Pakai data-attribute — JSON.stringify bikin double-quote di dalam onclick HTML dan merusak parser
+            return '<div class="fb-notif-item'+unread+'" id="fbNotif'+n.id
+                +'" data-nid="'+n.id+'" data-nurl="'+escHtml(n.url||'')+'" onclick="fbNotifClickEl(this)">'
                 + '<img class="fb-notif-avatar" src="'+escHtml(avatar)+'" onerror="this.src=\''+defaultAvatar+'\'" alt="">'
                 + '<div class="fb-notif-body">'
                 + '<div class="fb-notif-title">'+escHtml(n.title||'')+'</div>'
@@ -1107,11 +1109,25 @@ function fbLoadNotifs() {
     });
 }
 
-function fbNotifClick(id, url) {
+function fbNotifClickEl(el) {
+    var id  = el.getAttribute('data-nid');
+    var url = el.getAttribute('data-nurl') || '';
+    // Tandai baca di server
     fetch('/notifications/'+id+'/read', {
-        method: 'POST',
-        headers: { 'X-CSRF-TOKEN': fbCsrfToken(), 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+        method:'POST',
+        headers:{'X-CSRF-TOKEN':fbCsrfToken(),'X-Requested-With':'XMLHttpRequest','Accept':'application/json'}
     }).catch(function(){});
+    // Kurangi badge langsung tanpa tunggu server/reload
+    if (el.classList.contains('unread')) {
+        el.classList.remove('unread');
+        var badge = document.getElementById('fbNotifBadge');
+        if (badge && badge.style.display !== 'none') {
+            var cnt = parseInt(badge.textContent) || 0;
+            cnt--;
+            if (cnt > 0) { badge.textContent = cnt; }
+            else { badge.style.display = 'none'; }
+        }
+    }
     fbCloseNotif();
     if (url && url !== '#' && url !== '') window.location.href = url;
 }

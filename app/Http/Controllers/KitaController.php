@@ -84,7 +84,7 @@ class KitaController extends Controller
                         $post->user_id, $userId,
                         'like', Auth::user()->name . ' menyukai postinganmu',
                         \Illuminate\Support\Str::limit($post->body, 50),
-                        url('/kita')
+                        url('/kita') . '#kitaPost' . $id
                     );
                 } catch (\Throwable $e) {}
             }
@@ -122,7 +122,7 @@ class KitaController extends Controller
                     $post->user_id, Auth::id(),
                     'comment', Auth::user()->name . ' mengomentari postinganmu',
                     $request->body,
-                    url('/kita')
+                    url('/kita') . '#kitaPost' . $id
                 );
             } catch (\Throwable $e) {}
         }
