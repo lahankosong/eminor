@@ -590,5 +590,25 @@ function escHtml(t){
     d.appendChild(document.createTextNode(t));
     return d.innerHTML;
 }
+
+// Auto-buka komentar jika URL mengandung ?openPost={id}
+document.addEventListener('DOMContentLoaded', function() {
+    var params = new URLSearchParams(window.location.search);
+    var openId = params.get('openPost');
+    if (!openId) return;
+    var post = document.getElementById('kitaPost' + openId);
+    if (!post) return;
+    // Buka section komentar
+    var comments = document.getElementById('kitaComments' + openId);
+    if (comments) comments.classList.add('open');
+    // Scroll ke post dengan sedikit delay agar layout render
+    setTimeout(function() {
+        post.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Highlight sebentar
+        post.style.transition = 'box-shadow 0.4s';
+        post.style.boxShadow = '0 0 0 3px rgba(56,168,204,0.4)';
+        setTimeout(function() { post.style.boxShadow = ''; }, 2000);
+    }, 200);
+});
 </script>
 @endpush
