@@ -57,6 +57,22 @@ return new class extends Migration
             });
         }
 
+        // Ensure notifications table exists
+        if (!Schema::hasTable('notifications')) {
+            Schema::create('notifications', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
+                $table->foreignId('from_user_id')->nullable()->constrained('users')->onDelete('set null');
+                $table->string('type');
+                $table->string('title');
+                $table->text('body')->nullable();
+                $table->string('url')->nullable();
+                $table->string('icon')->nullable();
+                $table->timestamp('read_at')->nullable();
+                $table->timestamps();
+            });
+        }
+
         // Ensure kamu_notes table exists with all columns
         if (!Schema::hasTable('kamu_notes')) {
             Schema::create('kamu_notes', function (Blueprint $table) {

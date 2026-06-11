@@ -10,42 +10,54 @@ class NotificationController extends Controller
 {
     public function index()
     {
-        $notifications = AppNotification::where('user_id', Auth::id())
-            ->with('fromUser')
-            ->orderByDesc('created_at')
-            ->take(30)
-            ->get();
+        try {
+            $notifications = AppNotification::where('user_id', Auth::id())
+                ->with('fromUser')
+                ->orderByDesc('created_at')
+                ->take(30)
+                ->get();
 
-        $mapped = $notifications->map(fn($n) => array_merge($n->toArray(), [
-            'created_at_diff' => $n->created_at?->diffForHumans() ?? '',
-        ]));
+            $mapped = $notifications->map(fn($n) => array_merge($n->toArray(), [
+                'created_at_diff' => $n->created_at?->diffForHumans() ?? '',
+            ]));
 
-        return response()->json([
-            'notifications' => $mapped,
-            'unread_count'  => $notifications->whereNull('read_at')->count(),
-        ]);
+            return response()->json([
+                'notifications' => $mapped,
+                'unread_count'  => $notifications->whereNull('read_at')->count(),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['notifications' => [], 'unread_count' => 0]);
+        }
     }
 
     public function markRead($id)
     {
-        $notif = AppNotification::where('user_id', Auth::id())->findOrFail($id);
-        $notif->update(['read_at' => now()]);
+        try {
+            $notif = AppNotification::where('user_id', Auth::id())->findOrFail($id);
+            $notif->update(['read_at' => now()]);
+        } catch (\Throwable $e) {}
         return response()->json(['success' => true]);
     }
 
     public function markAllRead()
     {
-        AppNotification::where('user_id', Auth::id())
-            ->whereNull('read_at')
-            ->update(['read_at' => now()]);
+        try {
+            AppNotification::where('user_id', Auth::id())
+                ->whereNull('read_at')
+                ->update(['read_at' => now()]);
+        } catch (\Throwable $e) {}
         return response()->json(['success' => true]);
     }
 
     public function unreadCount()
     {
-        $count = AppNotification::where('user_id', Auth::id())
-            ->whereNull('read_at')
-            ->count();
+        try {
+            $count = AppNotification::where('user_id', Auth::id())
+                ->whereNull('read_at')
+                ->count();
+        } catch (\Throwable $e) {
+            $count = 0;
+        }
         return response()->json(['count' => $count]);
     }
 }

@@ -3,22 +3,47 @@
 
 @push('styles')
 <style>
-    /* Override main padding for chat layout */
-    .fb-main { padding:0 !important; }
+    /* ── Dia: ambil seluruh area, sembunyikan sidebar layout ── */
+    .fb-sidebar-left  { display:none !important; }
+    .fb-sidebar-right { display:none !important; }
+    .fb-layout        { grid-template-columns:1fr !important; }
+    .fb-main          { padding:0 !important; height:calc(100vh - 56px); overflow:hidden; }
 
     .dia-layout {
-        display:grid; grid-template-columns:260px 1fr;
-        height:calc(100vh - 52px); overflow:hidden;
+        display:grid;
+        grid-template-columns:300px 1fr;
+        height:100%;
+        overflow:hidden;
     }
 
-    /* SIDEBAR */
+    /* ─── SIDEBAR ─────────────────────────────────────────── */
     .dia-sidebar {
-        border-right:1px solid var(--border-lt); display:flex;
-        flex-direction:column; overflow:hidden; background:var(--card);
+        border-right:1px solid var(--border-lt);
+        display:flex; flex-direction:column;
+        overflow:hidden; background:var(--card);
     }
+
+    /* Mini app-nav di atas sidebar (desktop only) */
+    .dia-app-nav {
+        display:flex; align-items:center; gap:4px;
+        padding:8px 12px; border-bottom:1px solid var(--border-lt);
+        background:linear-gradient(135deg,rgba(30,127,168,0.06) 0%,rgba(255,255,255,0) 100%);
+        flex-shrink:0;
+    }
+    .dia-app-link {
+        display:inline-flex; align-items:center; gap:5px;
+        padding:5px 10px; border-radius:8px; font-size:11px;
+        font-weight:500; color:var(--text-3); text-decoration:none;
+        transition:0.15s; border:1px solid transparent;
+    }
+    .dia-app-link:hover { background:var(--sky-lt); color:var(--sky-dk); border-color:var(--sky-mid); }
+    .dia-app-link.active { background:var(--sky); color:#fff; }
+
     .dia-sidebar-head {
-        padding:0.875rem 1rem; border-bottom:1px solid var(--border-lt);
-        display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+        padding:0.75rem 1rem;
+        border-bottom:1px solid var(--border-lt);
+        display:flex; align-items:center; justify-content:space-between;
+        flex-shrink:0;
     }
     .dia-sidebar-title {
         font-size:13px; font-weight:600; color:var(--text-1);
@@ -28,7 +53,7 @@
         font-size:11px; color:var(--text-3); background:transparent;
         border:1px solid var(--border); border-radius:6px;
         padding:4px 10px; cursor:pointer; transition:0.15s;
-        font-family:'DM Sans', sans-serif; font-weight:500;
+        font-family:'DM Sans',sans-serif; font-weight:500;
     }
     .dia-new-group-btn:hover { color:var(--sky-dk); border-color:var(--sky-mid); background:var(--sky-lt); }
 
@@ -45,6 +70,12 @@
     .dia-section-label {
         font-size:10px; color:var(--text-4); letter-spacing:0.15em;
         text-transform:uppercase; padding:10px 14px 4px; font-weight:600;
+        display:flex; align-items:center; justify-content:space-between;
+    }
+    .dia-section-label .dia-online-count {
+        font-size:9px; color:#16a34a; font-weight:700; letter-spacing:0;
+        background:#f0fdf4; border:1px solid #bbf7d0; border-radius:99px;
+        padding:1px 6px;
     }
     .dia-item {
         display:flex; align-items:center; gap:10px;
@@ -56,7 +87,7 @@
     .dia-item:hover  { background:var(--sky-lt); border-left-color:var(--sky-mid); }
     .dia-item.active { background:var(--sky-lt); border-left-color:var(--sky); }
     .dia-item-avatar {
-        width:36px; height:36px; border-radius:50%;
+        position:relative; width:36px; height:36px; border-radius:50%;
         background:var(--sky-lt); flex-shrink:0; overflow:hidden;
         display:flex; align-items:center; justify-content:center;
         color:var(--sky-dk); border:1.5px solid var(--border);
@@ -66,7 +97,6 @@
     .dia-item-name    { font-size:12px; font-weight:500; color:var(--text-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .dia-item-preview { font-size:11px; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
     .dia-item-time { font-size:10px; color:var(--text-4); flex-shrink:0; }
-    .dia-item-avatar { position:relative; }
     .dia-dot {
         position:absolute; bottom:1px; right:1px;
         width:9px; height:9px; border-radius:50%;
@@ -87,7 +117,7 @@
     .dia-header-online .dot { width:7px; height:7px; border-radius:50%; background:#d1d5db; flex-shrink:0; }
     .dia-header-online .dot.online { background:#10b981; }
 
-    /* MAIN CHAT */
+    /* ─── MAIN CHAT ──────────────────────────────────────── */
     .dia-main { display:flex; flex-direction:column; overflow:hidden; background:var(--cream); }
     .dia-empty {
         flex:1; display:flex; flex-direction:column;
@@ -120,7 +150,6 @@
         display:flex; flex-direction:column; gap:6px;
         scrollbar-width:thin; scrollbar-color:var(--border) transparent;
     }
-
     .dia-msg { display:flex; gap:8px; align-items:flex-end; }
     .dia-msg.mine { flex-direction:row-reverse; }
     .dia-msg-avatar {
@@ -162,7 +191,6 @@
     }
     .dia-mention-item:hover { background:var(--sky-lt); color:var(--sky-dk); }
     .dia-mention-item img { width:22px; height:22px; border-radius:50%; object-fit:cover; }
-
     .dia-input-row { display:flex; gap:8px; align-items:flex-end; }
     .dia-input {
         flex:1; background:var(--cream); border:1px solid var(--border); border-radius:20px;
@@ -181,7 +209,7 @@
     }
     .dia-send-btn:hover { transform:scale(1.06); box-shadow:0 4px 14px var(--sky-glow); }
 
-    /* MODAL */
+    /* ─── MODAL ─────────────────────────────────────────── */
     .dia-modal {
         display:none; position:fixed; inset:0;
         background:rgba(0,0,0,0.45); z-index:1000;
@@ -227,20 +255,20 @@
     }
     .dia-modal-cancel:hover { background:var(--sky-lt); color:var(--sky-dk); }
 
+    /* ─── RESPONSIVE ─────────────────────────────────────── */
     @media (max-width:768px) {
+        .fb-bottom-nav { display:block; }
+        .dia-app-nav { display:none; }
         .dia-layout {
             grid-template-columns:1fr;
-            height: calc(100vh - 56px - 84px);
+            height:calc(100vh - 56px - 84px);
         }
         .dia-sidebar { display:flex; }
         .dia-main    { display:none; }
         .dia-layout.conv-open .dia-sidebar { display:none; }
         .dia-layout.conv-open .dia-main    { display:flex; }
         .dia-back-btn { display:block; }
-        .dia-input-area {
-            position: sticky;
-            bottom: 0;
-        }
+        .dia-input-area { position:sticky; bottom:0; }
     }
 </style>
 @endpush
@@ -251,6 +279,20 @@
 
     {{-- SIDEBAR --}}
     <div class="dia-sidebar">
+
+        {{-- Mini app nav (desktop) --}}
+        <div class="dia-app-nav">
+            <a href="{{ route('aku') }}"  class="dia-app-link {{ request()->routeIs('aku')  ? 'active' : '' }}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg> Aku
+            </a>
+            <a href="{{ route('kamu') }}" class="dia-app-link {{ request()->routeIs('kamu') ? 'active' : '' }}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Kamu
+            </a>
+            <a href="{{ route('kita') }}" class="dia-app-link {{ request()->routeIs('kita') ? 'active' : '' }}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Kita
+            </a>
+        </div>
+
         <div class="dia-sidebar-head">
             <span class="dia-sidebar-title">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -263,22 +305,29 @@
         </div>
         <div class="dia-list" id="diaList">
 
-            <div class="dia-section-label">Member</div>
-            @foreach($users as $user)
+            {{-- MEMBER: hanya yang online --}}
+            @php $onlineUsers = $users->filter(fn($u) => $u->isOnline()); @endphp
+            @if($onlineUsers->count() > 0)
+            <div class="dia-section-label">
+                Online
+                <span class="dia-online-count">{{ $onlineUsers->count() }}</span>
+            </div>
+            @foreach($onlineUsers as $user)
             <form method="POST" action="{{ route('dia.start', $user->id) }}" style="display:block;">
                 @csrf
                 <button type="submit" class="dia-item">
                     <div class="dia-item-avatar">
                         <img src="{{ $user->avatar ?? asset('images/default-avatar.png') }}" alt="">
-                        <span class="dia-dot {{ $user->isOnline() ? 'online' : '' }}"></span>
+                        <span class="dia-dot online"></span>
                     </div>
                     <div class="dia-item-info">
                         <div class="dia-item-name">{{ $user->name }}</div>
-                        <div class="dia-item-preview">{{ $user->lastSeenLabel() }}</div>
+                        <div class="dia-item-preview" style="color:#16a34a;">Online</div>
                     </div>
                 </button>
             </form>
             @endforeach
+            @endif
 
             @if($conversations->count() > 0)
             <div class="dia-section-label">Obrolan</div>
@@ -323,6 +372,12 @@
                 @endif
             </a>
             @endforeach
+            @endif
+
+            @if($onlineUsers->count() === 0 && $conversations->count() === 0 && $groups->count() === 0)
+            <div style="text-align:center;padding:2rem 1rem;color:var(--text-4);font-size:12px;">
+                Belum ada obrolan.
+            </div>
             @endif
 
         </div>
@@ -580,7 +635,6 @@ function diaCheckMention(el) {
     var match = val.match(/@(\w*)$/);
     var list  = document.getElementById('diaMentionList');
     if (!list) return;
-
     if (match) {
         var q = match[1].toLowerCase();
         var filtered = diaUsers.filter(function(u){ return u.name.toLowerCase().includes(q); });
