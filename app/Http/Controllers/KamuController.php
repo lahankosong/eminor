@@ -10,13 +10,25 @@ use Illuminate\Support\Facades\Auth;
 class KamuController extends Controller
 {
     public function index() {
-        $user  = Auth::user();
-        $posts = Post::where('user_id',$user->id)->orderByDesc('created_at')->get();
-        $notes = \App\Models\KamuNote::where('user_id',Auth::id())->orderByDesc('is_pinned')->orderByDesc('created_at')->get();
+        $user = Auth::user();
+
+        try {
+            $posts = Post::where('user_id', $user->id)->orderByDesc('created_at')->get();
+        } catch (\Throwable $e) {
+            $posts = collect();
+        }
+
+        try {
+            $notes = \App\Models\KamuNote::where('user_id', Auth::id())->get()
+                ->sortByDesc('is_pinned')->sortByDesc('created_at')->values();
+        } catch (\Throwable $e) {
+            $notes = collect();
+        }
+
         $totalLikes    = $posts->sum('likes_count');
         $totalComments = $posts->sum('comments_count');
         $totalPosts    = $posts->count();
-        return view('fanbase.kamu', compact('user','posts','notes','totalLikes','totalComments','totalPosts'));
+        return view('fanbase.kamu', compact('user', 'posts', 'notes', 'totalLikes', 'totalComments', 'totalPosts'));
     }
     public function update(Request $request, $id) {
         $post = Post::findOrFail($id);

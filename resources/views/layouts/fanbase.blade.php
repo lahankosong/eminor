@@ -308,19 +308,23 @@
             font-weight:700;
         }
         .fb-online-item {
-            display:flex; align-items:center; gap:8px;
-            padding:5px 0; cursor:pointer; transition:0.15s;
-            border-radius:8px;
+            display:flex; align-items:center; gap:9px;
+            padding:6px 4px; cursor:pointer; transition:0.15s;
+            border-radius:10px;
         }
-        .fb-online-item:hover { padding-left:6px; }
+        .fb-online-item:hover { background:var(--sky-lt); padding-left:8px; }
         .fb-online-avatar { position:relative; flex-shrink:0; }
-        .fb-online-avatar img { width:28px; height:28px; border-radius:50%; object-fit:cover; }
+        .fb-online-avatar img { width:30px; height:30px; border-radius:50%; object-fit:cover; border:1px solid var(--border); }
         .fb-online-dot {
             position:absolute; bottom:0; right:0;
-            width:8px; height:8px; border-radius:50%;
-            background:#22c55e; border:2px solid #fff;
+            width:9px; height:9px; border-radius:50%;
+            background:#d1d5db; border:2px solid var(--card);
         }
-        .fb-online-name { font-size:12px; color:var(--text-2); font-weight:500; }
+        .fb-online-dot.online { background:#22c55e; }
+        .fb-online-info { flex:1; min-width:0; }
+        .fb-online-name { font-size:12px; color:var(--text-2); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .fb-online-status { font-size:10px; color:var(--text-4); margin-top:1px; }
+        .fb-online-status.online { color:#16a34a; }
 
         /* ===== GLOBAL ALERT ===== */
         .fb-alert { padding:10px 16px; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:13px; }
@@ -712,16 +716,32 @@
 
     {{-- RIGHT SIDEBAR --}}
     <aside class="fb-sidebar-right">
-        @php $onlineUsers = \App\Models\User::where('id','!=',Auth::id())->latest()->take(8)->get(); @endphp
+        @php
+            $sidebarMembers = \App\Models\User::where('id','!=',Auth::id())->get()
+                ->sortByDesc(fn($u) => $u->isOnline() ? 1 : 0)
+                ->take(8)->values();
+            $onlineCount = $sidebarMembers->filter(fn($u) => $u->isOnline())->count();
+        @endphp
         <div class="fb-widget">
-            <p class="fb-widget-title">&#128994; Member</p>
-            @forelse($onlineUsers as $u)
+            <p class="fb-widget-title">
+                &#128100; Member
+                @if($onlineCount > 0)
+                <span style="float:right;font-size:10px;color:#16a34a;font-weight:600;letter-spacing:0;">
+                    &#128994; {{ $onlineCount }} online
+                </span>
+                @endif
+            </p>
+            @forelse($sidebarMembers as $u)
+            @php $isOnline = $u->isOnline(); @endphp
             <div class="fb-online-item" onclick="window.location.href='{{ route('dia') }}'">
                 <div class="fb-online-avatar">
-                    <img src="{{ $u->avatar ?? asset('images/default-avatar.png') }}" alt="">
-                    <div class="fb-online-dot"></div>
+                    <img src="{{ $u->avatar ?? asset('images/default-avatar.png') }}" alt="{{ $u->name }}">
+                    <div class="fb-online-dot {{ $isOnline ? 'online' : '' }}"></div>
                 </div>
-                <span class="fb-online-name">{{ explode(' ',$u->name)[0] }}</span>
+                <div class="fb-online-info">
+                    <div class="fb-online-name">{{ explode(' ',$u->name)[0] }}</div>
+                    <div class="fb-online-status {{ $isOnline ? 'online' : '' }}">{{ $u->lastSeenLabel() }}</div>
+                </div>
             </div>
             @empty
             <p style="font-size:11px;color:var(--text-4);text-align:center;padding:0.5rem 0;">Belum ada member lain.</p>
