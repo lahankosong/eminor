@@ -139,12 +139,13 @@ $php    = PHP_BINARY ?: 'php';
 $artisan = escapeshellarg($base . '/artisan');
 
 $commands = [
-    'config:clear'  => 'Hapus config cache lama',
-    'config:cache'  => 'Buat config cache baru (timezone, locale, dll.)',
-    'route:clear'   => 'Hapus route cache lama',
-    'route:cache'   => 'Buat route cache baru',
-    'view:clear'    => 'Hapus compiled views',
-    'cache:clear'   => 'Hapus application cache',
+    'migrate --force' => 'Jalankan migration baru (aman, skip yang sudah ada)',
+    'config:clear'    => 'Hapus config cache lama',
+    'config:cache'    => 'Buat config cache baru (timezone, locale, dll.)',
+    'route:clear'     => 'Hapus route cache lama',
+    'route:cache'     => 'Buat route cache baru',
+    'view:clear'      => 'Hapus compiled views',
+    'cache:clear'     => 'Hapus application cache',
 ];
 
 foreach ($commands as $cmd => $desc) {
