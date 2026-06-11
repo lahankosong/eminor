@@ -1,4 +1,4 @@
-@extends('layouts.fanbase')
+﻿@extends('layouts.fanbase')
 @section('title', 'Kamu')
 
 @push('styles')
@@ -93,51 +93,47 @@
 
     /* ===== GUITAR TUNER ===== */
     .tuner-card {
-        background: var(--card); border: 1px solid var(--border);
+        background: #0d1b2a; border: 1px solid rgba(56,168,204,0.18);
         border-radius: 20px; padding: 1.5rem 1rem;
-        box-shadow: var(--shadow); text-align: center;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3); text-align: center; color: #e8f4fa;
     }
     .tuner-gauge-wrap {
         position: relative; width: 220px; height: 125px;
-        margin: 0 auto 0.75rem;
+        margin: 0 auto 0.5rem;
     }
     .tuner-note-big {
         font-family: 'Sora', sans-serif;
-        font-size: 3rem; font-weight: 700; color: var(--sky-dk);
+        font-size: 3rem; font-weight: 700; color: #7EC8E3;
         line-height: 1; margin-bottom: 2px; letter-spacing: -1px;
         transition: color 0.2s;
     }
-    .tuner-note-big.in-tune { color: #16a34a; }
-    .tuner-note-big.too-low { color: var(--orange-dk); }
-    .tuner-note-big.too-high { color: #dc2626; }
-    .tuner-freq-lbl {
-        font-size: 11px; color: var(--text-3); margin-bottom: 0.5rem;
-        font-variant-numeric: tabular-nums;
+    .tuner-note-big.in-tune  { color: #22c55e; }
+    .tuner-note-big.too-low  { color: #F59E42; }
+    .tuner-note-big.too-high { color: #ef4444; }
+    .tuner-cents {
+        font-family: 'Sora', sans-serif; font-size: 1.4rem; font-weight: 700;
+        height: 28px; line-height: 28px; margin-bottom: 0.25rem;
+        color: #7EC8E3; transition: color 0.2s; font-variant-numeric: tabular-nums;
     }
+    .tuner-cents.in-tune  { color: #22c55e; }
+    .tuner-cents.too-low  { color: #F59E42; }
+    .tuner-cents.too-high { color: #ef4444; }
     .tuner-status {
-        font-size: 13px; font-weight: 600; height: 20px; margin-bottom: 0.875rem;
+        font-size: 12px; font-weight: 600; height: 18px; margin-bottom: 0.5rem; color: #7A9DB0;
     }
-    .tuner-status.in-tune  { color: #16a34a; }
-    .tuner-status.too-low  { color: var(--orange-dk); }
-    .tuner-status.too-high { color: #dc2626; }
-    .tuner-strings {
-        display: flex; gap: 6px; justify-content: center; margin-bottom: 1rem;
-        flex-wrap: wrap;
-    }
-    .tuner-str {
-        width: 44px; height: 44px; border-radius: 50%;
-        border: 2px solid var(--border); background: var(--surface);
-        font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 700;
-        color: var(--text-2); cursor: pointer; transition: 0.18s;
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        line-height: 1.2;
-    }
-    .tuner-str:hover { border-color: var(--sky-mid); color: var(--sky-dk); }
-    .tuner-str.active {
-        border-color: var(--sky-dk); background: var(--sky-lt); color: var(--sky-dk);
-        box-shadow: 0 0 0 3px var(--sky-glow);
-    }
-    .tuner-str.in-tune { border-color: #16a34a; background: #f0fdf4; color: #16a34a; }
+    .tuner-status.in-tune  { color: #22c55e; }
+    .tuner-status.too-low  { color: #F59E42; }
+    .tuner-status.too-high { color: #ef4444; }
+    /* Headstock */
+    .tuner-headstock-wrap { margin: 0 auto 1rem; width: 100%; max-width: 260px; }
+    .tuner-peg { cursor: pointer; }
+    .tuner-peg .pg-circle { fill: #1a2e40; stroke: #38A8CC; stroke-width: 2.5; transition: fill 0.18s, stroke 0.18s; }
+    .tuner-peg:hover .pg-circle { fill: #1e3a4e; }
+    .tuner-peg.active .pg-circle { fill: #38A8CC; stroke: #38A8CC; }
+    .tuner-peg.in-tune .pg-circle { fill: #16a34a; stroke: #22c55e; }
+    .tuner-peg .pg-txt { fill: #e8f4fa; font-size: 14px; font-weight: 700; font-family: 'Sora',sans-serif; transition: fill 0.18s; }
+    .tuner-peg.active .pg-txt { fill: #fff; }
+    .tuner-peg.in-tune .pg-txt { fill: #fff; }
     .tuner-btn {
         padding: 10px 28px; border-radius: 24px; border: none; cursor: pointer;
         font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
@@ -146,14 +142,14 @@
     }
     .tuner-btn:hover { transform: translateY(-1px); }
     .tuner-btn.stop {
-        background: linear-gradient(135deg, var(--orange) 0%, var(--orange-dk) 100%);
-        box-shadow: 0 4px 14px var(--orange-glow);
+        background: linear-gradient(135deg, #F59E42 0%, #d97706 100%);
+        box-shadow: 0 4px 14px rgba(245,158,66,0.35);
     }
-    .tuner-msg { font-size: 11px; color: var(--text-4); margin-top: 7px; min-height: 16px; }
+    .tuner-msg { font-size: 11px; color: #5a7a8a; margin-top: 7px; min-height: 16px; }
     .tuner-tip {
         margin-top: 1rem; padding: 0.75rem; border-radius: 12px;
-        background: var(--sky-lt); border: 1px solid var(--border-lt);
-        font-size: 11px; color: var(--text-3); line-height: 1.7; text-align: left;
+        background: rgba(56,168,204,0.08); border: 1px solid rgba(56,168,204,0.15);
+        font-size: 11px; color: #7A9DB0; line-height: 1.7; text-align: left;
     }
 
     /* ===== NOTES ===== */
@@ -493,64 +489,105 @@
 {{-- TAB: TUNER --}}
 <div class="kamu-tab-content" id="kamuTabTuner">
 <div class="tuner-card">
-    <p style="font-family:'Sora',sans-serif;font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:1rem;">
-        &#127928; Tuning Gitar Standar (EADGBE)
+    <p style="font-family:'Sora',sans-serif;font-size:13px;font-weight:600;color:#7EC8E3;margin-bottom:0.75rem;letter-spacing:0.05em;">
+        TUNING GITAR STANDAR
     </p>
 
     {{-- Gauge SVG --}}
     <div class="tuner-gauge-wrap">
         <svg id="tunerSvg" viewBox="0 0 220 125" style="overflow:visible;">
-            {{-- Arc background --}}
-            <path d="M 20 112 A 90 90 0 0 1 200 112"
-                  stroke="#EBF5F9" stroke-width="16" fill="none" stroke-linecap="round"/>
-            {{-- Low (left, red) --}}
-            <path d="M 20 112 A 90 90 0 0 1 73 30"
-                  stroke="#FEE2E2" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.8"/>
-            {{-- In-tune (center, green) --}}
-            <path d="M 79 24 A 90 90 0 0 1 141 24"
-                  stroke="#DCFCE7" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.9"/>
-            {{-- High (right, red) --}}
-            <path d="M 147 30 A 90 90 0 0 1 200 112"
-                  stroke="#FEE2E2" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.8"/>
-            {{-- Center tick --}}
-            <line x1="110" y1="20" x2="110" y2="32" stroke="#22c55e" stroke-width="2.5"/>
-            {{-- Needle --}}
+            <path d="M 20 112 A 90 90 0 0 1 200 112" stroke="rgba(255,255,255,0.06)" stroke-width="16" fill="none" stroke-linecap="round"/>
+            <path d="M 20 112 A 90 90 0 0 1 73 30"   stroke="rgba(239,68,68,0.2)"   stroke-width="16" fill="none" stroke-linecap="round"/>
+            <path d="M 79 24 A 90 90 0 0 1 141 24"   stroke="rgba(34,197,94,0.25)"  stroke-width="16" fill="none" stroke-linecap="round"/>
+            <path d="M 147 30 A 90 90 0 0 1 200 112" stroke="rgba(239,68,68,0.2)"   stroke-width="16" fill="none" stroke-linecap="round"/>
+            <line x1="110" y1="18" x2="110" y2="32" stroke="#22c55e" stroke-width="2.5"/>
             <line id="tunerNeedle" x1="110" y1="112" x2="110" y2="28"
                   stroke="#38A8CC" stroke-width="3.5" stroke-linecap="round"
                   style="transform-origin:110px 112px; transition:transform 0.12s ease;"/>
-            {{-- Center pivot --}}
-            <circle cx="110" cy="112" r="6" fill="var(--sky)"/>
-            <circle cx="110" cy="112" r="3" fill="#fff"/>
-            {{-- Labels --}}
-            <text x="10"  y="122" font-size="9" fill="#94A3B8" text-anchor="middle">-50</text>
-            <text x="110" y="13"  font-size="9" fill="#16a34a" text-anchor="middle" font-weight="600">0</text>
-            <text x="210" y="122" font-size="9" fill="#94A3B8" text-anchor="middle">+50</text>
+            <circle cx="110" cy="112" r="6" fill="#38A8CC"/>
+            <circle cx="110" cy="112" r="3" fill="#0d1b2a"/>
+            <text x="14"  y="122" font-size="9" fill="rgba(255,255,255,0.3)" text-anchor="middle">−</text>
+            <text x="110" y="13"  font-size="9" fill="#22c55e" text-anchor="middle" font-weight="700">✓</text>
+            <text x="206" y="122" font-size="9" fill="rgba(255,255,255,0.3)" text-anchor="middle">+</text>
         </svg>
     </div>
 
     <div class="tuner-note-big" id="tunerNote">—</div>
-    <div class="tuner-freq-lbl" id="tunerFreq">— Hz</div>
+    <div class="tuner-cents" id="tunerCents">—</div>
     <div class="tuner-status" id="tunerStatus">&nbsp;</div>
 
-    {{-- String buttons --}}
-    <div class="tuner-strings">
-        <button class="tuner-str" data-freq="82.41"  data-label="E₂" onclick="tunerPickStr(this)">E<sub>2</sub></button>
-        <button class="tuner-str" data-freq="110.00" data-label="A₂" onclick="tunerPickStr(this)">A<sub>2</sub></button>
-        <button class="tuner-str" data-freq="146.83" data-label="D₃" onclick="tunerPickStr(this)">D<sub>3</sub></button>
-        <button class="tuner-str" data-freq="196.00" data-label="G₃" onclick="tunerPickStr(this)">G<sub>3</sub></button>
-        <button class="tuner-str" data-freq="246.94" data-label="B₃" onclick="tunerPickStr(this)">B<sub>3</sub></button>
-        <button class="tuner-str" data-freq="329.63" data-label="e⁴" onclick="tunerPickStr(this)">e<sub>4</sub></button>
+    {{-- Guitar Headstock SVG --}}
+    <div class="tuner-headstock-wrap">
+        <svg id="tunerHeadstock" viewBox="0 0 260 230" style="width:100%;max-width:260px;display:block;margin:0 auto;">
+            <defs>
+                <linearGradient id="woodGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%"   stop-color="#3b1f08"/>
+                    <stop offset="45%"  stop-color="#5c3010"/>
+                    <stop offset="100%" stop-color="#3b1f08"/>
+                </linearGradient>
+            </defs>
+            {{-- Headstock body --}}
+            <rect x="95" y="8" width="70" height="210" rx="10" fill="url(#woodGrad)" stroke="#7a4a1a" stroke-width="1.5"/>
+            {{-- Wood grain --}}
+            <line x1="108" y1="8" x2="108" y2="218" stroke="rgba(0,0,0,0.18)" stroke-width="1"/>
+            <line x1="122" y1="8" x2="122" y2="218" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>
+            <line x1="138" y1="8" x2="138" y2="218" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>
+            <line x1="152" y1="8" x2="152" y2="218" stroke="rgba(0,0,0,0.18)" stroke-width="1"/>
+            {{-- Nut --}}
+            <rect x="90" y="8" width="80" height="9" rx="3" fill="#E8DCC0" stroke="#C8A870" stroke-width="1"/>
+            {{-- String lines (6 senar) --}}
+            <line x1="107" y1="17" x2="107" y2="218" stroke="rgba(210,190,150,0.45)" stroke-width="0.8"/>
+            <line x1="114" y1="17" x2="114" y2="218" stroke="rgba(210,190,150,0.45)" stroke-width="0.8"/>
+            <line x1="121" y1="17" x2="121" y2="218" stroke="rgba(210,190,150,0.35)" stroke-width="0.7"/>
+            <line x1="139" y1="17" x2="139" y2="218" stroke="rgba(210,190,150,0.35)" stroke-width="0.7"/>
+            <line x1="146" y1="17" x2="146" y2="218" stroke="rgba(210,190,150,0.45)" stroke-width="0.8"/>
+            <line x1="153" y1="17" x2="153" y2="218" stroke="rgba(210,190,150,0.45)" stroke-width="0.8"/>
+            {{-- Peg stems kiri --}}
+            <line x1="95" y1="55"  x2="52" y2="55"  stroke="#5c3010" stroke-width="5" stroke-linecap="round"/>
+            <line x1="95" y1="115" x2="52" y2="115" stroke="#5c3010" stroke-width="5" stroke-linecap="round"/>
+            <line x1="95" y1="175" x2="52" y2="175" stroke="#5c3010" stroke-width="5" stroke-linecap="round"/>
+            {{-- Peg stems kanan --}}
+            <line x1="165" y1="55"  x2="208" y2="55"  stroke="#5c3010" stroke-width="5" stroke-linecap="round"/>
+            <line x1="165" y1="115" x2="208" y2="115" stroke="#5c3010" stroke-width="5" stroke-linecap="round"/>
+            <line x1="165" y1="175" x2="208" y2="175" stroke="#5c3010" stroke-width="5" stroke-linecap="round"/>
+            {{-- Peg kiri: D, A, E --}}
+            <g class="tuner-peg" data-freq="146.83" data-label="D" onclick="tunerPickPeg(this)" id="pegD">
+                <circle class="pg-circle" cx="44" cy="55" r="22"/>
+                <text class="pg-txt" x="44" y="60" text-anchor="middle">D</text>
+            </g>
+            <g class="tuner-peg" data-freq="110.00" data-label="A" onclick="tunerPickPeg(this)" id="pegA">
+                <circle class="pg-circle" cx="44" cy="115" r="22"/>
+                <text class="pg-txt" x="44" y="120" text-anchor="middle">A</text>
+            </g>
+            <g class="tuner-peg" data-freq="82.41" data-label="E" onclick="tunerPickPeg(this)" id="pegE2">
+                <circle class="pg-circle" cx="44" cy="175" r="22"/>
+                <text class="pg-txt" x="44" y="180" text-anchor="middle">E</text>
+            </g>
+            {{-- Peg kanan: G, B, e --}}
+            <g class="tuner-peg" data-freq="196.00" data-label="G" onclick="tunerPickPeg(this)" id="pegG">
+                <circle class="pg-circle" cx="216" cy="55" r="22"/>
+                <text class="pg-txt" x="216" y="60" text-anchor="middle">G</text>
+            </g>
+            <g class="tuner-peg" data-freq="246.94" data-label="B" onclick="tunerPickPeg(this)" id="pegB">
+                <circle class="pg-circle" cx="216" cy="115" r="22"/>
+                <text class="pg-txt" x="216" y="120" text-anchor="middle">B</text>
+            </g>
+            <g class="tuner-peg" data-freq="329.63" data-label="e" onclick="tunerPickPeg(this)" id="pegE4">
+                <circle class="pg-circle" cx="216" cy="175" r="22"/>
+                <text class="pg-txt" x="216" y="180" text-anchor="middle">e</text>
+            </g>
+        </svg>
     </div>
 
     <button class="tuner-btn" id="tunerBtn" onclick="tunerToggle()">&#9654; Mulai Tuning</button>
-    <div class="tuner-msg" id="tunerMsg">Izin mikrofon diperlukan</div>
+    <div class="tuner-msg" id="tunerMsg">Pilih senar lalu mulai tuning</div>
 
     <div class="tuner-tip">
-        <strong>Cara pakai:</strong><br>
-        1. Pilih senar yang ingin di-tune (E₂–e⁴)<br>
+        <strong style="color:#7EC8E3;">Cara pakai:</strong><br>
+        1. Ketuk senar pada headstock (D·A·E kiri, G·B·e kanan)<br>
         2. Tekan Mulai Tuning → izinkan mikrofon<br>
-        3. Petik senarnya — jarum menunjuk <span style="color:#16a34a;font-weight:600;">tengah (0)</span> = tepat<br>
-        4. Jarum ke kiri = nada rendah, ke kanan = terlalu tinggi
+        3. Petik senar — jarum di <span style="color:#22c55e;font-weight:600;">tengah ✓</span> = tepat<br>
+        4. Indikator <span style="color:#F59E42;font-weight:600;">−</span> = terlalu rendah, <span style="color:#ef4444;font-weight:600;">+</span> = terlalu tinggi
     </div>
 </div>
 </div>
@@ -718,10 +755,10 @@ var TUNER_STRINGS = [
     { freq: 329.63, label: 'e⁴' },
 ];
 
-function tunerPickStr(btn) {
-    document.querySelectorAll('.tuner-str').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-    tunerSelectedFreq = parseFloat(btn.getAttribute('data-freq'));
+function tunerPickPeg(el) {
+    document.querySelectorAll('.tuner-peg').forEach(function(p){ p.classList.remove('active'); });
+    el.classList.add('active');
+    tunerSelectedFreq = parseFloat(el.getAttribute('data-freq'));
 }
 
 function tunerToggle() {
@@ -811,19 +848,18 @@ function tunerAutoCorr(buf, sr) {
 
 function tunerRenderUI(freq) {
     var noteEl   = document.getElementById('tunerNote');
-    var freqEl   = document.getElementById('tunerFreq');
+    var centsEl  = document.getElementById('tunerCents');
     var statusEl = document.getElementById('tunerStatus');
     var needle   = document.getElementById('tunerNeedle');
 
     if (!freq) {
-        noteEl.textContent = '—'; noteEl.className = 'tuner-note-big';
-        freqEl.textContent = '— Hz';
-        statusEl.textContent = ' '; statusEl.className = 'tuner-status';
+        noteEl.textContent  = '—'; noteEl.className  = 'tuner-note-big';
+        centsEl.textContent = '—'; centsEl.className = 'tuner-cents';
+        statusEl.textContent = ' '; statusEl.className = 'tuner-status';
         if (needle) needle.style.transform = 'rotate(0deg)';
         return;
     }
 
-    // Cari senar terdekat (atau senar yang dipilih user)
     var target = null, minDiff = Infinity;
     TUNER_STRINGS.forEach(function(s) {
         if (tunerSelectedFreq > 0) {
@@ -839,36 +875,44 @@ function tunerRenderUI(freq) {
     var deg   = Math.max(-90, Math.min(90, cents / 50 * 90));
 
     noteEl.textContent = target.label;
-    freqEl.textContent = freq.toFixed(1) + ' Hz';
-
     if (needle) needle.style.transform = 'rotate(' + deg + 'deg)';
 
-    // Auto-highlight string button
     if (tunerSelectedFreq === 0) {
-        document.querySelectorAll('.tuner-str').forEach(function(b){
-            b.classList.toggle('active', parseFloat(b.getAttribute('data-freq')) === target.freq);
+        document.querySelectorAll('.tuner-peg').forEach(function(p){
+            p.classList.toggle('active', parseFloat(p.getAttribute('data-freq')) === target.freq);
         });
     }
 
     var absC = Math.abs(cents);
     if (absC <= 5) {
-        noteEl.className   = 'tuner-note-big in-tune';
-        statusEl.innerHTML = '&#10003; Tepat!';
-        statusEl.className = 'tuner-status in-tune';
+        noteEl.className    = 'tuner-note-big in-tune';
+        centsEl.textContent = '✓';
+        centsEl.className   = 'tuner-cents in-tune';
+        statusEl.textContent = 'Tepat!';
+        statusEl.className  = 'tuner-status in-tune';
         needle.setAttribute('stroke', '#22c55e');
+        document.querySelectorAll('.tuner-peg').forEach(function(p){
+            if (parseFloat(p.getAttribute('data-freq')) === target.freq) p.classList.add('in-tune');
+        });
         if (!tunerWasInTune) { tunerWasInTune = true; fbSoundTunerInTune(); }
     } else if (cents < 0) {
         tunerWasInTune = false;
-        noteEl.className   = 'tuner-note-big too-low';
-        statusEl.textContent = '▼ Rendah ' + cents + ' cent';
-        statusEl.className   = 'tuner-status too-low';
-        needle.setAttribute('stroke', '#F07040');
+        document.querySelectorAll('.tuner-peg.in-tune').forEach(function(p){ p.classList.remove('in-tune'); });
+        noteEl.className    = 'tuner-note-big too-low';
+        centsEl.textContent = cents + ' ▼';
+        centsEl.className   = 'tuner-cents too-low';
+        statusEl.textContent = 'Terlalu rendah';
+        statusEl.className  = 'tuner-status too-low';
+        needle.setAttribute('stroke', '#F59E42');
     } else {
         tunerWasInTune = false;
-        noteEl.className   = 'tuner-note-big too-high';
-        statusEl.textContent = '▲ Tinggi +' + cents + ' cent';
-        statusEl.className   = 'tuner-status too-high';
-        needle.setAttribute('stroke', '#dc2626');
+        document.querySelectorAll('.tuner-peg.in-tune').forEach(function(p){ p.classList.remove('in-tune'); });
+        noteEl.className    = 'tuner-note-big too-high';
+        centsEl.textContent = '+' + cents + ' ▲';
+        centsEl.className   = 'tuner-cents too-high';
+        statusEl.textContent = 'Terlalu tinggi';
+        statusEl.className  = 'tuner-status too-high';
+        needle.setAttribute('stroke', '#ef4444');
     }
 }
 </script>
