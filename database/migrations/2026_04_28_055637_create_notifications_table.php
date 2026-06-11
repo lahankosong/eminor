@@ -8,11 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('notifications')) return; // sudah dibuat oleh ensure migration
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('from_user_id')->nullable()->constrained('users')->onDelete('set null');
-            $table->string('type'); // like, comment, reply, mention, message, post
+            $table->string('type');
             $table->string('title');
             $table->text('body')->nullable();
             $table->string('url')->nullable();

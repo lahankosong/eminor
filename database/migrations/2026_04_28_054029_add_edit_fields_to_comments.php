@@ -7,7 +7,7 @@ return new class extends Migration {
     public function up(): void {
         // AkuComments — sudah ada, skip
         // PostComments — tambah kolom jika belum ada
-        if (!Schema::hasColumn('post_comments', 'updated_at')) {
+        if (Schema::hasTable('post_comments') && !Schema::hasColumn('post_comments', 'updated_at')) {
             Schema::table('post_comments', function (Blueprint $table) {
                 $table->timestamp('updated_at')->nullable();
             });
