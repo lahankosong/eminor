@@ -66,6 +66,26 @@
     .dia-item-name    { font-size:12px; font-weight:500; color:var(--text-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .dia-item-preview { font-size:11px; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
     .dia-item-time { font-size:10px; color:var(--text-4); flex-shrink:0; }
+    .dia-item-avatar { position:relative; }
+    .dia-dot {
+        position:absolute; bottom:1px; right:1px;
+        width:9px; height:9px; border-radius:50%;
+        background:#d1d5db; border:2px solid var(--card);
+        pointer-events:none;
+    }
+    .dia-dot.online { background:#10b981; }
+    .dia-unread-badge {
+        background:var(--sky); color:#fff; font-size:9px; font-weight:700;
+        min-width:16px; height:16px; border-radius:99px;
+        display:inline-flex; align-items:center; justify-content:center; padding:0 3px;
+    }
+    .dia-item-meta { display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex-shrink:0; }
+    .dia-header-online {
+        display:inline-flex; align-items:center; gap:4px;
+        font-size:11px; color:var(--text-3);
+    }
+    .dia-header-online .dot { width:7px; height:7px; border-radius:50%; background:#d1d5db; flex-shrink:0; }
+    .dia-header-online .dot.online { background:#10b981; }
 
     /* MAIN CHAT */
     .dia-main { display:flex; flex-direction:column; overflow:hidden; background:var(--cream); }
@@ -250,10 +270,11 @@
                 <button type="submit" class="dia-item">
                     <div class="dia-item-avatar">
                         <img src="{{ $user->avatar ?? asset('images/default-avatar.png') }}" alt="">
+                        <span class="dia-dot {{ $user->isOnline() ? 'online' : '' }}"></span>
                     </div>
                     <div class="dia-item-info">
                         <div class="dia-item-name">{{ $user->name }}</div>
-                        <div class="dia-item-preview">Mulai obrolan</div>
+                        <div class="dia-item-preview">{{ $user->lastSeenLabel() }}</div>
                     </div>
                 </button>
             </form>
@@ -262,19 +283,25 @@
             @if($conversations->count() > 0)
             <div class="dia-section-label">Obrolan</div>
             @foreach($conversations as $conv)
-            @php $other = $conv->getOtherUser(Auth::id()); @endphp
+            @php $other = $conv->getOtherUser(Auth::id()); $convUnread = $unreadCounts[$conv->id] ?? 0; @endphp
             <a href="{{ route('dia.conversation', $conv->id) }}"
                class="dia-item {{ isset($conversation) && $conversation->id===$conv->id ? 'active' : '' }}">
                 <div class="dia-item-avatar">
                     <img src="{{ $other->avatar ?? asset('images/default-avatar.png') }}" alt="">
+                    <span class="dia-dot {{ $other->isOnline() ? 'online' : '' }}"></span>
                 </div>
                 <div class="dia-item-info">
                     <div class="dia-item-name">{{ $other->name }}</div>
                     <div class="dia-item-preview">{{ $conv->last_message ?? 'Belum ada pesan' }}</div>
                 </div>
-                @if($conv->last_message_at)
-                <span class="dia-item-time">{{ $conv->last_message_at->format('H:i') }}</span>
-                @endif
+                <div class="dia-item-meta">
+                    @if($conv->last_message_at)
+                    <span class="dia-item-time">{{ $conv->last_message_at->format('H:i') }}</span>
+                    @endif
+                    @if($convUnread > 0)
+                    <span class="dia-unread-badge">{{ $convUnread > 99 ? '99+' : $convUnread }}</span>
+                    @endif
+                </div>
             </a>
             @endforeach
             @endif
@@ -315,7 +342,12 @@
             </div>
             <div>
                 <div class="dia-header-name">{{ $other->name }}</div>
-                <div class="dia-header-sub">Member Margonoandi</div>
+                <div class="dia-header-sub">
+                    <span class="dia-header-online">
+                        <span class="dot {{ $other->isOnline() ? 'online' : '' }}"></span>
+                        {{ $other->lastSeenLabel() }}
+                    </span>
+                </div>
             </div>
         </div>
 
@@ -452,14 +484,22 @@ document.addEventListener('DOMContentLoaded', function() {
     var msgs = document.getElementById('diaMessages');
     if (msgs) {
         msgs.scrollTop = msgs.scrollHeight;
-        // collect highest existing message id
         msgs.querySelectorAll('[data-id]').forEach(function(el) {
             var id = parseInt(el.getAttribute('data-id'), 10);
             if (id > diaLastMsgId) diaLastMsgId = id;
         });
     }
     startPolling();
+    diaPing();
+    setInterval(diaPing, 30000);
 });
+
+function diaPing() {
+    fetch('/dia/ping', {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
+    }).catch(function(){});
+}
 
 function startPolling() {
     if (typeof convId === 'undefined' && typeof groupId === 'undefined') return;
@@ -523,6 +563,7 @@ function diaAppend(msg, isMine) {
     if (!area) return;
     var div  = document.createElement('div');
     div.className = 'dia-msg ' + (isMine ? 'mine' : 'others');
+    if (msg.id) div.setAttribute('data-id', msg.id);
     div.innerHTML =
         (!isMine ? '<img src="'+(msg.avatar||'')+'\" class="dia-msg-avatar" alt="">' : '') +
         '<div class="dia-msg-wrap">' +

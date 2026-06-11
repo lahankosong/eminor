@@ -29,9 +29,32 @@ class DiaController extends Controller
             ->orderByDesc('last_message_at')
             ->get();
 
-        $users = User::where('id', '!=', $userId)->get();
+        $users = User::where('id', '!=', $userId)
+            ->orderByDesc('is_online')
+            ->orderByDesc('last_seen')
+            ->get();
 
-        return view('fanbase.dia', compact('conversations', 'groups', 'users'));
+        $unreadCounts = $this->getUnreadCounts($conversations, $userId);
+
+        return view('fanbase.dia', compact('conversations', 'groups', 'users', 'unreadCounts'));
+    }
+
+    public function ping()
+    {
+        User::where('id', Auth::id())->update([
+            'last_seen' => now(),
+            'is_online' => true,
+        ]);
+        return response()->json(['ok' => true]);
+    }
+
+    private function getUnreadCounts($conversations, int $userId): array
+    {
+        $counts = [];
+        foreach ($conversations as $conv) {
+            $counts[$conv->id] = $conv->unreadCount($userId);
+        }
+        return $counts;
     }
 
     public function conversation($id)
@@ -59,10 +82,15 @@ class DiaController extends Controller
             ->orderByDesc('last_message_at')
             ->get();
 
-        $users = User::where('id', '!=', $userId)->get();
+        $users = User::where('id', '!=', $userId)
+            ->orderByDesc('is_online')
+            ->orderByDesc('last_seen')
+            ->get();
+
+        $unreadCounts = $this->getUnreadCounts($conversations, $userId);
 
         return view('fanbase.dia', compact(
-            'conversations', 'groups', 'users', 'conversation'
+            'conversations', 'groups', 'users', 'conversation', 'unreadCounts'
         ));
     }
 
@@ -196,10 +224,15 @@ class DiaController extends Controller
             ->orderByDesc('last_message_at')
             ->get();
 
-        $users = User::where('id', '!=', $userId)->get();
+        $users = User::where('id', '!=', $userId)
+            ->orderByDesc('is_online')
+            ->orderByDesc('last_seen')
+            ->get();
+
+        $unreadCounts = $this->getUnreadCounts($conversations, $userId);
 
         return view('fanbase.dia', compact(
-            'conversations', 'groups', 'users', 'group'
+            'conversations', 'groups', 'users', 'group', 'unreadCounts'
         ));
     }
 
