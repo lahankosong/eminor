@@ -915,21 +915,61 @@ $fbTracksData = \App\Models\Song::whereNotNull('audio_file')
     });
 @endphp
 var fbTracks=@json($fbTracksData),fbTotal=fbTracks.length,fbCurrent=-1,fbPlaying=false,fbAudio=document.getElementById('fbAudio');
+var fbLastSaveTs=0;
+
+// ── Simpan posisi & status ke localStorage ──────────────────
+function fbSaveState(){
+    if(!fbTotal||fbCurrent<0)return;
+    try{localStorage.setItem('fb_state',JSON.stringify({idx:fbCurrent,time:fbAudio.currentTime||0,playing:fbPlaying}));}catch(e){}
+}
+function fbClearState(){try{localStorage.removeItem('fb_state');}catch(e){}}
+
+// ── Resume otomatis dari localStorage ──────────────────────
+function fbTryResume(){
+    try{
+        var s=JSON.parse(localStorage.getItem('fb_state')||'null');
+        if(!s||!s.playing||s.idx<0||s.idx>=fbTotal)return;
+        fbCurrent=s.idx;
+        var seekTo=parseFloat(s.time)||0;
+        fbAudio.src=fbTracks[fbCurrent].audio;
+        fbAudio.addEventListener('canplay',function onCp(){
+            fbAudio.removeEventListener('canplay',onCp);
+            if(seekTo>1)fbAudio.currentTime=seekTo;
+            fbAudio.play()
+                .then(function(){fbPlaying=true;fbUpdateUI();})
+                .catch(function(){fbShowResumeToast();fbUpdateUI();});
+        });
+        fbUpdateUI();
+    }catch(e){}
+}
+function fbShowResumeToast(){
+    if(document.getElementById('fbResumeToast'))return;
+    var t=fbTracks[fbCurrent];if(!t)return;
+    var el=document.createElement('div');
+    el.id='fbResumeToast';
+    el.setAttribute('style','position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--sky-dk);color:#fff;padding:8px 18px;border-radius:20px;font-size:12px;font-family:inherit;z-index:9999;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.25);cursor:pointer;white-space:nowrap;');
+    el.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Lanjut: '+escHtml(t.title);
+    el.onclick=function(){fbAudio.play().then(function(){fbPlaying=true;fbUpdateUI();}).catch(function(){});el.remove();};
+    document.body.appendChild(el);
+    setTimeout(function(){if(el.parentNode)el.remove();},8000);
+}
 
 document.addEventListener('DOMContentLoaded',function(){
     var list=document.getElementById('fbPlaylistTracks');
-    if(!list||!fbTracks.length)return;
-    fbTracks.forEach(function(t,i){
-        var d=document.createElement('div');
-        d.className='fb-playlist-track';
-        d.id='fbPopupTrack'+i;
-        d.onclick=function(){fbPlayTrack(i);};
-        d.innerHTML='<span class="fb-playlist-track-num" id="fbPopupNum'+i+'">'+(i+1)+'</span>'+
-            '<img src="'+t.thumb+'" class="fb-playlist-track-thumb" alt="">'+
-            '<div style="flex:1;min-width:0;"><div class="fb-playlist-track-title">'+escHtml(t.title)+'</div>'+
-            '<div class="fb-playlist-track-era">'+escHtml(t.era)+'</div></div>';
-        list.appendChild(d);
-    });
+    if(list&&fbTracks.length){
+        fbTracks.forEach(function(t,i){
+            var d=document.createElement('div');
+            d.className='fb-playlist-track';
+            d.id='fbPopupTrack'+i;
+            d.onclick=function(){fbPlayTrack(i);};
+            d.innerHTML='<span class="fb-playlist-track-num" id="fbPopupNum'+i+'">'+(i+1)+'</span>'+
+                '<img src="'+t.thumb+'" class="fb-playlist-track-thumb" alt="">'+
+                '<div style="flex:1;min-width:0;"><div class="fb-playlist-track-title">'+escHtml(t.title)+'</div>'+
+                '<div class="fb-playlist-track-era">'+escHtml(t.era)+'</div></div>';
+            list.appendChild(d);
+        });
+    }
+    fbTryResume();
 });
 
 function fbPlayTrack(i){
@@ -937,13 +977,13 @@ function fbPlayTrack(i){
     fbCurrent=i;
     var t=fbTracks[i];
     fbAudio.src=t.audio;
-    fbAudio.play().then(function(){fbPlaying=true;fbUpdateUI();}).catch(function(){});
+    fbAudio.play().then(function(){fbPlaying=true;fbSaveState();fbUpdateUI();}).catch(function(){});
     document.querySelectorAll('.fb-song-item').forEach(function(el,j){el.classList.toggle('playing',j===i);});
 }
 function fbTogglePlay(){
     if(fbCurrent<0){fbPlayTrack(0);return;}
     if(fbPlaying){fbAudio.pause();fbPlaying=false;}else{fbAudio.play();fbPlaying=true;}
-    fbUpdateUI();
+    fbSaveState();fbUpdateUI();
 }
 function fbNext(){if(fbTotal)fbPlayTrack((fbCurrent+1)%fbTotal);}
 function fbPrev(){
@@ -977,10 +1017,15 @@ fbAudio.addEventListener('timeupdate',function(){
     var pct=(fbAudio.currentTime/fbAudio.duration*100).toFixed(1)+'%';
     var el=document.getElementById('fbPopupFill');if(el)el.style.width=pct;
     el=document.getElementById('fbPopupCur');if(el)el.textContent=fbFmt(fbAudio.currentTime);
+    // Simpan posisi tiap 4 detik
+    var now=Date.now();
+    if(fbPlaying&&now-fbLastSaveTs>4000){fbLastSaveTs=now;fbSaveState();}
 });
 fbAudio.addEventListener('loadedmetadata',function(){
     var el=document.getElementById('fbPopupDur');if(el)el.textContent=fbFmt(fbAudio.duration);
 });
+fbAudio.addEventListener('pause',function(){fbPlaying=false;fbSaveState();});
+fbAudio.addEventListener('play',function(){fbPlaying=true;fbSaveState();});
 fbAudio.addEventListener('ended',fbNext);
 function fbFmt(s){if(!s||isNaN(s))return'0:00';var m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+(sec<10?'0':'')+sec;}
 function fbSeekPopup(e){
