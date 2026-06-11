@@ -717,34 +717,35 @@
     {{-- RIGHT SIDEBAR --}}
     <aside class="fb-sidebar-right">
         @php
-            $sidebarMembers = \App\Models\User::where('id','!=',Auth::id())->get()
-                ->sortByDesc(fn($u) => $u->isOnline() ? 1 : 0)
-                ->take(8)->values();
-            $onlineCount = $sidebarMembers->filter(fn($u) => $u->isOnline())->count();
+            $onlineMembers = \App\Models\User::where('id','!=',Auth::id())->get()
+                ->filter(fn($u) => $u->isOnline())
+                ->values();
         @endphp
         <div class="fb-widget">
             <p class="fb-widget-title">
-                &#128100; Member
-                @if($onlineCount > 0)
+                &#128100; Online
+                @if($onlineMembers->count() > 0)
                 <span style="float:right;font-size:10px;color:#16a34a;font-weight:600;letter-spacing:0;">
-                    &#128994; {{ $onlineCount }} online
+                    &#128994; {{ $onlineMembers->count() }}
                 </span>
                 @endif
             </p>
-            @forelse($sidebarMembers as $u)
-            @php $isOnline = $u->isOnline(); @endphp
-            <div class="fb-online-item" onclick="window.location.href='{{ route('dia') }}'">
-                <div class="fb-online-avatar">
-                    <img src="{{ $u->avatar ?? asset('images/default-avatar.png') }}" alt="{{ $u->name }}">
-                    <div class="fb-online-dot {{ $isOnline ? 'online' : '' }}"></div>
-                </div>
-                <div class="fb-online-info">
-                    <div class="fb-online-name">{{ explode(' ',$u->name)[0] }}</div>
-                    <div class="fb-online-status {{ $isOnline ? 'online' : '' }}">{{ $u->lastSeenLabel() }}</div>
-                </div>
-            </div>
+            @forelse($onlineMembers as $u)
+            <form method="POST" action="{{ route('dia.start', $u->id) }}" style="margin:0;">
+                @csrf
+                <button type="submit" class="fb-online-item" style="width:100%;cursor:pointer;">
+                    <div class="fb-online-avatar">
+                        <img src="{{ $u->avatar ?? asset('images/default-avatar.png') }}" alt="{{ $u->name }}">
+                        <div class="fb-online-dot online"></div>
+                    </div>
+                    <div class="fb-online-info">
+                        <div class="fb-online-name">{{ explode(' ',$u->name)[0] }}</div>
+                        <div class="fb-online-status online">Online</div>
+                    </div>
+                </button>
+            </form>
             @empty
-            <p style="font-size:11px;color:var(--text-4);text-align:center;padding:0.5rem 0;">Belum ada member lain.</p>
+            <p style="font-size:11px;color:var(--text-4);text-align:center;padding:0.75rem 0;">Tidak ada yang online.</p>
             @endforelse
         </div>
         <div class="fb-widget">

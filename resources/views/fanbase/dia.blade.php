@@ -3,47 +3,25 @@
 
 @push('styles')
 <style>
-    /* ── Dia: ambil seluruh area, sembunyikan sidebar layout ── */
-    .fb-sidebar-left  { display:none !important; }
-    .fb-sidebar-right { display:none !important; }
-    .fb-layout        { grid-template-columns:1fr !important; }
-    .fb-main          { padding:0 !important; height:calc(100vh - 56px); overflow:hidden; }
+    /* Hapus padding fb-main agar dia-layout pas */
+    .fb-main { padding:0 !important; height:calc(100vh - 56px); overflow:hidden; }
 
     .dia-layout {
         display:grid;
-        grid-template-columns:300px 1fr;
+        grid-template-columns:260px 1fr;
         height:100%;
         overflow:hidden;
     }
 
-    /* ─── SIDEBAR ─────────────────────────────────────────── */
+    /* ─── SIDEBAR ───────────────────────────────────────── */
     .dia-sidebar {
         border-right:1px solid var(--border-lt);
         display:flex; flex-direction:column;
         overflow:hidden; background:var(--card);
     }
-
-    /* Mini app-nav di atas sidebar (desktop only) */
-    .dia-app-nav {
-        display:flex; align-items:center; gap:4px;
-        padding:8px 12px; border-bottom:1px solid var(--border-lt);
-        background:linear-gradient(135deg,rgba(30,127,168,0.06) 0%,rgba(255,255,255,0) 100%);
-        flex-shrink:0;
-    }
-    .dia-app-link {
-        display:inline-flex; align-items:center; gap:5px;
-        padding:5px 10px; border-radius:8px; font-size:11px;
-        font-weight:500; color:var(--text-3); text-decoration:none;
-        transition:0.15s; border:1px solid transparent;
-    }
-    .dia-app-link:hover { background:var(--sky-lt); color:var(--sky-dk); border-color:var(--sky-mid); }
-    .dia-app-link.active { background:var(--sky); color:#fff; }
-
     .dia-sidebar-head {
-        padding:0.75rem 1rem;
-        border-bottom:1px solid var(--border-lt);
-        display:flex; align-items:center; justify-content:space-between;
-        flex-shrink:0;
+        padding:0.875rem 1rem; border-bottom:1px solid var(--border-lt);
+        display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
     }
     .dia-sidebar-title {
         font-size:13px; font-weight:600; color:var(--text-1);
@@ -70,12 +48,6 @@
     .dia-section-label {
         font-size:10px; color:var(--text-4); letter-spacing:0.15em;
         text-transform:uppercase; padding:10px 14px 4px; font-weight:600;
-        display:flex; align-items:center; justify-content:space-between;
-    }
-    .dia-section-label .dia-online-count {
-        font-size:9px; color:#16a34a; font-weight:700; letter-spacing:0;
-        background:#f0fdf4; border:1px solid #bbf7d0; border-radius:99px;
-        padding:1px 6px;
     }
     .dia-item {
         display:flex; align-items:center; gap:10px;
@@ -96,12 +68,11 @@
     .dia-item-info { flex:1; min-width:0; }
     .dia-item-name    { font-size:12px; font-weight:500; color:var(--text-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .dia-item-preview { font-size:11px; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
-    .dia-item-time { font-size:10px; color:var(--text-4); flex-shrink:0; }
+    .dia-item-time    { font-size:10px; color:var(--text-4); flex-shrink:0; }
     .dia-dot {
         position:absolute; bottom:1px; right:1px;
         width:9px; height:9px; border-radius:50%;
-        background:#d1d5db; border:2px solid var(--card);
-        pointer-events:none;
+        background:#d1d5db; border:2px solid var(--card); pointer-events:none;
     }
     .dia-dot.online { background:#10b981; }
     .dia-unread-badge {
@@ -111,8 +82,7 @@
     }
     .dia-item-meta { display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex-shrink:0; }
     .dia-header-online {
-        display:inline-flex; align-items:center; gap:4px;
-        font-size:11px; color:var(--text-3);
+        display:inline-flex; align-items:center; gap:4px; font-size:11px; color:var(--text-3);
     }
     .dia-header-online .dot { width:7px; height:7px; border-radius:50%; background:#d1d5db; flex-shrink:0; }
     .dia-header-online .dot.online { background:#10b981; }
@@ -159,8 +129,7 @@
     .dia-msg-wrap { max-width:68%; }
     .dia-msg-name { font-size:10px; color:var(--text-3); margin-bottom:2px; padding:0 4px; }
     .dia-msg-bubble {
-        padding:8px 12px; border-radius:12px; font-size:13px;
-        line-height:1.5; word-break:break-word;
+        padding:8px 12px; border-radius:12px; font-size:13px; line-height:1.5; word-break:break-word;
     }
     .dia-msg.others .dia-msg-bubble {
         background:var(--card); color:var(--text-2);
@@ -186,8 +155,7 @@
     .dia-mention-list.show { display:block; }
     .dia-mention-item {
         display:flex; align-items:center; gap:8px;
-        padding:8px 12px; cursor:pointer; transition:0.15s;
-        font-size:12px; color:var(--text-2);
+        padding:8px 12px; cursor:pointer; transition:0.15s; font-size:12px; color:var(--text-2);
     }
     .dia-mention-item:hover { background:var(--sky-lt); color:var(--sky-dk); }
     .dia-mention-item img { width:22px; height:22px; border-radius:50%; object-fit:cover; }
@@ -255,14 +223,9 @@
     }
     .dia-modal-cancel:hover { background:var(--sky-lt); color:var(--sky-dk); }
 
-    /* ─── RESPONSIVE ─────────────────────────────────────── */
     @media (max-width:768px) {
-        .fb-bottom-nav { display:block; }
-        .dia-app-nav { display:none; }
-        .dia-layout {
-            grid-template-columns:1fr;
-            height:calc(100vh - 56px - 84px);
-        }
+        .fb-main { height:calc(100vh - 56px - 84px); }
+        .dia-layout { grid-template-columns:1fr; }
         .dia-sidebar { display:flex; }
         .dia-main    { display:none; }
         .dia-layout.conv-open .dia-sidebar { display:none; }
@@ -277,22 +240,8 @@
 
 <div class="dia-layout {{ (isset($conversation)||isset($group)) ? 'conv-open' : '' }}" id="diaLayout">
 
-    {{-- SIDEBAR --}}
+    {{-- SIDEBAR: Obrolan + Grup --}}
     <div class="dia-sidebar">
-
-        {{-- Mini app nav (desktop) --}}
-        <div class="dia-app-nav">
-            <a href="{{ route('aku') }}"  class="dia-app-link {{ request()->routeIs('aku')  ? 'active' : '' }}">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg> Aku
-            </a>
-            <a href="{{ route('kamu') }}" class="dia-app-link {{ request()->routeIs('kamu') ? 'active' : '' }}">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Kamu
-            </a>
-            <a href="{{ route('kita') }}" class="dia-app-link {{ request()->routeIs('kita') ? 'active' : '' }}">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Kita
-            </a>
-        </div>
-
         <div class="dia-sidebar-head">
             <span class="dia-sidebar-title">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -304,30 +253,6 @@
             <input type="text" placeholder="Cari obrolan..." oninput="diaFilter(this.value)">
         </div>
         <div class="dia-list" id="diaList">
-
-            {{-- MEMBER: hanya yang online --}}
-            @php $onlineUsers = $users->filter(fn($u) => $u->isOnline()); @endphp
-            @if($onlineUsers->count() > 0)
-            <div class="dia-section-label">
-                Online
-                <span class="dia-online-count">{{ $onlineUsers->count() }}</span>
-            </div>
-            @foreach($onlineUsers as $user)
-            <form method="POST" action="{{ route('dia.start', $user->id) }}" style="display:block;">
-                @csrf
-                <button type="submit" class="dia-item">
-                    <div class="dia-item-avatar">
-                        <img src="{{ $user->avatar ?? asset('images/default-avatar.png') }}" alt="">
-                        <span class="dia-dot online"></span>
-                    </div>
-                    <div class="dia-item-info">
-                        <div class="dia-item-name">{{ $user->name }}</div>
-                        <div class="dia-item-preview" style="color:#16a34a;">Online</div>
-                    </div>
-                </button>
-            </form>
-            @endforeach
-            @endif
 
             @if($conversations->count() > 0)
             <div class="dia-section-label">Obrolan</div>
@@ -374,16 +299,17 @@
             @endforeach
             @endif
 
-            @if($onlineUsers->count() === 0 && $conversations->count() === 0 && $groups->count() === 0)
+            @if($conversations->count() === 0 && $groups->count() === 0)
             <div style="text-align:center;padding:2rem 1rem;color:var(--text-4);font-size:12px;">
-                Belum ada obrolan.
+                <div style="font-size:28px;margin-bottom:8px;">&#128172;</div>
+                Belum ada obrolan.<br>Mulai dari sidebar kanan.
             </div>
             @endif
 
         </div>
     </div>
 
-    {{-- MAIN --}}
+    {{-- MAIN CHAT --}}
     <div class="dia-main">
 
         @if(isset($conversation))
@@ -428,8 +354,8 @@
         <div class="dia-input-area">
             <div class="dia-mention-list" id="diaMentionList"></div>
             <div class="dia-input-row">
-                <textarea class="dia-input" id="diaInput" placeholder="Ketik pesan... (@nama untuk mention)"
-                    rows="1"
+                <textarea class="dia-input" id="diaInput"
+                    placeholder="Ketik pesan... (@nama untuk mention)" rows="1"
                     onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();diaSend();}"
                     oninput="diaCheckMention(this)"></textarea>
                 <button class="dia-send-btn" onclick="diaSend()">
@@ -473,8 +399,8 @@
 
         <div class="dia-input-area">
             <div class="dia-input-row">
-                <textarea class="dia-input" id="diaInput" placeholder="Ketik ke grup... (Shift+Enter untuk baris baru)"
-                    rows="1"
+                <textarea class="dia-input" id="diaInput"
+                    placeholder="Ketik ke grup... (Shift+Enter untuk baris baru)" rows="1"
                     onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();diaSendGroup();}"></textarea>
                 <button class="dia-send-btn" onclick="diaSendGroup()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -485,7 +411,7 @@
         @else
         <div class="dia-empty">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            <p>Pilih obrolan atau mulai yang baru</p>
+            <p>Pilih obrolan atau klik member di kanan untuk mulai</p>
         </div>
         @endif
 
@@ -570,7 +496,6 @@ function diaPoll() {
         url = '/dia/group/' + groupId + '/poll?after=' + diaLastMsgId;
     }
     if (!url) return;
-
     fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
     .then(function(r) { return r.ok ? r.json() : null; })
     .then(function(data) {
@@ -579,8 +504,7 @@ function diaPoll() {
             diaAppend(msg, msg.mine);
             if (msg.id > diaLastMsgId) diaLastMsgId = msg.id;
         });
-    })
-    .catch(function() {});
+    }).catch(function() {});
 }
 
 function diaSend() {
@@ -588,14 +512,11 @@ function diaSend() {
     var body  = input ? input.value.trim() : '';
     if (!body || typeof convId === 'undefined') return;
     input.value = ''; input.style.height = 'auto';
-
     fetch('/dia/conversation/' + convId + '/send', {
         method:'POST',
         headers:{'X-CSRF-TOKEN':csrfToken,'Content-Type':'application/json'},
         body:JSON.stringify({body:body})
-    })
-    .then(function(r){return r.json();})
-    .then(function(d){ if(d.success) diaAppend(d.message, true); });
+    }).then(function(r){return r.json();}).then(function(d){ if(d.success) diaAppend(d.message, true); });
 }
 
 function diaSendGroup() {
@@ -603,20 +524,17 @@ function diaSendGroup() {
     var body  = input ? input.value.trim() : '';
     if (!body || typeof groupId === 'undefined') return;
     input.value = ''; input.style.height = 'auto';
-
     fetch('/dia/group/' + groupId + '/send', {
         method:'POST',
         headers:{'X-CSRF-TOKEN':csrfToken,'Content-Type':'application/json'},
         body:JSON.stringify({body:body})
-    })
-    .then(function(r){return r.json();})
-    .then(function(d){ if(d.success) diaAppend(d.message, true); });
+    }).then(function(r){return r.json();}).then(function(d){ if(d.success) diaAppend(d.message, true); });
 }
 
 function diaAppend(msg, isMine) {
     var area = document.getElementById('diaMessages');
     if (!area) return;
-    var div  = document.createElement('div');
+    var div = document.createElement('div');
     div.className = 'dia-msg ' + (isMine ? 'mine' : 'others');
     if (msg.id) div.setAttribute('data-id', msg.id);
     div.innerHTML =
@@ -631,9 +549,8 @@ function diaAppend(msg, isMine) {
 }
 
 function diaCheckMention(el) {
-    var val   = el.value;
-    var match = val.match(/@(\w*)$/);
-    var list  = document.getElementById('diaMentionList');
+    var val = el.value, match = val.match(/@(\w*)$/);
+    var list = document.getElementById('diaMentionList');
     if (!list) return;
     if (match) {
         var q = match[1].toLowerCase();
@@ -644,8 +561,7 @@ function diaCheckMention(el) {
                     (u.avatar ? '<img src="'+escHtml(u.avatar)+'">' : '') +
                     ' ' + escHtml(u.name) + '</div>';
             }).join('');
-            list.classList.add('show');
-            return;
+            list.classList.add('show'); return;
         }
     }
     list.classList.remove('show');
