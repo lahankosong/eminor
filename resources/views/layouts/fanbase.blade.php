@@ -201,12 +201,36 @@
         /* ===== LEFT SIDEBAR ===== */
         .fb-sidebar-left {
             position:sticky; top:56px; height:calc(100vh - 56px);
-            overflow-y:auto; overflow-x:hidden;
+            overflow:hidden;
+            border-right:1px solid var(--border-lt);
+            display:flex; flex-direction:column;
+        }
+        .fb-sidebar-scroll {
+            flex:1; overflow-y:auto; overflow-x:hidden;
             padding:1.5rem 1rem;
             scrollbar-width:none;
-            border-right:1px solid var(--border-lt);
         }
-        .fb-sidebar-left::-webkit-scrollbar { display:none; }
+        .fb-sidebar-scroll::-webkit-scrollbar { display:none; }
+
+        /* Desktop mini player */
+        .fb-desk-player {
+            flex-shrink:0;
+            padding:8px 12px 10px;
+            border-top:1px solid var(--border-lt);
+            background:var(--card);
+        }
+        .fb-dp-top { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+        .fb-dp-thumb { width:32px; height:32px; border-radius:6px; object-fit:cover; background:var(--surface); flex-shrink:0; box-shadow:var(--shadow-sm); }
+        .fb-dp-info { flex:1; min-width:0; }
+        .fb-dp-title { font-size:11px; font-weight:600; color:var(--text-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .fb-dp-era   { font-size:10px; color:var(--text-4); }
+        .fb-dp-controls { display:flex; justify-content:center; align-items:center; gap:4px; margin-bottom:6px; }
+        .fb-dp-btn { background:transparent; border:none; cursor:pointer; color:var(--text-3); padding:3px 7px; font-size:11px; border-radius:4px; line-height:1; }
+        .fb-dp-btn:hover { background:var(--sky-lt); color:var(--sky-dk); }
+        .fb-dp-play { font-size:15px; color:var(--sky-dk); background:var(--sky-lt); border-radius:50%; padding:5px 8px; }
+        .fb-dp-play:hover { background:var(--sky); color:#fff; }
+        .fb-dp-bar { height:3px; background:var(--border-lt); border-radius:2px; cursor:pointer; position:relative; overflow:hidden; }
+        .fb-dp-fill { height:100%; background:linear-gradient(90deg,var(--sky),var(--sky-dk)); border-radius:2px; pointer-events:none; transition:width 0.3s linear; }
 
         /* Profile card */
         .fb-profile-card {
@@ -637,6 +661,7 @@
 
     {{-- LEFT SIDEBAR --}}
     <aside class="fb-sidebar-left">
+    <div class="fb-sidebar-scroll">
         <div class="fb-profile-card">
             <img src="{{ Auth::user()->avatar ?? asset('images/default-avatar.png') }}" class="fb-profile-avatar" alt="">
             <div class="fb-profile-name">{{ Auth::user()->name }}</div>
@@ -708,6 +733,27 @@
         </div>
         @endforeach
         @endif
+    </div>{{-- /.fb-sidebar-scroll --}}
+
+    {{-- Desktop mini player --}}
+    <div class="fb-desk-player" id="fbDeskPlayer">
+        <div class="fb-dp-top">
+            <img id="fbDpThumb" src="" class="fb-dp-thumb" alt="">
+            <div class="fb-dp-info">
+                <div id="fbDpTitle" class="fb-dp-title">Pilih lagu</div>
+                <div id="fbDpEra" class="fb-dp-era"></div>
+            </div>
+        </div>
+        <div class="fb-dp-controls">
+            <button class="fb-dp-btn" onclick="fbPrev()" title="Sebelumnya">&#9664;&#9664;</button>
+            <button class="fb-dp-btn fb-dp-play" id="fbDpPlayBtn" onclick="fbTogglePlay()" title="Play/Pause">&#9654;</button>
+            <button class="fb-dp-btn" onclick="fbNext()" title="Selanjutnya">&#9654;&#9654;</button>
+        </div>
+        <div class="fb-dp-bar" id="fbDpBar" onclick="fbSeekDesk(event)">
+            <div class="fb-dp-fill" id="fbDpFill" style="width:0%"></div>
+        </div>
+    </div>
+
     </aside>
 
     {{-- MAIN --}}
@@ -1003,6 +1049,11 @@ function fbUpdateUI(){
     el=document.getElementById('fbPopupTitle');if(el)el.textContent=t.title;
     el=document.getElementById('fbPopupEra');if(el)el.textContent=t.era;
     el=document.getElementById('fbPopupPlayBtn');if(el)el.innerHTML=fbPlaying?'&#9646;&#9646;':'&#9654;';
+    // Desktop player
+    el=document.getElementById('fbDpThumb');if(el)el.src=t.thumb;
+    el=document.getElementById('fbDpTitle');if(el)el.textContent=t.title;
+    el=document.getElementById('fbDpEra');if(el)el.textContent=t.era;
+    el=document.getElementById('fbDpPlayBtn');if(el)el.innerHTML=fbPlaying?'&#9646;&#9646;':'&#9654;';
     el=document.getElementById('fbPlayBtnNav');
     if(el){
         el.innerHTML=fbPlaying
@@ -1022,6 +1073,7 @@ fbAudio.addEventListener('timeupdate',function(){
     var pct=(fbAudio.currentTime/fbAudio.duration*100).toFixed(1)+'%';
     var el=document.getElementById('fbPopupFill');if(el)el.style.width=pct;
     el=document.getElementById('fbPopupCur');if(el)el.textContent=fbFmt(fbAudio.currentTime);
+    el=document.getElementById('fbDpFill');if(el)el.style.width=pct;
     // Simpan posisi tiap 4 detik
     var now=Date.now();
     if(fbPlaying&&now-fbLastSaveTs>4000){fbLastSaveTs=now;fbSaveState();}
@@ -1037,6 +1089,12 @@ window.addEventListener('beforeunload',function(){if(fbCurrent>=0)fbSaveState();
 function fbFmt(s){if(!s||isNaN(s))return'0:00';var m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+(sec<10?'0':'')+sec;}
 function fbSeekPopup(e){
     var bar=document.getElementById('fbPopupBar');
+    if(!bar||!fbAudio.duration)return;
+    var rect=bar.getBoundingClientRect();
+    fbAudio.currentTime=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width))*fbAudio.duration;
+}
+function fbSeekDesk(e){
+    var bar=document.getElementById('fbDpBar');
     if(!bar||!fbAudio.duration)return;
     var rect=bar.getBoundingClientRect();
     fbAudio.currentTime=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width))*fbAudio.duration;

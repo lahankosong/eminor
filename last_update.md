@@ -2,6 +2,89 @@
 
 ---
 
+## 2026-06-11 — Pemutar Musik Persisten + Player Desktop + Online Sekarang di Atas
+
+### Yang Dikerjakan
+
+#### 1. Pemutar Musik Persisten (Tetap Berputar saat Pindah Halaman / Refresh)
+- `fanbase.blade.php`: tambah `fbSaveState()` → simpan `{idx, time, playing}` ke `localStorage` key `fb_state`
+- `fbTryResume()`: saat halaman load, cek localStorage → jika ada state, setup audio lalu lanjutkan dari posisi terakhir
+- **Race condition fix**: listener `canplay` didaftarkan SEBELUM `fbAudio.src` diset, agar tidak melewatkan event dari audio yang sudah ter-cache di browser
+- `fbAudio.load()` dipanggil eksplisit agar audio yang `preload="none"` tetap dimuat
+- `window.beforeunload`: simpan posisi tepat sebelum pindah halaman, menghilangkan rollback 4 detik
+- Toast biru "▶ Lanjut: [judul]" muncul jika autoplay diblokir browser, klik untuk lanjutkan manual
+- `fbSaveState()` dipanggil di: `fbPlayTrack().then()`, `fbTogglePlay()`, `timeupdate` tiap 4 detik, event `pause`, event `play`
+
+#### 2. Player Desktop (Kontrol Musik di Sidebar Kiri)
+- `fanbase.blade.php`: sidebar kiri diubah dari `overflow-y:auto` jadi flex column (`display:flex;flex-direction:column`)
+- Konten sidebar dibungkus `<div class="fb-sidebar-scroll">` (flex:1, overflow-y:auto)
+- Tambah `<div class="fb-desk-player">` di bawah scroll area: thumbnail, judul/era, tombol ◀◀ / ▶ / ▶▶, progress bar klik-untuk-seek
+- `fbUpdateUI()` diperluas: update `#fbDpThumb`, `#fbDpTitle`, `#fbDpEra`, `#fbDpPlayBtn`
+- `timeupdate` event: update `#fbDpFill` (progress bar desktop)
+- `fbSeekDesk(e)`: fungsi seek via klik progress bar desktop
+
+#### 3. "Online Sekarang" Dipindah ke Atas Obrolan
+- `dia.blade.php`: dalam `#diaNormalContent`, section Online Sekarang dipindah dari bawah Grup ke paling atas (di bawah search bar)
+- Urutan baru: Online Sekarang → Obrolan → Grup → Empty state
+
+---
+
+## 2026-06-11 — Pencarian User + Online Sekarang di Dia (Mobile/Tablet)
+
+### Yang Dikerjakan
+
+#### 1. Pencarian User di Halaman Dia
+- `dia.blade.php`: tambah search bar di atas `dia-mobile-list` (tampil di semua ukuran layar ≤1060px)
+- Client-side filter dari array JS `diaUsers` (tidak perlu endpoint baru)
+- `diaUsers` dibangun di PHP dengan `json_encode()` + `JSON_HEX_*` flags, bukan `@json()`, untuk mencegah XSS/parse error
+- `diaDoSearch(q)`: filter nama user, tampilkan di `#diaSearchResults`, sembunyikan `#diaNormalContent`
+- `diaClearSearch()`: reset ke tampilan normal
+- `diaStartConv(userId)`: submit form POST tersembunyi ke `/dia/start/{id}` untuk memulai percakapan
+
+#### 2. Online Sekarang di Mobile/Tablet
+- `dia.blade.php`: section Online Sekarang ditambahkan di `dia-mobile-list` (sidebar kiri mobile)
+- `$onlineUsers` dihitung dengan `strtotime()` raw (bukan Carbon) + `try-catch` untuk mencegah error di user dengan `last_seen` tidak valid
+- Breakpoint diperluas dari 768px ke 1060px agar tablet juga menampilkan layout mobile
+
+#### 3. Perbaikan Error 500 dia.blade.php
+- **Root cause**: `$u->isOnline()` dipanggil untuk semua user → beberapa user produksi punya `last_seen` yang tidak bisa di-parse Carbon
+- Fix 1: `User::isOnline()` diubah dari Carbon ke `strtotime($this->attributes['last_seen'])` + `try-catch`
+- Fix 2: View cache lama di server tidak ikut ter-deploy → `fixdb.php` diperluas dengan hapus `storage/framework/views/*.php`, `routes-v7.php`, `config.php`
+- Fix 3: `@json()` diganti manual `json_encode()` dalam blok `@php` dengan try-catch
+- Fix 4: `DiaController::index()` dibungkus per-section dengan try-catch individual
+
+---
+
+## 2026-06-11 — Fitur Baru: Like & Balas Komentar, Tuner Gitar, PWA, Suara Notifikasi
+
+### Yang Dikerjakan
+
+#### 1. Like & Balas Komentar
+- `post_comments`: tambah kolom `parent_id` (reply) dan `likes_count`
+- Tabel baru `post_comment_likes`: unique per user per komentar
+- `AkuController` / `KitaController`: endpoint `POST /comment/{id}/like` dan `POST /comment/{id}/reply`
+- UI: tombol ❤ (toggle like) dan 💬 (buka form reply inline) di setiap komentar
+- Reply tampil indented di bawah komentar induk
+
+#### 2. Tuner Gitar (Halaman Kamu)
+- `kamu.blade.php`: tambah panel tuner via Web Audio API
+- Deteksi nada real-time dari mikrofon: FFT + algoritma YIN untuk deteksi pitch
+- Tampilkan: nada terdekat (E, A, D, G, B, e), cent deviation, jarum meter visual
+- Tidak memerlukan library eksternal
+
+#### 3. PWA (Progressive Web App)
+- `manifest.json`: `name`, `short_name`, `icons` (192×192, 512×512), `theme_color`, `display: standalone`
+- `public/sw.js`: service worker — cache-first untuk aset statis, network-first untuk HTML
+- `fanbase.blade.php`: `<link rel="manifest">` + SW register via JS
+- Pengguna dapat "Add to Home Screen" di Android/iOS
+
+#### 4. Suara Notifikasi
+- `fanbase.blade.php`: Web Audio API — buat `AudioContext` + oscillator untuk nada notif pendek (880Hz, 50ms)
+- Bunyi muncul saat notifikasi baru masuk (poll 30 detik)
+- Tidak memerlukan file audio eksternal
+
+---
+
 ## 2026-06-10 — Bug Fixes: Notifikasi, Pesan Realtime, WIB, Kamu 500
 
 ### Yang Dikerjakan
@@ -186,23 +269,24 @@ Semua halaman yang menggunakan `layouts.app` diperbarui: warna hardcode (`#0a0a0
 | Fitur | Status |
 |-------|--------|
 | Like + tooltip who liked (Aku, Kita) | ✅ Berfungsi |
+| Like & balas komentar | ✅ Ditambahkan 2026-06-11 |
 | Komentar (Aku, Kita) | ✅ Diperbaiki |
 | Halaman Kamu (desktop + mobile) | ✅ Diperbaiki |
+| Tuner gitar real-time | ✅ Ditambahkan 2026-06-11 |
+| PWA (Add to Home Screen) | ✅ Ditambahkan 2026-06-11 |
+| Suara notifikasi | ✅ Ditambahkan 2026-06-11 |
 | Lokasi otomatis kota/kabupaten | ✅ Diperbaiki |
 | Chat DM (Dia) | ✅ Diperbaiki |
-| Chat Grup (Dia) | ✅ Seharusnya berfungsi |
+| Chat Grup (Dia) | ✅ Berfungsi |
+| Pencarian user di Dia | ✅ Ditambahkan 2026-06-11 |
+| Online Sekarang di Dia (mobile/tablet) | ✅ Ditambahkan 2026-06-11 |
+| Online Sekarang di atas Obrolan | ✅ Diperbaiki 2026-06-11 |
+| Pemutar musik persisten (pindah halaman) | ✅ Ditambahkan 2026-06-11 |
+| Player kontrol desktop (sidebar kiri) | ✅ Ditambahkan 2026-06-11 |
 | Chat input di atas bottom nav (mobile) | ✅ Diperbaiki |
 | Keamanan route (auth middleware) | ✅ Diperbaiki |
 | Halaman Profil | ✅ Direnovasi ke fanbase layout |
-| Notifikasi | ⚠️ Perlu verifikasi tabel `notifications` ada di DB |
+| Notifikasi lonceng | ✅ Berfungsi |
+| isOnline() robust (strtotime, no Carbon) | ✅ Diperbaiki 2026-06-11 |
+| fixdb.php diagnostik (view cache + log) | ✅ Diperluas 2026-06-11 |
 | Deploy ke cPanel | ✅ Via `deploy.php` + GitHub ZIP |
-
----
-
-## Hal yang Belum Dicek / TODO
-
-- [ ] Verifikasi tabel `notifications` sudah di-migrate di server hosting
-- [ ] Chat grup: belum diuji end-to-end setelah perbaikan cast integer
-- [x] Community/thread page: direnovasi ke CSS variables (2026-06-10)
-- [x] Song detail page (`/lagu/{slug}`): direnovasi ke CSS variables (2026-06-10)
-- [x] Avatar fallback `google.com/favicon.ico` → `asset('images/default-avatar.png')` di semua halaman komunitas & lagu

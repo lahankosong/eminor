@@ -245,6 +245,41 @@
 
     {{-- Normal content (hidden while searching) --}}
     <div id="diaNormalContent">
+        {{-- Online users — tampil di atas obrolan, cek raw atribut last_seen --}}
+        @php
+        $onlineUsers = $users->filter(function($u) {
+            try {
+                $seen = $u->getAttributes()['last_seen'] ?? null;
+                return $seen && strtotime((string)$seen) > (time() - 120);
+            } catch (\Throwable $e) { return false; }
+        })->take(8);
+        @endphp
+        @if($onlineUsers->count() > 0)
+        <div class="dia-mobile-section-label" style="display:flex;align-items:center;gap:5px;">
+            <span style="width:7px;height:7px;border-radius:50%;background:#10b981;display:inline-block;"></span>
+            Online Sekarang ({{ $onlineUsers->count() }})
+        </div>
+        @foreach($onlineUsers as $u)
+        <button class="dia-mobile-item" onclick="diaStartConv({{ $u->id }})">
+            <div class="dia-mobile-avatar">
+                @if($u->avatar)
+                <img src="{{ $u->avatar }}" alt="">
+                @else
+                <span style="font-size:15px;font-weight:700;">{{ mb_substr($u->name,0,1) }}</span>
+                @endif
+                <span class="dia-mobile-dot online"></span>
+            </div>
+            <div class="dia-mobile-info">
+                <div class="dia-mobile-name">{{ $u->name }}</div>
+                <div class="dia-mobile-preview">Ketuk untuk mulai ngobrol</div>
+            </div>
+            <div class="dia-mobile-meta">
+                <span style="font-size:9px;color:#10b981;font-weight:600;letter-spacing:0.02em;">&#9679; Online</span>
+            </div>
+        </button>
+        @endforeach
+        @endif
+
         @if($conversations->count() > 0)
         <div class="dia-mobile-section-label">Obrolan</div>
         @foreach($conversations as $conv)
@@ -281,41 +316,6 @@
             <div class="dia-mobile-meta"><span class="dia-mobile-time">{{ $grp->last_message_at->format('H:i') }}</span></div>
             @endif
         </a>
-        @endforeach
-        @endif
-
-        {{-- Online users — cek raw atribut last_seen tanpa memanggil isOnline() --}}
-        @php
-        $onlineUsers = $users->filter(function($u) {
-            try {
-                $seen = $u->getAttributes()['last_seen'] ?? null;
-                return $seen && strtotime((string)$seen) > (time() - 120);
-            } catch (\Throwable $e) { return false; }
-        })->take(8);
-        @endphp
-        @if($onlineUsers->count() > 0)
-        <div class="dia-mobile-section-label" style="display:flex;align-items:center;gap:5px;">
-            <span style="width:7px;height:7px;border-radius:50%;background:#10b981;display:inline-block;"></span>
-            Online Sekarang ({{ $onlineUsers->count() }})
-        </div>
-        @foreach($onlineUsers as $u)
-        <button class="dia-mobile-item" onclick="diaStartConv({{ $u->id }})">
-            <div class="dia-mobile-avatar">
-                @if($u->avatar)
-                <img src="{{ $u->avatar }}" alt="">
-                @else
-                <span style="font-size:15px;font-weight:700;">{{ mb_substr($u->name,0,1) }}</span>
-                @endif
-                <span class="dia-mobile-dot online"></span>
-            </div>
-            <div class="dia-mobile-info">
-                <div class="dia-mobile-name">{{ $u->name }}</div>
-                <div class="dia-mobile-preview">Ketuk untuk mulai ngobrol</div>
-            </div>
-            <div class="dia-mobile-meta">
-                <span style="font-size:9px;color:#10b981;font-weight:600;letter-spacing:0.02em;">&#9679; Online</span>
-            </div>
-        </button>
         @endforeach
         @endif
 
