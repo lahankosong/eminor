@@ -219,8 +219,37 @@ foreach ($toMark as $m) {
     echo '<pre class="ok">&#10003; Ditandai: ' . htmlspecialchars($m) . '</pre>';
 }
 
-// ── 8. Verifikasi akhir ───────────────────────────────────────────────────────
-echo '<h2>8. Verifikasi Tabel Kritis</h2>';
+// ── 8. Bersihkan View/Config Cache ────────────────────────────────────────────
+echo '<h2>8. Bersihkan Cache Laravel</h2>';
+$cacheCleared = 0;
+$viewDir  = $base . '/storage/framework/views/';
+$routeCache = $base . '/bootstrap/cache/routes-v7.php';
+$configCache = $base . '/bootstrap/cache/config.php';
+if (is_dir($viewDir)) {
+    foreach (glob($viewDir . '*.php') as $f) {
+        if (@unlink($f)) $cacheCleared++;
+    }
+    echo '<pre class="ok">&#10003; View cache dihapus (' . $cacheCleared . ' file)</pre>';
+} else {
+    echo '<pre class="info">&#8212; Direktori view cache tidak ditemukan</pre>';
+}
+if (file_exists($routeCache))  { @unlink($routeCache);  echo '<pre class="ok">&#10003; Route cache dihapus</pre>'; }
+if (file_exists($configCache)) { @unlink($configCache); echo '<pre class="ok">&#10003; Config cache dihapus</pre>'; }
+
+// ── 9. Log Error Laravel Terakhir ────────────────────────────────────────────
+echo '<h2>9. Log Error Laravel (50 baris terakhir)</h2>';
+$logFile = $base . '/storage/logs/laravel.log';
+if (file_exists($logFile)) {
+    $lines = file($logFile, FILE_IGNORE_NEW_LINES);
+    $last  = array_slice($lines, -50);
+    $text  = implode("\n", $last);
+    echo '<pre style="max-height:400px;overflow-y:auto;font-size:11px;">' . htmlspecialchars($text) . '</pre>';
+} else {
+    echo '<pre class="info">&#8212; File log tidak ditemukan</pre>';
+}
+
+// ── 10. Verifikasi akhir ──────────────────────────────────────────────────────
+echo '<h2>10. Verifikasi Tabel Kritis</h2>';
 $check = [
     'notifications'        => 'Notifikasi lonceng',
     'kamu_notes'           => 'Catatan Kamu',
@@ -247,8 +276,6 @@ echo '<pre>' . ($hasCols ? '<span class="ok">&#10003;</span>' : '<span class="er
 mysqli_close($conn);
 
 echo '<h2 style="color:#4ade80;margin-top:1.5rem">&#10003; Selesai!</h2>';
-echo '<pre class="ok">Semua tabel sudah dibuat. Sekarang coba buka halaman notifikasi.
-Jika badge masih kosong, itu normal karena notifikasi baru akan muncul
-setelah ada aktivitas baru (like, komentar, atau pesan).</pre>';
+echo '<pre class="ok">Semua tabel sudah dibuat dan cache dibersihkan. Coba buka /dia lagi sekarang.</pre>';
 echo '<pre class="warn">&#9888; Hapus file fixdb.php setelah selesai via cPanel File Manager.</pre>';
 echo '</body></html>';

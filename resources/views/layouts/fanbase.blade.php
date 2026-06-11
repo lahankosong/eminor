@@ -1032,6 +1032,8 @@ fbAudio.addEventListener('loadedmetadata',function(){
 fbAudio.addEventListener('pause',function(){fbPlaying=false;fbSaveState();});
 fbAudio.addEventListener('play',function(){fbPlaying=true;fbSaveState();});
 fbAudio.addEventListener('ended',fbNext);
+// Simpan posisi TEPAT saat pindah halaman agar tidak rollback
+window.addEventListener('beforeunload',function(){if(fbCurrent>=0)fbSaveState();});
 function fbFmt(s){if(!s||isNaN(s))return'0:00';var m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+(sec<10?'0':'')+sec;}
 function fbSeekPopup(e){
     var bar=document.getElementById('fbPopupBar');
