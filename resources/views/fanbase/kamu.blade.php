@@ -804,23 +804,32 @@ function tunerStop() {
     tunerRenderUI(null);
 }
 
+
 var tunerLastRender = 0;
+var tunerStableCount = 0;
 function tunerLoop(ts) {
     if (!tunerRunning) return;
-    // Jalankan analisis tiap ~60ms (bukan tiap frame) agar tidak terlalu sering
-    if (ts - tunerLastRender >= 60) {
+    if (ts - tunerLastRender >= 80) {
         tunerLastRender = ts;
         tunerAnalyser.getFloatTimeDomainData(tunerBuf);
         var freq = tunerAutoCorr(tunerBuf, tunerCtx.sampleRate);
-        if (freq > 55 && freq < 1500) {
-            // Smoothing lebih ringan: 55% lama + 45% baru → lebih responsif
-            tunerSmooth = tunerSmooth === 0 ? freq : tunerSmooth * 0.55 + freq * 0.45;
-            tunerRenderUI(tunerSmooth);
-        } else if (tunerSmooth > 0) {
-            // Sinyal hilang: fade perlahan
-            tunerSmooth *= 0.7;
-            if (tunerSmooth < 60) { tunerSmooth = 0; tunerRenderUI(null); }
-            else tunerRenderUI(tunerSmooth);
+        if (freq > 60 && freq < 1400) {
+            // Filter: jika senar dipilih, abaikan frekuensi yang terlalu jauh
+            if (tunerSelectedFreq > 0) {
+                var centsDiff = Math.abs(1200 * Math.log2(freq / tunerSelectedFreq));
+                if (centsDiff > 200) { tunerRaf = requestAnimationFrame(tunerLoop); return; }
+            }
+            // Smoothing agresif: 80% lama, 20% baru agar tidak liar
+            tunerSmooth = tunerSmooth === 0 ? freq : tunerSmooth * 0.80 + freq * 0.20;
+            tunerStableCount++;
+            // Tampilkan hanya setelah 3 pembacaan stabil
+            if (tunerStableCount >= 3) tunerRenderUI(tunerSmooth);
+        } else {
+            tunerStableCount = 0;
+            if (tunerSmooth > 0) {
+                tunerSmooth *= 0.6;
+                if (tunerSmooth < 60) { tunerSmooth = 0; tunerRenderUI(null); }
+            }
         }
     }
     tunerRaf = requestAnimationFrame(tunerLoop);
@@ -830,20 +839,22 @@ function tunerAutoCorr(buf, sr) {
     var SIZE = buf.length, HALF = Math.floor(SIZE / 2);
     var rms = 0;
     for (var i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
-    if (Math.sqrt(rms / SIZE) < 0.008) return -1;
+    rms = Math.sqrt(rms / SIZE);
+    if (rms < 0.025) return -1; // Threshold lebih tinggi: abaikan suara latar
 
     var best_off = -1, best_corr = 0, last_corr = 1, found = false;
     for (var off = 1; off < HALF; off++) {
         var corr = 0;
         for (var i = 0; i < HALF; i++) corr += Math.abs(buf[i] - buf[i + off]);
         corr = 1 - corr / HALF;
-        if (corr > 0.9 && corr > last_corr) {
+        if (corr > 0.93 && corr > last_corr) { // Threshold korelasi lebih tinggi
             found = true;
             if (corr > best_corr) { best_corr = corr; best_off = off; }
         } else if (found) { break; }
         last_corr = corr;
     }
-    return best_off === -1 ? -1 : sr / best_off;
+    if (best_off === -1 || best_corr < 0.93) return -1;
+    return sr / best_off;
 }
 
 function tunerRenderUI(freq) {
