@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.margonoandi.fanbase",
+      "package_name": "com.maftune.app",
       "sha256_cert_fingerprints": [
-        "GANTI_DENGAN_SHA256_FINGERPRINT_KEYSTORE_ANDROID_STUDIO"
+        "55:FF:6B:F6:80:6B:AC:4A:5F:B9:60:AA:4B:1A:A4:11:93:D5:5C:74:48:ED:52:4D:A1:E7:2C:BD:BF:14:36:5F"
       ]
     }
   }
