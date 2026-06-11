@@ -767,13 +767,24 @@ function tunerStop() {
     tunerRenderUI(null);
 }
 
-function tunerLoop() {
+var tunerLastRender = 0;
+function tunerLoop(ts) {
     if (!tunerRunning) return;
-    tunerAnalyser.getFloatTimeDomainData(tunerBuf);
-    var freq = tunerAutoCorr(tunerBuf, tunerCtx.sampleRate);
-    if (freq > 60 && freq < 1500) {
-        tunerSmooth = tunerSmooth === 0 ? freq : tunerSmooth * 0.75 + freq * 0.25;
-        tunerRenderUI(tunerSmooth);
+    // Jalankan analisis tiap ~60ms (bukan tiap frame) agar tidak terlalu sering
+    if (ts - tunerLastRender >= 60) {
+        tunerLastRender = ts;
+        tunerAnalyser.getFloatTimeDomainData(tunerBuf);
+        var freq = tunerAutoCorr(tunerBuf, tunerCtx.sampleRate);
+        if (freq > 55 && freq < 1500) {
+            // Smoothing lebih ringan: 55% lama + 45% baru → lebih responsif
+            tunerSmooth = tunerSmooth === 0 ? freq : tunerSmooth * 0.55 + freq * 0.45;
+            tunerRenderUI(tunerSmooth);
+        } else if (tunerSmooth > 0) {
+            // Sinyal hilang: fade perlahan
+            tunerSmooth *= 0.7;
+            if (tunerSmooth < 60) { tunerSmooth = 0; tunerRenderUI(null); }
+            else tunerRenderUI(tunerSmooth);
+        }
     }
     tunerRaf = requestAnimationFrame(tunerLoop);
 }

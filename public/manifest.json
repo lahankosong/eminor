@@ -1,0 +1,42 @@
+{
+  "name": "Margonoandi Fanbase",
+  "short_name": "Margonoandi",
+  "description": "Fanbase resmi Margonoandi — musik, komunitas, dan tuner gitar",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1a2b",
+  "theme_color": "#38A8CC",
+  "categories": ["music", "social"],
+  "icons": [
+    {
+      "src": "/images/Margonoandi.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/Margonoandi.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Kita",
+      "short_name": "Kita",
+      "description": "Lihat postingan komunitas",
+      "url": "/kita",
+      "icons": [{ "src": "/images/Margonoandi.jpeg", "sizes": "96x96" }]
+    },
+    {
+      "name": "Tuner Gitar",
+      "short_name": "Tuner",
+      "description": "Tuning gitar standar EADGBE",
+      "url": "/kamu",
+      "icons": [{ "src": "/images/Margonoandi.jpeg", "sizes": "96x96" }]
+    }
+  ]
+}
