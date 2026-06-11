@@ -11,16 +11,22 @@
   "categories": ["music", "social"],
   "icons": [
     {
-      "src": "/images/Margonoandi.jpeg",
+      "src": "https://ui-avatars.com/api/?name=M&background=38A8CC&color=fff&size=192&bold=true&format=png",
       "sizes": "192x192",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/Margonoandi.jpeg",
+      "src": "https://ui-avatars.com/api/?name=M&background=38A8CC&color=fff&size=512&bold=true&format=png",
       "sizes": "512x512",
-      "type": "image/jpeg",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://ui-avatars.com/api/?name=M&background=38A8CC&color=fff&size=512&bold=true&format=png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
@@ -29,14 +35,22 @@
       "short_name": "Kita",
       "description": "Lihat postingan komunitas",
       "url": "/kita",
-      "icons": [{ "src": "/images/Margonoandi.jpeg", "sizes": "96x96" }]
+      "icons": [{
+        "src": "https://ui-avatars.com/api/?name=K&background=38A8CC&color=fff&size=96&bold=true&format=png",
+        "sizes": "96x96",
+        "type": "image/png"
+      }]
     },
     {
       "name": "Tuner Gitar",
       "short_name": "Tuner",
       "description": "Tuning gitar standar EADGBE",
       "url": "/kamu",
-      "icons": [{ "src": "/images/Margonoandi.jpeg", "sizes": "96x96" }]
+      "icons": [{
+        "src": "https://ui-avatars.com/api/?name=T&background=F59E42&color=fff&size=96&bold=true&format=png",
+        "sizes": "96x96",
+        "type": "image/png"
+      }]
     }
   ]
 }
