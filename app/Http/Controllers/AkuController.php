@@ -91,12 +91,14 @@ class AkuController extends Controller
             $post->increment('likes_count');
             $liked = true;
             if ($post->user_id !== $userId) {
-                NotifHelper::send(
-                    $post->user_id, $userId,
-                    'like', Auth::user()->name . ' menyukai postinganmu',
-                    $post->title ?? \Illuminate\Support\Str::limit($post->body, 50),
-                    url('/aku')
-                );
+                try {
+                    NotifHelper::send(
+                        $post->user_id, $userId,
+                        'like', Auth::user()->name . ' menyukai postinganmu',
+                        $post->title ?? \Illuminate\Support\Str::limit($post->body, 50),
+                        url('/aku')
+                    );
+                } catch (\Throwable $e) {}
             }
         }
 
