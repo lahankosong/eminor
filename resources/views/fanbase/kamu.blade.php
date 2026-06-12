@@ -744,7 +744,8 @@ function kamuDeletePost(id) {
 var tunerCtx = null, tunerAnalyser = null, tunerBuf = null;
 var tunerStream = null, tunerRunning = false, tunerRaf = null;
 var tunerSmooth = 0, tunerSelectedFreq = 0;
-var tunerWasInTune = false; // cegah suara ding berulang
+var tunerWasInTune = false;
+var tunerFreqHistory = [];
 
 var TUNER_STRINGS = [
     { freq: 82.41,  label: 'E₂' },
@@ -779,8 +780,11 @@ function tunerStart() {
         tunerAnalyser.fftSize = 2048;
         tunerBuf = new Float32Array(tunerAnalyser.fftSize);
         tunerCtx.createMediaStreamSource(stream).connect(tunerAnalyser);
+        tunerAnalyser.fftSize = 4096;
+        tunerBuf = new Float32Array(tunerAnalyser.fftSize);
         tunerRunning = true;
         tunerSmooth = 0;
+        tunerFreqHistory = [];
         var btn = document.getElementById('tunerBtn');
         btn.innerHTML = '&#9646;&#9646; Stop';
         btn.classList.add('stop');
@@ -794,6 +798,8 @@ function tunerStart() {
 
 function tunerStop() {
     tunerRunning = false;
+    tunerFreqHistory = [];
+    tunerSmooth = 0;
     if (tunerRaf) cancelAnimationFrame(tunerRaf);
     if (tunerStream) { tunerStream.getTracks().forEach(function(t){ t.stop(); }); tunerStream = null; }
     if (tunerCtx) { tunerCtx.close(); tunerCtx = null; }
@@ -806,28 +812,28 @@ function tunerStop() {
 
 
 var tunerLastRender = 0;
-var tunerStableCount = 0;
 function tunerLoop(ts) {
     if (!tunerRunning) return;
     if (ts - tunerLastRender >= 80) {
         tunerLastRender = ts;
         tunerAnalyser.getFloatTimeDomainData(tunerBuf);
-        var freq = tunerAutoCorr(tunerBuf, tunerCtx.sampleRate);
+        var freq = tunerYIN(tunerBuf, tunerCtx.sampleRate);
         if (freq > 60 && freq < 1400) {
-            // Filter: jika senar dipilih, abaikan frekuensi yang terlalu jauh
             if (tunerSelectedFreq > 0) {
                 var centsDiff = Math.abs(1200 * Math.log2(freq / tunerSelectedFreq));
-                if (centsDiff > 200) { tunerRaf = requestAnimationFrame(tunerLoop); return; }
+                if (centsDiff > 250) { tunerRaf = requestAnimationFrame(tunerLoop); return; }
             }
-            // Smoothing agresif: 80% lama, 20% baru agar tidak liar
-            tunerSmooth = tunerSmooth === 0 ? freq : tunerSmooth * 0.80 + freq * 0.20;
-            tunerStableCount++;
-            // Tampilkan hanya setelah 3 pembacaan stabil
-            if (tunerStableCount >= 3) tunerRenderUI(tunerSmooth);
+            tunerFreqHistory.push(freq);
+            if (tunerFreqHistory.length > 7) tunerFreqHistory.shift();
+            // Median dari history untuk buang outlier
+            var sorted = tunerFreqHistory.slice().sort(function(a,b){return a-b;});
+            var median = sorted[Math.floor(sorted.length/2)];
+            tunerSmooth = tunerSmooth === 0 ? median : tunerSmooth * 0.75 + median * 0.25;
+            if (tunerFreqHistory.length >= 3) tunerRenderUI(tunerSmooth);
         } else {
-            tunerStableCount = 0;
+            tunerFreqHistory = [];
             if (tunerSmooth > 0) {
-                tunerSmooth *= 0.6;
+                tunerSmooth *= 0.5;
                 if (tunerSmooth < 60) { tunerSmooth = 0; tunerRenderUI(null); }
             }
         }
@@ -835,26 +841,47 @@ function tunerLoop(ts) {
     tunerRaf = requestAnimationFrame(tunerLoop);
 }
 
-function tunerAutoCorr(buf, sr) {
+// YIN pitch detection — jauh lebih akurat dari autocorrelation biasa
+function tunerYIN(buf, sr) {
     var SIZE = buf.length, HALF = Math.floor(SIZE / 2);
+    // Gate: abaikan jika suara terlalu pelan
     var rms = 0;
     for (var i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
-    rms = Math.sqrt(rms / SIZE);
-    if (rms < 0.025) return -1; // Threshold lebih tinggi: abaikan suara latar
+    if (Math.sqrt(rms / SIZE) < 0.02) return -1;
 
-    var best_off = -1, best_corr = 0, last_corr = 1, found = false;
-    for (var off = 1; off < HALF; off++) {
-        var corr = 0;
-        for (var i = 0; i < HALF; i++) corr += Math.abs(buf[i] - buf[i + off]);
-        corr = 1 - corr / HALF;
-        if (corr > 0.93 && corr > last_corr) { // Threshold korelasi lebih tinggi
-            found = true;
-            if (corr > best_corr) { best_corr = corr; best_off = off; }
-        } else if (found) { break; }
-        last_corr = corr;
+    // Difference function
+    var diff = new Float32Array(HALF);
+    for (var tau = 1; tau < HALF; tau++) {
+        for (var i = 0; i < HALF; i++) {
+            var d = buf[i] - buf[i + tau];
+            diff[tau] += d * d;
+        }
     }
-    if (best_off === -1 || best_corr < 0.93) return -1;
-    return sr / best_off;
+    // Cumulative mean normalized difference
+    var cmnd = new Float32Array(HALF);
+    cmnd[0] = 1;
+    var runSum = 0;
+    for (var tau = 1; tau < HALF; tau++) {
+        runSum += diff[tau];
+        cmnd[tau] = runSum > 0 ? diff[tau] * tau / runSum : 0;
+    }
+    // Cari minimum pertama di bawah threshold
+    var threshold = 0.12, tau = 2;
+    while (tau < HALF - 1) {
+        if (cmnd[tau] < threshold) {
+            while (tau + 1 < HALF && cmnd[tau + 1] < cmnd[tau]) tau++;
+            break;
+        }
+        tau++;
+    }
+    if (tau >= HALF - 1 || cmnd[tau] >= threshold) return -1;
+    // Parabolic interpolation untuk akurasi lebih tinggi
+    if (tau > 1 && tau < HALF - 1) {
+        var s0 = cmnd[tau-1], s1 = cmnd[tau], s2 = cmnd[tau+1];
+        var denom = 2*s1 - s2 - s0;
+        if (Math.abs(denom) > 1e-9) tau = tau + (s2 - s0) / (2 * denom);
+    }
+    return sr / tau;
 }
 
 function tunerRenderUI(freq) {
