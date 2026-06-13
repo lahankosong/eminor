@@ -330,27 +330,30 @@
 </div>
 
 {{-- FEED (posts + member logs, urutan kronologis) --}}
-@if($feed->count() > 0)
-    @foreach($feed as $feedItem)
+@php
+    // Sisipkan member logs ke dalam feed posts berdasarkan timestamp
+    $shownLogIds = [];
+@endphp
 
-    {{-- LOG MEMBER BARU --}}
-    @if($feedItem['type'] === 'log')
-    @php $log = $feedItem['item']; @endphp
+@if($posts->count() > 0)
+    @foreach($posts as $post)
+
+    {{-- Tampilkan member log yang lebih baru dari post ini dan belum ditampilkan --}}
+    @foreach($memberLogs->filter(fn($l) => !in_array($l->id, $shownLogIds) && $l->created_at >= $post->created_at) as $log)
+    @php $shownLogIds[] = $log->id; @endphp
     <div class="member-log-card">
         <img src="{{ $log->user->avatar ?? 'https://www.google.com/favicon.ico' }}"
              class="member-log-avatar" alt="">
         <div class="member-log-body">
             <div class="member-log-text">
-                <strong>{{ $log->user->name }}</strong> baru saja bergabung di fanbase Rakhman Andi &#127881;
+                <strong>{{ $log->user->name ?? 'Member' }}</strong> baru saja bergabung di fanbase Rakhman Andi &#127881;
             </div>
             <div class="member-log-date">{{ $log->created_at->diffForHumans() }}</div>
         </div>
         <span class="member-log-badge">&#127381; Member Baru</span>
     </div>
+    @endforeach
 
-    {{-- POST BIASA --}}
-    @else
-    @php $post = $feedItem['item']; @endphp
     <div class="kita-post" id="kitaPost{{ $post->id }}">
 
         <div class="kita-post-header">
@@ -482,20 +485,35 @@
         </div>
 
     </div>
-    @endif
 
     @endforeach
 
-    @if($feed->hasPages())
+    {{-- Log yang lebih lama dari semua post di halaman ini --}}
+    @foreach($memberLogs->filter(fn($l) => !in_array($l->id, $shownLogIds)) as $log)
+    @php $shownLogIds[] = $log->id; @endphp
+    <div class="member-log-card">
+        <img src="{{ $log->user->avatar ?? 'https://www.google.com/favicon.ico' }}"
+             class="member-log-avatar" alt="">
+        <div class="member-log-body">
+            <div class="member-log-text">
+                <strong>{{ $log->user->name ?? 'Member' }}</strong> baru saja bergabung di fanbase Rakhman Andi &#127881;
+            </div>
+            <div class="member-log-date">{{ $log->created_at->diffForHumans() }}</div>
+        </div>
+        <span class="member-log-badge">&#127381; Member Baru</span>
+    </div>
+    @endforeach
+
+    @if($posts->hasPages())
     <div style="display:flex;justify-content:center;gap:8px;margin-top:1.25rem;">
-        @if(!$feed->onFirstPage())
-        <a href="{{ $feed->previousPageUrl() }}"
+        @if(!$posts->onFirstPage())
+        <a href="{{ $posts->previousPageUrl() }}"
            style="padding:8px 18px;border-radius:20px;border:1px solid var(--border);color:var(--text-3);font-size:12px;text-decoration:none;background:var(--card);font-weight:500;box-shadow:var(--shadow-sm);">
             ← Sebelumnya
         </a>
         @endif
-        @if($feed->hasMorePages())
-        <a href="{{ $feed->nextPageUrl() }}"
+        @if($posts->hasMorePages())
+        <a href="{{ $posts->nextPageUrl() }}"
            style="padding:8px 18px;border-radius:20px;border:1px solid var(--border);color:var(--text-3);font-size:12px;text-decoration:none;background:var(--card);font-weight:500;box-shadow:var(--shadow-sm);">
             Berikutnya →
         </a>
