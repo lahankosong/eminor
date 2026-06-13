@@ -2,6 +2,50 @@
 
 ---
 
+## 2026-06-13 — Redesign Tuner Gitar (Meter Jarum + Headstock Realistis) + Perbaikan Disk Penuh
+**Commit**: `cbb4461` (redesign meter + headstock), `787c63d` (meter bar awal)
+
+### Yang Dikerjakan
+
+#### 1. Masalah kritis: Disk C: penuh (0 MB)
+- **Gejala**: request timeout berulang, OneDrive crash (I/O error 0xc000007f), VS Code gagal copy
+  `d3dcompiler_47.dll` ("not enough space"), pekerjaan seolah selalu mengulang dari awal
+- **Akar masalah**: drive **C: benar-benar penuh (0 MB free dari 147 GB)** → sistem tidak bisa
+  menulis file temp sehingga proses gagal di tengah. Bukan kode yang hilang
+- **Solusi (atas izin user)**: hapus temp + cache Chrome/Edge + Recycle Bin, dan installer di Downloads
+  (Docker 617 MB, Office 388 MB, gradle-8.13-bin.zip 130 MB). File musik/video user TIDAK disentuh
+- **Hasil**: C: dari **0 MB → ~7 GB free**
+- **Catatan**: `.gradle` (~1.9 GB) & media Downloads (~2 GB) masih ada; drive **E: masih lega**
+
+#### 2. Redesign Tuner Gitar (`resources/views/fanbase/kamu.blade.php`)
+Tuner di halaman **Kamu → tab Tuner**. Tiga keluhan diperbaiki: deteksi kurang akurat,
+pembacaan membingungkan, desain membosankan/tidak realistis.
+
+**Meter akurasi — lebih informatif:**
+- Bar tinggi dengan **garis skala (tick)** + **zona hijau "pas"** di tengah
+- **Jarum meluncur** + pointer segitiga + glow; warna ikut status: hijau = pas (±5 cent),
+  oranye = terlalu rendah ♭, merah = terlalu tinggi ♯
+- Angka cent besar di atas meter + label ♭ / 0 / ♯ (tidak lagi pakai Hz)
+- Note besar (E A D G B e) dengan glow hijau saat in-tune
+- Hint dinamis: "Petik atau pilih senar" (idle) / "Mendengarkan…" (aktif)
+
+**Headstock — lebih realistis:**
+- Bentuk kayu 3+3 dengan gradient kayu + sheen + serat
+- Tuner **chrome** (knob radial-gradient + highlight), **string post** di muka headstock,
+  senar menyebar (fan) dari nut ke post; knob berdenyut hijau saat senar in-tune
+- Senar bisa diketuk (klik knob) untuk memilih target tuning
+
+**Algoritma deteksi (MPM + Hann window):**
+- Threshold diturunkan agar lebih sensitif: RMS `0.015 → 0.007`, NSDF `0.25 → 0.08`
+- Adaptive filter per senar (minFreq/maxFreq), median filter + low-pass smoothing,
+  parabolic interpolation, referensi A4 = 440 Hz, presisi 0.1 cent
+
+#### 3. Deploy
+- Push `main` → `deploy.php?key=margono2026&run=1` (148 file ter-copy, artisan sukses)
+- Aplikasi Android **maftune** (TWA) otomatis ikut update; verifikasi via hard refresh Ctrl+Shift+R
+
+---
+
 ## 2026-06-11 — Pemutar Musik Persisten + Player Desktop + Online Sekarang di Atas
 
 ### Yang Dikerjakan
@@ -294,7 +338,8 @@ Semua halaman yang menggunakan `layouts.app` diperbarui: warna hardcode (`#0a0a0
 | Like & balas komentar | ✅ Ditambahkan 2026-06-11 |
 | Komentar (Aku, Kita) | ✅ Diperbaiki |
 | Halaman Kamu (desktop + mobile) | ✅ Diperbaiki |
-| Tuner gitar real-time | ✅ Ditambahkan 2026-06-11 |
+| Tuner gitar real-time | ✅ Ditambahkan 2026-06-11, redesign 2026-06-13 (meter jarum + headstock chrome) |
+| Aplikasi Android maftune (TWA) | ✅ Build APK; auto-update dari web (lihat `build_android.md`) |
 | PWA (Add to Home Screen) | ✅ Ditambahkan 2026-06-11 |
 | Suara notifikasi | ✅ Ditambahkan 2026-06-11 |
 | Lokasi otomatis kota/kabupaten | ✅ Diperbaiki |

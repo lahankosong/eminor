@@ -36,10 +36,11 @@ app/
   Models/
     User.php
     AkuPost.php, AkuLike.php, AkuComment.php
-    Post.php, PostLike.php, PostComment.php
+    Post.php, PostLike.php, PostComment.php, PostCommentLike.php
     KamuNote.php
-    Conversation.php, Message.php
+    Conversation.php, Message.php, ConversationInvite.php
     Group.php, GroupMember.php, GroupMessage.php
+    DiaMessage.php, DiaInvite.php
     AppNotification.php             — tabel: notifications
     Song.php, SongComment.php
     AiGeneration.php
@@ -77,9 +78,11 @@ routes/web.php
 - Model: `AkuPost`, `AkuLike` (fillable ✓, relasi user ✓), `AkuComment` (fillable ✓)
 
 ### Kamu (`/kamu`)
-- Profil personal: statistik (post, like, komentar), tab Notes dan Postingan Kita
+- Profil personal: statistik (post, like, komentar), tab Notes / Postingan Kita / **Tuner Gitar**
 - Notes: catatan pribadi (CRUD), bisa di-pin, max 150 char preview
 - Postingan: menampilkan post kita milik user yang login
+- **Tuner Gitar**: Web Audio API murni, algoritma MPM + Hann window, meter jarum + cent,
+  headstock SVG realistis (3+3 chrome), A4=440Hz. Semua logika ada di `kamu.blade.php`
 - Model: `KamuNote` (is_pinned ✓), `Post`
 
 ### Kita (`/kita`)
@@ -135,22 +138,31 @@ routes/web.php
 
 | Grup | Middleware | Contoh Route |
 |------|-----------|--------------|
-| Fanbase | `auth` | `/aku`, `/kamu`, `/kita`, `/dia` |
-| Admin | `auth` + `isAdmin` | `/admin/*` |
-| Publik | — | `/`, `/lagu/{slug}`, `/auth/google` |
-| ⚠️ Di luar auth | — | `/kamu/note` (POST/PUT/DELETE), `/kamu/{id}` (PUT/DELETE) |
+| Fanbase | `auth` | `/aku`, `/kamu`, `/kita`, `/dia`, `/kamu/note/*`, `/notifications/*` |
+| Admin | `auth` + `isAdmin` | `/admin/*` (CRUD lagu, settings, ai-agent) |
+| Publik | — | `/`, `/lagu/{slug}`, `/auth/google`, `/community/*`, `/chat/*` |
 
-> **Catatan**: Beberapa route kamu dan kamu-note tidak ada di dalam group `auth` — perlu diperhatikan saat pengembangan lanjutan.
+> **Catatan**: Sejak 2026-06-10 semua route Kamu/Kamu-note/Notifikasi sudah dipindahkan ke dalam
+> group `auth` (security fix). Tidak ada lagi endpoint fanbase di luar `auth`.
 
 ---
 
 ## Fitur Lain
-- **Music Player**: sidebar kiri, autoplay dari tabel `songs`, filter `is_active = true`
-- **Online Users**: sidebar kanan, 8 user terbaru
-- **Notifikasi Bell**: unread count di topbar, mark as read via AJAX
+- **Music Player persisten**: tetap berputar saat pindah halaman/refresh
+  (state di `localStorage` key `fb_state`, resume via `canplay`, save via `beforeunload`).
+  Ada juga **player desktop** di sidebar kiri (play/pause/stop SVG + progress seek)
+- **Tuner Gitar** (Kamu): Web Audio API + MPM, meter jarum + headstock chrome realistis
+- **Online Users**: sidebar kanan + pencarian member (`fbMemberSearch` → `/dia/start/{id}`)
+- **Notifikasi Bell**: unread count di topbar, poll 30 detik, suara via Web Audio API, mark read AJAX
+- **Like & balas komentar**: `parent_id` + `likes_count` + tabel `post_comment_likes`
+- **Lokasi otomatis** (Kita): GPS → Nominatim (OpenStreetMap, tanpa API key) → nama kota
+- **Realtime**: polling `setInterval` (pesan Dia 4 detik, notifikasi 30 detik) — bukan WebSocket
+- **PWA**: `public/manifest.json` + `public/sw.js` → installable "Add to Home Screen"
+- **Android (maftune)**: TWA wrap PWA → APK `com.maftune.app`; auto-update saat web di-deploy.
+  Lihat `build_android.md` + `public/.well-known/assetlinks.json`
 - **Admin Panel**: CRUD lagu, pengaturan situs, AI agent generasi lirik
-- **Community**: thread diskusi (terpisah dari fanbase)
-- **Deploy**: `deploy.php` di root — download ZIP dari GitHub dan ekstrak
+- **Community**: thread diskusi + chat publik (pakai `layouts/app`, terpisah dari fanbase)
+- **Deploy**: `deploy.php?key=margono2026` (tarik ZIP GitHub) + `fixdb.php` (bersihkan cache)
 
 ---
 
