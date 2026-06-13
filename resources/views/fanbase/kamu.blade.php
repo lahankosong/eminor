@@ -103,73 +103,103 @@
         font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
         color: #2a4a5a; font-weight: 700; margin-bottom: 1rem;
     }
-    /* Meter bar */
+    /* ===== Meter ===== */
     .tuner-meter-wrap {
-        position: relative; width: calc(100% - 32px); max-width: 280px;
-        margin: 0 auto 0.3rem;
+        position: relative; width: calc(100% - 24px); max-width: 320px;
+        margin: 0 auto 0.4rem;
     }
-    .tuner-meter-track {
-        height: 5px; border-radius: 3px; position: relative; overflow: visible;
-        background: linear-gradient(to right,
-            #ef4444 0%, #fb923c 30%, #22c55e 47%, #22c55e 53%, #fb923c 70%, #ef4444 100%);
-        opacity: 0.2; transition: opacity 0.3s;
+    /* angka cent besar di atas meter */
+    .tuner-cents {
+        font-family: 'Sora', sans-serif;
+        font-size: 1.05rem; font-weight: 700; min-height: 22px; line-height: 22px;
+        color: #2a4a5a; margin: 0 0 0.5rem; letter-spacing: 0.01em;
+        font-variant-numeric: tabular-nums; transition: color 0.15s;
     }
-    .tuner-meter-track.active { opacity: 1; }
-    .tuner-meter-center {
-        position: absolute; top: -5px; bottom: -5px; left: 50%;
-        width: 2px; background: rgba(255,255,255,0.15); transform: translateX(-50%);
+    .tuner-cents.in-tune  { color: #22c55e; }
+    .tuner-cents.too-low  { color: #fb923c; }
+    .tuner-cents.too-high { color: #ef4444; }
+    .tuner-meter {
+        position: relative; width: 100%; height: 64px;
+        border-radius: 14px; overflow: hidden;
+        background:
+            radial-gradient(120% 140% at 50% 120%, rgba(56,168,204,0.08), transparent 60%),
+            #0a1422;
+        border: 1px solid rgba(56,168,204,0.14);
+        box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        opacity: 0.45; transition: opacity 0.3s;
     }
-    .tuner-meter-cursor {
-        position: absolute; top: 50%; left: 50%;
-        width: 18px; height: 18px; border-radius: 50%;
-        background: #fff; border: 3px solid #38A8CC;
-        transform: translate(-50%, -50%);
-        transition: left 0.09s ease, background 0.15s, border-color 0.15s;
-        box-shadow: 0 0 10px rgba(56,168,204,0.6);
+    .tuner-meter.active { opacity: 1; }
+    /* garis-garis skala (tick) */
+    .tuner-meter-ticks {
+        position: absolute; left: 0; right: 0; top: 14px; bottom: 14px;
+        background-image: repeating-linear-gradient(90deg,
+            rgba(255,255,255,0.13) 0 1px, transparent 1px, transparent 10%);
     }
-    .tuner-meter-cursor.in-tune  { background: #22c55e; border-color: #22c55e; box-shadow: 0 0 16px rgba(34,197,94,0.8); }
-    .tuner-meter-cursor.too-low  { background: #fb923c; border-color: #fb923c; box-shadow: 0 0 10px rgba(251,146,60,0.6); }
-    .tuner-meter-cursor.too-high { background: #ef4444; border-color: #ef4444; box-shadow: 0 0 10px rgba(239,68,68,0.6); }
+    /* zona "pas" hijau di tengah */
+    .tuner-meter-zone {
+        position: absolute; top: 0; bottom: 0; left: 50%; width: 12%;
+        transform: translateX(-50%);
+        background: linear-gradient(180deg, rgba(34,197,94,0), rgba(34,197,94,0.22), rgba(34,197,94,0));
+        border-left: 1px solid rgba(34,197,94,0.35);
+        border-right: 1px solid rgba(34,197,94,0.35);
+    }
+    /* garis tengah target */
+    .tuner-meter-axis {
+        position: absolute; top: 6px; bottom: 6px; left: 50%; width: 2px;
+        background: rgba(34,197,94,0.55); transform: translateX(-50%);
+    }
+    /* jarum penunjuk yang meluncur */
+    .tuner-meter-needle {
+        position: absolute; top: 8px; bottom: 8px; left: 50%;
+        width: 4px; border-radius: 3px; transform: translateX(-50%);
+        background: #cfeaf5;
+        transition: left 0.09s cubic-bezier(.22,.61,.36,1), background 0.15s, box-shadow 0.15s;
+        box-shadow: 0 0 10px rgba(207,234,245,0.6);
+    }
+    .tuner-meter-needle::before {
+        content: ''; position: absolute; top: -7px; left: 50%; transform: translateX(-50%);
+        border-left: 6px solid transparent; border-right: 6px solid transparent;
+        border-top: 8px solid currentColor;
+    }
+    .tuner-meter-needle { color: #cfeaf5; }
+    .tuner-meter-needle.in-tune  { background: #22c55e; color: #22c55e; box-shadow: 0 0 18px rgba(34,197,94,0.95); width: 5px; }
+    .tuner-meter-needle.too-low  { background: #fb923c; color: #fb923c; box-shadow: 0 0 12px rgba(251,146,60,0.8); }
+    .tuner-meter-needle.too-high { background: #ef4444; color: #ef4444; box-shadow: 0 0 12px rgba(239,68,68,0.8); }
     .tuner-meter-labels {
-        display: flex; justify-content: space-between;
-        font-size: 9px; color: rgba(255,255,255,0.15);
-        margin-top: 4px; padding: 0 2px;
-        font-variant-numeric: tabular-nums;
+        display: flex; justify-content: space-between; align-items: center;
+        font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.22);
+        margin-top: 6px; padding: 0 2px; font-variant-numeric: tabular-nums;
     }
+    .tuner-meter-labels .flat  { color: #fb923c; font-size: 13px; }
+    .tuner-meter-labels .sharp { color: #ef4444; font-size: 13px; }
+    .tuner-meter-labels .mid   { color: rgba(34,197,94,0.7); }
     /* Note */
     .tuner-note-big {
         font-family: 'Sora', sans-serif;
         font-size: 4.5rem; font-weight: 800; line-height: 1;
         color: #2a4a5a; letter-spacing: -3px;
-        transition: color 0.12s; margin: 0.5rem 0 0;
+        transition: color 0.12s, text-shadow 0.2s; margin: 0.4rem 0 0.1rem;
     }
     .tuner-note-big.active   { color: #7EC8E3; }
-    .tuner-note-big.in-tune  { color: #22c55e; }
+    .tuner-note-big.in-tune  { color: #22c55e; text-shadow: 0 0 28px rgba(34,197,94,0.6); }
     .tuner-note-big.too-low  { color: #fb923c; }
     .tuner-note-big.too-high { color: #ef4444; }
-    .tuner-cents {
-        font-size: 1rem; font-weight: 700; min-height: 24px; line-height: 24px;
-        color: transparent; margin: 0 0 0.6rem;
-        font-variant-numeric: tabular-nums; transition: color 0.12s;
-        letter-spacing: 0.02em;
-    }
-    .tuner-cents.in-tune  { color: #22c55e; }
-    .tuner-cents.too-low  { color: #fb923c; }
-    .tuner-cents.too-high { color: #ef4444; }
-    /* Headstock */
-    .tuner-headstock-wrap { margin: 0 auto 0.75rem; width: 100%; max-width: 240px; }
+    /* ===== Headstock realistis ===== */
+    .tuner-headstock-wrap { margin: 0.25rem auto 0.75rem; width: 100%; max-width: 230px; }
     .tuner-peg { cursor: pointer; }
-    .tuner-peg .pg-body { fill: #111e2d; stroke: rgba(56,168,204,0.3); stroke-width: 2; transition: all 0.15s; }
-    .tuner-peg .pg-btn  { fill: #162030; stroke: rgba(56,168,204,0.25); stroke-width: 1.5; transition: all 0.15s; }
-    .tuner-peg .pg-txt  { fill: #2e5a6a; font-size: 13px; font-weight: 800; font-family: 'Sora',sans-serif; transition: fill 0.15s; pointer-events: none; }
-    .tuner-peg:hover .pg-body, .tuner-peg:hover .pg-btn { stroke: rgba(56,168,204,0.7); }
-    .tuner-peg:hover .pg-txt { fill: #7EC8E3; }
-    .tuner-peg.active .pg-body { fill: #1a3a50; stroke: #38A8CC; }
-    .tuner-peg.active .pg-btn  { fill: #122840; stroke: #38A8CC; }
-    .tuner-peg.active .pg-txt  { fill: #38A8CC; }
-    .tuner-peg.in-tune .pg-body { fill: #0f2d1a; stroke: #22c55e; }
-    .tuner-peg.in-tune .pg-btn  { fill: #0a2014; stroke: #22c55e; }
-    .tuner-peg.in-tune .pg-txt  { fill: #22c55e; }
+    .tuner-peg .pg-post { transition: all 0.15s; }
+    .tuner-peg .pg-btn  { transition: all 0.15s; }
+    .tuner-peg .pg-ring { fill: none; stroke: rgba(56,168,204,0); stroke-width: 2.5; transition: stroke 0.15s; }
+    .tuner-peg .pg-txt  { fill: #c9b48a; font-size: 13px; font-weight: 800; font-family: 'Sora',sans-serif; transition: fill 0.15s; pointer-events: none; }
+    .tuner-peg:hover .pg-ring { stroke: rgba(126,200,227,0.55); }
+    .tuner-peg:hover .pg-txt  { fill: #fff; }
+    .tuner-peg.active .pg-ring { stroke: #38A8CC; }
+    .tuner-peg.active .pg-txt  { fill: #7EC8E3; }
+    .tuner-peg.active .pg-glow { opacity: 1; }
+    .tuner-peg.in-tune .pg-ring { stroke: #22c55e; }
+    .tuner-peg.in-tune .pg-txt  { fill: #4ade80; }
+    .tuner-peg .pg-glow { opacity: 0; transition: opacity 0.2s; }
+    .tuner-peg.in-tune .pg-glow { opacity: 1; }
     /* Button */
     .tuner-btn {
         padding: 12px 36px; border-radius: 50px; border: none; cursor: pointer;
@@ -525,101 +555,149 @@
 
     <div class="tuner-label">Tuner Gitar &mdash; Standar EADGBE</div>
 
-    {{-- Meter bar --}}
+    {{-- Note besar --}}
+    <div class="tuner-note-big" id="tunerNote">—</div>
+    {{-- Angka cent --}}
+    <div class="tuner-cents" id="tunerCents">Petik atau pilih senar</div>
+
+    {{-- Meter jarum --}}
     <div class="tuner-meter-wrap">
-        <div class="tuner-meter-track" id="tunerBarTrack">
-            <div class="tuner-meter-center"></div>
-            <div class="tuner-meter-cursor" id="tunerBarCursor"></div>
+        <div class="tuner-meter" id="tunerBarTrack">
+            <div class="tuner-meter-ticks"></div>
+            <div class="tuner-meter-zone"></div>
+            <div class="tuner-meter-axis"></div>
+            <div class="tuner-meter-needle" id="tunerBarCursor"></div>
         </div>
         <div class="tuner-meter-labels">
-            <span>♭ −50</span><span>−25</span><span>0</span><span>+25</span><span>+50 ♯</span>
+            <span class="flat">♭</span><span>−25</span><span class="mid">0</span><span>+25</span><span class="sharp">♯</span>
         </div>
     </div>
 
-    {{-- Note & cents --}}
-    <div class="tuner-note-big" id="tunerNote">—</div>
-    <div class="tuner-cents" id="tunerCents"></div>
-
-    {{-- Headstock SVG --}}
+    {{-- Headstock SVG realistis (3+3, tuner chrome) --}}
     <div class="tuner-headstock-wrap">
-    <svg viewBox="0 0 260 245" style="width:100%;max-width:240px;display:block;margin:0 auto;">
+    <svg viewBox="0 0 260 250" style="width:100%;max-width:230px;display:block;margin:0 auto;">
         <defs>
             <linearGradient id="wg" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%"   stop-color="#2a1205"/>
-                <stop offset="35%"  stop-color="#5a2a10"/>
-                <stop offset="50%"  stop-color="#7a3e1a"/>
-                <stop offset="65%"  stop-color="#5a2a10"/>
-                <stop offset="100%" stop-color="#2a1205"/>
+                <stop offset="0%"   stop-color="#241004"/>
+                <stop offset="14%"  stop-color="#4e2810"/>
+                <stop offset="34%"  stop-color="#7d4623"/>
+                <stop offset="50%"  stop-color="#8a4f29"/>
+                <stop offset="66%"  stop-color="#7d4623"/>
+                <stop offset="86%"  stop-color="#4e2810"/>
+                <stop offset="100%" stop-color="#241004"/>
             </linearGradient>
-            <linearGradient id="pegL" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#2a3a4a"/>
-                <stop offset="100%" stop-color="#0d1520"/>
+            <radialGradient id="woodSheen" cx="0.5" cy="0.16" r="0.7">
+                <stop offset="0%"  stop-color="#b07a48" stop-opacity="0.55"/>
+                <stop offset="60%" stop-color="#b07a48" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="chrome" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#f4f8fb"/>
+                <stop offset="42%"  stop-color="#aeb9c0"/>
+                <stop offset="56%"  stop-color="#727d84"/>
+                <stop offset="100%" stop-color="#cdd6db"/>
             </linearGradient>
+            <radialGradient id="knob" cx="0.36" cy="0.30" r="0.9">
+                <stop offset="0%"   stop-color="#ffffff"/>
+                <stop offset="30%"  stop-color="#d7dee3"/>
+                <stop offset="62%"  stop-color="#9aa4ab"/>
+                <stop offset="100%" stop-color="#525c63"/>
+            </radialGradient>
+            <radialGradient id="postG" cx="0.4" cy="0.35" r="0.85">
+                <stop offset="0%"   stop-color="#eef3f6"/>
+                <stop offset="55%"  stop-color="#b3bdc4"/>
+                <stop offset="100%" stop-color="#6b757c"/>
+            </radialGradient>
         </defs>
 
-        {{-- Headstock body: classical rounded shape --}}
-        <path d="M 97 240 L 95 58 Q 94 18 130 12 Q 166 18 165 58 L 163 240 Z"
-              fill="url(#wg)" stroke="#4a1e08" stroke-width="1.5"/>
-        {{-- Binding --}}
-        <path d="M 97 240 L 95 58 Q 94 18 130 12 Q 166 18 165 58 L 163 240"
-              fill="none" stroke="rgba(230,210,160,0.3)" stroke-width="2"/>
-        {{-- Wood grain --}}
-        <line x1="109" y1="12" x2="107" y2="240" stroke="rgba(0,0,0,0.2)"  stroke-width="1.5"/>
-        <line x1="119" y1="12" x2="118" y2="240" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>
-        <line x1="130" y1="12" x2="130" y2="240" stroke="rgba(0,0,0,0.10)" stroke-width="1"/>
-        <line x1="141" y1="12" x2="142" y2="240" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>
-        <line x1="151" y1="12" x2="153" y2="240" stroke="rgba(0,0,0,0.2)"  stroke-width="1.5"/>
+        {{-- Bayangan headstock --}}
+        <path d="M 96 246 L 93 66 C 93 30 110 16 130 16 C 150 16 167 30 167 66 L 164 246 Z"
+              fill="#000" opacity="0.45" transform="translate(3,4)"/>
+        {{-- Body kayu --}}
+        <path d="M 96 246 L 93 66 C 93 30 110 16 130 16 C 150 16 167 30 167 66 L 164 246 Z"
+              fill="url(#wg)" stroke="#1c0d03" stroke-width="2"/>
+        <path d="M 96 246 L 93 66 C 93 30 110 16 130 16 C 150 16 167 30 167 66 L 164 246 Z"
+              fill="url(#woodSheen)"/>
+        {{-- Binding terang --}}
+        <path d="M 96 246 L 93 66 C 93 30 110 16 130 16 C 150 16 167 30 167 66 L 164 246"
+              fill="none" stroke="rgba(240,222,180,0.35)" stroke-width="1.6"/>
+        {{-- Serat kayu --}}
+        <path d="M 113 20 C 110 90 112 170 110 244" fill="none" stroke="rgba(0,0,0,0.22)" stroke-width="1.2"/>
+        <path d="M 130 18 C 129 90 130 170 130 246" fill="none" stroke="rgba(0,0,0,0.16)" stroke-width="1"/>
+        <path d="M 147 20 C 150 90 148 170 150 244" fill="none" stroke="rgba(0,0,0,0.22)" stroke-width="1.2"/>
         {{-- Nut --}}
-        <rect x="91" y="232" width="78" height="11" rx="2.5" fill="#F0E4C0" stroke="#B89040" stroke-width="1"/>
-        {{-- Strings --}}
-        <line x1="105" y1="12" x2="105" y2="232" stroke="rgba(200,175,110,0.5)" stroke-width="1"/>
-        <line x1="113" y1="12" x2="113" y2="232" stroke="rgba(200,175,110,0.45)" stroke-width="0.9"/>
-        <line x1="121" y1="12" x2="121" y2="232" stroke="rgba(200,175,110,0.38)" stroke-width="0.75"/>
-        <line x1="139" y1="12" x2="139" y2="232" stroke="rgba(200,175,110,0.38)" stroke-width="0.75"/>
-        <line x1="147" y1="12" x2="147" y2="232" stroke="rgba(200,175,110,0.45)" stroke-width="0.9"/>
-        <line x1="155" y1="12" x2="155" y2="232" stroke="rgba(200,175,110,0.5)" stroke-width="1"/>
+        <rect x="94" y="234" width="72" height="10" rx="2.5" fill="#efe2bd" stroke="#b9933f" stroke-width="1"/>
 
-        {{-- Peg stems LEFT --}}
-        <rect x="68" y="52" width="27" height="7" rx="3.5" fill="#3a1a06"/>
-        <rect x="68" y="112" width="27" height="7" rx="3.5" fill="#3a1a06"/>
-        <rect x="68" y="172" width="27" height="7" rx="3.5" fill="#3a1a06"/>
-        {{-- Peg stems RIGHT --}}
-        <rect x="165" y="52" width="27" height="7" rx="3.5" fill="#3a1a06"/>
-        <rect x="165" y="112" width="27" height="7" rx="3.5" fill="#3a1a06"/>
-        <rect x="165" y="172" width="27" height="7" rx="3.5" fill="#3a1a06"/>
+        {{-- Senar (nut → post) --}}
+        <g stroke-linecap="round">
+            <line x1="124" y1="236" x2="117" y2="72"  stroke="#d9c389" stroke-width="2.1"/>{{-- D --}}
+            <line x1="116" y1="236" x2="117" y2="120" stroke="#d9c389" stroke-width="1.8"/>{{-- A --}}
+            <line x1="108" y1="236" x2="117" y2="168" stroke="#d9c389" stroke-width="2.4"/>{{-- E --}}
+            <line x1="136" y1="236" x2="143" y2="72"  stroke="#e4d29a" stroke-width="1.2"/>{{-- G --}}
+            <line x1="144" y1="236" x2="143" y2="120" stroke="#e4d29a" stroke-width="1"/>  {{-- B --}}
+            <line x1="152" y1="236" x2="143" y2="168" stroke="#e4d29a" stroke-width="0.85"/>{{-- e --}}
+        </g>
 
-        {{-- LEFT pegs: D · A · E --}}
+        {{-- String post di muka headstock --}}
+        @php $posts = [[117,72],[117,120],[117,168],[143,72],[143,120],[143,168]]; @endphp
+        @foreach($posts as $p)
+            <ellipse cx="{{ $p[0] }}" cy="{{ $p[1] }}" rx="7.5" ry="8.5" fill="url(#postG)" stroke="#4a545b" stroke-width="0.8"/>
+            <ellipse cx="{{ $p[0] }}" cy="{{ $p[1] }}" rx="3" ry="3.6" fill="#2b3338"/>
+        @endforeach
+
+        {{-- Stem tuner (penghubung ke pinggir) --}}
+        <g fill="url(#chrome)" stroke="#525c63" stroke-width="0.6">
+            <rect x="55"  y="68"  width="42" height="8" rx="4"/>
+            <rect x="55"  y="116" width="42" height="8" rx="4"/>
+            <rect x="55"  y="164" width="42" height="8" rx="4"/>
+            <rect x="163" y="68"  width="42" height="8" rx="4"/>
+            <rect x="163" y="116" width="42" height="8" rx="4"/>
+            <rect x="163" y="164" width="42" height="8" rx="4"/>
+        </g>
+
+        {{-- ===== TUNER KNOB (clickable) ===== --}}
+        {{-- KIRI: D · A · E --}}
         <g class="tuner-peg" data-freq="146.83" data-label="D" onclick="tunerPickPeg(this)" id="pegD">
-            <ellipse class="pg-body" cx="47" cy="55"  rx="21" ry="15"/>
-            <ellipse class="pg-btn"  cx="28" cy="55"  rx="12" ry="12"/>
-            <text    class="pg-txt"  x="55"  y="60"  text-anchor="middle">D</text>
+            <circle class="pg-glow" cx="40" cy="72" r="24" fill="#22c55e" opacity="0"/>
+            <circle class="pg-ring" cx="40" cy="72" r="19"/>
+            <ellipse class="pg-btn" cx="40" cy="72" rx="17" ry="13" fill="url(#knob)" stroke="#4d575e" stroke-width="1"/>
+            <ellipse cx="36" cy="68" rx="6" ry="3.5" fill="#ffffff" opacity="0.5"/>
+            <text class="pg-txt" x="40" y="77" text-anchor="middle">D</text>
         </g>
         <g class="tuner-peg" data-freq="110.00" data-label="A" onclick="tunerPickPeg(this)" id="pegA">
-            <ellipse class="pg-body" cx="47" cy="115" rx="21" ry="15"/>
-            <ellipse class="pg-btn"  cx="28" cy="115" rx="12" ry="12"/>
-            <text    class="pg-txt"  x="55"  y="120" text-anchor="middle">A</text>
+            <circle class="pg-glow" cx="40" cy="120" r="24" fill="#22c55e" opacity="0"/>
+            <circle class="pg-ring" cx="40" cy="120" r="19"/>
+            <ellipse class="pg-btn" cx="40" cy="120" rx="17" ry="13" fill="url(#knob)" stroke="#4d575e" stroke-width="1"/>
+            <ellipse cx="36" cy="116" rx="6" ry="3.5" fill="#ffffff" opacity="0.5"/>
+            <text class="pg-txt" x="40" y="125" text-anchor="middle">A</text>
         </g>
-        <g class="tuner-peg" data-freq="82.41"  data-label="E" onclick="tunerPickPeg(this)" id="pegE2">
-            <ellipse class="pg-body" cx="47" cy="175" rx="21" ry="15"/>
-            <ellipse class="pg-btn"  cx="28" cy="175" rx="12" ry="12"/>
-            <text    class="pg-txt"  x="55"  y="180" text-anchor="middle">E</text>
+        <g class="tuner-peg" data-freq="82.41" data-label="E" onclick="tunerPickPeg(this)" id="pegE2">
+            <circle class="pg-glow" cx="40" cy="168" r="24" fill="#22c55e" opacity="0"/>
+            <circle class="pg-ring" cx="40" cy="168" r="19"/>
+            <ellipse class="pg-btn" cx="40" cy="168" rx="17" ry="13" fill="url(#knob)" stroke="#4d575e" stroke-width="1"/>
+            <ellipse cx="36" cy="164" rx="6" ry="3.5" fill="#ffffff" opacity="0.5"/>
+            <text class="pg-txt" x="40" y="173" text-anchor="middle">E</text>
         </g>
-
-        {{-- RIGHT pegs: G · B · e --}}
+        {{-- KANAN: G · B · e --}}
         <g class="tuner-peg" data-freq="196.00" data-label="G" onclick="tunerPickPeg(this)" id="pegG">
-            <ellipse class="pg-body" cx="213" cy="55"  rx="21" ry="15"/>
-            <ellipse class="pg-btn"  cx="232" cy="55"  rx="12" ry="12"/>
-            <text    class="pg-txt"  x="205" y="60"  text-anchor="middle">G</text>
+            <circle class="pg-glow" cx="220" cy="72" r="24" fill="#22c55e" opacity="0"/>
+            <circle class="pg-ring" cx="220" cy="72" r="19"/>
+            <ellipse class="pg-btn" cx="220" cy="72" rx="17" ry="13" fill="url(#knob)" stroke="#4d575e" stroke-width="1"/>
+            <ellipse cx="216" cy="68" rx="6" ry="3.5" fill="#ffffff" opacity="0.5"/>
+            <text class="pg-txt" x="220" y="77" text-anchor="middle">G</text>
         </g>
         <g class="tuner-peg" data-freq="246.94" data-label="B" onclick="tunerPickPeg(this)" id="pegB">
-            <ellipse class="pg-body" cx="213" cy="115" rx="21" ry="15"/>
-            <ellipse class="pg-btn"  cx="232" cy="115" rx="12" ry="12"/>
-            <text    class="pg-txt"  x="205" y="120" text-anchor="middle">B</text>
+            <circle class="pg-glow" cx="220" cy="120" r="24" fill="#22c55e" opacity="0"/>
+            <circle class="pg-ring" cx="220" cy="120" r="19"/>
+            <ellipse class="pg-btn" cx="220" cy="120" rx="17" ry="13" fill="url(#knob)" stroke="#4d575e" stroke-width="1"/>
+            <ellipse cx="216" cy="116" rx="6" ry="3.5" fill="#ffffff" opacity="0.5"/>
+            <text class="pg-txt" x="220" y="125" text-anchor="middle">B</text>
         </g>
         <g class="tuner-peg" data-freq="329.63" data-label="e" onclick="tunerPickPeg(this)" id="pegE4">
-            <ellipse class="pg-body" cx="213" cy="175" rx="21" ry="15"/>
-            <ellipse class="pg-btn"  cx="232" cy="175" rx="12" ry="12"/>
-            <text    class="pg-txt"  x="205" y="180" text-anchor="middle">e</text>
+            <circle class="pg-glow" cx="220" cy="168" r="24" fill="#22c55e" opacity="0"/>
+            <circle class="pg-ring" cx="220" cy="168" r="19"/>
+            <ellipse class="pg-btn" cx="220" cy="168" rx="17" ry="13" fill="url(#knob)" stroke="#4d575e" stroke-width="1"/>
+            <ellipse cx="216" cy="164" rx="6" ry="3.5" fill="#ffffff" opacity="0.5"/>
+            <text class="pg-txt" x="220" y="173" text-anchor="middle">e</text>
         </g>
     </svg>
     </div>
@@ -955,8 +1033,9 @@ function tunerRenderUI(freq) {
 
     if (!freq) {
         noteEl.textContent  = '—'; noteEl.className  = 'tuner-note-big';
-        centsEl.textContent = '';  centsEl.className = 'tuner-cents';
-        if (cursor) { cursor.style.left = '50%'; cursor.className = 'tuner-meter-cursor'; }
+        centsEl.textContent = tunerRunning ? 'Mendengarkan…' : 'Petik atau pilih senar';
+        centsEl.className = 'tuner-cents';
+        if (cursor) { cursor.style.left = '50%'; cursor.className = 'tuner-meter-needle'; }
         if (track)  track.classList.remove('active');
         return;
     }
@@ -994,7 +1073,7 @@ function tunerRenderUI(freq) {
         noteEl.className    = 'tuner-note-big in-tune';
         centsEl.textContent = absC <= 1 ? '✓ Pas' : '✓ ' + sign + cents.toFixed(1) + ' cent';
         centsEl.className   = 'tuner-cents in-tune';
-        if (cursor) cursor.className = 'tuner-meter-cursor in-tune';
+        if (cursor) cursor.className = 'tuner-meter-needle in-tune';
         document.querySelectorAll('.tuner-peg').forEach(function(p){
             if (parseFloat(p.getAttribute('data-freq')) === target.freq) p.classList.add('in-tune');
         });
@@ -1005,14 +1084,14 @@ function tunerRenderUI(freq) {
         noteEl.className    = 'tuner-note-big too-low';
         centsEl.textContent = sign + cents.toFixed(1) + ' cent  ▼ naikkan tegangan';
         centsEl.className   = 'tuner-cents too-low';
-        if (cursor) cursor.className = 'tuner-meter-cursor too-low';
+        if (cursor) cursor.className = 'tuner-meter-needle too-low';
     } else {
         tunerWasInTune = false;
         document.querySelectorAll('.tuner-peg.in-tune').forEach(function(p){ p.classList.remove('in-tune'); });
         noteEl.className    = 'tuner-note-big too-high';
         centsEl.textContent = sign + cents.toFixed(1) + ' cent  ▲ kendurkan tegangan';
         centsEl.className   = 'tuner-cents too-high';
-        if (cursor) cursor.className = 'tuner-meter-cursor too-high';
+        if (cursor) cursor.className = 'tuner-meter-needle too-high';
     }
 }
 </script>
