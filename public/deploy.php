@@ -249,6 +249,7 @@ function runDiagnostics(string $base): string
         'post_likes'             => 'Like Kita',
         'post_comments'          => 'Komentar Kita',
         'conversation_invites'   => 'Invite @mention',
+        'member_logs'            => 'Log member baru bergabung',
     ];
 
     // Ambil daftar tabel dari DB
