@@ -33,7 +33,11 @@ class AkuController extends Controller
                 'avatar' => $l->user->avatar ?? null,
             ])->values());
 
-        return view('fanbase.aku', compact('posts', 'likedIds', 'likersByPost'));
+        $isNewMember = Auth::check()
+            && Auth::user()->created_at
+            && Auth::user()->created_at->diffInDays(now()) <= 7;
+
+        return view('fanbase.aku', compact('posts', 'likedIds', 'likersByPost', 'isNewMember'));
     }
 
     public function store(Request $request)

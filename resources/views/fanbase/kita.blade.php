@@ -261,6 +261,39 @@
         box-shadow: var(--shadow-sm);
     }
     .empty-kita p { color: var(--text-3); font-size: 13px; margin-top: 0.75rem; }
+
+    /* MEMBER LOG CARD */
+    .member-log-card {
+        display: flex; align-items: center; gap: 12px;
+        background: var(--card); border: 1px solid var(--border);
+        border-radius: 20px; padding: 0.875rem 1rem;
+        margin-bottom: 1rem; box-shadow: var(--shadow-sm);
+        position: relative; overflow: hidden;
+    }
+    .member-log-card::before {
+        content: '';
+        position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+        background: linear-gradient(180deg, var(--sky), var(--orange));
+        border-radius: 3px 0 0 3px;
+    }
+    .member-log-avatar {
+        width: 38px; height: 38px; border-radius: 50%;
+        object-fit: cover; border: 2px solid var(--sky-lt);
+        box-shadow: var(--shadow-sm); flex-shrink: 0;
+    }
+    .member-log-body { flex: 1; min-width: 0; }
+    .member-log-text {
+        font-size: 13px; color: var(--text-2); line-height: 1.5;
+    }
+    .member-log-text strong { color: var(--text-1); font-weight: 600; }
+    .member-log-date { font-size: 11px; color: var(--text-4); margin-top: 3px; }
+    .member-log-badge {
+        display: inline-flex; align-items: center; gap: 4px;
+        font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+        color: var(--sky-dk); background: var(--sky-lt);
+        border: 1px solid var(--border); border-radius: 20px;
+        padding: 3px 10px; white-space: nowrap; flex-shrink: 0;
+    }
 </style>
 @endpush
 
@@ -296,9 +329,28 @@
     </form>
 </div>
 
-{{-- FEED --}}
-@if($posts->count() > 0)
-    @foreach($posts as $post)
+{{-- FEED (posts + member logs, urutan kronologis) --}}
+@if($feed->count() > 0)
+    @foreach($feed as $feedItem)
+
+    {{-- LOG MEMBER BARU --}}
+    @if($feedItem['type'] === 'log')
+    @php $log = $feedItem['item']; @endphp
+    <div class="member-log-card">
+        <img src="{{ $log->user->avatar ?? 'https://www.google.com/favicon.ico' }}"
+             class="member-log-avatar" alt="">
+        <div class="member-log-body">
+            <div class="member-log-text">
+                <strong>{{ $log->user->name }}</strong> baru saja bergabung di fanbase Rakhman Andi &#127881;
+            </div>
+            <div class="member-log-date">{{ $log->created_at->diffForHumans() }}</div>
+        </div>
+        <span class="member-log-badge">&#127381; Member Baru</span>
+    </div>
+
+    {{-- POST BIASA --}}
+    @else
+    @php $post = $feedItem['item']; @endphp
     <div class="kita-post" id="kitaPost{{ $post->id }}">
 
         <div class="kita-post-header">
@@ -430,18 +482,20 @@
         </div>
 
     </div>
+    @endif
+
     @endforeach
 
-    @if($posts->hasPages())
+    @if($feed->hasPages())
     <div style="display:flex;justify-content:center;gap:8px;margin-top:1.25rem;">
-        @if(!$posts->onFirstPage())
-        <a href="{{ $posts->previousPageUrl() }}"
+        @if(!$feed->onFirstPage())
+        <a href="{{ $feed->previousPageUrl() }}"
            style="padding:8px 18px;border-radius:20px;border:1px solid var(--border);color:var(--text-3);font-size:12px;text-decoration:none;background:var(--card);font-weight:500;box-shadow:var(--shadow-sm);">
             ← Sebelumnya
         </a>
         @endif
-        @if($posts->hasMorePages())
-        <a href="{{ $posts->nextPageUrl() }}"
+        @if($feed->hasMorePages())
+        <a href="{{ $feed->nextPageUrl() }}"
            style="padding:8px 18px;border-radius:20px;border:1px solid var(--border);color:var(--text-3);font-size:12px;text-decoration:none;background:var(--card);font-weight:500;box-shadow:var(--shadow-sm);">
             Berikutnya →
         </a>

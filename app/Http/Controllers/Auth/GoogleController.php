@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\MemberLog;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -28,6 +29,10 @@ class GoogleController extends Controller
                     'google_id' => $googleUser->getId(),
                 ]
             );
+
+            if ($user->wasRecentlyCreated) {
+                MemberLog::create(['user_id' => $user->id]);
+            }
 
             Auth::login($user, true);
 

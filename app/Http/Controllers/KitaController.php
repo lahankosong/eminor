@@ -6,7 +6,9 @@ use App\Models\Post;
 use App\Models\PostLike;
 use App\Models\PostComment;
 use App\Models\PostCommentLike;
+use App\Models\MemberLog;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\NotifHelper;
 
@@ -15,16 +17,42 @@ class KitaController extends Controller
 {
     public function index()
     {
-        $posts = Post::with([
+        $perPage = 15;
+        $page    = (int) request()->get('page', 1);
+
+        // Ambil semua post dengan relasi
+        $allPosts = Post::with([
             'user',
             'comments' => fn($q) => $q->whereNull('parent_id')
                 ->with(['user', 'replies.user'])->latest(),
-        ])->orderByDesc('created_at')->paginate(15);
+        ])->orderByDesc('created_at')->get();
+
+        // Ambil semua member log dengan relasi user
+        $allLogs = MemberLog::with('user')->orderByDesc('created_at')->get();
+
+        // Gabung ke unified feed, urutkan berdasarkan waktu
+        $feedItems = $allPosts
+            ->map(fn($p) => ['type' => 'post', 'item' => $p, 'ts' => $p->created_at])
+            ->merge($allLogs->map(fn($l) => ['type' => 'log', 'item' => $l, 'ts' => $l->created_at]))
+            ->sortByDesc('ts')
+            ->values();
+
+        $total     = $feedItems->count();
+        $pageItems = $feedItems->slice(($page - 1) * $perPage, $perPage)->values();
+
+        $feed = new LengthAwarePaginator(
+            $pageItems, $total, $perPage, $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        // Like data hanya untuk post yang ada di halaman ini
+        $postIdsOnPage = $pageItems->where('type', 'post')->pluck('item.id');
 
         $likedIds = PostLike::where('user_id', Auth::id())
+            ->whereIn('post_id', $postIdsOnPage)
             ->pluck('post_id')->toArray();
 
-        $likersByPost = PostLike::whereIn('post_id', $posts->pluck('id'))
+        $likersByPost = PostLike::whereIn('post_id', $postIdsOnPage)
             ->with('user')->latest()->get()
             ->groupBy('post_id')
             ->map(fn($likes) => $likes->take(5)->map(fn($l) => [
@@ -39,7 +67,7 @@ class KitaController extends Controller
                 ->pluck('comment_id')->toArray();
         } catch (\Throwable $e) {}
 
-        return view('fanbase.kita', compact('posts', 'likedIds', 'likersByPost', 'likedCommentIds'));
+        return view('fanbase.kita', compact('feed', 'likedIds', 'likersByPost', 'likedCommentIds'));
     }
 
     public function store(Request $request)

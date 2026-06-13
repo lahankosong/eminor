@@ -283,6 +283,43 @@
         box-shadow: var(--shadow-sm);
     }
     .empty-aku p { font-size: 13px; color: var(--text-3); margin-top: 0.75rem; }
+
+    /* WELCOME BANNER */
+    .welcome-banner {
+        position: relative; overflow: hidden;
+        background: linear-gradient(135deg, var(--sky-lt) 0%, #fff 60%, var(--orange-lt) 100%);
+        border: 1px solid var(--sky-mid); border-radius: 20px;
+        padding: 1.25rem 1.25rem 1.25rem 1.5rem;
+        margin-bottom: 1.5rem; box-shadow: var(--shadow);
+        display: flex; align-items: flex-start; gap: 14px;
+    }
+    .welcome-banner::before {
+        content: '';
+        position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        background: linear-gradient(90deg, var(--sky), var(--orange));
+    }
+    .welcome-banner-icon {
+        font-size: 32px; flex-shrink: 0; line-height: 1;
+        margin-top: 2px;
+    }
+    .welcome-banner-body { flex: 1; min-width: 0; }
+    .welcome-banner-title {
+        font-family: 'Sora', sans-serif;
+        font-size: 14px; font-weight: 700; color: var(--text-1);
+        margin-bottom: 4px;
+    }
+    .welcome-banner-sub {
+        font-size: 12px; color: var(--text-3); line-height: 1.6;
+    }
+    .welcome-banner-close {
+        position: absolute; top: 12px; right: 12px;
+        width: 24px; height: 24px; border-radius: 50%;
+        background: var(--surface); border: 1px solid var(--border);
+        color: var(--text-4); font-size: 11px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: 0.2s; flex-shrink: 0;
+    }
+    .welcome-banner-close:hover { background: #fef2f2; color: #ef4444; border-color: #fecaca; }
 </style>
 @endpush
 
@@ -297,6 +334,21 @@
     <div class="admin-badge">&#9733; Admin</div>
     @endif
 </div>
+
+{{-- WELCOME BANNER (member baru, max 7 hari) --}}
+@if(Auth::check() && ($isNewMember ?? false))
+<div class="welcome-banner" id="welcomeBanner">
+    <div class="welcome-banner-icon">&#127881;</div>
+    <div class="welcome-banner-body">
+        <div class="welcome-banner-title">Selamat datang, {{ Auth::user()->name }}! &#10024;</div>
+        <div class="welcome-banner-sub">
+            Halo, member baru! Senang kamu sudah bergabung di fanbase Rakhman Andi.
+            Di sini kamu bisa membaca catatan &amp; cerita, memberikan like, dan berkomentar. Selamat menikmati! &#128149;
+        </div>
+    </div>
+    <button class="welcome-banner-close" onclick="dismissWelcome()" title="Tutup">&#10005;</button>
+</div>
+@endif
 
 {{-- ADMIN FORM --}}
 @if(Auth::check() && in_array(Auth::user()->email, explode(',', env('ADMIN_EMAILS',''))))
@@ -487,6 +539,21 @@
 <script>
 var BASE_URL   = '{{ url("") }}';
 var csrfToken  = '{{ csrf_token() }}';
+
+/* WELCOME BANNER */
+(function(){
+    var uid = '{{ Auth::id() }}';
+    var key = 'welcome_dismissed_' + uid;
+    var banner = document.getElementById('welcomeBanner');
+    if(banner && localStorage.getItem(key)) banner.style.display = 'none';
+})();
+function dismissWelcome(){
+    var uid = '{{ Auth::id() }}';
+    var key = 'welcome_dismissed_' + uid;
+    localStorage.setItem(key, '1');
+    var banner = document.getElementById('welcomeBanner');
+    if(banner){ banner.style.opacity='0'; banner.style.transition='opacity 0.3s'; setTimeout(function(){ banner.style.display='none'; }, 300); }
+}
 
 /* LIKE */
 function akuToggleLike(postId) {
