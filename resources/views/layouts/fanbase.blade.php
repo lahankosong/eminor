@@ -853,17 +853,16 @@
             </div>
         </div>
 
-        {{-- Online members --}}
+        {{-- Online members — hanya tampil jika ada yang online --}}
+        @if($onlineMembers->count() > 0)
         <div class="fb-widget">
             <p class="fb-widget-title">
                 &#128100; Online
-                @if($onlineMembers->count() > 0)
                 <span style="float:right;font-size:10px;color:#16a34a;font-weight:600;letter-spacing:0;">
                     &#128994; {{ $onlineMembers->count() }}
                 </span>
-                @endif
             </p>
-            @forelse($onlineMembers as $u)
+            @foreach($onlineMembers as $u)
             <form method="POST" action="{{ route('dia.start', $u->id) }}" style="margin:0;">
                 @csrf
                 <button type="submit" class="fb-online-item" style="width:100%;cursor:pointer;">
@@ -877,10 +876,9 @@
                     </div>
                 </button>
             </form>
-            @empty
-            <p style="font-size:11px;color:var(--text-4);text-align:center;padding:0.75rem 0;">Tidak ada yang online.</p>
-            @endforelse
+            @endforeach
         </div>
+        @endif
 
         {{-- Obrolan & Grup (tampil di semua halaman) --}}
         @php
