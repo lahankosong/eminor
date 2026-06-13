@@ -23,22 +23,24 @@ class GoogleController extends Controller
             $user = User::updateOrCreate(
                 ['google_id' => $googleUser->getId()],
                 [
-                    'name'   => $googleUser->getName(),
-                    'email'  => $googleUser->getEmail(),
-                    'avatar' => $googleUser->getAvatar(),
+                    'name'      => $googleUser->getName(),
+                    'email'     => $googleUser->getEmail(),
+                    'avatar'    => $googleUser->getAvatar(),
                     'google_id' => $googleUser->getId(),
                 ]
             );
 
             if ($user->wasRecentlyCreated) {
-                MemberLog::create(['user_id' => $user->id]);
+                try {
+                    MemberLog::create(['user_id' => $user->id]);
+                } catch (\Throwable $e) {}
             }
 
             Auth::login($user, true);
 
             return redirect()->route('aku');
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return redirect()->route('login')
                 ->with('error', 'Login gagal, silakan coba lagi.');
         }
