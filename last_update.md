@@ -2,6 +2,40 @@
 
 ---
 
+## 2026-06-13 — Welcome Banner Member Baru + Log Member di Kita + Perbaikan 500 + Online Widget
+**Commit**: `2b4fce5` (player desktop + online di atas), `093faf7` (fix 500), `7ce4da3` (fix db), `26bcea0` (fix dia), `5c027c2` (musik persisten), serta commit sesi ini
+
+### Yang Dikerjakan
+
+#### 1. Welcome Banner untuk Member Baru (`aku.blade.php`)
+- `AkuController`: tambah `$isNewMember` — `true` jika `Auth::user()->created_at->diffInDays(now()) <= 7`
+- `aku.blade.php`: banner gradient sky+orange muncul di atas feed untuk member baru
+- Dismissable via JS + `localStorage` key `welcome_dismissed_{uid}` — tidak muncul lagi setelah ditutup
+- Banner menampilkan nama user dan pesan selamat datang
+
+#### 2. Log Bergabung Member di Kita (`kita.blade.php`)
+- **Model baru** `MemberLog` (`app/Models/MemberLog.php`): `fillable = ['user_id']`, relasi `belongsTo(User)`
+- **Migrasi baru** `2026_06_13_000001_create_member_logs_table.php`: tabel `member_logs` (id, user_id FK → users, timestamps)
+- `GoogleController::callback()`: saat `$user->wasRecentlyCreated` (deteksi by `google_id` bukan email), buat `MemberLog::create(['user_id' => $user->id])` dalam try-catch tersendiri
+- `KitaController`: load `$memberLogs` dari `member_logs` + fallback ke `users.created_at` jika tabel kosong/error
+- `kita.blade.php`: card member baru disisipkan secara kronologis di antara post menggunakan `$shownLogIds` untuk mencegah duplikat
+
+#### 3. Perbaikan Error 500 di Kita
+- **Penyebab 1**: tabel `member_logs` belum ada → `MemberLog::get()` lempar exception. Fix: `try-catch (\Throwable $e)` + fallback
+- **Penyebab 2**: `->get()` tanpa limit + `LengthAwarePaginator` manual tidak stabil di hosting. Fix: kembali ke `paginate(15)`, pass `$posts` dan `$memberLogs` terpisah ke view
+- **Penyebab 3**: `pluck('item.id')` pada nested object. Fix: ganti ke `filter()->map()` eksplisit
+
+#### 4. Perbaikan Error 500 Login User Baru (`GoogleController`)
+- **Penyebab**: `catch (\Exception $e)` tidak menangkap `\Error` (class not found) → login baru gagal 500
+- **Fix 1**: isolasi `MemberLog::create()` dalam try-catch sendiri → kegagalan log tidak blokir login
+- **Fix 2**: ubah outer catch dari `\Exception` ke `\Throwable` untuk menangkap semua `\Error` juga
+
+#### 5. Widget "Online Sekarang" Selalu Tampil
+- `fanbase.blade.php` (sidebar kanan): ubah `@if($onlineUsers->count() > 0)` wrapper menjadi `@forelse/@empty` — widget selalu muncul, tampilkan "Tidak ada yang online." jika kosong
+- `dia.blade.php`: header "Online Sekarang" selalu ditampilkan (bukan bersyarat); isi pakai `@forelse/@empty` dengan pesan fallback "Belum ada yang online saat ini"
+
+---
+
 ## 2026-06-13 — Redesign Tuner Gitar (Meter Jarum + Headstock Realistis) + Perbaikan Disk Penuh
 **Commit**: `cbb4461` (redesign meter + headstock), `787c63d` (meter bar awal)
 
@@ -348,6 +382,7 @@ Semua halaman yang menggunakan `layouts.app` diperbarui: warna hardcode (`#0a0a0
 | Pencarian user di Dia | ✅ Ditambahkan 2026-06-11 |
 | Online Sekarang di Dia (mobile/tablet) | ✅ Ditambahkan 2026-06-11 |
 | Online Sekarang di atas Obrolan | ✅ Diperbaiki 2026-06-11 |
+| Online widget selalu tampil (ada/tidak ada online) | ✅ Diperbaiki 2026-06-13 |
 | Pemutar musik persisten (pindah halaman) | ✅ Ditambahkan 2026-06-11 |
 | Player kontrol desktop (sidebar kiri) | ✅ Ditambahkan 2026-06-11 |
 | Chat input di atas bottom nav (mobile) | ✅ Diperbaiki |
@@ -357,3 +392,6 @@ Semua halaman yang menggunakan `layouts.app` diperbarui: warna hardcode (`#0a0a0
 | isOnline() robust (strtotime, no Carbon) | ✅ Diperbaiki 2026-06-11 |
 | fixdb.php diagnostik (view cache + log) | ✅ Diperluas 2026-06-11 |
 | Deploy ke cPanel | ✅ Via `deploy.php` + GitHub ZIP |
+| Welcome banner member baru (Aku) | ✅ Ditambahkan 2026-06-13 |
+| Log bergabung member di feed Kita | ✅ Ditambahkan 2026-06-13 (MemberLog + fallback users) |
+| Login user baru tidak 500 | ✅ Diperbaiki 2026-06-13 (isolated try-catch + \Throwable) |

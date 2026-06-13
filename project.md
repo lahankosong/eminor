@@ -38,6 +38,7 @@ app/
     AkuPost.php, AkuLike.php, AkuComment.php
     Post.php, PostLike.php, PostComment.php, PostCommentLike.php
     KamuNote.php
+    MemberLog.php                    — log bergabungnya member baru (user_id, timestamps)
     Conversation.php, Message.php, ConversationInvite.php
     Group.php, GroupMember.php, GroupMessage.php
     DiaMessage.php, DiaInvite.php
@@ -75,6 +76,7 @@ routes/web.php
 ### Aku (`/aku`)
 - Post eksklusif dari admin (admin ditentukan via `ADMIN_EMAILS` di .env)
 - Fitur: like + siapa yang like (tooltip), komentar + balasan, pin post, upload gambar
+- **Welcome banner** untuk member baru (bergabung ≤ 7 hari): gradient sky+orange, dismissable via `localStorage` key `welcome_dismissed_{uid}`
 - Model: `AkuPost`, `AkuLike` (fillable ✓, relasi user ✓), `AkuComment` (fillable ✓)
 
 ### Kamu (`/kamu`)
@@ -88,7 +90,8 @@ routes/web.php
 ### Kita (`/kita`)
 - Feed komunitas semua user, paginate 15
 - Fitur: buat post, like + tooltip, komentar, edit/hapus post sendiri
-- Model: `Post` (fillable ✓), `PostLike` (fillable ✓, relasi user ✓), `PostComment` (fillable ✓, relasi user ✓)
+- **Log bergabung member**: setiap member baru muncul sebagai card di feed, disisipkan secara kronologis (bukan dikumpulkan di atas/bawah). Source: tabel `member_logs`; fallback ke `users.created_at` jika tabel kosong/belum ada.
+- Model: `Post` (fillable ✓), `PostLike` (fillable ✓, relasi user ✓), `PostComment` (fillable ✓, relasi user ✓), `MemberLog` (fillable ✓)
 
 ### Dia (`/dia`)
 - Chat DM (percakapan personal) + Chat Grup
@@ -152,7 +155,9 @@ routes/web.php
   (state di `localStorage` key `fb_state`, resume via `canplay`, save via `beforeunload`).
   Ada juga **player desktop** di sidebar kiri (play/pause/stop SVG + progress seek)
 - **Tuner Gitar** (Kamu): Web Audio API + MPM, meter jarum + headstock chrome realistis
-- **Online Users**: sidebar kanan + pencarian member (`fbMemberSearch` → `/dia/start/{id}`)
+- **Online Users**: sidebar kanan + pencarian member (`fbMemberSearch` → `/dia/start/{id}`); widget selalu tampil meski tidak ada yang online
+- **Welcome banner** (Aku): muncul untuk member baru ≤ 7 hari, dismissable via localStorage
+- **Log member baru** (Kita): card kronologis di feed; sumber `member_logs` + fallback `users.created_at`
 - **Notifikasi Bell**: unread count di topbar, poll 30 detik, suara via Web Audio API, mark read AJAX
 - **Like & balas komentar**: `parent_id` + `likes_count` + tabel `post_comment_likes`
 - **Lokasi otomatis** (Kita): GPS → Nominatim (OpenStreetMap, tanpa API key) → nama kota
@@ -169,5 +174,7 @@ routes/web.php
 ## Hal yang Perlu Diperhatikan
 1. `Post::comments()` sudah include `->with('user')` di dalam definisi relasi — jangan double-eager-load
 2. Semua perbandingan `===` / `!==` dengan kolom DB integer perlu cast di model (sudah diperbaiki untuk Conversation, Message, GroupMessage)
-3. Semua `Model::create()` perlu `$fillable` terdefinisi (sudah diperbaiki untuk PostComment, PostLike, AkuLike)
+3. Semua `Model::create()` perlu `$fillable` terdefinisi (sudah diperbaiki untuk PostComment, PostLike, AkuLike, MemberLog)
 4. `NotifHelper::send()` harus selalu di dalam `try-catch` sebelum `return response()->json()`
+5. Di `GoogleController::callback()`, `MemberLog::create()` diisolasi dalam try-catch sendiri agar kegagalan log tidak memblokir login. Outer catch harus `\Throwable` (bukan `\Exception`) karena `\Error` (class not found) tidak ter-catch oleh `\Exception`.
+6. `KitaController` selalu kirim `$posts` (paginated) dan `$memberLogs` (Collection) terpisah ke view — interleaving dilakukan di Blade dengan `$shownLogIds` untuk menghindari duplikat.
