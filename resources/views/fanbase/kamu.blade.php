@@ -566,10 +566,7 @@
 <div class="tuner-card">
 
     <div class="tuner-label">Tuner Gitar &mdash; Standar EADGBE</div>
-    <div class="tuner-steps">
-        <b>1.</b> Tekan Mulai &nbsp;·&nbsp; <b>2.</b> Petik 1 senar &nbsp;·&nbsp; <b>3.</b> Putar pasak sampai jarum di tengah (hijau)
-    </div>
-
+    
     {{-- Note besar --}}
     <div class="tuner-note-big" id="tunerNote">—</div>
     {{-- Status: arah putar + seberapa meleset --}}
@@ -1000,14 +997,14 @@ function tunerRenderUI(freq) {
         tunerWasInTune = false;
         document.querySelectorAll('.tuner-peg.in-tune').forEach(function(p){ p.classList.remove('in-tune'); });
         noteEl.className    = 'tuner-note-big too-low';
-        centsEl.textContent = '⬆ KENCANGKAN  ·  meleset ' + off;
+        centsEl.textContent = '− ' + off;   // tanda − = kencangkan
         centsEl.className   = 'tuner-cents too-low';
         if (cursor) cursor.className = 'tuner-meter-needle too-low';
     } else {
         tunerWasInTune = false;
         document.querySelectorAll('.tuner-peg.in-tune').forEach(function(p){ p.classList.remove('in-tune'); });
         noteEl.className    = 'tuner-note-big too-high';
-        centsEl.textContent = '⬇ KENDURKAN  ·  meleset ' + off;
+        centsEl.textContent = '+ ' + off;   // tanda + = kendurkan
         centsEl.className   = 'tuner-cents too-high';
         if (cursor) cursor.className = 'tuner-meter-needle too-high';
     }
