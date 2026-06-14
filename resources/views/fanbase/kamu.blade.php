@@ -188,22 +188,30 @@
     .tuner-note-big.in-tune  { color: #22c55e; text-shadow: 0 0 28px rgba(34,197,94,0.6); }
     .tuner-note-big.too-low  { color: #fb923c; }
     .tuner-note-big.too-high { color: #ef4444; }
-    /* ===== Headstock realistis ===== */
+    /* ===== Headstock (gambar + area klik pasak) ===== */
     .tuner-headstock-wrap { margin: 0.25rem auto 0.75rem; width: 100%; max-width: 230px; }
-    .tuner-peg { cursor: pointer; }
-    .tuner-peg .pg-post { transition: all 0.15s; }
-    .tuner-peg .pg-btn  { transition: all 0.15s; }
-    .tuner-peg .pg-ring { fill: none; stroke: rgba(56,168,204,0); stroke-width: 2.5; transition: stroke 0.15s; }
-    .tuner-peg .pg-txt  { fill: #c9b48a; font-size: 13px; font-weight: 800; font-family: 'Sora',sans-serif; transition: fill 0.15s; pointer-events: none; }
-    .tuner-peg:hover .pg-ring { stroke: rgba(126,200,227,0.55); }
-    .tuner-peg:hover .pg-txt  { fill: #fff; }
-    .tuner-peg.active .pg-ring { stroke: #38A8CC; }
-    .tuner-peg.active .pg-txt  { fill: #7EC8E3; }
-    .tuner-peg.active .pg-glow { opacity: 1; }
-    .tuner-peg.in-tune .pg-ring { stroke: #22c55e; }
-    .tuner-peg.in-tune .pg-txt  { fill: #4ade80; }
-    .tuner-peg .pg-glow { opacity: 0; transition: opacity 0.2s; }
-    .tuner-peg.in-tune .pg-glow { opacity: 1; }
+    .tuner-hs { position: relative; width: 100%; margin: 0 auto; line-height: 0; }
+    .tuner-hs-img { width: 100%; display: block; user-select: none; -webkit-user-drag: none; }
+    /* tombol transparan di atas tiap pasak */
+    .tuner-peg {
+        position: absolute; transform: translate(-50%,-50%);
+        width: 18%; aspect-ratio: 1/1;
+        border-radius: 50%; border: 2.5px solid transparent;
+        background: transparent; cursor: pointer; padding: 0;
+        display: flex; align-items: center; justify-content: center;
+        transition: 0.15s; -webkit-tap-highlight-color: transparent;
+    }
+    .tuner-peg .pg-txt {
+        font-family: 'Sora',sans-serif; font-weight: 800; font-size: 13px;
+        color: #fff; opacity: 0; transition: 0.15s;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.85); pointer-events: none;
+    }
+    .tuner-peg:hover { border-color: rgba(126,200,227,0.7); background: rgba(56,168,204,0.18); }
+    .tuner-peg:hover .pg-txt { opacity: 1; }
+    .tuner-peg.active  { border-color: #38A8CC; background: rgba(56,168,204,0.28); box-shadow: 0 0 14px rgba(56,168,204,0.6); }
+    .tuner-peg.active .pg-txt  { opacity: 1; color: #cdeefb; }
+    .tuner-peg.in-tune { border-color: #22c55e; background: rgba(34,197,94,0.30); box-shadow: 0 0 16px rgba(34,197,94,0.75); }
+    .tuner-peg.in-tune .pg-txt { opacity: 1; color: #dcfce7; }
     /* Button */
     .tuner-btn {
         padding: 12px 36px; border-radius: 50px; border: none; cursor: pointer;
@@ -580,133 +588,18 @@
         </div>
     </div>
 
-    {{-- Headstock SVG realistis (3+3, tuner chrome) --}}
+    {{-- Headstock (gambar + area klik pasak) --}}
     <div class="tuner-headstock-wrap">
-    <svg viewBox="0 0 260 250" style="width:100%;max-width:230px;display:block;margin:0 auto;">
-        <defs>
-            <linearGradient id="wg" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%"   stop-color="#241004"/>
-                <stop offset="14%"  stop-color="#4e2810"/>
-                <stop offset="34%"  stop-color="#7d4623"/>
-                <stop offset="50%"  stop-color="#8a4f29"/>
-                <stop offset="66%"  stop-color="#7d4623"/>
-                <stop offset="86%"  stop-color="#4e2810"/>
-                <stop offset="100%" stop-color="#241004"/>
-            </linearGradient>
-            <radialGradient id="woodSheen" cx="0.5" cy="0.16" r="0.7">
-                <stop offset="0%"  stop-color="#b07a48" stop-opacity="0.55"/>
-                <stop offset="60%" stop-color="#b07a48" stop-opacity="0"/>
-            </radialGradient>
-            <linearGradient id="chrome" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stop-color="#f4f8fb"/>
-                <stop offset="42%"  stop-color="#aeb9c0"/>
-                <stop offset="56%"  stop-color="#727d84"/>
-                <stop offset="100%" stop-color="#cdd6db"/>
-            </linearGradient>
-            <radialGradient id="knob" cx="0.36" cy="0.30" r="0.9">
-                <stop offset="0%"   stop-color="#ffffff"/>
-                <stop offset="30%"  stop-color="#d7dee3"/>
-                <stop offset="62%"  stop-color="#9aa4ab"/>
-                <stop offset="100%" stop-color="#525c63"/>
-            </radialGradient>
-            <radialGradient id="postG" cx="0.4" cy="0.35" r="0.85">
-                <stop offset="0%"   stop-color="#eef3f6"/>
-                <stop offset="55%"  stop-color="#b3bdc4"/>
-                <stop offset="100%" stop-color="#6b757c"/>
-            </radialGradient>
-        </defs>
-
-        {{-- Bayangan headstock --}}
-        <path d="M 96 246 L 93 66 C 93 30 110 16 130 16 C 150 16 167 30 167 66 L 164 246 Z"
-              fill="#000" opacity="0.45" transform="translate(3,4)"/>
-        {{-- Body kayu --}}
-        <path d="M 96 246 L 93 66 C 93 30 110 16 130 16 C 150 16 167 30 167 66 L 164 246 Z"
-              fill="url(#wg)" stroke="#1c0d03" stroke-width="2"/>
-        <path d="M 96 246 L 93 66 C 93 30 110 16 130 16 C 150 16 167 30 167 66 L 164 246 Z"
-              fill="url(#woodSheen)"/>
-        {{-- Binding terang --}}
-        <path d="M 96 246 L 93 66 C 93 30 110 16 130 16 C 150 16 167 30 167 66 L 164 246"
-              fill="none" stroke="rgba(240,222,180,0.35)" stroke-width="1.6"/>
-        {{-- Serat kayu --}}
-        <path d="M 113 20 C 110 90 112 170 110 244" fill="none" stroke="rgba(0,0,0,0.22)" stroke-width="1.2"/>
-        <path d="M 130 18 C 129 90 130 170 130 246" fill="none" stroke="rgba(0,0,0,0.16)" stroke-width="1"/>
-        <path d="M 147 20 C 150 90 148 170 150 244" fill="none" stroke="rgba(0,0,0,0.22)" stroke-width="1.2"/>
-        {{-- Nut --}}
-        <rect x="94" y="234" width="72" height="10" rx="2.5" fill="#efe2bd" stroke="#b9933f" stroke-width="1"/>
-
-        {{-- Senar (nut → post) --}}
-        <g stroke-linecap="round">
-            <line x1="124" y1="236" x2="117" y2="72"  stroke="#d9c389" stroke-width="2.1"/>{{-- D --}}
-            <line x1="116" y1="236" x2="117" y2="120" stroke="#d9c389" stroke-width="1.8"/>{{-- A --}}
-            <line x1="108" y1="236" x2="117" y2="168" stroke="#d9c389" stroke-width="2.4"/>{{-- E --}}
-            <line x1="136" y1="236" x2="143" y2="72"  stroke="#e4d29a" stroke-width="1.2"/>{{-- G --}}
-            <line x1="144" y1="236" x2="143" y2="120" stroke="#e4d29a" stroke-width="1"/>  {{-- B --}}
-            <line x1="152" y1="236" x2="143" y2="168" stroke="#e4d29a" stroke-width="0.85"/>{{-- e --}}
-        </g>
-
-        {{-- String post di muka headstock --}}
-        @php $posts = [[117,72],[117,120],[117,168],[143,72],[143,120],[143,168]]; @endphp
-        @foreach($posts as $p)
-            <ellipse cx="{{ $p[0] }}" cy="{{ $p[1] }}" rx="7.5" ry="8.5" fill="url(#postG)" stroke="#4a545b" stroke-width="0.8"/>
-            <ellipse cx="{{ $p[0] }}" cy="{{ $p[1] }}" rx="3" ry="3.6" fill="#2b3338"/>
-        @endforeach
-
-        {{-- Stem tuner (penghubung ke pinggir) --}}
-        <g fill="url(#chrome)" stroke="#525c63" stroke-width="0.6">
-            <rect x="55"  y="68"  width="42" height="8" rx="4"/>
-            <rect x="55"  y="116" width="42" height="8" rx="4"/>
-            <rect x="55"  y="164" width="42" height="8" rx="4"/>
-            <rect x="163" y="68"  width="42" height="8" rx="4"/>
-            <rect x="163" y="116" width="42" height="8" rx="4"/>
-            <rect x="163" y="164" width="42" height="8" rx="4"/>
-        </g>
-
-        {{-- ===== TUNER KNOB (clickable) ===== --}}
-        {{-- KIRI: D · A · E --}}
-        <g class="tuner-peg" data-freq="146.83" data-label="D" onclick="tunerPickPeg(this)" id="pegD">
-            <circle class="pg-glow" cx="40" cy="72" r="24" fill="#22c55e" opacity="0"/>
-            <circle class="pg-ring" cx="40" cy="72" r="19"/>
-            <ellipse class="pg-btn" cx="40" cy="72" rx="17" ry="13" fill="url(#knob)" stroke="#4d575e" stroke-width="1"/>
-            <ellipse cx="36" cy="68" rx="6" ry="3.5" fill="#ffffff" opacity="0.5"/>
-            <text class="pg-txt" x="40" y="77" text-anchor="middle">D</text>
-        </g>
-        <g class="tuner-peg" data-freq="110.00" data-label="A" onclick="tunerPickPeg(this)" id="pegA">
-            <circle class="pg-glow" cx="40" cy="120" r="24" fill="#22c55e" opacity="0"/>
-            <circle class="pg-ring" cx="40" cy="120" r="19"/>
-            <ellipse class="pg-btn" cx="40" cy="120" rx="17" ry="13" fill="url(#knob)" stroke="#4d575e" stroke-width="1"/>
-            <ellipse cx="36" cy="116" rx="6" ry="3.5" fill="#ffffff" opacity="0.5"/>
-            <text class="pg-txt" x="40" y="125" text-anchor="middle">A</text>
-        </g>
-        <g class="tuner-peg" data-freq="82.41" data-label="E" onclick="tunerPickPeg(this)" id="pegE2">
-            <circle class="pg-glow" cx="40" cy="168" r="24" fill="#22c55e" opacity="0"/>
-            <circle class="pg-ring" cx="40" cy="168" r="19"/>
-            <ellipse class="pg-btn" cx="40" cy="168" rx="17" ry="13" fill="url(#knob)" stroke="#4d575e" stroke-width="1"/>
-            <ellipse cx="36" cy="164" rx="6" ry="3.5" fill="#ffffff" opacity="0.5"/>
-            <text class="pg-txt" x="40" y="173" text-anchor="middle">E</text>
-        </g>
-        {{-- KANAN: G · B · e --}}
-        <g class="tuner-peg" data-freq="196.00" data-label="G" onclick="tunerPickPeg(this)" id="pegG">
-            <circle class="pg-glow" cx="220" cy="72" r="24" fill="#22c55e" opacity="0"/>
-            <circle class="pg-ring" cx="220" cy="72" r="19"/>
-            <ellipse class="pg-btn" cx="220" cy="72" rx="17" ry="13" fill="url(#knob)" stroke="#4d575e" stroke-width="1"/>
-            <ellipse cx="216" cy="68" rx="6" ry="3.5" fill="#ffffff" opacity="0.5"/>
-            <text class="pg-txt" x="220" y="77" text-anchor="middle">G</text>
-        </g>
-        <g class="tuner-peg" data-freq="246.94" data-label="B" onclick="tunerPickPeg(this)" id="pegB">
-            <circle class="pg-glow" cx="220" cy="120" r="24" fill="#22c55e" opacity="0"/>
-            <circle class="pg-ring" cx="220" cy="120" r="19"/>
-            <ellipse class="pg-btn" cx="220" cy="120" rx="17" ry="13" fill="url(#knob)" stroke="#4d575e" stroke-width="1"/>
-            <ellipse cx="216" cy="116" rx="6" ry="3.5" fill="#ffffff" opacity="0.5"/>
-            <text class="pg-txt" x="220" y="125" text-anchor="middle">B</text>
-        </g>
-        <g class="tuner-peg" data-freq="329.63" data-label="e" onclick="tunerPickPeg(this)" id="pegE4">
-            <circle class="pg-glow" cx="220" cy="168" r="24" fill="#22c55e" opacity="0"/>
-            <circle class="pg-ring" cx="220" cy="168" r="19"/>
-            <ellipse class="pg-btn" cx="220" cy="168" rx="17" ry="13" fill="url(#knob)" stroke="#4d575e" stroke-width="1"/>
-            <ellipse cx="216" cy="164" rx="6" ry="3.5" fill="#ffffff" opacity="0.5"/>
-            <text class="pg-txt" x="220" y="173" text-anchor="middle">e</text>
-        </g>
-    </svg>
+        <div class="tuner-hs">
+            <img class="tuner-hs-img" src="{{ asset('images/tuner/headstock.png') }}" alt="Headstock gitar Margonoandi">
+            {{-- Area klik transparan di tiap pasak. KIRI: E·A·D  KANAN: G·B·e --}}
+            <button class="tuner-peg" style="left:10%;top:24.5%" data-freq="82.41"  data-label="E" id="pegE2" onclick="tunerPickPeg(this)"><span class="pg-txt">E</span></button>
+            <button class="tuner-peg" style="left:10%;top:45.5%" data-freq="110.00" data-label="A" id="pegA"  onclick="tunerPickPeg(this)"><span class="pg-txt">A</span></button>
+            <button class="tuner-peg" style="left:10%;top:66%"   data-freq="146.83" data-label="D" id="pegD"  onclick="tunerPickPeg(this)"><span class="pg-txt">D</span></button>
+            <button class="tuner-peg" style="left:90%;top:24.5%" data-freq="196.00" data-label="G" id="pegG"  onclick="tunerPickPeg(this)"><span class="pg-txt">G</span></button>
+            <button class="tuner-peg" style="left:90%;top:45.5%" data-freq="246.94" data-label="B" id="pegB"  onclick="tunerPickPeg(this)"><span class="pg-txt">B</span></button>
+            <button class="tuner-peg" style="left:90%;top:66%"   data-freq="329.63" data-label="e" id="pegE4" onclick="tunerPickPeg(this)"><span class="pg-txt">e</span></button>
+        </div>
     </div>
 
     <button class="tuner-btn" id="tunerBtn" onclick="tunerToggle()">&#9654; Mulai Tuning</button>
