@@ -33,8 +33,9 @@ class AiAgentController extends Controller
                 // hanya hasil format v2 (punya narrations)
                 if (!is_array($topics) || empty($topics[0]['narrations'])) continue;
                 $saved[$g->song_id] = [
-                    'niche'  => $g->shorts_description,
-                    'topics' => $topics,
+                    'niche'     => $g->shorts_description,
+                    'topics'    => $topics,
+                    'long_form' => json_decode($g->scripts, true),
                 ];
                 if ($lastSongId === null) $lastSongId = $g->song_id;
             }
@@ -133,7 +134,8 @@ TUGAS:
 1. NICHE: tentukan satu sudut konten/niche paling kuat dari lirik (1 kalimat, bahasa Indonesia).
 2. TOPIK: pecah niche jadi 3–5 topik kejadian sehari-hari yang SANGAT spesifik & berbeda (bukan generik). Tiap topik max 5 kata label.
 3. NARASI: tiap topik buat 5 narasi pendek (kata-kata pendek & punchy, gaya caption/hook notes HP jam 2 pagi, 1–2 kalimat, Indonesia).
-4. IMAGE PROMPT: tiap narasi buat 1 prompt gambar (BAHASA INGGRIS, untuk text-to-image, max 400 karakter, wajib mencakup palet brand + gaya sinematik + karakter Indonesia).
+4. IMAGE PROMPT: tiap narasi buat 1 prompt gambar (BAHASA INGGRIS, untuk text-to-image, max 400 karakter). WAJIB format VERTIKAL 9:16 untuk video short — sertakan frasa "vertical 9:16 aspect ratio, portrait". Wajib mencakup palet brand + gaya sinematik + karakter Indonesia.
+5. LONG FORM (konten video 3–5 menit): buat 1 video panjang — judul menarik + naskah NARASI mengalir bahasa Indonesia ~500–750 kata (durasi dibaca 3–5 menit, storytelling personal sesuai niche, ada pembuka-isi-penutup) + 6–8 image prompt (BAHASA INGGRIS, vertical 9:16, palet brand) untuk mengilustrasikan narasi.
 
 Balas HANYA JSON valid tanpa markdown tanpa backtick:
 {
@@ -150,9 +152,17 @@ Balas HANYA JSON valid tanpa markdown tanpa backtick:
         {"text": "...", "image_prompt": "..."}
       ]
     }
-  ]
+  ],
+  "long_form": {
+    "title": "judul video 3-5 menit",
+    "duration_estimate": "± 4 menit",
+    "narration": "naskah narasi bahasa Indonesia mengalir 500-750 kata (3-5 menit)",
+    "scenes": [
+      {"image_prompt": "english vertical 9:16 image prompt"}
+    ]
+  }
 }
-Jumlah topics 3 sampai 5. Tiap topik WAJIB 5 narasi.
+Jumlah topics 3 sampai 5. Tiap topik WAJIB 5 narasi. long_form.scenes berisi 6-8 image prompt.
 EOT;
 
         try {
@@ -179,6 +189,7 @@ EOT;
                     [
                         'topics'             => json_encode($result['topics']),
                         'shorts_description' => $result['niche'] ?? '',
+                        'scripts'            => json_encode($result['long_form'] ?? null),
                     ]
                 );
             } catch (\Throwable $e) {
@@ -192,6 +203,7 @@ EOT;
                 'provider' => $provider->name,
                 'niche'    => $result['niche'] ?? '',
                 'topics'   => $result['topics'],
+                'long_form' => $result['long_form'] ?? null,
             ]);
         } catch (\Throwable $e) {
             Log::error('AI v2 generate error', ['error' => $e->getMessage()]);

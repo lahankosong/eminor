@@ -178,6 +178,7 @@
         <div class="val" id="nicheVal"></div>
     </div>
     <div id="topicsWrap"></div>
+    <div id="longFormWrap"></div>
 
     <div class="sched-bar">
         <div class="fg"><label>Mulai tanggal</label><input type="date" id="schedDate" class="fi" value="{{ now()->toDateString() }}"></div>
@@ -244,7 +245,7 @@ function doGenerate() {
             return;
         }
         document.getElementById('genStatus').textContent = '✓ Selesai via ' + res.d.provider + ' · hasil tersimpan otomatis';
-        SAVED[res.d.song_id] = { niche: res.d.niche, topics: res.d.topics };
+        SAVED[res.d.song_id] = { niche: res.d.niche, topics: res.d.topics, long_form: res.d.long_form };
         renderResults(res.d);
     })
     .catch(function(e){
@@ -276,6 +277,29 @@ function renderResults(d) {
         html += '</div>';
         wrap.insertAdjacentHTML('beforeend', html);
     });
+
+    // ===== Long form (video 3-5 menit) =====
+    var lfWrap = document.getElementById('longFormWrap');
+    lfWrap.innerHTML = '';
+    var lf = d.long_form;
+    if (lf && lf.narration) {
+        var scenes = (lf.scenes || []).map(function(sc, i){
+            return '<div class="narr-prompt">🎨 ' + (i+1) + '. ' + esc(sc.image_prompt) +
+                '<span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(sc.image_prompt) + '\')">[copy]</span></div>';
+        }).join('');
+        lfWrap.innerHTML =
+            '<div class="topic"><div class="topic-head">' +
+                '<span class="topic-title">🎬 Video Panjang · ' + esc(lf.duration_estimate || '3–5 menit') + '</span>' +
+                '<label style="font-size:11px;color:var(--text-2);display:flex;gap:6px;align-items:center;cursor:pointer;">' +
+                    '<input type="checkbox" class="narrChk" data-text="' + esc(lf.title || 'Video panjang') + '" data-prompt="' + esc(lf.narration) + '" onchange="updateCount()"> jadwalkan</label>' +
+            '</div>' +
+            '<div class="narr"><div class="narr-body">' +
+                '<div class="narr-text" style="font-weight:600;margin-bottom:6px;">' + esc(lf.title || '') +
+                    ' <span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(lf.narration) + '\')">[copy narasi]</span></div>' +
+                '<div class="narr-prompt" style="white-space:pre-wrap;font-family:inherit;line-height:1.7;">' + esc(lf.narration) + '</div>' +
+                (scenes ? '<div style="margin-top:8px;font-size:11px;color:var(--text-3);">Image prompts (vertical 9:16):</div>' + scenes : '') +
+            '</div></div></div>';
+    }
 
     document.getElementById('results').style.display = 'block';
     updateCount();
@@ -338,7 +362,7 @@ function showToast(msg) {
 // Tampilkan hasil tersimpan saat lagu dipilih
 function showSaved(id) {
     if (id && SAVED[id]) {
-        renderResults({ song_id: parseInt(id), niche: SAVED[id].niche, topics: SAVED[id].topics, provider: 'tersimpan' });
+        renderResults({ song_id: parseInt(id), niche: SAVED[id].niche, topics: SAVED[id].topics, long_form: SAVED[id].long_form, provider: 'tersimpan' });
         document.getElementById('genStatus').textContent = '📁 Hasil tersimpan ditampilkan. Generate lagi untuk memperbarui.';
         return true;
     }
