@@ -253,6 +253,17 @@ if (!tableExists($conn, $dbname, 'content_plans')) {
     markMigration($conn, '2026_06_14_000001_create_content_plans_table');
 }
 
+// ── 6c2. Kolom content_type di content_plans ─────────────────────────────────
+echo '<h2>6c2. Kolom content_type di content_plans</h2>';
+if (tableExists($conn, $dbname, 'content_plans')) {
+    if (!columnExists($conn, $dbname, 'content_plans', 'content_type')) {
+        runSQL($conn, 'ADD COLUMN content_type', "ALTER TABLE `content_plans` ADD COLUMN `content_type` varchar(255) NOT NULL DEFAULT 'short' AFTER `platforms`");
+    } else {
+        echo '<pre class="info">&#8212; Kolom content_type sudah ada</pre>';
+    }
+    markMigration($conn, '2026_06_14_000003_add_content_type_to_content_plans_table');
+}
+
 // ── 6d. Tabel ai_providers ────────────────────────────────────────────────────
 echo '<h2>6d. Tabel ai_providers</h2>';
 if (!tableExists($conn, $dbname, 'ai_providers')) {

@@ -65,6 +65,15 @@
 
     .empty-state { text-align: center; color: var(--text-3); padding: 3rem 1rem; font-size: 13px; line-height: 1.6; }
 
+    .cal-filter { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:1rem; }
+    .chip { padding:6px 12px; border-radius:20px; font-size:12px; background:var(--bg-2); border:1px solid var(--border); color:var(--text-2); cursor:pointer; transition:0.15s; }
+    .chip:hover { border-color:var(--text-3); color:var(--text); }
+    .chip.active { background:var(--text); color:var(--bg); border-color:var(--text); }
+    .type-badge { font-size:10px; padding:1px 8px; border-radius:20px; font-weight:600; }
+    .type-badge.type-short { background:var(--accent-dim); color:var(--accent); }
+    .type-badge.type-long { background:#3b1d0e; color:#fb923c; }
+    .type-badge.type-umum { background:var(--bg-3); color:var(--text-3); }
+
     @media (max-width: 800px) {
         .cal-layout { grid-template-columns: 1fr; }
         .cal-form { position: static; }
@@ -110,6 +119,14 @@
                 </select>
             </div>
             <div class="fg">
+                <label>Tipe konten</label>
+                <select name="content_type" class="fi">
+                    <option value="short">📱 Short Video (9:16)</option>
+                    <option value="long">🎬 Video 3–5 menit</option>
+                    <option value="umum">Umum / lainnya</option>
+                </select>
+            </div>
+            <div class="fg">
                 <label>Platform</label>
                 <div class="platforms-grid">
                     @foreach(['TikTok','Instagram','YouTube','Spotify','Discord','Email'] as $pf)
@@ -133,6 +150,15 @@
             $dows = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
         @endphp
 
+        @if($plans->count())
+        <div class="cal-filter">
+            <span class="chip active" data-f="all"   onclick="calFilter('all',this)">Semua</span>
+            <span class="chip" data-f="short" onclick="calFilter('short',this)">📱 Short</span>
+            <span class="chip" data-f="long"  onclick="calFilter('long',this)">🎬 Video panjang</span>
+            <span class="chip" data-f="umum"  onclick="calFilter('umum',this)">Umum</span>
+        </div>
+        @endif
+
         @forelse($grouped as $date => $items)
             @php $d = \Carbon\Carbon::parse($date); $isPast = $d->lt($today); @endphp
             <div class="day-group">
@@ -143,10 +169,12 @@
                 </div>
 
                 @foreach($items as $plan)
-                <div class="plan-item">
+                @php $ct = $plan->content_type ?? 'short'; @endphp
+                <div class="plan-item" data-type="{{ $ct }}">
                     <div class="plan-main">
                         <div class="plan-title">{{ $plan->title ?: ($plan->song->title ?? 'Konten') }}</div>
                         <div class="plan-meta">
+                            <span class="type-badge type-{{ $ct }}">{{ $ct === 'long' ? '🎬 Panjang' : ($ct === 'short' ? '📱 Short' : 'Umum') }}</span>
                             @if($plan->song)<span class="pf-badge">🎵 {{ $plan->song->title }}</span>@endif
                             @if($plan->platforms)
                                 @foreach(explode(',', $plan->platforms) as $pf)
@@ -184,5 +212,21 @@
         @endforelse
     </div>
 </div>
+
+<script>
+function calFilter(f, el) {
+    document.querySelectorAll('.cal-filter .chip').forEach(function(c){ c.classList.toggle('active', c.getAttribute('data-f') === f); });
+    document.querySelectorAll('.day-group').forEach(function(g){
+        var items = g.querySelectorAll('.plan-item');
+        var shown = 0;
+        items.forEach(function(it){
+            var vis = (f === 'all') || it.getAttribute('data-type') === f;
+            it.style.display = vis ? '' : 'none';
+            if (vis) shown++;
+        });
+        g.style.display = shown ? '' : 'none';
+    });
+}
+</script>
 
 @endsection

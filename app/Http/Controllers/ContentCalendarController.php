@@ -26,22 +26,24 @@ class ContentCalendarController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'plan_date' => 'required|date',
-            'title'     => 'nullable|string|max:255',
-            'song_id'   => 'nullable|integer',
-            'status'    => 'nullable|string|max:20',
-            'notes'     => 'nullable|string',
+            'plan_date'    => 'required|date',
+            'title'        => 'nullable|string|max:255',
+            'song_id'      => 'nullable|integer',
+            'content_type' => 'nullable|string|max:20',
+            'status'       => 'nullable|string|max:20',
+            'notes'        => 'nullable|string',
         ]);
 
         ContentPlan::create([
-            'plan_date' => $request->plan_date,
-            'song_id'   => $request->song_id ?: null,
-            'platforms' => $request->platforms
+            'plan_date'    => $request->plan_date,
+            'song_id'      => $request->song_id ?: null,
+            'platforms'    => $request->platforms
                 ? implode(',', (array) $request->platforms)
                 : null,
-            'title'     => $request->title,
-            'status'    => $request->status ?: 'rencana',
-            'notes'     => $request->notes,
+            'content_type' => $request->content_type ?: 'short',
+            'title'        => $request->title,
+            'status'       => $request->status ?: 'rencana',
+            'notes'        => $request->notes,
         ]);
 
         return redirect()->route('admin.calendar')

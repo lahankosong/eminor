@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ContentPlan extends Model
 {
     protected $fillable = [
-        'plan_date', 'song_id', 'platforms', 'title', 'status', 'notes',
+        'plan_date', 'song_id', 'platforms', 'content_type', 'title', 'status', 'notes',
     ];
 
     protected $casts = [

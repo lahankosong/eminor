@@ -222,19 +222,24 @@ EOT;
             'items'             => 'required|array|min:1',
             'items.*.text'      => 'required|string',
             'items.*.image_prompt' => 'nullable|string',
+            'items.*.type'      => 'nullable|string',
         ]);
 
         $date = \Carbon\Carbon::parse($data['start_date']);
         $count = 0;
         foreach ($data['items'] as $i => $item) {
-            $planDate = (clone $date)->addDays($i); // satu narasi per hari
+            $planDate = (clone $date)->addDays($i); // satu konten per hari
+            $type = $item['type'] ?? 'short';
             ContentPlan::create([
-                'plan_date' => $planDate->toDateString(),
-                'song_id'   => $data['song_id'] ?: null,
-                'platforms' => $data['platforms'] ?? 'TikTok,Instagram',
-                'title'     => mb_substr($item['text'], 0, 240),
-                'status'    => 'rencana',
-                'notes'     => $item['image_prompt'] ? "🎨 Image prompt:\n" . $item['image_prompt'] : null,
+                'plan_date'    => $planDate->toDateString(),
+                'song_id'      => $data['song_id'] ?: null,
+                'platforms'    => $data['platforms'] ?? 'TikTok,Instagram',
+                'content_type' => $type,
+                'title'        => mb_substr($item['text'], 0, 240),
+                'status'       => 'rencana',
+                'notes'        => $item['image_prompt']
+                    ? ($type === 'long' ? "📝 Narasi:\n" : "🎨 Image prompt:\n") . $item['image_prompt']
+                    : null,
             ]);
             $count++;
         }

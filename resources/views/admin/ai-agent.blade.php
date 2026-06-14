@@ -44,6 +44,7 @@
     .niche-box { background:var(--accent-dim); border:1px solid transparent; border-radius:10px; padding:12px 14px; margin-bottom:1.25rem; }
     .niche-box .lbl { font-size:10px; color:var(--accent); text-transform:uppercase; letter-spacing:0.1em; }
     .niche-box .val { font-size:14px; color:var(--text); margin-top:3px; }
+    .section-divider { font-size:12px; font-weight:700; color:var(--text-2); letter-spacing:0.06em; margin:1.25rem 0 0.6rem; padding-bottom:6px; border-bottom:1px solid var(--border); }
     .topic { background:var(--bg-2); border:1px solid var(--border); border-radius:12px; margin-bottom:1rem; overflow:hidden; }
     .topic-head { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0.8rem 1.1rem; border-bottom:1px solid var(--border); }
     .topic-title { font-size:13px; font-weight:600; color:var(--text); }
@@ -258,7 +259,7 @@ function renderResults(d) {
     currentSongId = d.song_id;
     document.getElementById('nicheVal').textContent = d.niche || '—';
     var wrap = document.getElementById('topicsWrap');
-    wrap.innerHTML = '';
+    wrap.innerHTML = (d.topics && d.topics.length) ? '<div class="section-divider">📱 KONTEN SHORT VIDEO · 9:16</div>' : '';
 
     (d.topics || []).forEach(function(t, ti){
         var html = '<div class="topic"><div class="topic-head">' +
@@ -266,7 +267,7 @@ function renderResults(d) {
             '<span class="mini-btn" onclick="toggleTopic(this)">Pilih semua</span></div>';
         (t.narrations || []).forEach(function(n){
             html += '<div class="narr">' +
-                '<input type="checkbox" class="narrChk" data-text="' + esc(n.text) + '" data-prompt="' + esc(n.image_prompt) + '" onchange="updateCount()">' +
+                '<input type="checkbox" class="narrChk" data-type="short" data-text="' + esc(n.text) + '" data-prompt="' + esc(n.image_prompt) + '" onchange="updateCount()">' +
                 '<div class="narr-body">' +
                     '<div class="narr-text">' + esc(n.text) + '</div>' +
                     '<div class="narr-prompt">🎨 ' + esc(n.image_prompt) +
@@ -288,10 +289,11 @@ function renderResults(d) {
                 '<span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(sc.image_prompt) + '\')">[copy]</span></div>';
         }).join('');
         lfWrap.innerHTML =
+            '<div class="section-divider">🎬 VIDEO 3–5 MENIT</div>' +
             '<div class="topic"><div class="topic-head">' +
                 '<span class="topic-title">🎬 Video Panjang · ' + esc(lf.duration_estimate || '3–5 menit') + '</span>' +
                 '<label style="font-size:11px;color:var(--text-2);display:flex;gap:6px;align-items:center;cursor:pointer;">' +
-                    '<input type="checkbox" class="narrChk" data-text="' + esc(lf.title || 'Video panjang') + '" data-prompt="' + esc(lf.narration) + '" onchange="updateCount()"> jadwalkan</label>' +
+                    '<input type="checkbox" class="narrChk" data-type="long" data-text="' + esc(lf.title || 'Video panjang') + '" data-prompt="' + esc(lf.narration) + '" onchange="updateCount()"> jadwalkan</label>' +
             '</div>' +
             '<div class="narr"><div class="narr-body">' +
                 '<div class="narr-text" style="font-weight:600;margin-bottom:6px;">' + esc(lf.title || '') +
@@ -330,7 +332,7 @@ function doSchedule() {
     var checked = document.querySelectorAll('.narrChk:checked');
     if (!checked.length) { alert('Centang minimal 1 narasi dulu.'); return; }
     var items = Array.prototype.map.call(checked, function(c){
-        return { text: c.getAttribute('data-text'), image_prompt: c.getAttribute('data-prompt') };
+        return { text: c.getAttribute('data-text'), image_prompt: c.getAttribute('data-prompt'), type: c.getAttribute('data-type') || 'short' };
     });
     var body = {
         song_id: currentSongId,
