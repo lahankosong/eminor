@@ -195,7 +195,7 @@
     /* tombol transparan di atas tiap pasak */
     .tuner-peg {
         position: absolute; transform: translate(-50%,-50%);
-        width: 18%; aspect-ratio: 1/1;
+        width: 15%; aspect-ratio: 1/1;
         border-radius: 50%; border: 2.5px solid transparent;
         background: transparent; cursor: pointer; padding: 0;
         display: flex; align-items: center; justify-content: center;
@@ -592,13 +592,13 @@
     <div class="tuner-headstock-wrap">
         <div class="tuner-hs">
             <img class="tuner-hs-img" src="{{ asset('images/tuner/headstock.png') }}" alt="Headstock gitar Margonoandi">
-            {{-- Area klik transparan di tiap pasak. KIRI: E·A·D  KANAN: G·B·e --}}
-            <button class="tuner-peg" style="left:10%;top:24.5%" data-freq="82.41"  data-label="E" id="pegE2" onclick="tunerPickPeg(this)"><span class="pg-txt">E</span></button>
-            <button class="tuner-peg" style="left:10%;top:45.5%" data-freq="110.00" data-label="A" id="pegA"  onclick="tunerPickPeg(this)"><span class="pg-txt">A</span></button>
-            <button class="tuner-peg" style="left:10%;top:66%"   data-freq="146.83" data-label="D" id="pegD"  onclick="tunerPickPeg(this)"><span class="pg-txt">D</span></button>
-            <button class="tuner-peg" style="left:90%;top:24.5%" data-freq="196.00" data-label="G" id="pegG"  onclick="tunerPickPeg(this)"><span class="pg-txt">G</span></button>
-            <button class="tuner-peg" style="left:90%;top:45.5%" data-freq="246.94" data-label="B" id="pegB"  onclick="tunerPickPeg(this)"><span class="pg-txt">B</span></button>
-            <button class="tuner-peg" style="left:90%;top:66%"   data-freq="329.63" data-label="e" id="pegE4" onclick="tunerPickPeg(this)"><span class="pg-txt">e</span></button>
+            {{-- Area klik transparan di tiap pasak (digeser keluar agar tak menimpa tuner). KIRI: D·A·E  KANAN: G·B·e --}}
+            <button class="tuner-peg" style="left:5%;top:24.5%"  data-freq="146.83" data-label="D" id="pegD"  onclick="tunerPickPeg(this)"><span class="pg-txt">D</span></button>
+            <button class="tuner-peg" style="left:5%;top:45.5%"  data-freq="110.00" data-label="A" id="pegA"  onclick="tunerPickPeg(this)"><span class="pg-txt">A</span></button>
+            <button class="tuner-peg" style="left:5%;top:66%"    data-freq="82.41"  data-label="E" id="pegE2" onclick="tunerPickPeg(this)"><span class="pg-txt">E</span></button>
+            <button class="tuner-peg" style="left:95%;top:24.5%" data-freq="196.00" data-label="G" id="pegG"  onclick="tunerPickPeg(this)"><span class="pg-txt">G</span></button>
+            <button class="tuner-peg" style="left:95%;top:45.5%" data-freq="246.94" data-label="B" id="pegB"  onclick="tunerPickPeg(this)"><span class="pg-txt">B</span></button>
+            <button class="tuner-peg" style="left:95%;top:66%"   data-freq="329.63" data-label="e" id="pegE4" onclick="tunerPickPeg(this)"><span class="pg-txt">e</span></button>
         </div>
     </div>
 
