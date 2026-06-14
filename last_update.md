@@ -2,6 +2,23 @@
 
 ---
 
+## 2026-06-14 — AI Agent v2 (Multi-Provider) + Fix 500 Promo
+**Commit**: `d943500` (fix promo @json), `8efd3b8` (AI Agent v2)
+
+### AI Agent v2 (`/admin/ai-agent`)
+- **Multi-provider**: tabel `ai_providers` + model `AiProvider` (api_key cast `encrypted`). Mendukung format **OpenAI-compatible** (Gemini, Groq, OpenRouter, OpenAI, DeepSeek) + **Anthropic** (Claude) lewat satu method `callAi()`.
+- **Kelola dari UI**: preset dropdown (auto-isi base_url/model/format) + tambah provider custom; key tersimpan terenkripsi. Semua otomatis masuk dropdown pilihan saat generate.
+- **Alur generate**: pilih lagu + provider → niche dari lirik → 3–5 topik → tiap topik 5 narasi pendek + 1 image prompt (English, palet brand) → tampil dengan checkbox.
+- **Integrasi Calendar**: centang narasi → `scheduleToCalendar()` bikin `ContentPlan` (1 narasi/hari, title=narasi, notes=image prompt) → redirect ke Calendar.
+- Konfirmasi sebelum generate (cegah pemakaian kredit tak sengaja); loading state; AJAX (tanpa `@json` closure).
+- `fixdb.php`: tambah tabel `ai_providers`.
+
+### Fix 500 `/admin/promo`
+- Penyebab: `@json($songs->map(closure{...}))` — array `[...]` di dalam closure bikin parser argumen Blade gagal ("Unclosed '['"). 
+- Fix: pindah ke blok `@php` + `json_encode(JSON_HEX_*)`. **Pelajaran: hindari `@json()` dengan closure multi-line; pakai `@php`+`json_encode`.**
+
+---
+
 ## 2026-06-14 — Tier 1 SELESAI: Admin Cleanup + Promo Templates + Content Calendar
 **Commit**: `8bce86c` (edit), `1cd466a` (index), `1eb60f6` (settings), `607f7e8` (ai-agent), `fba9469` (promo), `4df89e0` (calendar) — + UI tuner (`88ebd74`, `2428499`, `ebcc5c3`) & roadmap (`9a1a16b`)
 
