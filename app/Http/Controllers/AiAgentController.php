@@ -16,12 +16,33 @@ class AiAgentController extends Controller
     {
         $songs = Song::orderBy('track_number')->get();
         $providers = collect();
+        $saved = [];          // song_id => ['niche'=>..., 'topics'=>[...]]
+        $lastSongId = null;   // generasi terakhir → ditampilkan saat halaman dibuka
+
         try {
             $providers = AiProvider::orderBy('name')->get();
         } catch (\Throwable $e) {
             // tabel belum ada — jalankan fixdb.php
         }
-        return view('admin.ai-agent', compact('songs', 'providers'));
+
+        try {
+            $gens = AiGeneration::where('user_id', auth()->id())
+                ->orderByDesc('updated_at')->get();
+            foreach ($gens as $g) {
+                $topics = json_decode($g->topics, true);
+                // hanya hasil format v2 (punya narrations)
+                if (!is_array($topics) || empty($topics[0]['narrations'])) continue;
+                $saved[$g->song_id] = [
+                    'niche'  => $g->shorts_description,
+                    'topics' => $topics,
+                ];
+                if ($lastSongId === null) $lastSongId = $g->song_id;
+            }
+        } catch (\Throwable $e) {
+            // tabel belum ada / kolom beda — abaikan
+        }
+
+        return view('admin.ai-agent', compact('songs', 'providers', 'saved', 'lastSongId'));
     }
 
     /* ===================== Provider CRUD ===================== */

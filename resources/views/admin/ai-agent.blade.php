@@ -198,6 +198,8 @@ var ROUTE_GEN_BASE = '{{ url('admin/ai-agent/generate') }}';
 var ROUTE_SCHEDULE = '{{ route('admin.ai-agent.schedule') }}';
 var ROUTE_CALENDAR = '{{ route('admin.calendar') }}';
 var currentSongId = null;
+var SAVED = {!! json_encode($saved) !!};       // hasil tersimpan per song_id
+var LAST_SONG = {{ $lastSongId ?? 'null' }};   // generasi terakhir
 
 var PRESETS = {
     gemini:    {name:'Gemini Flash',   base_url:'https://generativelanguage.googleapis.com/v1beta/openai', model:'gemini-2.0-flash', format:'openai'},
@@ -241,7 +243,8 @@ function doGenerate() {
             document.getElementById('genStatus').textContent = '⚠️ ' + (res.d.error || 'Gagal generate.');
             return;
         }
-        document.getElementById('genStatus').textContent = '✓ Selesai via ' + res.d.provider;
+        document.getElementById('genStatus').textContent = '✓ Selesai via ' + res.d.provider + ' · hasil tersimpan otomatis';
+        SAVED[res.d.song_id] = { niche: res.d.niche, topics: res.d.topics };
         renderResults(res.d);
     })
     .catch(function(e){
@@ -330,6 +333,25 @@ function showToast(msg) {
     var t = document.getElementById('toast');
     t.textContent = msg; t.classList.add('show');
     setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+
+// Tampilkan hasil tersimpan saat lagu dipilih
+function showSaved(id) {
+    if (id && SAVED[id]) {
+        renderResults({ song_id: parseInt(id), niche: SAVED[id].niche, topics: SAVED[id].topics, provider: 'tersimpan' });
+        document.getElementById('genStatus').textContent = '📁 Hasil tersimpan ditampilkan. Generate lagi untuk memperbarui.';
+        return true;
+    }
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('genStatus').textContent = '';
+    return false;
+}
+document.getElementById('songSelect').addEventListener('change', function(){ showSaved(this.value); });
+
+// Saat halaman dibuka: pulihkan generasi terakhir
+if (LAST_SONG && SAVED[LAST_SONG]) {
+    document.getElementById('songSelect').value = LAST_SONG;
+    showSaved(LAST_SONG);
 }
 </script>
 
