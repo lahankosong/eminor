@@ -11,6 +11,7 @@ use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SongController;
 use App\Http\Controllers\AiAgentController;
+use App\Http\Controllers\PromoTemplateController;
 use App\Http\Controllers\AkuController;
 use App\Http\Controllers\KamuController;
 use App\Http\Controllers\KitaController;
@@ -64,6 +65,7 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::delete('/destroy/{id}', [AdminController::class, 'destroy'])->name('destroy');
     Route::get('/settings', [SiteSettingController::class, 'index'])->name('settings');
     Route::post('/settings', [SiteSettingController::class, 'update'])->name('settings.update');
+    Route::get('/promo', [PromoTemplateController::class, 'index'])->name('promo');
     Route::get('/ai-agent', [AiAgentController::class, 'index'])->name('ai-agent');
     Route::post('/ai-agent/generate/{id}', [AiAgentController::class, 'generate'])->name('ai-agent.generate');
     Route::post('/ai-agent/save-selected', [AiAgentController::class, 'saveSelected'])->name('ai-agent.save-selected');
