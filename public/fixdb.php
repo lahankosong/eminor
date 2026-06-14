@@ -227,6 +227,32 @@ if (!tableExists($conn, $dbname, 'member_logs')) {
     markMigration($conn, '2026_06_13_000001_create_member_logs_table');
 }
 
+// ── 6c. Tabel content_plans ───────────────────────────────────────────────────
+echo '<h2>6c. Tabel content_plans</h2>';
+if (!tableExists($conn, $dbname, 'content_plans')) {
+    runSQL($conn, 'CREATE TABLE content_plans', "
+        CREATE TABLE `content_plans` (
+            `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `plan_date` date NOT NULL,
+            `song_id` bigint(20) UNSIGNED DEFAULT NULL,
+            `platforms` varchar(255) DEFAULT NULL,
+            `title` varchar(255) DEFAULT NULL,
+            `status` varchar(255) NOT NULL DEFAULT 'rencana',
+            `notes` text DEFAULT NULL,
+            `created_at` timestamp NULL DEFAULT NULL,
+            `updated_at` timestamp NULL DEFAULT NULL,
+            PRIMARY KEY (`id`),
+            KEY `content_plans_plan_date_index` (`plan_date`),
+            KEY `content_plans_song_id_foreign` (`song_id`),
+            CONSTRAINT `content_plans_song_id_foreign` FOREIGN KEY (`song_id`) REFERENCES `songs` (`id`) ON DELETE SET NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+    markMigration($conn, '2026_06_14_000001_create_content_plans_table');
+} else {
+    echo '<pre class="info">&#8212; Tabel content_plans sudah ada</pre>';
+    markMigration($conn, '2026_06_14_000001_create_content_plans_table');
+}
+
 // ── 7. Mark remaining pending migrations ─────────────────────────────────────
 echo '<h2>7. Tandai migration yang pending sebagai selesai</h2>';
 $toMark = [
@@ -278,6 +304,7 @@ $check = [
     'posts'                => 'Postingan Kita',
     'post_comments'        => 'Komentar Kita',
     'member_logs'          => 'Log member baru',
+    'content_plans'        => 'Content Calendar',
 ];
 foreach ($check as $tbl => $label) {
     $exists = tableExists($conn, $dbname, $tbl);

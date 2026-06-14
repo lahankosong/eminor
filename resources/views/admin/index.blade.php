@@ -141,6 +141,7 @@
     </div>
     <div class="quick-actions">
         <a href="{{ route('admin.settings') }}" class="btn-add btn-ghost">&#9881; Pengaturan</a>
+        <a href="{{ route('admin.calendar') }}" class="btn-add btn-ghost">&#128197; Kalender</a>
         <a href="{{ route('admin.promo') }}" class="btn-add btn-ghost">&#128203; Promo</a>
         <a href="{{ route('admin.ai-agent') }}" class="btn-add btn-accent">&#10024; AI Agent</a>
         <a href="{{ route('admin.create') }}" class="btn-add">+ Tambah Lagu</a>
