@@ -865,14 +865,14 @@ var tunerFreqHistory = [];
 var tunerA4 = 440; // referensi A4
 var tunerHannWin = null; // Hann window cache
 
-// minFreq/maxFreq untuk adaptive filter per senar
+// minFreq/maxFreq untuk adaptive filter per senar (range ±18%, tolak harmonic)
 var TUNER_STRINGS = [
-    { freq: 82.41,  label: 'E₂', minFreq: 70,  maxFreq: 100 },
-    { freq: 110.00, label: 'A₂', minFreq: 95,  maxFreq: 135 },
-    { freq: 146.83, label: 'D₃', minFreq: 130, maxFreq: 175 },
-    { freq: 196.00, label: 'G₃', minFreq: 170, maxFreq: 230 },
-    { freq: 246.94, label: 'B₃', minFreq: 220, maxFreq: 295 },
-    { freq: 329.63, label: 'e⁴', minFreq: 290, maxFreq: 390 },
+    { freq: 82.41,  label: 'E₂', minFreq: 68,  maxFreq: 97 },
+    { freq: 110.00, label: 'A₂', minFreq: 92,  maxFreq: 131 },
+    { freq: 146.83, label: 'D₃', minFreq: 122, maxFreq: 172 },
+    { freq: 196.00, label: 'G₃', minFreq: 164, maxFreq: 229 },
+    { freq: 246.94, label: 'B₃', minFreq: 207, maxFreq: 288 },
+    { freq: 329.63, label: 'e⁴', minFreq: 276, maxFreq: 383 },
 ];
 
 function tunerPickPeg(el) {
@@ -908,11 +908,14 @@ function tunerStart() {
         tunerRunning = true;
         tunerSmooth = 0;
         tunerFreqHistory = [];
+        tunerWasInTune = false;
+        tunerLastRender = null;    // diinit ke ts asli pada frame pertama
+        tunerLastAnalysis = null;
         var btn = document.getElementById('tunerBtn');
         btn.innerHTML = '&#9646;&#9646; Stop';
         btn.classList.add('stop');
         document.getElementById('tunerMsg').textContent = 'Petik senar gitarmu...';
-        tunerLoop();
+        tunerRaf = requestAnimationFrame(tunerLoop);   // mulai via RAF agar ts valid
     })
     .catch(function() {
         document.getElementById('tunerMsg').textContent = 'Izin mikrofon ditolak.';
@@ -934,11 +937,18 @@ function tunerStop() {
 }
 
 
-var tunerLastRender = 0;
+var tunerLastRender = null;          // ms render UI terakhir (diinit di tunerStart)
+var tunerLastAnalysis = null;        // ms analisis pitch terakhir
+var TUNER_RENDER_INTERVAL = 120;     // jeda update UI (≈8x/detik) — mata bisa follow
+var TUNER_ANALYSIS_INTERVAL = 35;    // jeda deteksi pitch (≈28x/detik) — banyak sampel, CPU aman
 function tunerLoop(ts) {
     if (!tunerRunning) return;
-    if (ts - tunerLastRender >= 80) {
-        tunerLastRender = ts;
+    if (tunerLastRender === null)   tunerLastRender = ts;
+    if (tunerLastAnalysis === null) tunerLastAnalysis = ts;
+
+    // ===== ANALISIS (lebih sering, isi history + smoothing) =====
+    if (ts - tunerLastAnalysis >= TUNER_ANALYSIS_INTERVAL) {
+        tunerLastAnalysis = ts;
         tunerAnalyser.getFloatTimeDomainData(tunerBuf);
         var freq = tunerMPM(tunerBuf, tunerCtx.sampleRate);
         // Adaptive range: jika senar dipilih, gunakan minFreq/maxFreq senar itu
@@ -949,20 +959,26 @@ function tunerLoop(ts) {
         }
         if (freq >= fMin && freq <= fMax) {
             tunerFreqHistory.push(freq);
-            if (tunerFreqHistory.length > 8) tunerFreqHistory.shift();
-            // Median buang outlier, lalu low-pass smoothing
+            if (tunerFreqHistory.length > 16) tunerFreqHistory.shift();
+            // Median buang outlier, lalu low-pass smoothing (alpha 0.35 = lebih halus)
             var sorted = tunerFreqHistory.slice().sort(function(a,b){return a-b;});
             var median = sorted[Math.floor(sorted.length / 2)];
-            tunerSmooth = tunerSmooth === 0 ? median : tunerSmooth * 0.72 + median * 0.28;
-            if (tunerFreqHistory.length >= 4) tunerRenderUI(tunerSmooth);
+            tunerSmooth = tunerSmooth === 0 ? median : tunerSmooth * 0.65 + median * 0.35;
         } else {
             tunerFreqHistory = [];
             if (tunerSmooth > 0) {
                 tunerSmooth *= 0.45;
-                if (tunerSmooth < 60) { tunerSmooth = 0; tunerRenderUI(null); }
+                if (tunerSmooth < 60) { tunerSmooth = 0; tunerRenderUI(null); tunerLastRender = ts; }
             }
         }
     }
+
+    // ===== RENDER (lebih jarang, butuh ≥10 sampel = confidence) =====
+    if (ts - tunerLastRender >= TUNER_RENDER_INTERVAL) {
+        tunerLastRender = ts;
+        if (tunerFreqHistory.length >= 10) tunerRenderUI(tunerSmooth);
+    }
+
     tunerRaf = requestAnimationFrame(tunerLoop);
 }
 
@@ -1069,7 +1085,10 @@ function tunerRenderUI(freq) {
 
     var absC = Math.abs(centsRaw);
     var sign = centsRaw >= 0 ? '+' : '';
-    if (absC <= 5) {
+    // Hysteresis: masuk in-tune saat ≤5 cent, bertahan sampai >8 cent (cegah flip-flop di tepi)
+    var wasInTune = tunerWasInTune;
+    var inTune = wasInTune ? (absC < 8) : (absC <= 5);
+    if (inTune) {
         noteEl.className    = 'tuner-note-big in-tune';
         centsEl.textContent = absC <= 1 ? '✓ Pas' : '✓ ' + sign + cents.toFixed(1) + ' cent';
         centsEl.className   = 'tuner-cents in-tune';
@@ -1077,7 +1096,8 @@ function tunerRenderUI(freq) {
         document.querySelectorAll('.tuner-peg').forEach(function(p){
             if (parseFloat(p.getAttribute('data-freq')) === target.freq) p.classList.add('in-tune');
         });
-        if (!tunerWasInTune) { tunerWasInTune = true; if (typeof fbSoundTunerInTune === 'function') fbSoundTunerInTune(); }
+        tunerWasInTune = true;
+        if (!wasInTune) { if (typeof fbSoundTunerInTune === 'function') fbSoundTunerInTune(); }
     } else if (centsRaw < 0) {
         tunerWasInTune = false;
         document.querySelectorAll('.tuner-peg.in-tune').forEach(function(p){ p.classList.remove('in-tune'); });
