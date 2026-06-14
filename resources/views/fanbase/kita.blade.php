@@ -94,8 +94,36 @@
     .kita-post-name {
         font-family: 'Sora', sans-serif;
         font-size: 13px; font-weight: 600; color: var(--text-1);
+        display: inline-flex; align-items: center; gap: 5px;
     }
+    .mus-badge { border: none; background: var(--sky-lt); color: var(--sky-dk); cursor: pointer; font-size: 11px; line-height: 1; padding: 2px 5px; border-radius: 20px; transition: 0.15s; }
+    .mus-badge:hover { background: var(--sky); color: #fff; transform: scale(1.1); }
     .kita-post-date { font-size: 11px; color: var(--text-4); margin-top: 2px; }
+
+    /* POPUP MUSISI */
+    .mc-overlay { position: fixed; inset: 0; background: rgba(10,20,30,0.55); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+    .mc-overlay.open { display: flex; }
+    .mc-card { background: var(--card); border-radius: 20px; width: 100%; max-width: 340px; box-shadow: var(--shadow-xl); overflow: hidden; animation: mcIn 0.18s ease; }
+    @keyframes mcIn { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .mc-banner { height: 64px; background: linear-gradient(135deg, var(--sky-dk), var(--sky-mid)); }
+    .mc-body { padding: 0 1.25rem 1.25rem; margin-top: -34px; text-align: center; }
+    .mc-avatar { width: 68px; height: 68px; border-radius: 50%; object-fit: cover; border: 3px solid var(--card); margin: 0 auto; display: block; background: var(--surface); }
+    .mc-name { font-family: 'Sora',sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--text-1); margin-top: 8px; }
+    .mc-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+    .mc-tags { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 10px 0; }
+    .mc-badge { font-size: 11px; padding: 2px 9px; border-radius: 20px; background: var(--surface); color: var(--sky-dk); border: 1px solid var(--border-lt); }
+    .mc-badge.lv-pemula { background: #facc15; color: #5a3e00; border: none; font-weight: 700; }
+    .mc-badge.lv-menengah { background: #38bdf8; color: #062b3a; border: none; font-weight: 700; }
+    .mc-badge.lv-mahir { background: #4ade80; color: #053a1a; border: none; font-weight: 700; }
+    .mc-badge.lv-profesional { background: #c084fc; color: #2e0a4a; border: none; font-weight: 700; }
+    .mc-look { font-size: 12px; color: var(--text-2); margin: 6px 0 2px; }
+    .mc-followers { font-size: 12px; color: var(--text-3); margin-bottom: 10px; }
+    .mc-actions { display: flex; gap: 8px; }
+    .mc-btn { flex: 1; padding: 9px; border-radius: 10px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; text-decoration: none; text-align: center; }
+    .mc-btn-follow { background: var(--sky); color: #fff; }
+    .mc-btn-follow.following { background: var(--surface); color: var(--text-2); border: 1px solid var(--border); }
+    .mc-btn-ghost { background: var(--surface); color: var(--text-2); border: 1px solid var(--border); }
+    .mc-close { position: absolute; }
     .kita-post-location {
         display: inline-flex; align-items: center; gap: 3px;
         font-size: 10px; color: var(--sky-dk); background: var(--sky-lt);
@@ -360,7 +388,9 @@
             <img src="{{ $post->user->avatar ?? 'https://www.google.com/favicon.ico' }}"
                  class="kita-post-avatar" alt="">
             <div class="kita-post-meta">
-                <div class="kita-post-name">{{ $post->user->name }}</div>
+                <div class="kita-post-name">{{ $post->user->name }}
+                    <button type="button" class="mus-badge" onclick="openMusCard({{ $post->user_id }})" title="Lihat profil">&#127925;</button>
+                </div>
                 <div class="kita-post-date">{{ $post->created_at->diffForHumans() }}</div>
                 @if(isset($post->location) && $post->location)
                 <span class="kita-post-location">&#128205; {{ $post->location }}</span>
@@ -528,12 +558,105 @@
 </div>
 @endif
 
+{{-- POPUP MUSISI / AUDIENS --}}
+<div class="mc-overlay" id="musOverlay" onclick="closeMusCard(event)">
+    <div class="mc-card" onclick="event.stopPropagation()">
+        <div class="mc-banner"></div>
+        <div class="mc-body">
+            <img id="mcAvatar" class="mc-avatar" src="{{ asset('images/default-avatar.png') }}" alt="">
+            <div class="mc-name" id="mcName">—</div>
+            <div class="mc-sub" id="mcSub"></div>
+            <div class="mc-tags" id="mcTags"></div>
+            <div class="mc-look" id="mcLook" style="display:none;"></div>
+            <div class="mc-followers" id="mcFollowers"></div>
+            <div class="mc-actions" id="mcActions"></div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
 <script>
 var BASE_URL  = '{{ url("") }}';
 var csrfToken = '{{ csrf_token() }}';
+
+/* ===== POPUP MUSISI ===== */
+var mcUser = null;
+function openMusCard(userId) {
+    document.getElementById('mcName').textContent = 'Memuat…';
+    document.getElementById('mcSub').textContent = '';
+    document.getElementById('mcTags').innerHTML = '';
+    document.getElementById('mcLook').style.display = 'none';
+    document.getElementById('mcFollowers').textContent = '';
+    document.getElementById('mcActions').innerHTML = '';
+    document.getElementById('mcAvatar').src = '{{ asset('images/default-avatar.png') }}';
+    document.getElementById('musOverlay').classList.add('open');
+    fetch(BASE_URL + '/musisi/card/' + userId, { headers: { 'Accept': 'application/json' } })
+        .then(function(r){ return r.json(); })
+        .then(function(d){ if (d && d.user_id) renderMusCard(d); else document.getElementById('mcName').textContent = 'Tidak ditemukan'; })
+        .catch(function(){ document.getElementById('mcName').textContent = 'Gagal memuat'; });
+}
+function closeMusCard(e) { document.getElementById('musOverlay').classList.remove('open'); }
+function mcCap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+function mcEsc(s){ return (s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function renderMusCard(d) {
+    mcUser = d;
+    document.getElementById('mcAvatar').src = d.avatar || '{{ asset('images/default-avatar.png') }}';
+    document.getElementById('mcName').textContent = d.name || 'Member';
+    var sub = d.is_musician ? '🎸 Musisi' : '🎧 Pendengar · calon fans';
+    if (d.location) sub += ' · 📍 ' + d.location;
+    document.getElementById('mcSub').textContent = sub;
+
+    var tags = '';
+    if (d.is_musician) {
+        if (d.skill_level) tags += '<span class="mc-badge lv-' + mcEsc(d.skill_level) + '">' + mcCap(d.skill_level) + '</span>';
+        (d.roles || []).forEach(function(r){ tags += '<span class="mc-badge">' + mcEsc(r) + '</span>'; });
+        (d.genres || []).forEach(function(g){ tags += '<span class="mc-badge">' + mcEsc(g) + '</span>'; });
+    }
+    document.getElementById('mcTags').innerHTML = tags;
+
+    var look = document.getElementById('mcLook');
+    if (d.is_musician && d.looking_for) { look.style.display = ''; look.textContent = '🔎 ' + d.looking_for; }
+    else look.style.display = 'none';
+
+    document.getElementById('mcFollowers').textContent = d.followers + ' pengikut';
+
+    var act = '';
+    if (!d.is_self) {
+        act += '<button class="mc-btn mc-btn-follow' + (d.is_following ? ' following' : '') + '" id="mcFollowBtn" onclick="mcToggleFollow()">' + (d.is_following ? 'Mengikuti' : '+ Ikuti') + '</button>';
+        act += '<button class="mc-btn mc-btn-ghost" onclick="mcContact()">💬 Hubungi</button>';
+    } else {
+        act += '<a class="mc-btn mc-btn-ghost" href="' + BASE_URL + '/musisi/profil">Edit profilku</a>';
+    }
+    if (d.is_musician && d.profile_id) {
+        act += '<a class="mc-btn mc-btn-ghost" href="' + BASE_URL + '/musisi/' + d.profile_id + '">Profil</a>';
+    }
+    document.getElementById('mcActions').innerHTML = act;
+}
+function mcToggleFollow() {
+    if (!mcUser) return;
+    var btn = document.getElementById('mcFollowBtn');
+    btn.disabled = true;
+    fetch(BASE_URL + '/follow/' + mcUser.user_id, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' } })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            btn.disabled = false;
+            if (d.error) return;
+            mcUser.is_following = d.following;
+            btn.textContent = d.following ? 'Mengikuti' : '+ Ikuti';
+            btn.classList.toggle('following', d.following);
+            document.getElementById('mcFollowers').textContent = d.followers + ' pengikut';
+        })
+        .catch(function(){ btn.disabled = false; });
+}
+function mcContact() {
+    if (!mcUser) return;
+    var f = document.createElement('form');
+    f.method = 'POST'; f.action = BASE_URL + '/dia/start/' + mcUser.user_id;
+    f.innerHTML = '<input type="hidden" name="_token" value="' + csrfToken + '">';
+    document.body.appendChild(f); f.submit();
+}
 
 /* CHAR COUNT */
 function kitaCharCount(el) {

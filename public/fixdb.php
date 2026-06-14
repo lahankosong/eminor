@@ -319,6 +319,29 @@ if (!tableExists($conn, $dbname, 'musician_profiles')) {
     markMigration($conn, '2026_06_15_000001_create_musician_profiles_table');
 }
 
+// ── 6f. Tabel follows ─────────────────────────────────────────────────────────
+echo '<h2>6f. Tabel follows</h2>';
+if (!tableExists($conn, $dbname, 'follows')) {
+    runSQL($conn, 'CREATE TABLE follows', "
+        CREATE TABLE `follows` (
+            `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `follower_id` bigint(20) UNSIGNED NOT NULL,
+            `following_id` bigint(20) UNSIGNED NOT NULL,
+            `created_at` timestamp NULL DEFAULT NULL,
+            `updated_at` timestamp NULL DEFAULT NULL,
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `follows_unique` (`follower_id`,`following_id`),
+            KEY `follows_following_id_index` (`following_id`),
+            CONSTRAINT `follows_follower_fk` FOREIGN KEY (`follower_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+            CONSTRAINT `follows_following_fk` FOREIGN KEY (`following_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+    markMigration($conn, '2026_06_15_000002_create_follows_table');
+} else {
+    echo '<pre class="info">&#8212; Tabel follows sudah ada</pre>';
+    markMigration($conn, '2026_06_15_000002_create_follows_table');
+}
+
 // ── 7. Mark remaining pending migrations ─────────────────────────────────────
 echo '<h2>7. Tandai migration yang pending sebagai selesai</h2>';
 $toMark = [

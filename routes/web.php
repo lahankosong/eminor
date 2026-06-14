@@ -100,6 +100,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/musisi', [MusicianController::class, 'index'])->name('musisi.index');
     Route::get('/musisi/profil', [MusicianController::class, 'edit'])->name('musisi.edit');
     Route::post('/musisi/profil', [MusicianController::class, 'save'])->name('musisi.save');
+    Route::get('/musisi/card/{userId}', [MusicianController::class, 'card'])->whereNumber('userId')->name('musisi.card');
+    Route::post('/follow/{userId}', [MusicianController::class, 'toggleFollow'])->whereNumber('userId')->name('follow.toggle');
     Route::get('/musisi/{id}', [MusicianController::class, 'show'])->whereNumber('id')->name('musisi.show');
 
     Route::get('/dia', [DiaController::class, 'index'])->name('dia');

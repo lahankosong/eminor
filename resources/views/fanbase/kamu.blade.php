@@ -67,6 +67,32 @@
         margin-top: 4px; letter-spacing: 0.05em;
     }
 
+    /* HERO RAMPING + PROFIL MUSISI */
+    .kamu-hero-compact { padding: 1.1rem 1.25rem; }
+    .kamu-hero-row { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
+    .kamu-avatar-sm { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.5); flex-shrink: 0; }
+    .kamu-hero-info { min-width: 0; }
+    .kamu-name-sm { font-family: 'Sora',sans-serif; font-size: 1.05rem; font-weight: 700; color: #fff; }
+    .kamu-follow-row { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: rgba(255,255,255,0.8); margin-top: 3px; }
+    .kamu-follow-row b { color: #fff; }
+    .kamu-private { color: rgba(255,255,255,0.6); }
+    .kamu-mus-card { position: relative; z-index: 1; margin-top: 12px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 10px 12px; }
+    .kamu-mus-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .kamu-mus-title { font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 0.02em; }
+    .kamu-mus-link { color: #fff; text-decoration: none; font-size: 14px; padding: 2px 6px; border-radius: 6px; opacity: 0.85; }
+    .kamu-mus-link:hover { background: rgba(255,255,255,0.18); opacity: 1; }
+    .kamu-mus-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+    .kamu-mus-badge { font-size: 11px; padding: 2px 9px; border-radius: 20px; background: rgba(255,255,255,0.22); color: #fff; }
+    .kamu-mus-badge.lv-pemula { background: #facc15; color: #5a3e00; font-weight: 700; }
+    .kamu-mus-badge.lv-menengah { background: #38bdf8; color: #062b3a; font-weight: 700; }
+    .kamu-mus-badge.lv-mahir { background: #4ade80; color: #053a1a; font-weight: 700; }
+    .kamu-mus-badge.lv-profesional { background: #c084fc; color: #2e0a4a; font-weight: 700; }
+    .kamu-mus-look { font-size: 12px; color: rgba(255,255,255,0.92); margin-top: 8px; }
+    .kamu-mus-activate { position: relative; z-index: 1; display: block; margin-top: 12px; text-align: center; background: rgba(255,255,255,0.16); border: 1px dashed rgba(255,255,255,0.4); border-radius: 12px; padding: 10px; color: #fff; text-decoration: none; font-size: 13px; font-weight: 600; }
+    .kamu-mus-activate:hover { background: rgba(255,255,255,0.24); }
+    .kamu-stats-compact { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: 12px; color: rgba(255,255,255,0.78); }
+    .kamu-stats-compact b { color: #fff; }
+
     /* TABS */
     .kamu-tabs {
         display: flex; gap: 4px; margin-bottom: 1.25rem;
@@ -423,31 +449,45 @@
 @section('content')
 
 {{-- PROFILE HERO --}}
-<div class="kamu-hero">
-    <div class="kamu-avatar-wrap">
-        <img src="{{ $user->avatar ?? asset('images/default-avatar.png') }}"
-             class="kamu-avatar" alt="{{ $user->name }}">
-        <div class="kamu-avatar-badge">&#10022;</div>
+<div class="kamu-hero kamu-hero-compact">
+    <div class="kamu-hero-row">
+        <img src="{{ $user->avatar ?? asset('images/default-avatar.png') }}" class="kamu-avatar-sm" alt="{{ $user->name }}">
+        <div class="kamu-hero-info">
+            <div class="kamu-name-sm">{{ $user->name }}</div>
+            <div class="kamu-follow-row">
+                <span><b>{{ $followers }}</b> pengikut</span>
+                <span><b>{{ $following }}</b> diikuti</span>
+                <span class="kamu-private">&#128274; privat</span>
+            </div>
+        </div>
     </div>
-    <div class="kamu-name">{{ $user->name }}</div>
-    <div class="kamu-email">{{ $user->email }}</div>
-    <div class="kamu-stats">
-        <div class="kamu-stat">
-            <div class="kamu-stat-num">{{ $totalPosts }}</div>
-            <div class="kamu-stat-label">Postingan</div>
+
+    {{-- Profil Musisi: display + pengaturan --}}
+    @if($musician)
+    <div class="kamu-mus-card">
+        <div class="kamu-mus-head">
+            <span class="kamu-mus-title">&#127928; Profil Musisi</span>
+            <div>
+                <a href="{{ route('musisi.show', $musician->id) }}" class="kamu-mus-link" title="Lihat di direktori">&#128065;</a>
+                <a href="{{ route('musisi.edit') }}" class="kamu-mus-link" title="Edit profil musisi">&#9998;</a>
+            </div>
         </div>
-        <div class="kamu-stat">
-            <div class="kamu-stat-num">{{ $totalLikes }}</div>
-            <div class="kamu-stat-label">Like</div>
+        <div class="kamu-mus-tags">
+            @if($musician->skill_level)<span class="kamu-mus-badge lv-{{ $musician->skill_level }}">{{ ucfirst($musician->skill_level) }}</span>@endif
+            @foreach($musician->rolesArray() as $r)<span class="kamu-mus-badge">{{ $r }}</span>@endforeach
+            @foreach($musician->genresArray() as $g)<span class="kamu-mus-badge">{{ $g }}</span>@endforeach
         </div>
-        <div class="kamu-stat">
-            <div class="kamu-stat-num">{{ $notes->count() }}</div>
-            <div class="kamu-stat-label">Catatan</div>
-        </div>
-        <div class="kamu-stat">
-            <div class="kamu-stat-num">{{ $user->created_at?->format('Y') ?? date('Y') }}</div>
-            <div class="kamu-stat-label">Bergabung</div>
-        </div>
+        @if($musician->looking_for)<div class="kamu-mus-look">&#128270; {{ $musician->looking_for }}</div>@endif
+    </div>
+    @else
+    <a href="{{ route('musisi.edit') }}" class="kamu-mus-activate">&#127928; Aktifkan profil musisimu &rarr;</a>
+    @endif
+
+    <div class="kamu-stats-compact">
+        <span><b>{{ $totalPosts }}</b> postingan</span>
+        <span><b>{{ $totalLikes }}</b> like</span>
+        <span><b>{{ $notes->count() }}</b> catatan</span>
+        <span>sejak <b>{{ $user->created_at?->format('Y') ?? date('Y') }}</b></span>
     </div>
 </div>
 

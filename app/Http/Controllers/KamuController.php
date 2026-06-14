@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\AkuPost;
+use App\Models\MusicianProfile;
+use App\Models\Follow;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,7 +30,18 @@ class KamuController extends Controller
         $totalLikes    = $posts->sum('likes_count');
         $totalComments = $posts->sum('comments_count');
         $totalPosts    = $posts->count();
-        return view('fanbase.kamu', compact('user', 'posts', 'notes', 'totalLikes', 'totalComments', 'totalPosts'));
+
+        $musician = null; $followers = 0; $following = 0;
+        try { $musician = MusicianProfile::where('user_id', $user->id)->first(); } catch (\Throwable $e) {}
+        try {
+            $followers = Follow::where('following_id', $user->id)->count();
+            $following = Follow::where('follower_id', $user->id)->count();
+        } catch (\Throwable $e) {}
+
+        return view('fanbase.kamu', compact(
+            'user', 'posts', 'notes', 'totalLikes', 'totalComments', 'totalPosts',
+            'musician', 'followers', 'following'
+        ));
     }
     public function update(Request $request, $id) {
         $post = Post::findOrFail($id);
