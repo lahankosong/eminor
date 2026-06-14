@@ -54,24 +54,6 @@
     }
     .form-textarea:focus { border-color: var(--text-3); }
 
-    /* QUILL EDITOR */
-    .quill-wrap { border-radius: 8px; overflow: hidden; }
-    .ql-toolbar {
-        background: var(--bg-3) !important; border: 1px solid var(--border) !important;
-        border-bottom: 1px solid var(--border-2) !important; border-radius: 8px 8px 0 0 !important;
-    }
-    .ql-container {
-        background: var(--bg-3) !important; border: 1px solid var(--border) !important;
-        border-top: none !important; border-radius: 0 0 8px 8px !important;
-        font-size: 13px !important; min-height: 150px;
-    }
-    .ql-editor { color: var(--text-2) !important; min-height: 150px; line-height: 1.7; }
-    .ql-toolbar .ql-stroke { stroke: var(--text-3) !important; }
-    .ql-toolbar .ql-fill   { fill: var(--text-3) !important; }
-    .ql-toolbar button:hover .ql-stroke { stroke: var(--text) !important; }
-    .ql-toolbar button:hover .ql-fill   { fill: var(--text) !important; }
-    .ql-toolbar .ql-picker-label { color: var(--text-3) !important; }
-
     /* PHOTO UPLOAD */
     .photo-upload-wrap { display: flex; align-items: center; gap: 16px; }
     .photo-preview {
@@ -253,15 +235,21 @@
         <div class="form-section">
             <p class="form-section-title">Biografi & Deskripsi Project</p>
             <div class="form-group full">
-                <label class="form-label">Bio (tampil di halaman About)</label>
-                <div class="quill-wrap">
-                    <div id="bioEditor">{!! $settings['bio']->value ?? '' !!}</div>
-                </div>
-                <input type="hidden" name="bio" id="bioInput">
+                <label class="form-label">Bio</label>
+                @php
+                    $bioRaw = $settings['bio']->value ?? '';
+                    // konversi sisa HTML lama (Quill) ke teks biasa
+                    $bioText = trim(html_entity_decode(strip_tags(
+                        str_ireplace(['<br>', '<br/>', '<br />', '</p>', '</div>'], "\n", $bioRaw)
+                    )));
+                @endphp
+                <textarea name="bio" class="form-textarea" style="min-height:180px;"
+                    placeholder="Tulis biografi / deskripsi project di sini...">{{ $bioText }}</textarea>
+                <span class="form-hint">Teks biasa. Pisahkan paragraf dengan baris kosong.</span>
             </div>
         </div>
         <div class="form-actions">
-            <button type="submit" class="btn-save" onclick="saveBio()">Simpan</button>
+            <button type="submit" class="btn-save">Simpan</button>
         </div>
     </div>
 
@@ -315,25 +303,7 @@
 @endsection
 
 @push('scripts')
-<link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
 <script>
-var quill = new Quill('#bioEditor', {
-    theme: 'snow',
-    modules: {
-        toolbar: [
-            ['bold', 'italic', 'underline'],
-            [{ 'align': [] }],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            ['clean']
-        ]
-    }
-});
-
-function saveBio() {
-    document.getElementById('bioInput').value = quill.root.innerHTML;
-}
-
 function showTab(name) {
     document.querySelectorAll('.tab-panel').forEach(function(el) {
         el.classList.remove('active');
@@ -363,10 +333,11 @@ function previewPhoto(input) {
     }
 }
 
+// Feedback tombol saat menyimpan
 document.querySelector('form').addEventListener('submit', function() {
-    if (document.getElementById('tab-bio').classList.contains('active')) {
-        saveBio();
-    }
+    document.querySelectorAll('.btn-save').forEach(function(b){
+        b.textContent = 'Menyimpan…'; b.disabled = true; b.style.opacity = '0.7';
+    });
 });
 </script>
 @endpush
