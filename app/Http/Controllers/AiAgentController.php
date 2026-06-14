@@ -156,8 +156,8 @@ EOT;
             $n++;
         }
         if (in_array('umum', $want)) {
-            $tasks .= "\n{$n}. TEMA UMUM: 5 ide tema/cerita UMUM (cerita rakyat Indonesia, sejarah, kisah cinta legendaris, momen kehidupan, adegan film) yang COCOK memakai lagu ini sebagai BACKSOUND. Tiap tema: judul tema, angle (kenapa lagu ini cocok jadi backsound-nya), narasi pendek pembuka konten (Indonesia), 1 image prompt (BAHASA INGGRIS, vertical 9:16). Contoh tema: kisah Roro Jonggrang & Bandung Bondowoso.";
-            $schema[] = '"umum": [{"theme":"judul tema","angle":"alasan cocok jadi backsound","narration":"narasi pendek","image_prompt":"english 9:16 prompt"}]';
+            $tasks .= "\n{$n}. TEMA UMUM (video panjang 3–5 menit): 3 ide tema/cerita UMUM (cerita rakyat Indonesia, sejarah, kisah cinta legendaris, adegan film, momen kehidupan) yang COCOK memakai lagu ini sebagai BACKSOUND. Tiap tema: judul tema, angle (kenapa lagu cocok jadi backsound-nya), NARASI panjang bahasa Indonesia ~500–700 kata (durasi dibaca 3–5 menit, storytelling utuh pembuka-konflik-penutup), + 5–6 image prompt (BAHASA INGGRIS, vertical 9:16, palet brand). Contoh tema: kisah Roro Jonggrang & Bandung Bondowoso.";
+            $schema[] = '"umum": [{"theme":"judul tema","angle":"alasan cocok jadi backsound","narration":"naskah 500-700 kata (3-5 menit)","scenes":[{"image_prompt":"english 9:16 prompt"}]}]';
             $n++;
         }
 
@@ -244,7 +244,7 @@ EOT;
                 'title'        => mb_substr($item['text'], 0, 240),
                 'status'       => 'rencana',
                 'notes'        => $item['image_prompt']
-                    ? ($type === 'long' ? "📝 Narasi:\n" : "🎨 Image prompt:\n") . $item['image_prompt']
+                    ? ($type === 'long' ? "📝 Narasi:\n" : ($type === 'umum' ? "🌐 Tema backsound:\n" : "🎨 Image prompt:\n")) . $item['image_prompt']
                     : null,
             ]);
             $count++;

@@ -329,17 +329,25 @@ function renderResults(d) {
     umWrap.innerHTML = '';
     var um = d.umum;
     if (um && um.length) {
-        var uh = '<div class="section-divider">🌐 TEMA UMUM · backsound cerita</div>';
+        var uh = '<div class="section-divider">🌐 TEMA UMUM · video panjang 3–5 menit</div>';
         um.forEach(function(u){
-            var combined = 'Tema: ' + (u.theme||'') + '\nAngle: ' + (u.angle||'') + '\nNarasi: ' + (u.narration||'') + '\nImage: ' + (u.image_prompt||'');
-            uh += '<div class="topic"><div class="narr">' +
-                '<input type="checkbox" class="narrChk" data-type="umum" data-text="' + esc(u.theme) + '" data-prompt="' + esc(combined) + '" onchange="updateCount()">' +
-                '<div class="narr-body">' +
-                    '<div class="narr-text" style="font-weight:600;">' + esc(u.theme) + '</div>' +
-                    '<div style="font-size:12px;color:var(--text-3);margin-top:3px;">💡 ' + esc(u.angle) + '</div>' +
-                    '<div class="narr-text" style="margin-top:5px;">' + esc(u.narration) + '</div>' +
-                    '<div class="narr-prompt">🎨 ' + esc(u.image_prompt) +
-                        '<span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(u.image_prompt) + '\')">[copy]</span></div>' +
+            var scenesArr = (u.scenes && u.scenes.length) ? u.scenes : (u.image_prompt ? [{image_prompt:u.image_prompt}] : []);
+            var scenesHtml = scenesArr.map(function(sc, i){
+                return '<div class="narr-prompt">🎨 ' + (i+1) + '. ' + esc(sc.image_prompt) +
+                    '<span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(sc.image_prompt) + '\')">[copy]</span></div>';
+            }).join('');
+            var scenesText = scenesArr.map(function(sc, i){ return (i+1) + '. ' + sc.image_prompt; }).join('\n');
+            var combined = 'Angle: ' + (u.angle||'') + '\n\nNarasi:\n' + (u.narration||'') + (scenesText ? '\n\nImage prompts:\n' + scenesText : '');
+            uh += '<div class="topic"><div class="topic-head">' +
+                '<span class="topic-title">🌐 ' + esc(u.theme) + '</span>' +
+                '<label style="font-size:11px;color:var(--text-2);display:flex;gap:6px;align-items:center;cursor:pointer;">' +
+                    '<input type="checkbox" class="narrChk" data-type="umum" data-text="' + esc(u.theme) + '" data-prompt="' + esc(combined) + '" onchange="updateCount()"> jadwalkan</label>' +
+                '</div>' +
+                '<div class="narr"><div class="narr-body">' +
+                    '<div style="font-size:12px;color:var(--text-3);">💡 ' + esc(u.angle) + '</div>' +
+                    '<div class="narr-prompt" style="white-space:pre-wrap;font-family:inherit;line-height:1.7;margin-top:6px;">' + esc(u.narration) +
+                        ' <span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(u.narration) + '\')">[copy narasi]</span></div>' +
+                    (scenesHtml ? '<div style="margin-top:8px;font-size:11px;color:var(--text-3);">Image prompts (9:16):</div>' + scenesHtml : '') +
                 '</div></div></div>';
         });
         umWrap.innerHTML = uh;
