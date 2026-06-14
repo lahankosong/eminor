@@ -309,12 +309,14 @@ function renderResults(d) {
             return '<div class="narr-prompt">🎨 ' + (i+1) + '. ' + esc(sc.image_prompt) +
                 '<span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(sc.image_prompt) + '\')">[copy]</span></div>';
         }).join('');
+        var lfScenesText = (lf.scenes || []).map(function(sc, i){ return (i+1) + '. ' + sc.image_prompt; }).join('\n');
+        var lfCombined = (lf.narration || '') + (lfScenesText ? '\n\nImage prompts:\n' + lfScenesText : '');
         lfWrap.innerHTML =
             '<div class="section-divider">🎬 VIDEO 3–5 MENIT</div>' +
             '<div class="topic"><div class="topic-head">' +
                 '<span class="topic-title">🎬 Video Panjang · ' + esc(lf.duration_estimate || '3–5 menit') + '</span>' +
                 '<label style="font-size:11px;color:var(--text-2);display:flex;gap:6px;align-items:center;cursor:pointer;">' +
-                    '<input type="checkbox" class="narrChk" data-type="long" data-text="' + esc(lf.title || 'Video panjang') + '" data-prompt="' + esc(lf.narration) + '" onchange="updateCount()"> jadwalkan</label>' +
+                    '<input type="checkbox" class="narrChk" data-type="long" data-text="' + esc(lf.title || 'Video panjang') + '" data-prompt="' + esc(lfCombined) + '" onchange="updateCount()"> jadwalkan</label>' +
             '</div>' +
             '<div class="narr"><div class="narr-body">' +
                 '<div class="narr-text" style="font-weight:600;margin-bottom:6px;">' + esc(lf.title || '') +
