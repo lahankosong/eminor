@@ -2,6 +2,41 @@
 
 ---
 
+## 2026-06-14 — Stabilisasi Tuner + SKILL.md + member_logs + Fix 500 Guest
+**Commit**: `9caeb33` (tuner + SKILL.md), `6c66eda` (fixdb member_logs), `317a0c1` (fix redirect guest)
+
+### Yang Dikerjakan
+
+#### 1. Stabilisasi Tuner Gitar (`kamu.blade.php`)
+Mengatasi keluhan jarum/meter terlalu agresif & tidak stabil (analisis root-cause dari sesi Claude lain):
+- **Pisah dua timer**: analisis pitch 35ms (≈28×/dtk) vs render UI 120ms (≈8×/dtk).
+  Sebelumnya keduanya throttle bareng di 80ms → render terlalu cepat, mata tak bisa follow.
+- **Fix timing**: `tunerLastRender` diinit `null` → diisi `ts` asli di frame pertama; loop mulai via `requestAnimationFrame` (bukan call langsung dgn `ts=undefined`).
+- **Low-pass alpha** 0.28 → **0.35** (0.65/0.35) — jarum lebih halus.
+- **History buffer** 8 → **16**, **gate render** ≥4 → **≥10 sampel** (kurangi false positive).
+- **Hysteresis in-tune**: masuk ≤5 cent, bertahan sampai >8 cent (cegah flip-flop di tepi).
+- **Range frekuensi** per senar ±25% → **±18%** (E 70–100 → 68–97 dst) untuk tolak harmonic.
+- Penyesuaian vs rencana: rencana minta analisis tiap frame (~60×/dtk); karena MPM O(n²) berat di HP, dipisah jadi 35ms agar CPU mobile aman.
+
+#### 2. SKILL.md (baru)
+Panduan kerja project: Quick Reference (folder/file/stack), Development Patterns (controller/model/blade/AJAX), Common Tasks (route, notif, tab, fix 500, deploy, cache), Design System (CSS vars, breakpoint 1060/768/480, ikon SVG), Troubleshooting, Testing Checklist + cara pakai referensi.
+
+#### 3. Tabel member_logs (dari pull sesi sebelumnya)
+- Lokal: `php artisan migrate --path=...create_member_logs_table.php` (DB lokal ternyata **MySQL**, bukan SQLite; migrasi lama lain pending tapi redundan).
+- Produksi: tambah pembuatan tabel + verifikasi ke `fixdb.php` (pola SQL mentah), deploy, jalankan → tabel dibuat.
+
+#### 4. Fix Bug 500 untuk Guest (`bootstrap/app.php`)
+- **Gejala**: semua route ber-auth (`/aku /kamu /kita /dia /profile`) **500** untuk user belum login.
+- **Penyebab**: project tak punya route bernama `login` (pakai `google.login`) → middleware auth default lempar `RouteNotFoundException`. Ini juga penyebab error `GoogleController::callback` menumpuk di log.
+- **Fix**: `$middleware->redirectGuestsTo(fn () => route('google.login'))`.
+- **Hasil**: 500 → **302 redirect ke login** (terverifikasi); homepage tetap 200.
+
+#### 5. Deploy
+- Push `main` → `deploy.php?key=margono2026&run=1` (151 file) → `fixdb.php?key=margono2026`.
+- Verifikasi produksi: `/` 200, route terproteksi 302, tabel `member_logs` ada.
+
+---
+
 ## 2026-06-13 — Welcome Banner Member Baru + Log Member di Kita + Perbaikan 500 + Online Widget
 **Commit**: `2b4fce5` (player desktop + online di atas), `093faf7` (fix 500), `7ce4da3` (fix db), `26bcea0` (fix dia), `5c027c2` (musik persisten), serta commit sesi ini
 
