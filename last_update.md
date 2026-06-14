@@ -2,6 +2,31 @@
 
 ---
 
+## 2026-06-14 — Tier 1 SELESAI: Admin Cleanup + Promo Templates + Content Calendar
+**Commit**: `8bce86c` (edit), `1cd466a` (index), `1eb60f6` (settings), `607f7e8` (ai-agent), `fba9469` (promo), `4df89e0` (calendar) — + UI tuner (`88ebd74`, `2428499`, `ebcc5c3`) & roadmap (`9a1a16b`)
+
+### Admin Panel Cleanup (Tier 1)
+1. **edit.blade.php** — perbaiki bug nesting (upload audio pemutar musik dipindah ke section Media; sebelumnya ter-nest di field YouTube ID); hapus Chord Detector autokorelasi (~165 baris, akurasi rendah); 4 section collapsible (native `<details>`); panel Preview realtime. 510→345 baris.
+2. **index.blade.php** (dashboard) — search judul, filter chip (status/era), stats card jadi tombol filter, tabel jadi kartu di mobile (data-label), Quick Actions di header.
+3. **settings.blade.php** — ganti Quill editor (~180KB) → textarea biasa (bio tidak dirender publik, jadi aman; konversi HTML lama ke teks); feedback tombol "Menyimpan…".
+4. **ai-agent.blade.php** — banner "fitur dijeda (hemat budget)" + konfirmasi sebelum generate (cegah pemakaian kredit API tak sengaja); fitur tetap utuh.
+5. **create.blade.php** — dilewati (opsional DRY, file sudah rapi).
+
+### Fitur Baru (Tier 1)
+6. **Promo Templates** (`/admin/promo`) — `PromoTemplateController` + `admin/promo.blade.php`. Pilih lagu → 5 template caption otomatis dari data lagu (TikTok/Reels hook, Instagram 3 variasi, YouTube description, Spotify pitch, Discord announcement); editable + tombol Copy; **100% client-side, tanpa API**.
+7. **Content Calendar** (`/admin/calendar`) — tabel `content_plans` + model `ContentPlan` + `ContentCalendarController` (index/store/update/destroy). Form jadwalkan konten (tanggal, ide, lagu, platform checkbox, catatan); daftar dikelompokkan per tanggal; status rencana/proses/selesai; hapus. Controller dibungkus try-catch (fallback bila tabel belum ada).
+
+### Catatan teknis
+- `fixdb.php` diperluas: buat tabel `member_logs` (sesi lalu) + `content_plans` + verifikasi.
+- Migrasi lokal pakai `--path` (DB lokal MySQL, ada migrasi lama redundan yang pending).
+- Quick Actions dashboard kini: Pengaturan · Kalender · Promo · AI Agent · Tambah Lagu.
+- Semua sudah deploy ke produksi (`deploy.php` + `fixdb.php`); route terverifikasi (302 untuk guest).
+
+### Belum dikerjakan (Tier 2+)
+Email newsletter, analytics dashboard, multi-platform scheduler, fan engagement (leaderboard), AI Agent v2, Discord bot — lihat roadmap di `project.md`.
+
+---
+
 ## 2026-06-14 — Stabilisasi Tuner + SKILL.md + member_logs + Fix 500 Guest
 **Commit**: `9caeb33` (tuner + SKILL.md), `6c66eda` (fixdb member_logs), `317a0c1` (fix redirect guest)
 
