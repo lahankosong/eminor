@@ -670,6 +670,9 @@
 <div class="fb-topbar">
     <a href="{{ route('aku') }}" class="fb-brand">MARGONOANDI <span>· fanbase</span></a>
     <div class="fb-topbar-right">
+        <a href="{{ route('musisi.index') }}" class="fb-notif-btn {{ request()->routeIs('musisi*') ? 'active' : '' }}" title="Direktori Musisi" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        </a>
         <div class="fb-notif-wrap">
             <button class="fb-notif-btn" id="fbNotifBtn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -732,6 +735,13 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 </span>
                 <span>Dia</span>
+            </a>
+            <a href="{{ route('musisi.index') }}"
+               class="fb-nav-item {{ request()->routeIs('musisi*') ? 'active' : '' }}">
+                <span class="fb-nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                </span>
+                <span>Musisi</span>
             </a>
             <div class="fb-nav-divider"></div>
             <a href="{{ route('home') }}" class="fb-nav-item">

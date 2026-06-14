@@ -287,6 +287,38 @@ if (!tableExists($conn, $dbname, 'ai_providers')) {
     markMigration($conn, '2026_06_14_000002_create_ai_providers_table');
 }
 
+// ── 6e. Tabel musician_profiles ───────────────────────────────────────────────
+echo '<h2>6e. Tabel musician_profiles</h2>';
+if (!tableExists($conn, $dbname, 'musician_profiles')) {
+    runSQL($conn, 'CREATE TABLE musician_profiles', "
+        CREATE TABLE `musician_profiles` (
+            `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `user_id` bigint(20) UNSIGNED NOT NULL,
+            `roles` varchar(255) DEFAULT NULL,
+            `skill_level` varchar(255) DEFAULT NULL,
+            `genres` varchar(255) DEFAULT NULL,
+            `location` varchar(255) DEFAULT NULL,
+            `bio` text DEFAULT NULL,
+            `looking_for` varchar(255) DEFAULT NULL,
+            `spotify_url` varchar(255) DEFAULT NULL,
+            `youtube_url` varchar(255) DEFAULT NULL,
+            `instagram` varchar(255) DEFAULT NULL,
+            `open_to_band` tinyint(1) NOT NULL DEFAULT 1,
+            `open_to_collab` tinyint(1) NOT NULL DEFAULT 1,
+            `is_active` tinyint(1) NOT NULL DEFAULT 1,
+            `created_at` timestamp NULL DEFAULT NULL,
+            `updated_at` timestamp NULL DEFAULT NULL,
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `musician_profiles_user_id_unique` (`user_id`),
+            CONSTRAINT `musician_profiles_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+    markMigration($conn, '2026_06_15_000001_create_musician_profiles_table');
+} else {
+    echo '<pre class="info">&#8212; Tabel musician_profiles sudah ada</pre>';
+    markMigration($conn, '2026_06_15_000001_create_musician_profiles_table');
+}
+
 // ── 7. Mark remaining pending migrations ─────────────────────────────────────
 echo '<h2>7. Tandai migration yang pending sebagai selesai</h2>';
 $toMark = [
@@ -340,6 +372,7 @@ $check = [
     'member_logs'          => 'Log member baru',
     'content_plans'        => 'Content Calendar',
     'ai_providers'         => 'AI Agent providers',
+    'musician_profiles'    => 'Direktori Musisi (ekosistem)',
 ];
 foreach ($check as $tbl => $label) {
     $exists = tableExists($conn, $dbname, $tbl);

@@ -13,6 +13,7 @@ use App\Http\Controllers\SongController;
 use App\Http\Controllers\AiAgentController;
 use App\Http\Controllers\PromoTemplateController;
 use App\Http\Controllers\ContentCalendarController;
+use App\Http\Controllers\MusicianController;
 use App\Http\Controllers\AkuController;
 use App\Http\Controllers\KamuController;
 use App\Http\Controllers\KitaController;
@@ -94,6 +95,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/kita/{id}/like', [KitaController::class, 'like'])->name('kita.like');
     Route::post('/kita/{id}/comment', [KitaController::class, 'comment'])->name('kita.comment');
     Route::post('/kita/{postId}/comment/{commentId}/like', [KitaController::class, 'likeComment'])->name('kita.comment.like');
+
+    // Ecosystem Fase 1 — Direktori Musisi
+    Route::get('/musisi', [MusicianController::class, 'index'])->name('musisi.index');
+    Route::get('/musisi/profil', [MusicianController::class, 'edit'])->name('musisi.edit');
+    Route::post('/musisi/profil', [MusicianController::class, 'save'])->name('musisi.save');
+    Route::get('/musisi/{id}', [MusicianController::class, 'show'])->whereNumber('id')->name('musisi.show');
 
     Route::get('/dia', [DiaController::class, 'index'])->name('dia');
     Route::get('/dia/conversation/{id}', [DiaController::class, 'conversation'])->name('dia.conversation');
