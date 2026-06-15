@@ -676,33 +676,28 @@ function kitaToggleLocation() {
     if (!el) return;
     el.classList.toggle('show');
     if (el.classList.contains('show') && !el.value) {
-        kitaDetectLocation(el, false);
+        kitaDetectLocation(el);
     }
 }
 
-// Deteksi lokasi tahan-banting: coba akurasi rendah dulu (cepat, cukup utk kota),
-// jika gagal/timeout retry sekali dgn GPS akurasi tinggi + waktu lebih panjang.
-function kitaDetectLocation(el, highAccuracy) {
-    if (!navigator.geolocation) { el.placeholder = 'Ketik lokasi manual...'; return; }
+// Deteksi lokasi tahan-banting (penting utk Android/TWA):
+// 1. Coba GPS sekali (cepat, cukup utk kota). 2. Apa pun yang gagal (ditolak,
+//    timeout, tak tersedia) → fallback deteksi via JARINGAN (IP) yang tidak
+//    butuh izin & jalan di Android meski GPS bermasalah.
+function kitaSetCity(el, city) {
+    if (!el.value) el.value = city;
+    el.placeholder = '📍 Lokasi kamu...';
+}
+
+function kitaDetectLocation(el) {
     el.placeholder = '⏳ Mendeteksi lokasi…';
+    if (!navigator.geolocation) { kitaIpFallback(el); return; }
+    var settled = false;
+    var guard = setTimeout(function(){ if (!settled) { settled = true; kitaIpFallback(el); } }, 9000);
     navigator.geolocation.getCurrentPosition(
-        function(pos) { kitaReverseGeocode(el, pos.coords.latitude, pos.coords.longitude); },
-        function(err) {
-            if (err && err.code === 1) {              // PERMISSION_DENIED
-                el.placeholder = 'Izin lokasi ditolak — ketik manual';
-                return;
-            }
-            if (!highAccuracy) {                       // TIMEOUT / UNAVAILABLE → retry GPS
-                kitaDetectLocation(el, true);
-            } else {
-                el.placeholder = 'Lokasi tak terdeteksi — ketik manual';
-            }
-        },
-        {
-            enableHighAccuracy: highAccuracy,
-            timeout: highAccuracy ? 20000 : 12000,
-            maximumAge: 600000                          // terima fix s/d 10 menit terakhir
-        }
+        function(pos) { if (settled) return; settled = true; clearTimeout(guard); kitaReverseGeocode(el, pos.coords.latitude, pos.coords.longitude); },
+        function(err) { if (settled) return; settled = true; clearTimeout(guard); kitaIpFallback(el); },
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 }
     );
 }
 
@@ -710,21 +705,39 @@ function kitaReverseGeocode(el, lat, lon) {
     el.placeholder = '⏳ Mencari nama kota…';
     var done = false;
     var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-    var t = setTimeout(function(){ if (ctrl) ctrl.abort(); if (!done) el.placeholder = 'Ketik lokasi manual...'; }, 9000);
+    var t = setTimeout(function(){ if (ctrl) ctrl.abort(); if (!done) { done = true; kitaIpFallback(el); } }, 8000);
     fetch('https://nominatim.openstreetmap.org/reverse?format=json&zoom=10&lat=' + lat + '&lon=' + lon,
           { headers: { 'Accept-Language': 'id' }, signal: ctrl ? ctrl.signal : undefined })
         .then(function(r){ return r.json(); })
         .then(function(d){
-            done = true; clearTimeout(t);
+            if (done) return; done = true; clearTimeout(t);
             var a = d.address || {};
             var city = a.city || a.town || a.village || a.municipality || a.county || a.state || '';
-            if (city) { el.value = city; el.placeholder = '📍 Lokasi kamu...'; }
-            else { el.placeholder = 'Kota tak ditemukan — ketik manual'; }
+            if (city) kitaSetCity(el, city);
+            else kitaIpFallback(el);
         })
-        .catch(function(){
-            done = true; clearTimeout(t);
-            el.placeholder = 'Gagal ambil nama kota — ketik manual';
-        });
+        .catch(function(){ if (done) return; done = true; clearTimeout(t); kitaIpFallback(el); });
+}
+
+// Fallback via IP (HTTPS, tanpa API key). ipwho.is → cadangan ipapi.co.
+function kitaIpFallback(el) {
+    el.placeholder = '⏳ Mendeteksi via jaringan…';
+    fetch('https://ipwho.is/')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            if (d && d.success && d.city) kitaSetCity(el, d.city);
+            else kitaIpFallback2(el);
+        })
+        .catch(function(){ kitaIpFallback2(el); });
+}
+function kitaIpFallback2(el) {
+    fetch('https://ipapi.co/json/')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            if (d && d.city) kitaSetCity(el, d.city);
+            else el.placeholder = 'Tak terdeteksi — ketik manual';
+        })
+        .catch(function(){ el.placeholder = 'Tak terdeteksi — ketik manual'; });
 }
 
 /* LIKE */
