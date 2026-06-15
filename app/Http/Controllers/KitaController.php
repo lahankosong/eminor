@@ -88,11 +88,7 @@ class KitaController extends Controller
             'location' => 'nullable|string|max:100',
         ]);
 
-        $badWords = ['bangsat','anjing','babi','goblok','tolol','kontol','memek','bajingan','sialan','kampret'];
-        $body = $request->body;
-        foreach ($badWords as $word) {
-            $body = preg_replace('/\b'.preg_quote($word,'/').'\b/i', str_repeat('*', strlen($word)), $body);
-        }
+        $body = \App\Helpers\WordFilter::clean($request->body);
 
         Post::create([
             'user_id'  => Auth::id(),

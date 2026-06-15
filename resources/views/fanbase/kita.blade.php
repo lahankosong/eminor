@@ -72,6 +72,10 @@
     }
     .kita-location-input.show { display: block; }
     .kita-location-input:focus { border-color: var(--sky); }
+    .kita-loc-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--sky-dk); background: var(--sky-lt); border: 1px solid var(--border-lt); border-radius: 20px; padding: 3px 6px 3px 10px; }
+    .kita-loc-x { border: none; background: rgba(0,0,0,0.06); color: var(--sky-dk); width: 16px; height: 16px; border-radius: 50%; cursor: pointer; font-size: 10px; line-height: 1; padding: 0; }
+    .kita-loc-x:hover { background: rgba(0,0,0,0.14); }
+    .kita-loc-status { font-size: 12px; color: var(--text-3); }
 
     /* POST CARD */
     .kita-post {
@@ -347,14 +351,15 @@
         @csrf
         <textarea name="body" class="kita-textarea" id="kitaBody"
             placeholder="Apa yang ada di pikiranmu sekarang?"
-            maxlength="500" oninput="kitaCharCount(this)" required></textarea>
-        <input type="text" name="location" class="kita-location-input"
-               id="kitaLocation" placeholder="&#128205; Lokasi kamu...">
+            maxlength="500" oninput="kitaCharCount(this)" onfocus="kitaAutoLoc()" required></textarea>
+        <input type="hidden" name="location" id="kitaLocation">
         <div class="kita-form-footer">
             <div class="kita-form-left">
-                <button type="button" class="kita-loc-btn" onclick="kitaToggleLocation()">
-                    &#128205; Lokasi
-                </button>
+                <span class="kita-loc-chip" id="kitaLocChip" style="display:none;">
+                    &#128205; <span id="kitaLocText"></span>
+                    <button type="button" class="kita-loc-x" onclick="kitaClearLoc()" title="Hapus lokasi">&#10005;</button>
+                </span>
+                <span class="kita-loc-status" id="kitaLocStatus" style="display:none;"></span>
                 <span class="kita-char-count" id="kitaCharCount">0 / 500</span>
             </div>
             <button type="submit" class="btn-post-kita">&#128640; Posting</button>
@@ -616,7 +621,7 @@ function renderMusCard(d) {
     document.getElementById('mcSub').textContent = sub;
 
     var cityEl = document.getElementById('mcCity');
-    if (d.city) { cityEl.style.display = ''; cityEl.textContent = '📍 ' + d.city + ' · lokasi jaringan'; }
+    if (d.city) { cityEl.style.display = ''; cityEl.textContent = '📍 ~' + d.city + ' · perkiraan wilayah (jaringan)'; }
     else { cityEl.style.display = 'none'; }
 
     var tags = '';
@@ -676,74 +681,42 @@ function kitaCharCount(el) {
     if(cnt){ cnt.textContent=c+' / 500'; cnt.classList.toggle('warn',c>400); }
 }
 
-/* LOCATION */
-function kitaToggleLocation() {
-    var el = document.getElementById('kitaLocation');
-    if (!el) return;
-    el.classList.toggle('show');
-    if (el.classList.contains('show') && !el.value) {
-        kitaDetectLocation(el);
-    }
-}
-
-// Deteksi lokasi tahan-banting (penting utk Android/TWA):
-// 1. Coba GPS sekali (cepat, cukup utk kota). 2. Apa pun yang gagal (ditolak,
-//    timeout, tak tersedia) → fallback deteksi via JARINGAN (IP) yang tidak
-//    butuh izin & jalan di Android meski GPS bermasalah.
-function kitaSetCity(el, city) {
-    if (!el.value) el.value = city;
-    el.placeholder = '📍 Lokasi kamu...';
-}
-
-function kitaDetectLocation(el) {
-    el.placeholder = '⏳ Mendeteksi lokasi…';
-    if (!navigator.geolocation) { kitaIpFallback(el); return; }
-    var settled = false;
-    var guard = setTimeout(function(){ if (!settled) { settled = true; kitaIpFallback(el); } }, 9000);
+/* LOCATION — auto-deteksi GPS akurat saat mulai menulis post, langsung muncul */
+var kitaLocStarted = false;
+function kitaAutoLoc() {
+    if (kitaLocStarted) return;            // sekali saja per buka halaman
+    kitaLocStarted = true;
+    if (document.getElementById('kitaLocation').value) return; // sudah ada
+    if (!navigator.geolocation) return;
+    var st = document.getElementById('kitaLocStatus');
+    st.style.display = ''; st.textContent = '📍 mendeteksi lokasi…';
     navigator.geolocation.getCurrentPosition(
-        function(pos) { if (settled) return; settled = true; clearTimeout(guard); kitaReverseGeocode(el, pos.coords.latitude, pos.coords.longitude); },
-        function(err) { if (settled) return; settled = true; clearTimeout(guard); kitaIpFallback(el); },
-        { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 }
+        function(pos){ kitaPostReverse(pos.coords.latitude, pos.coords.longitude); },
+        function(err){ st.style.display = 'none'; },   // ditolak/gagal → tanpa lokasi (jangan pakai IP yg meleset jauh)
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
     );
 }
-
-function kitaReverseGeocode(el, lat, lon) {
-    el.placeholder = '⏳ Mencari nama kota…';
-    var done = false;
-    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-    var t = setTimeout(function(){ if (ctrl) ctrl.abort(); if (!done) { done = true; kitaIpFallback(el); } }, 8000);
-    fetch('https://nominatim.openstreetmap.org/reverse?format=json&zoom=10&lat=' + lat + '&lon=' + lon,
-          { headers: { 'Accept-Language': 'id' }, signal: ctrl ? ctrl.signal : undefined })
+function kitaPostReverse(lat, lon) {
+    fetch('https://nominatim.openstreetmap.org/reverse?format=json&zoom=12&lat=' + lat + '&lon=' + lon,
+          { headers: { 'Accept-Language': 'id' } })
         .then(function(r){ return r.json(); })
         .then(function(d){
-            if (done) return; done = true; clearTimeout(t);
             var a = d.address || {};
-            var city = a.city || a.town || a.village || a.municipality || a.county || a.state || '';
-            if (city) kitaSetCity(el, city);
-            else kitaIpFallback(el);
+            var city = a.city || a.town || a.village || a.suburb || a.municipality || a.county || a.state || '';
+            if (city) kitaSetLoc(city);
+            else document.getElementById('kitaLocStatus').style.display = 'none';
         })
-        .catch(function(){ if (done) return; done = true; clearTimeout(t); kitaIpFallback(el); });
+        .catch(function(){ document.getElementById('kitaLocStatus').style.display = 'none'; });
 }
-
-// Fallback via IP (HTTPS, tanpa API key). ipwho.is → cadangan ipapi.co.
-function kitaIpFallback(el) {
-    el.placeholder = '⏳ Mendeteksi via jaringan…';
-    fetch('https://ipwho.is/')
-        .then(function(r){ return r.json(); })
-        .then(function(d){
-            if (d && d.success && d.city) kitaSetCity(el, d.city);
-            else kitaIpFallback2(el);
-        })
-        .catch(function(){ kitaIpFallback2(el); });
+function kitaSetLoc(city) {
+    document.getElementById('kitaLocation').value = city;
+    document.getElementById('kitaLocText').textContent = city;
+    document.getElementById('kitaLocChip').style.display = '';
+    document.getElementById('kitaLocStatus').style.display = 'none';
 }
-function kitaIpFallback2(el) {
-    fetch('https://ipapi.co/json/')
-        .then(function(r){ return r.json(); })
-        .then(function(d){
-            if (d && d.city) kitaSetCity(el, d.city);
-            else el.placeholder = 'Tak terdeteksi — ketik manual';
-        })
-        .catch(function(){ el.placeholder = 'Tak terdeteksi — ketik manual'; });
+function kitaClearLoc() {
+    document.getElementById('kitaLocation').value = '';
+    document.getElementById('kitaLocChip').style.display = 'none';
 }
 
 /* LIKE */

@@ -6,12 +6,14 @@ class WordFilter
 {
     // Daftar kata kasar (Indonesia + beberapa Inggris). Dicocokkan utuh (word boundary).
     protected static array $words = [
-        'anjing', 'anjg', 'anjir', 'asu', 'bangsat', 'bangsad', 'bajingan', 'bangke',
-        'bacot', 'babi', 'bego', 'bgst', 'goblok', 'tolol', 'kontol', 'memek', 'ngentot',
-        'ngewe', 'jancok', 'jancuk', 'jancik', 'pepek', 'pukimak', 'pukima', 'sialan',
+        'anjing', 'anjg', 'anjir', 'anjay', 'asu', 'asw', 'bangsat', 'bangsad', 'bajingan', 'bangke',
+        'bacot', 'babi', 'bego', 'bgst', 'goblok', 'goblog', 'tolol', 'kontol', 'kontl', 'memek', 'mmk',
+        'ngentot', 'ngewe', 'jancok', 'jancuk', 'jancik', 'pepek', 'pukimak', 'pukima', 'sialan',
         'kampret', 'keparat', 'tai', 'taik', 'taek', 'brengsek', 'kunyuk', 'jembut',
-        'peler', 'lonte', 'pelacur', 'bispak', 'perek', 'kontl', 'mmk',
-        'fuck', 'fucking', 'shit', 'bitch', 'asshole', 'dick', 'pussy', 'bastard',
+        'peler', 'lonte', 'pelacur', 'bispak', 'perek',
+        'bodoh', 'bodo', 'dungu', 'idiot', 'sinting', 'geblek', 'goblek', 'sarap', 'sableng',
+        'kampang', 'sundel', 'sompret', 'ngehe', 'bejat', 'biadab', 'tolol',
+        'fuck', 'fucking', 'fuckin', 'shit', 'bitch', 'asshole', 'dick', 'pussy', 'bastard', 'motherfucker',
     ];
 
     public static function clean(?string $text): string
