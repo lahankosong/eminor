@@ -392,6 +392,17 @@ if (!tableExists($conn, $dbname, 'band_posts')) {
     markMigration($conn, '2026_06_15_000004_create_band_posts_table');
 }
 
+// ── 6h. Kolom city di users (lokasi jaringan anti-penipuan) ──────────────────
+echo '<h2>6h. Kolom city di users</h2>';
+if (tableExists($conn, $dbname, 'users')) {
+    if (!columnExists($conn, $dbname, 'users', 'city')) {
+        runSQL($conn, 'ADD COLUMN city', "ALTER TABLE `users` ADD COLUMN `city` varchar(255) DEFAULT NULL AFTER `email`");
+    } else {
+        echo '<pre class="info">&#8212; Kolom city sudah ada</pre>';
+    }
+    markMigration($conn, '2026_06_15_000005_add_city_to_users_table');
+}
+
 // ── 7. Mark remaining pending migrations ─────────────────────────────────────
 echo '<h2>7. Tandai migration yang pending sebagai selesai</h2>';
 $toMark = [

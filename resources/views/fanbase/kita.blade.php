@@ -114,6 +114,7 @@
     .mc-avatar { width: 68px; height: 68px; border-radius: 50%; object-fit: cover; border: 3px solid var(--card); margin: 0 auto; display: block; background: var(--surface); }
     .mc-name { font-family: 'Sora',sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--text-1); margin-top: 8px; }
     .mc-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+    .mc-net { font-size: 11px; color: var(--sky-dk); background: var(--sky-lt); border-radius: 20px; padding: 2px 10px; display: inline-block; margin-top: 5px; }
     .mc-tags { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 10px 0; }
     .mc-badge { font-size: 11px; padding: 2px 9px; border-radius: 20px; background: var(--surface); color: var(--sky-dk); border: 1px solid var(--border-lt); }
     .mc-badge.lv-pemula { background: #facc15; color: #5a3e00; border: none; font-weight: 700; }
@@ -571,6 +572,7 @@
             <img id="mcAvatar" class="mc-avatar" src="{{ asset('images/default-avatar.png') }}" alt="">
             <div class="mc-name" id="mcName">—</div>
             <div class="mc-sub" id="mcSub"></div>
+            <div class="mc-net" id="mcCity" style="display:none;"></div>
             <div class="mc-tags" id="mcTags"></div>
             <div class="mc-look" id="mcLook" style="display:none;"></div>
             <div class="mc-followers" id="mcFollowers"></div>
@@ -610,8 +612,12 @@ function renderMusCard(d) {
     document.getElementById('mcAvatar').src = d.avatar || '{{ asset('images/default-avatar.png') }}';
     document.getElementById('mcName').textContent = d.name || 'Member';
     var sub = d.is_musician ? '🎸 Musisi' : '🎧 Pendengar · calon fans';
-    if (d.location) sub += ' · 📍 ' + d.location;
+    if (d.location) sub += ' · ' + d.location;
     document.getElementById('mcSub').textContent = sub;
+
+    var cityEl = document.getElementById('mcCity');
+    if (d.city) { cityEl.style.display = ''; cityEl.textContent = '📍 ' + d.city + ' · lokasi jaringan'; }
+    else { cityEl.style.display = 'none'; }
 
     var tags = '';
     if (d.is_musician) {

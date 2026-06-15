@@ -85,6 +85,7 @@ class MusicianController extends Controller
             'name'         => $user->name,
             'avatar'       => $user->avatar,
             'is_self'      => (int) $userId === Auth::id(),
+            'city'         => $user->city ?? null,
             'is_musician'  => (bool) $profile,
             'profile_id'   => $profile->id ?? null,
             'roles'        => $profile ? $profile->rolesArray() : [],

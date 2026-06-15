@@ -35,7 +35,7 @@ class DiaController extends Controller
         return view('fanbase.dia', compact('conversations', 'groups', 'users', 'unreadCounts'));
     }
 
-    public function ping()
+    public function ping(Request $request)
     {
         try {
             User::where('id', Auth::id())->update([
@@ -43,7 +43,35 @@ class DiaController extends Controller
                 'is_online' => true,
             ]);
         } catch (\Throwable $e) {}
+
+        $this->captureCity($request);
+
         return response()->json(['ok' => true]);
+    }
+
+    // Tangkap kota dari IP asli (server-side, anti-palsu). Hanya sekali saat kosong.
+    protected function captureCity(Request $request): void
+    {
+        try {
+            $user = Auth::user();
+            if (!$user || !empty($user->city)) return;
+
+            $ip = $request->header('CF-Connecting-IP')
+                ?: ($request->header('X-Forwarded-For')
+                    ? trim(explode(',', $request->header('X-Forwarded-For'))[0])
+                    : $request->ip());
+
+            // Lewati IP privat/loopback (mis. saat lokal)
+            if (!$ip || !filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                return;
+            }
+
+            $resp = \Illuminate\Support\Facades\Http::timeout(5)->get('https://ipwho.is/' . $ip);
+            $d = $resp->json();
+            if (!empty($d['success']) && !empty($d['city'])) {
+                User::where('id', $user->id)->update(['city' => $d['city']]);
+            }
+        } catch (\Throwable $e) {}
     }
 
     public function conversation($id)
