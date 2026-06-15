@@ -101,3 +101,21 @@ App Android langsung menampilkan versi terbaru.
 | Ganti nama / package app | ✅ Ya |
 | Tambah permission Android | ✅ Ya |
 | Update ke Play Store | ✅ Ya (signed APK) |
+
+---
+
+## 📍 Izin Lokasi (untuk auto-deteksi kota di Kita)
+
+Geolocation di **TWA** hanya jalan kalau APK punya izin lokasi di manifest.
+Kalau auto-deteksi lokasi "minta izin tapi tidak terdeteksi", pastikan
+`AndroidManifest.xml` (app maftune) berisi:
+
+```xml
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+```
+
+Lalu **rebuild + reinstall APK** (perubahan manifest = wajib rebuild).
+Saat dipakai: pastikan **GPS/Location HP menyala**. Sisi web sudah retry
+otomatis (akurasi rendah → tinggi) + timeout panjang, jadi setelah izin &
+GPS aktif, kota akan terisi sendiri. Desktop tidak butuh izin manifest ini.
