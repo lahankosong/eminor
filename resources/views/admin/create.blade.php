@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.admin')
 
 @push('styles')
 <style>
@@ -86,7 +86,7 @@
 @section('content')
 
 <div class="form-header">
-    <a href="{{ route('admin.index') }}" class="btn-back">← Kembali</a>
+    <a href="{{ route('admin.index') }}" class="btn-back">â† Kembali</a>
     <div>
         <h2>Tambah Lagu Baru</h2>
         <p>Isi informasi lagu yang ingin ditambahkan</p>
@@ -204,3 +204,4 @@ function updateThumb(val) {
 </script>
 
 @endsection
+

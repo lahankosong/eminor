@@ -3,14 +3,66 @@
 namespace App\Http\Controllers;
 
 use App\Models\Song;
+use App\Models\User;
+use App\Models\Post;
+use App\Models\MemberLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
     public function index()
     {
         $songs = Song::orderBy('track_number')->get();
-        return view('admin.index', compact('songs'));
+
+        // Metrics
+        $totalSongs   = $songs->count();
+        $activeSongs  = $songs->where('is_active', 1)->count();
+        $totalMembers = 0;
+        $dau          = 0;
+        $totalPosts   = 0;
+
+        try { $totalMembers = User::count(); } catch (\Throwable $e) {}
+        try { $dau = User::where('last_seen', '>=', now()->subHours(24))->count(); } catch (\Throwable $e) {}
+        try { $totalPosts = Post::count(); } catch (\Throwable $e) {}
+
+        // Recent activity: merge posts + new members, sorted by time
+        $recentActivity = collect();
+        try {
+            $recentPosts = Post::with('user')->latest()->take(8)->get()
+                ->map(fn($p) => (object)[
+                    'type'   => 'post',
+                    'user'   => $p->user,
+                    'text'   => Str::limit($p->body, 70),
+                    'time'   => $p->created_at,
+                    'time_h' => $p->created_at?->diffForHumans(),
+                ]);
+
+            $recentMembers = collect();
+            try {
+                $recentMembers = MemberLog::with('user')->latest()->take(5)->get()
+                    ->map(fn($l) => (object)[
+                        'type'   => 'member',
+                        'user'   => $l->user,
+                        'text'   => 'bergabung sebagai member baru',
+                        'time'   => $l->created_at,
+                        'time_h' => $l->created_at?->diffForHumans(),
+                    ]);
+            } catch (\Throwable $e) {}
+
+            $recentActivity = $recentPosts->concat($recentMembers)
+                ->sortByDesc('time')->take(10)->values();
+        } catch (\Throwable $e) {}
+
+        // Top songs: featured first, then active
+        $topSongs = $songs->where('is_active', 1)
+            ->sortByDesc('featured')->take(6)->values();
+
+        return view('admin.index', compact(
+            'songs', 'totalSongs', 'activeSongs',
+            'totalMembers', 'dau', 'totalPosts',
+            'recentActivity', 'topSongs'
+        ));
     }
 
     public function edit($id)

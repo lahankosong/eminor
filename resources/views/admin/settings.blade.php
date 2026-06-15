@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.admin')
 
 @push('styles')
 <style>
@@ -112,9 +112,9 @@
 <div class="settings-header">
     <div>
         <h2>Pengaturan Website</h2>
-        <p>Kelola identitas, konten, dan tampilan — tanpa sentuh kode</p>
+        <p>Kelola identitas, konten, dan tampilan â€” tanpa sentuh kode</p>
     </div>
-    <a href="{{ route('admin.index') }}" class="btn-back">← Panel Admin</a>
+    <a href="{{ route('admin.index') }}" class="btn-back">â† Panel Admin</a>
 </div>
 
 @if(session('success'))
@@ -166,13 +166,13 @@
                     <label class="form-label">Role / Profesi</label>
                     <input type="text" name="artist_role" class="form-input"
                         value="{{ $settings['artist_role']->value ?? '' }}"
-                        placeholder="Songwriter · Musisi Independent">
+                        placeholder="Songwriter Â· Musisi Independent">
                 </div>
                 <div class="form-group full">
                     <label class="form-label">Project / Album Fokus</label>
                     <input type="text" name="artist_project" class="form-input"
                         value="{{ $settings['artist_project']->value ?? '' }}"
-                        placeholder="Margonoandi — 15 Lagu 2000–2026">
+                        placeholder="Margonoandi â€” 15 Lagu 2000â€“2026">
                 </div>
             </div>
         </div>
@@ -336,8 +336,9 @@ function previewPhoto(input) {
 // Feedback tombol saat menyimpan
 document.querySelector('form').addEventListener('submit', function() {
     document.querySelectorAll('.btn-save').forEach(function(b){
-        b.textContent = 'Menyimpan…'; b.disabled = true; b.style.opacity = '0.7';
+        b.textContent = 'Menyimpanâ€¦'; b.disabled = true; b.style.opacity = '0.7';
     });
 });
 </script>
 @endpush
+

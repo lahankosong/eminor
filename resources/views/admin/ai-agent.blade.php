@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.admin')
 
 @push('styles')
 <style>
@@ -13,7 +13,7 @@
     .card > summary, .card-head { padding:0.9rem 1.1rem; border-bottom:1px solid var(--border); font-size:12px; color:var(--text-2); font-weight:600; letter-spacing:0.04em; }
     .card > summary { cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; }
     .card > summary::-webkit-details-marker { display:none; }
-    .card > summary::after { content:'▾'; color:var(--text-3); transition:transform 0.2s; }
+    .card > summary::after { content:'â–¾'; color:var(--text-3); transition:transform 0.2s; }
     details.card[open] > summary::after { transform:rotate(180deg); }
     .card-body { padding:1.1rem; }
 
@@ -78,9 +78,9 @@
 <div class="ai-header">
     <div>
         <h2>AI Agent v2</h2>
-        <p>Niche → topik → narasi → prompt gambar → jadwalkan ke Calendar</p>
+        <p>Niche â†’ topik â†’ narasi â†’ prompt gambar â†’ jadwalkan ke Calendar</p>
     </div>
-    <a href="{{ route('admin.index') }}" class="btn-back">← Panel Admin</a>
+    <a href="{{ route('admin.index') }}" class="btn-back">â† Panel Admin</a>
 </div>
 
 @if(session('success'))
@@ -89,7 +89,7 @@
 
 {{-- ===== PENGATURAN AI (provider) ===== --}}
 <details class="card">
-    <summary>⚙️ Pengaturan AI — Provider &amp; API Key ({{ $providers->count() }})</summary>
+    <summary>âš™ï¸ Pengaturan AI â€” Provider &amp; API Key ({{ $providers->count() }})</summary>
     <div class="card-body">
         @if($providers->count())
         <div style="margin-bottom:1rem;">
@@ -98,8 +98,8 @@
                 <div style="flex:1;min-width:0;">
                     <span class="prov-name">{{ $prov->name }}</span>
                     <span class="prov-badge">{{ $prov->format }}</span>
-                    <div class="prov-meta">{{ $prov->model }} ·
-                        @if($prov->api_key)<span class="prov-key-ok">● key terisi</span>@else<span class="prov-key-no">● key kosong</span>@endif
+                    <div class="prov-meta">{{ $prov->model }} Â·
+                        @if($prov->api_key)<span class="prov-key-ok">â— key terisi</span>@else<span class="prov-key-no">â— key kosong</span>@endif
                     </div>
                 </div>
                 <form method="POST" action="{{ route('admin.ai-agent.provider.destroy', $prov->id) }}" onsubmit="return confirm('Hapus provider {{ $prov->name }}?')">
@@ -118,9 +118,9 @@
             <div class="fg">
                 <label>Preset cepat (otomatis isi kolom)</label>
                 <select class="fi" id="presetSelect" onchange="applyPreset(this.value)">
-                    <option value="">— Pilih preset / isi manual —</option>
+                    <option value="">â€” Pilih preset / isi manual â€”</option>
                     <option value="gemini">Google Gemini (gratis)</option>
-                    <option value="groq">Groq — Llama 3.3 (gratis)</option>
+                    <option value="groq">Groq â€” Llama 3.3 (gratis)</option>
                     <option value="openrouter">OpenRouter (ada model gratis)</option>
                     <option value="openai">OpenAI</option>
                     <option value="deepseek">DeepSeek (murah)</option>
@@ -148,13 +148,13 @@
 
 {{-- ===== GENERATE ===== --}}
 <div class="card">
-    <div class="card-head">✨ Generate Konten</div>
+    <div class="card-head">âœ¨ Generate Konten</div>
     <div class="card-body">
         <div class="gen-bar">
             <div class="fg">
                 <label>Lagu</label>
                 <select class="fi" id="songSelect">
-                    <option value="">— Pilih lagu —</option>
+                    <option value="">â€” Pilih lagu â€”</option>
                     @foreach($songs as $song)
                     <option value="{{ $song->id }}" data-title="{{ $song->title }}">{{ $song->title }}</option>
                     @endforeach
@@ -163,7 +163,7 @@
             <div class="fg">
                 <label>AI Provider</label>
                 <select class="fi" id="providerSelect">
-                    <option value="">— Pilih AI —</option>
+                    <option value="">â€” Pilih AI â€”</option>
                     @foreach($providers as $prov)
                     <option value="{{ $prov->id }}">{{ $prov->name }} ({{ $prov->model }})</option>
                     @endforeach
@@ -172,9 +172,9 @@
             <div class="fg">
                 <label>Jenis konten</label>
                 <select class="fi" id="modeSelect">
-                    <option value="short">📱 Short saja (hemat)</option>
-                    <option value="long">🎬 Video panjang saja</option>
-                    <option value="umum">🌐 Umum saja (backsound tema)</option>
+                    <option value="short">ðŸ“± Short saja (hemat)</option>
+                    <option value="long">ðŸŽ¬ Video panjang saja</option>
+                    <option value="umum">ðŸŒ Umum saja (backsound tema)</option>
                     <option value="all">Semua (3 jenis)</option>
                 </select>
             </div>
@@ -182,13 +182,13 @@
         </div>
 
         <div class="fg" style="margin-top:12px;">
-            <label>Sumber tambahan (opsional) — teks atau link Wikipedia</label>
+            <label>Sumber tambahan (opsional) â€” teks atau link Wikipedia</label>
             <textarea class="fi" id="sourceInput" rows="2" placeholder="Tempel teks cerita / link, mis. https://id.wikipedia.org/wiki/Roro_Jonggrang"></textarea>
-            <span style="font-size:11px;color:var(--text-3);margin-top:3px;">Berguna untuk kategori Umum — cerita diambil dari sumber, lagu jadi backsound.</span>
+            <span style="font-size:11px;color:var(--text-3);margin-top:3px;">Berguna untuk kategori Umum â€” cerita diambil dari sumber, lagu jadi backsound.</span>
         </div>
 
         <details style="margin-top:6px;">
-            <summary style="cursor:pointer;font-size:12px;color:var(--text-2);padding:4px 0;">🎨 Pengaturan Gaya Gambar (opsional)</summary>
+            <summary style="cursor:pointer;font-size:12px;color:var(--text-2);padding:4px 0;">ðŸŽ¨ Pengaturan Gaya Gambar (opsional)</summary>
             <div class="style-grid">
                 <div class="fg"><label>Orientasi</label>
                     <select class="fi" id="styleOrientation">
@@ -272,7 +272,7 @@
         <div style="flex:1;"></div>
         <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
             <span class="sched-count" id="schedCount">0 narasi dipilih</span>
-            <button class="btn btn-accent" onclick="doSchedule()">📅 Jadwalkan terpilih ke Calendar</button>
+            <button class="btn btn-accent" onclick="doSchedule()">ðŸ“… Jadwalkan terpilih ke Calendar</button>
         </div>
     </div>
 </div>
@@ -328,7 +328,7 @@ function doGenerate() {
     };
     var btn = document.getElementById('genBtn');
     btn.disabled = true;
-    document.getElementById('genStatus').innerHTML = '<span class="spinner"></span> Menganalisis lirik & membuat konten… (10–40 detik)';
+    document.getElementById('genStatus').innerHTML = '<span class="spinner"></span> Menganalisis lirik & membuat kontenâ€¦ (10â€“40 detik)';
 
     fetch(ROUTE_GEN_BASE + '/' + songId, {
         method:'POST',
@@ -339,10 +339,10 @@ function doGenerate() {
     .then(function(res){
         btn.disabled = false;
         if (!res.ok || res.d.error) {
-            document.getElementById('genStatus').textContent = '⚠️ ' + (res.d.error || 'Gagal generate.');
+            document.getElementById('genStatus').textContent = 'âš ï¸ ' + (res.d.error || 'Gagal generate.');
             return;
         }
-        document.getElementById('genStatus').textContent = '✓ Selesai via ' + res.d.provider + ' · hasil tersimpan otomatis';
+        document.getElementById('genStatus').textContent = 'âœ“ Selesai via ' + res.d.provider + ' Â· hasil tersimpan otomatis';
         // gabung dengan hasil mode lain yang sudah tersimpan
         var prev = SAVED[res.d.song_id] || {};
         var merged = {
@@ -358,15 +358,15 @@ function doGenerate() {
     })
     .catch(function(e){
         btn.disabled = false;
-        document.getElementById('genStatus').textContent = '⚠️ Error: ' + e.message;
+        document.getElementById('genStatus').textContent = 'âš ï¸ Error: ' + e.message;
     });
 }
 
 function renderResults(d) {
     currentSongId = d.song_id;
-    document.getElementById('nicheVal').textContent = d.niche || '—';
+    document.getElementById('nicheVal').textContent = d.niche || 'â€”';
     var wrap = document.getElementById('topicsWrap');
-    wrap.innerHTML = (d.topics && d.topics.length) ? '<div class="section-divider">📱 KONTEN SHORT VIDEO · 9:16</div>' : '';
+    wrap.innerHTML = (d.topics && d.topics.length) ? '<div class="section-divider">ðŸ“± KONTEN SHORT VIDEO Â· 9:16</div>' : '';
 
     (d.topics || []).forEach(function(t, ti){
         var html = '<div class="topic"><div class="topic-head">' +
@@ -377,7 +377,7 @@ function renderResults(d) {
                 '<input type="checkbox" class="narrChk" data-type="short" data-text="' + esc(n.text) + '" data-prompt="' + esc(n.image_prompt) + '" onchange="updateCount()">' +
                 '<div class="narr-body">' +
                     '<div class="narr-text">' + esc(n.text) + '</div>' +
-                    '<div class="narr-prompt">🎨 ' + esc(n.image_prompt) +
+                    '<div class="narr-prompt">ðŸŽ¨ ' + esc(n.image_prompt) +
                         '<span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(n.image_prompt) + '\')">[copy]</span>' +
                     '</div>' +
                 '</div></div>';
@@ -392,15 +392,15 @@ function renderResults(d) {
     var lf = d.long_form;
     if (lf && lf.narration) {
         var scenes = (lf.scenes || []).map(function(sc, i){
-            return '<div class="narr-prompt">🎨 ' + (i+1) + '. ' + esc(sc.image_prompt) +
+            return '<div class="narr-prompt">ðŸŽ¨ ' + (i+1) + '. ' + esc(sc.image_prompt) +
                 '<span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(sc.image_prompt) + '\')">[copy]</span></div>';
         }).join('');
         var lfScenesText = (lf.scenes || []).map(function(sc, i){ return (i+1) + '. ' + sc.image_prompt; }).join('\n');
         var lfCombined = (lf.narration || '') + (lfScenesText ? '\n\nImage prompts:\n' + lfScenesText : '');
         lfWrap.innerHTML =
-            '<div class="section-divider">🎬 VIDEO 3–5 MENIT</div>' +
+            '<div class="section-divider">ðŸŽ¬ VIDEO 3â€“5 MENIT</div>' +
             '<div class="topic"><div class="topic-head">' +
-                '<span class="topic-title">🎬 Video Panjang · ' + esc(lf.duration_estimate || '3–5 menit') + '</span>' +
+                '<span class="topic-title">ðŸŽ¬ Video Panjang Â· ' + esc(lf.duration_estimate || '3â€“5 menit') + '</span>' +
                 '<label style="font-size:11px;color:var(--text-2);display:flex;gap:6px;align-items:center;cursor:pointer;">' +
                     '<input type="checkbox" class="narrChk" data-type="long" data-text="' + esc(lf.title || 'Video panjang') + '" data-prompt="' + esc(lfCombined) + '" onchange="updateCount()"> jadwalkan</label>' +
             '</div>' +
@@ -417,22 +417,22 @@ function renderResults(d) {
     umWrap.innerHTML = '';
     var um = d.umum;
     if (um && um.length) {
-        var uh = '<div class="section-divider">🌐 TEMA UMUM · video panjang 3–5 menit</div>';
+        var uh = '<div class="section-divider">ðŸŒ TEMA UMUM Â· video panjang 3â€“5 menit</div>';
         um.forEach(function(u){
             var scenesArr = (u.scenes && u.scenes.length) ? u.scenes : (u.image_prompt ? [{image_prompt:u.image_prompt}] : []);
             var scenesHtml = scenesArr.map(function(sc, i){
-                return '<div class="narr-prompt">🎨 ' + (i+1) + '. ' + esc(sc.image_prompt) +
+                return '<div class="narr-prompt">ðŸŽ¨ ' + (i+1) + '. ' + esc(sc.image_prompt) +
                     '<span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(sc.image_prompt) + '\')">[copy]</span></div>';
             }).join('');
             var scenesText = scenesArr.map(function(sc, i){ return (i+1) + '. ' + sc.image_prompt; }).join('\n');
             var combined = 'Angle: ' + (u.angle||'') + '\n\nNarasi:\n' + (u.narration||'') + (scenesText ? '\n\nImage prompts:\n' + scenesText : '');
             uh += '<div class="topic"><div class="topic-head">' +
-                '<span class="topic-title">🌐 ' + esc(u.theme) + '</span>' +
+                '<span class="topic-title">ðŸŒ ' + esc(u.theme) + '</span>' +
                 '<label style="font-size:11px;color:var(--text-2);display:flex;gap:6px;align-items:center;cursor:pointer;">' +
                     '<input type="checkbox" class="narrChk" data-type="umum" data-text="' + esc(u.theme) + '" data-prompt="' + esc(combined) + '" onchange="updateCount()"> jadwalkan</label>' +
                 '</div>' +
                 '<div class="narr"><div class="narr-body">' +
-                    '<div style="font-size:12px;color:var(--text-3);">💡 ' + esc(u.angle) + '</div>' +
+                    '<div style="font-size:12px;color:var(--text-3);">ðŸ’¡ ' + esc(u.angle) + '</div>' +
                     '<div class="narr-prompt" style="white-space:pre-wrap;font-family:inherit;line-height:1.7;margin-top:6px;">' + esc(u.narration) +
                         ' <span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(u.narration) + '\')">[copy narasi]</span></div>' +
                     (scenesHtml ? '<div style="margin-top:8px;font-size:11px;color:var(--text-3);">Image prompts (9:16):</div>' + scenesHtml : '') +
@@ -486,11 +486,11 @@ function doSchedule() {
     .then(function(r){ return r.json(); })
     .then(function(d){
         if (d.success) {
-            showToast('✓ ' + d.count + ' jadwal dibuat. Membuka Calendar…');
+            showToast('âœ“ ' + d.count + ' jadwal dibuat. Membuka Calendarâ€¦');
             setTimeout(function(){ window.location = ROUTE_CALENDAR; }, 1400);
-        } else { showToast('⚠️ ' + (d.error || 'Gagal menjadwalkan')); }
+        } else { showToast('âš ï¸ ' + (d.error || 'Gagal menjadwalkan')); }
     })
-    .catch(function(e){ showToast('⚠️ ' + e.message); });
+    .catch(function(e){ showToast('âš ï¸ ' + e.message); });
 }
 
 function showToast(msg) {
@@ -503,7 +503,7 @@ function showToast(msg) {
 function showSaved(id) {
     if (id && SAVED[id]) {
         renderResults({ song_id: parseInt(id), niche: SAVED[id].niche, topics: SAVED[id].topics, long_form: SAVED[id].long_form, umum: SAVED[id].umum, provider: 'tersimpan' });
-        document.getElementById('genStatus').textContent = '📁 Hasil tersimpan ditampilkan. Generate lagi untuk memperbarui.';
+        document.getElementById('genStatus').textContent = 'ðŸ“ Hasil tersimpan ditampilkan. Generate lagi untuk memperbarui.';
         return true;
     }
     document.getElementById('results').style.display = 'none';
@@ -520,3 +520,4 @@ if (LAST_SONG && SAVED[LAST_SONG]) {
 </script>
 
 @endsection
+
