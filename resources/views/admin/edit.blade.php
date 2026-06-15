@@ -1,4 +1,4 @@
-﻿@extends('layouts.admin')
+?@extends('layouts.admin')
 
 @push('styles')
 <style>
@@ -57,7 +57,7 @@
     .form-section > summary::-webkit-details-marker { display: none; }
     .form-section > summary:hover { color: var(--text); background: var(--bg-3); }
     .form-section > summary::after {
-        content: 'â–¾'; font-size: 14px; color: var(--text-3); transition: transform 0.2s;
+        content: '▾'; font-size: 14px; color: var(--text-3); transition: transform 0.2s;
     }
     .form-section[open] > summary::after { transform: rotate(180deg); }
     .form-section[open] > summary { border-bottom: 1px solid var(--border); }
@@ -131,7 +131,7 @@
 @section('content')
 
 <div class="form-header">
-    <a href="{{ route('admin.index') }}" class="btn-back">â† Kembali</a>
+    <a href="{{ route('admin.index') }}" class="btn-back">← Kembali</a>
     <div>
         <h2>Edit Lagu</h2>
         <p>{{ $song->title }}</p>
@@ -184,7 +184,7 @@
                     <select name="era" class="form-input">
                         <option value="">Pilih era</option>
                         <option value="Papsi Class" {{ $song->era == 'Papsi Class' ? 'selected' : '' }}>Papsi Class (SMA)</option>
-                        <option value="Papsi Class â†’ Senyawa" {{ $song->era == 'Papsi Class â†’ Senyawa' ? 'selected' : '' }}>Papsi Class â†’ Senyawa</option>
+                        <option value="Papsi Class → Senyawa" {{ $song->era == 'Papsi Class → Senyawa' ? 'selected' : '' }}>Papsi Class → Senyawa</option>
                         <option value="Senyawa" {{ $song->era == 'Senyawa' ? 'selected' : '' }}>Senyawa (Kuliah)</option>
                         <option value="Solo" {{ $song->era == 'Solo' ? 'selected' : '' }}>Solo (2012-2014)</option>
                         <option value="AI Revival" {{ $song->era == 'AI Revival' ? 'selected' : '' }}>AI Revival (2026)</option>
@@ -244,7 +244,7 @@
                         @endif
                         <input type="file" name="audio_file" accept="audio/mp3,audio/*" class="form-input" style="flex:1;min-width:200px;">
                     </div>
-                    <span class="form-hint">MP3/WAV/OGG, maks 10MB. Bisa versi akustik/demo â€” beda dari versi YouTube.</span>
+                    <span class="form-hint">MP3/WAV/OGG, maks 10MB. Bisa versi akustik/demo — beda dari versi YouTube.</span>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Spotify URL</label>
@@ -330,7 +330,7 @@ Aku coba memohon, agar engkau mengerti</code>
                 <div class="pv-title" id="pvTitle">{{ $song->title }}</div>
                 <div class="pv-desc" id="pvDesc">{{ $song->description }}</div>
                 <div class="pv-meta">
-                    <span class="pv-badge accent" id="pvKey" style="{{ $song->key_signature ? '' : 'display:none' }}">â™ª {{ $song->key_signature }}</span>
+                    <span class="pv-badge accent" id="pvKey" style="{{ $song->key_signature ? '' : 'display:none' }}">♪ {{ $song->key_signature }}</span>
                     <span class="pv-badge" id="pvTempo" style="{{ $song->tempo ? '' : 'display:none' }}">{{ $song->tempo }} BPM</span>
                     <span class="pv-badge" id="pvEra" style="{{ $song->era ? '' : 'display:none' }}">{{ $song->era }}</span>
                 </div>
@@ -357,7 +357,7 @@ bindPv('fTitle', function(e){ document.getElementById('pvTitle').textContent = e
 bindPv('fDesc',  function(e){ document.getElementById('pvDesc').textContent = e.target.value; });
 bindPv('fKey',   function(e){
     var b = document.getElementById('pvKey');
-    if (e.target.value.trim()) { b.style.display = ''; b.textContent = 'â™ª ' + e.target.value; }
+    if (e.target.value.trim()) { b.style.display = ''; b.textContent = '♪ ' + e.target.value; }
     else b.style.display = 'none';
 });
 bindPv('fTempo', function(e){

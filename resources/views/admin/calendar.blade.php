@@ -1,4 +1,4 @@
-﻿@extends('layouts.admin')
+?@extends('layouts.admin')
 
 @push('styles')
 <style>
@@ -92,9 +92,9 @@
 <div class="cal-header">
     <div>
         <h2>Content Calendar</h2>
-        <p>Rencanakan jadwal posting konten â€” TikTok, IG, YouTube, dll.</p>
+        <p>Rencanakan jadwal posting konten — TikTok, IG, YouTube, dll.</p>
     </div>
-    <a href="{{ route('admin.index') }}" class="btn-back">â† Panel Admin</a>
+    <a href="{{ route('admin.index') }}" class="btn-back">← Panel Admin</a>
 </div>
 
 @if(session('success'))
@@ -118,7 +118,7 @@
             <div class="fg">
                 <label>Lagu terkait</label>
                 <select name="song_id" class="fi">
-                    <option value="">â€” Tidak spesifik â€”</option>
+                    <option value="">— Tidak spesifik —</option>
                     @foreach($songs as $song)
                     <option value="{{ $song->id }}">{{ $song->title }}</option>
                     @endforeach
@@ -127,8 +127,8 @@
             <div class="fg">
                 <label>Tipe konten</label>
                 <select name="content_type" class="fi">
-                    <option value="short">ðŸ“± Short Video (9:16)</option>
-                    <option value="long">ðŸŽ¬ Video 3â€“5 menit</option>
+                    <option value="short">📱 Short Video (9:16)</option>
+                    <option value="long">🎬 Video 3–5 menit</option>
                     <option value="umum">Umum / lainnya</option>
                 </select>
             </div>
@@ -159,8 +159,8 @@
         @if($plans->count())
         <div class="cal-filter">
             <span class="chip active" data-f="all"   onclick="calFilter('all',this)">Semua</span>
-            <span class="chip" data-f="short" onclick="calFilter('short',this)">ðŸ“± Short</span>
-            <span class="chip" data-f="long"  onclick="calFilter('long',this)">ðŸŽ¬ Video panjang</span>
+            <span class="chip" data-f="short" onclick="calFilter('short',this)">📱 Short</span>
+            <span class="chip" data-f="long"  onclick="calFilter('long',this)">🎬 Video panjang</span>
             <span class="chip" data-f="umum"  onclick="calFilter('umum',this)">Umum</span>
         </div>
         @endif
@@ -171,7 +171,7 @@
                 <div class="day-head {{ $isPast ? 'past' : '' }}">
                     <span class="dot"></span>
                     {{ $d->format('d M Y') }}
-                    <span class="dow">Â· {{ $dows[$d->dayOfWeek] }}{{ $d->isToday() ? ' (hari ini)' : '' }}</span>
+                    <span class="dow">· {{ $dows[$d->dayOfWeek] }}{{ $d->isToday() ? ' (hari ini)' : '' }}</span>
                 </div>
 
                 @foreach($items as $plan)
@@ -180,8 +180,8 @@
                     <div class="plan-main">
                         <div class="plan-title">{{ $plan->title ?: ($plan->song->title ?? 'Konten') }}</div>
                         <div class="plan-meta">
-                            <span class="type-badge type-{{ $ct }}">{{ $ct === 'long' ? 'ðŸŽ¬ Panjang' : ($ct === 'short' ? 'ðŸ“± Short' : 'Umum') }}</span>
-                            @if($plan->song)<span class="pf-badge">ðŸŽµ {{ $plan->song->title }}</span>@endif
+                            <span class="type-badge type-{{ $ct }}">{{ $ct === 'long' ? '🎬 Panjang' : ($ct === 'short' ? '📱 Short' : 'Umum') }}</span>
+                            @if($plan->song)<span class="pf-badge">🎵 {{ $plan->song->title }}</span>@endif
                             @if($plan->platforms)
                                 @foreach(explode(',', $plan->platforms) as $pf)
                                 <span class="pf-badge">{{ $pf }}</span>
@@ -192,7 +192,7 @@
                             @php $longNote = mb_strlen($plan->notes) > 160; @endphp
                             <div class="plan-notes {{ $longNote ? 'clamped' : '' }}">{{ $plan->notes }}</div>
                             <div class="notes-actions">
-                                @if($longNote)<button type="button" class="notes-toggle" onclick="toggleNotes(this)">selengkapnya â–¾</button>@endif
+                                @if($longNote)<button type="button" class="notes-toggle" onclick="toggleNotes(this)">selengkapnya ▾</button>@endif
                                 <button type="button" class="notes-copy" onclick="copyNotes(this)">salin</button>
                             </div>
                         @endif
@@ -219,7 +219,7 @@
             </div>
         @empty
             <div class="empty-state">
-                <p style="font-size:24px;margin-bottom:0.75rem;">ðŸ—“ï¸</p>
+                <p style="font-size:24px;margin-bottom:0.75rem;">🗓️</p>
                 <p>Belum ada jadwal konten.<br>Tambah lewat form di sebelah kiri.</p>
             </div>
         @endforelse
@@ -231,7 +231,7 @@ function toggleNotes(btn) {
     var notes = btn.closest('.notes-actions').previousElementSibling;
     var ex = notes.classList.toggle('expanded');
     notes.classList.toggle('clamped', !ex);
-    btn.textContent = ex ? 'tutup â–´' : 'selengkapnya â–¾';
+    btn.textContent = ex ? 'tutup ▴' : 'selengkapnya ▾';
 }
 function copyNotes(btn) {
     var notes = btn.closest('.notes-actions').previousElementSibling;

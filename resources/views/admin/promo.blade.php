@@ -1,4 +1,4 @@
-﻿@extends('layouts.admin')
+?@extends('layouts.admin')
 
 @push('styles')
 <style>
@@ -84,14 +84,14 @@
 <div class="promo-header">
     <div>
         <h2>Promo Templates</h2>
-        <p>Generator caption siap-posting â€” tanpa biaya API</p>
+        <p>Generator caption siap-posting — tanpa biaya API</p>
     </div>
-    <a href="{{ route('admin.index') }}" class="btn-back">â† Panel Admin</a>
+    <a href="{{ route('admin.index') }}" class="btn-back">← Panel Admin</a>
 </div>
 
 <div class="info-banner">
-    ðŸ’¡ <b>Tanpa biaya.</b> Pilih lagu â†’ template caption otomatis terisi dari data lagu â†’
-    edit bila perlu â†’ <b>Copy</b> â†’ tempel ke TikTok/IG/YouTube/Spotify/Discord.
+    💡 <b>Tanpa biaya.</b> Pilih lagu → template caption otomatis terisi dari data lagu →
+    edit bila perlu → <b>Copy</b> → tempel ke TikTok/IG/YouTube/Spotify/Discord.
 </div>
 
 <div class="promo-layout">
@@ -104,7 +104,7 @@
                 <img src="https://img.youtube.com/vi/{{ $song->youtube_id }}/mqdefault.jpg" class="song-option-thumb" alt="">
                 <div style="min-width:0;">
                     <div class="song-option-title">{{ $song->title }}</div>
-                    <div class="song-option-era">{{ $song->era ?? 'â€”' }}</div>
+                    <div class="song-option-era">{{ $song->era ?? '—' }}</div>
                 </div>
             </div>
             @empty
@@ -116,7 +116,7 @@
     {{-- MAIN --}}
     <div class="promo-main">
         <div class="empty-state" id="emptyState">
-            <p style="font-size:24px;margin-bottom:0.75rem;">ðŸ“‹</p>
+            <p style="font-size:24px;margin-bottom:0.75rem;">📋</p>
             <p>Pilih lagu di kiri untuk membuat template promosi.</p>
         </div>
 
@@ -124,7 +124,7 @@
             {{-- TikTok / Reels Hook --}}
             <div class="tpl-card">
                 <div class="tpl-head">
-                    <div class="tpl-title">ðŸŽ¬ TikTok / Reels Hook <small>15â€“30 detik</small></div>
+                    <div class="tpl-title">🎬 TikTok / Reels Hook <small>15–30 detik</small></div>
                     <button class="btn-copy" onclick="copyTpl('tplTiktok', this)">Copy</button>
                 </div>
                 <div class="tpl-body">
@@ -135,7 +135,7 @@
             {{-- Instagram Caption (3 variasi) --}}
             <div class="tpl-card">
                 <div class="tpl-head">
-                    <div class="tpl-title">ðŸ“¸ Instagram Caption</div>
+                    <div class="tpl-title">📸 Instagram Caption</div>
                     <button class="btn-copy" onclick="copyTpl('tplIg', this)">Copy</button>
                 </div>
                 <div class="tpl-body">
@@ -151,7 +151,7 @@
             {{-- YouTube Description --}}
             <div class="tpl-card">
                 <div class="tpl-head">
-                    <div class="tpl-title">â–¶ï¸ YouTube Description</div>
+                    <div class="tpl-title">▶️ YouTube Description</div>
                     <button class="btn-copy" onclick="copyTpl('tplYt', this)">Copy</button>
                 </div>
                 <div class="tpl-body">
@@ -162,7 +162,7 @@
             {{-- Spotify Pitch --}}
             <div class="tpl-card">
                 <div class="tpl-head">
-                    <div class="tpl-title">ðŸŽ§ Spotify Playlist Pitch <small>untuk kurator</small></div>
+                    <div class="tpl-title">🎧 Spotify Playlist Pitch <small>untuk kurator</small></div>
                     <button class="btn-copy" onclick="copyTpl('tplSpotify', this)">Copy</button>
                 </div>
                 <div class="tpl-body">
@@ -173,7 +173,7 @@
             {{-- Discord Announcement --}}
             <div class="tpl-card">
                 <div class="tpl-head">
-                    <div class="tpl-title">ðŸ’¬ Discord Announcement</div>
+                    <div class="tpl-title">💬 Discord Announcement</div>
                     <button class="btn-copy" onclick="copyTpl('tplDiscord', this)">Copy</button>
                 </div>
                 <div class="tpl-body">
@@ -230,36 +230,36 @@ function selectSong(id, el) {
 
     // TikTok / Reels
     document.getElementById('tplTiktok').value =
-        'ðŸŽµ "' + s.title + '"\n\n' +
+        '🎵 "' + s.title + '"\n\n' +
         (hook ? '"' + hook + '"\n\n' : '') +
-        'Lagu yang mungkin kamu butuhin hari ini. ðŸŽ¸\n' +
-        'Dengerin full-nya, link di bio ðŸ‘†\n\n' +
+        'Lagu yang mungkin kamu butuhin hari ini. 🎸\n' +
+        'Dengerin full-nya, link di bio 👆\n\n' +
         tagLine;
 
     // Instagram (3 variasi)
     igVariants[0] =
-        'ðŸŽµ "' + s.title + '"' + (s.era ? ' â€” era ' + s.era : '') + '\n\n' +
+        '🎵 "' + s.title + '"' + (s.era ? ' — era ' + s.era : '') + '\n\n' +
         (hook ? hook + '\n\n' : '') +
         'Sekarang bisa kamu dengerin di semua platform.\n' +
-        'Link lengkap di bio. Ceritakan, lagu ini ngingetin kamu sama siapa? ðŸ’¬\n\n' + tagLine;
+        'Link lengkap di bio. Ceritakan, lagu ini ngingetin kamu sama siapa? 💬\n\n' + tagLine;
     igVariants[1] =
-        '"' + s.title + '" ðŸŽ¶\n\n' +
+        '"' + s.title + '" 🎶\n\n' +
         (desc ? desc + '\n\n' : (hook ? hook + '\n\n' : '')) +
-        'Dengerin â†’ ' + listen + '\n\n' + tagLine;
+        'Dengerin → ' + listen + '\n\n' + tagLine;
     igVariants[2] =
-        'Behind the song: "' + s.title + '" ðŸŽ™ï¸\n\n' +
+        'Behind the song: "' + s.title + '" 🎙️\n\n' +
         (s.era ? 'Lahir di era ' + s.era + '. ' : '') +
         (hook ? hook + '\n\n' : '\n') +
-        'Full version di bio. Save & share kalau relate ya. ðŸ¤\n\n' + tagLine;
+        'Full version di bio. Save & share kalau relate ya. 🤍\n\n' + tagLine;
     document.getElementById('tplIg').value = igVariants[0];
     document.querySelectorAll('#igVariants .variant-btn').forEach(function(b,i){ b.classList.toggle('active', i===0); });
 
     // YouTube Description
     document.getElementById('tplYt').value =
-        s.title + ' â€” Margonoandi (Official Audio)\n\n' +
+        s.title + ' — Margonoandi (Official Audio)\n\n' +
         (hook ? hook + '\n\n' : '') +
         (desc ? desc + '\n\n' : '') +
-        'ðŸŽ§ Dengarkan di semua platform:\n' +
+        '🎧 Dengarkan di semua platform:\n' +
         (s.spotify ? 'Spotify: ' + s.spotify + '\n' : '') +
         (s.apple ? 'Apple Music: ' + s.apple + '\n' : '') +
         'Website & lirik: ' + SITE + '\n\n' +
@@ -275,14 +275,14 @@ function selectSong(id, el) {
         (hook ? hook + '\n\n' : '') +
         'Cocok untuk playlist bertema akustik/indie/galau Indonesia. ' +
         'Link: ' + listen + '\n\n' +
-        'Terima kasih atas waktunya.\nâ€” Margonoandi (' + SITE + ')';
+        'Terima kasih atas waktunya.\n— Margonoandi (' + SITE + ')';
 
     // Discord
     document.getElementById('tplDiscord').value =
-        '@everyone ðŸŽµ Lagu baru: **' + s.title + '**\n\n' +
+        '@everyone 🎵 Lagu baru: **' + s.title + '**\n\n' +
         (hook ? '> ' + hook + '\n\n' : '') +
-        'Dengerin sekarang ðŸ‘‰ ' + listen + '\n' +
-        'Ngobrolin lagunya di sini ya! Apa bagian favoritmu? ðŸ’¬';
+        'Dengerin sekarang 👉 ' + listen + '\n' +
+        'Ngobrolin lagunya di sini ya! Apa bagian favoritmu? 💬';
 }
 
 function setIgVariant(i, btn) {
@@ -295,7 +295,7 @@ function copyTpl(id, btn) {
     var ta = document.getElementById(id);
     navigator.clipboard.writeText(ta.value).then(function(){
         var old = btn.textContent;
-        btn.textContent = 'âœ“ Tersalin'; btn.classList.add('done');
+        btn.textContent = '✓ Tersalin'; btn.classList.add('done');
         showToast();
         setTimeout(function(){ btn.textContent = old; btn.classList.remove('done'); }, 1600);
     });
