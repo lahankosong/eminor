@@ -109,5 +109,10 @@ band_applications  (Tahap 5, opsional — bisa diganti DM dulu)
 - [x] Direktori Musisi (list + search + filter chip role)
 - [x] Detail Musisi + tombol Hubungi (reuse DM Dia)
 - [x] Nav "Musisi" di sidebar + ikon topbar (mobile)
-- [ ] **Cari Personil (band posts)** ← berikutnya
-- [ ] Lamaran / kelola pelamar (atau via DM dulu)
+- [x] Integrasi ke Kamu (kartu profil musisi + edit) & Kita (badge musisi + popup, badge berwarna per level)
+- [x] **Sistem Follow** (`follows`) + notifikasi saat di-follow
+- [x] **Cari Personil (band posts)** — `band_posts` + index/create/show; lamar via DM Dia
+- [ ] (opsional) Tabel lamaran terstruktur (saat ini via DM)
+- [ ] (opsional) Profil musisi: badge "open to band/collab", jumlah pengikut di detail
+
+**Fase 1 MVP pada dasarnya SELESAI.** Berikutnya: validasi ke musisi nyata, lalu pertimbangkan Fase 2 (studio).

@@ -2,6 +2,17 @@
 
 ---
 
+## 2026-06-15 — Badge level warna + notif follow + Cari Personil (Fase 1 MVP selesai)
+**Commit**: `85be106` (setelah pull merge admin redesign + page tracking dari sesi lain di `4f00a57`)
+
+- **Kita**: badge author kini **berwarna sesuai level musisi** (pemula kuning · menengah biru · mahir hijau · profesional ungu); `KitaController` kirim peta level penulis. Non-musisi tetap netral.
+- **Notifikasi follow**: saat seseorang mengikutimu → notif (NotifHelper type `follow` ➕).
+- **Cari Personil (`band_posts`)**: model + `BandPostController` + halaman index/create/show. Pasang lowongan (judul, role dibutuhkan, genre, lokasi, urgent), buka/tutup/hapus (pemilik), **lamar/kontak via DM Dia**. Tombol "🎯 Cari Personil" di hero Direktori Musisi.
+- fixdb diperluas (`band_posts`); semua tabel ekosistem (`musician_profiles`, `follows`, `band_posts`) live di produksi.
+- **Catatan merge**: pull membawa redesign admin panel (`layouts/admin.blade.php`) + tracking kunjungan (`page_visits`, middleware `TrackPageVisit`) dari sesi lain — tergabung bersih dengan pekerjaan ekosistem.
+
+---
+
 ## 2026-06-15 — Integrasi Musisi ke Kamu/Kita + Sistem Follow
 **Commit**: `af74cb7`
 
