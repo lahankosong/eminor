@@ -185,7 +185,12 @@ class AiAgentController extends Controller
             ]);
         } catch (\Throwable $e) {
             Log::error('AI image generate error', ['error' => $e->getMessage()]);
-            return response()->json(['error' => $e->getMessage()], 500);
+            $msg = $e->getMessage();
+            if (str_contains($msg, '429') || str_contains($msg, 'RESOURCE_EXHAUSTED') || str_contains($msg, 'quota')) {
+                $msg = 'Kuota provider habis / butuh billing aktif. Gemini & Imagen perlu billing untuk gambar. '
+                     . 'Pakai provider "Pollinations" (gratis) sebagai gantinya, atau aktifkan billing di Google.';
+            }
+            return response()->json(['error' => $msg], 500);
         }
     }
 
