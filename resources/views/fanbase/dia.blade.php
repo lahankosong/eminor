@@ -106,7 +106,15 @@
     }
     .dia-mention-item:hover { background:var(--sky-lt); color:var(--sky-dk); }
     .dia-mention-item img { width:22px; height:22px; border-radius:50%; object-fit:cover; }
-    .dia-input-row { display:flex; gap:8px; align-items:flex-end; }
+    .dia-input-row { display:flex; gap:6px; align-items:flex-end; }
+    .dia-tool-btn { background:transparent; border:none; cursor:pointer; font-size:18px; padding:6px 7px; border-radius:50%; line-height:1; flex-shrink:0; color:var(--text-2); }
+    .dia-tool-btn:hover { background:var(--surface); }
+    .dia-tool-btn.recording { background:#fee2e2; animation:diaPulse 1s infinite; }
+    @keyframes diaPulse { 0%,100%{opacity:1;} 50%{opacity:0.45;} }
+    .dia-media { display:block; margin-bottom:4px; }
+    .dia-media-img { max-width:220px; max-height:280px; border-radius:12px; cursor:pointer; display:block; background:var(--surface); }
+    .dia-media-audio { width:230px; max-width:100%; height:40px; margin-bottom:2px; }
+    .dia-media-video { max-width:260px; max-height:320px; border-radius:12px; display:block; background:#000; }
     .dia-input {
         flex:1; background:var(--cream); border:1px solid var(--border); border-radius:20px;
         color:var(--text-1); font-size:13px; padding:9px 16px; outline:none;
@@ -395,7 +403,8 @@
             @if($msg->user_id !== Auth::id())
             <div class="dia-msg-name">{{ $msg->user->name }}</div>
             @endif
-            <div class="dia-msg-bubble">{{ $msg->body }}</div>
+            @if($msg->media_type)@include('fanbase.partials.dia-media', ['url' => asset($msg->media_url), 'type' => $msg->media_type])@endif
+            @if($msg->body)<div class="dia-msg-bubble">{{ $msg->body }}</div>@endif
             <div class="dia-msg-time">{{ $msg->created_at->diffForHumans() }}</div>
         </div>
     </div>
@@ -406,7 +415,10 @@
 
 <div class="dia-input-area">
     <div class="dia-mention-list" id="diaMentionList"></div>
+    <input type="file" id="diaFileInput" accept="image/*,video/*" style="display:none" onchange="diaFileChosen(this)">
     <div class="dia-input-row">
+        <button type="button" class="dia-tool-btn" onclick="diaPickMedia()" title="Kirim foto/video">&#128206;</button>
+        <button type="button" class="dia-tool-btn" id="diaVoiceBtn" onclick="diaToggleVoice()" title="Voice note">&#127908;</button>
         <textarea class="dia-input" id="diaInput"
             placeholder="Ketik pesan... (@nama untuk undang)" rows="1"
             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();diaSend();}"
@@ -442,7 +454,8 @@
             @if($msg->user_id !== Auth::id())
             <div class="dia-msg-name">{{ $msg->user->name }}</div>
             @endif
-            <div class="dia-msg-bubble">{{ $msg->body }}</div>
+            @if($msg->media_type)@include('fanbase.partials.dia-media', ['url' => asset($msg->media_url), 'type' => $msg->media_type])@endif
+            @if($msg->body)<div class="dia-msg-bubble">{{ $msg->body }}</div>@endif
             <div class="dia-msg-time">{{ $msg->created_at->diffForHumans() }}</div>
         </div>
     </div>
@@ -452,7 +465,10 @@
 </div>
 
 <div class="dia-input-area">
+    <input type="file" id="diaFileInput" accept="image/*,video/*" style="display:none" onchange="diaFileChosen(this)">
     <div class="dia-input-row">
+        <button type="button" class="dia-tool-btn" onclick="diaPickMedia()" title="Kirim foto/video">&#128206;</button>
+        <button type="button" class="dia-tool-btn" id="diaVoiceBtn" onclick="diaToggleVoice()" title="Voice note">&#127908;</button>
         <textarea class="dia-input" id="diaInput"
             placeholder="Ketik ke grup... (Shift+Enter baris baru)" rows="1"
             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();diaSendGroup();}"
@@ -517,6 +533,125 @@ function diaCaptureGps() {
         { enableHighAccuracy: true, timeout: 9000, maximumAge: 300000 }
     );
 }
+
+/* ========= MEDIA CHAT (foto / voice / video) =========
+   Server hanya transit (auto-hapus >24 jam). Media disimpan di cache device
+   (IndexedDB) tiap pengguna — kalau dihapus dari device, tak bisa ditampilkan. */
+var DIA_DB = null;
+function idbOpen() {
+    return new Promise(function(res, rej){
+        if (DIA_DB) return res(DIA_DB);
+        if (!window.indexedDB) return rej('no-idb');
+        var rq = indexedDB.open('diaMedia', 1);
+        rq.onupgradeneeded = function(e){ e.target.result.createObjectStore('media'); };
+        rq.onsuccess = function(e){ DIA_DB = e.target.result; res(DIA_DB); };
+        rq.onerror = function(){ rej(rq.error); };
+    });
+}
+function idbGet(key) {
+    return idbOpen().then(function(db){ return new Promise(function(res){
+        try { var r = db.transaction('media','readonly').objectStore('media').get(key);
+            r.onsuccess = function(){ res(r.result || null); }; r.onerror = function(){ res(null); };
+        } catch(e){ res(null); }
+    }); });
+}
+function idbPut(key, blob) {
+    return idbOpen().then(function(db){ return new Promise(function(res){
+        try { var r = db.transaction('media','readwrite').objectStore('media').put(blob, key);
+            r.onsuccess = function(){ res(1); }; r.onerror = function(){ res(0); };
+        } catch(e){ res(0); }
+    }); }).catch(function(){});
+}
+function diaMediaKey(url){ return url.substring(url.lastIndexOf('/') + 1); }
+
+function diaMediaHtml(url, type) {
+    if (!url || !type) return '';
+    var k = escHtml(diaMediaKey(url)), s = escHtml(url);
+    if (type === 'image') return '<a class="dia-media" href="javascript:void(0)" onclick="diaOpenImg(this)"><img class="dia-media-img" data-mkey="'+k+'" data-msrc="'+s+'" alt="foto"></a>';
+    if (type === 'audio') return '<audio class="dia-media-audio" controls preload="none" data-mkey="'+k+'" data-msrc="'+s+'"></audio>';
+    if (type === 'video') return '<video class="dia-media-video" controls preload="metadata" data-mkey="'+k+'" data-msrc="'+s+'"></video>';
+    return '';
+}
+function diaHydrateMedia(root) {
+    if (!root) return;
+    root.querySelectorAll('[data-msrc]').forEach(function(el){
+        if (el.getAttribute('data-hyd')) return;
+        el.setAttribute('data-hyd','1');
+        var key = el.getAttribute('data-mkey'), src = el.getAttribute('data-msrc');
+        idbGet(key).then(function(blob){
+            if (blob) { el.src = URL.createObjectURL(blob); return; }
+            fetch(src).then(function(r){ return r.ok ? r.blob() : null; }).then(function(b){
+                if (b) { idbPut(key, b); el.src = URL.createObjectURL(b); }
+                else { el.src = src; }
+            }).catch(function(){ el.src = src; });
+        }).catch(function(){ el.src = src; });
+    });
+}
+function diaOpenImg(a){ var i = a.querySelector('img'); if (i && i.src) window.open(i.src, '_blank'); }
+
+function diaPickMedia(){ var inp = document.getElementById('diaFileInput'); if (inp) inp.click(); }
+function diaFileChosen(input) {
+    var f = input.files && input.files[0]; input.value = '';
+    if (!f) return;
+    var type = f.type.indexOf('video') === 0 ? 'video' : (f.type.indexOf('image') === 0 ? 'image' : (f.type.indexOf('audio') === 0 ? 'audio' : ''));
+    if (!type) { alert('Jenis file tidak didukung.'); return; }
+    if (f.size > 10 * 1024 * 1024) { alert('File maksimal 10MB.'); return; }
+    diaUploadSend(f, type);
+}
+function diaUploadSend(blob, type) {
+    var fd = new FormData();
+    var fname = blob.name || (type + '.' + (type === 'audio' ? 'webm' : type === 'video' ? 'mp4' : 'jpg'));
+    fd.append('file', blob, fname);
+    fd.append('type', type);
+    diaSending = true;
+    fetch('{{ route('dia.upload') }}', { method:'POST', headers:{'X-CSRF-TOKEN':csrfToken,'Accept':'application/json'}, body: fd })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            if (!d || !d.ok) { alert('Upload gagal.'); return; }
+            idbPut(diaMediaKey(d.url), blob);        // simpan ke cache device (pengirim)
+            diaSendMediaMessage(d.path, type);
+        })
+        .catch(function(){ alert('Upload gagal.'); })
+        .finally(function(){ diaSending = false; });
+}
+function diaSendMediaMessage(path, type) {
+    var url = (typeof convId !== 'undefined') ? ('/dia/conversation/' + convId + '/send')
+            : ((typeof groupId !== 'undefined') ? ('/dia/group/' + groupId + '/send') : null);
+    if (!url) return;
+    fetch(url, {
+        method:'POST',
+        headers:{'X-CSRF-TOKEN':csrfToken,'Content-Type':'application/json','Accept':'application/json'},
+        body: JSON.stringify({ body:'', media_url: path, media_type: type })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if (d.success && d.message) {
+            diaAppend(d.message, true);
+            if (d.message.id && d.message.id > diaLastMsgId) diaLastMsgId = d.message.id;
+        }
+    }).catch(function(){});
+}
+
+/* Voice note (rekam via MediaRecorder) */
+var diaRec = null, diaRecChunks = [];
+function diaToggleVoice() {
+    var btn = document.getElementById('diaVoiceBtn');
+    if (diaRec && diaRec.state === 'recording') { diaRec.stop(); return; }
+    if (!navigator.mediaDevices || !window.MediaRecorder) { alert('Perekaman suara tidak didukung browser ini.'); return; }
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream){
+        diaRecChunks = [];
+        diaRec = new MediaRecorder(stream);
+        diaRec.ondataavailable = function(e){ if (e.data && e.data.size) diaRecChunks.push(e.data); };
+        diaRec.onstop = function(){
+            stream.getTracks().forEach(function(t){ t.stop(); });
+            if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; }
+            var blob = new Blob(diaRecChunks, { type: 'audio/webm' });
+            if (blob.size > 0) diaUploadSend(blob, 'audio');
+        };
+        diaRec.start();
+        if (btn) { btn.classList.add('recording'); btn.textContent = '⏹'; }
+    }).catch(function(){ alert('Izin mikrofon ditolak.'); });
+}
 @php
 try {
     $_diaUsersArr = $users->map(function($u) {
@@ -546,6 +681,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var id = parseInt(el.getAttribute('data-id'), 10);
             if (id > diaLastMsgId) diaLastMsgId = id;
         });
+        diaHydrateMedia(msgs);   // muat media (cache device → server) untuk pesan lama
     }
     startPolling();
     diaPing();
@@ -659,14 +795,17 @@ function diaAppend(msg, isMine) {
         ? '<img src="'+escHtml(msg.avatar||'')+'\" class="dia-msg-avatar" onerror="this.style.display=\'none\'" alt="">'
         : '';
 
+    var bodyHtml = (msg.body && msg.body.length) ? '<div class="dia-msg-bubble">'+escHtml(msg.body)+'</div>' : '';
     div.innerHTML = avatarHtml +
         '<div class="dia-msg-wrap">' +
         (!isMine ? '<div class="dia-msg-name">'+escHtml(msg.name||'')+'</div>' : '') +
-        '<div class="dia-msg-bubble">'+escHtml(msg.body)+'</div>' +
+        diaMediaHtml(msg.media_url, msg.media_type) +
+        bodyHtml +
         '<div class="dia-msg-time">'+escHtml(msg.time||'')+'</div>' +
         '</div>';
 
     area.appendChild(div);
+    diaHydrateMedia(div);
     area.scrollTop = area.scrollHeight;
 }
 

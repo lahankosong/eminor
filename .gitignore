@@ -22,3 +22,7 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# media chat (transit, jangan commit isinya)
+/public/chat_media/*
+!/public/chat_media/.gitkeep

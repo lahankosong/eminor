@@ -122,54 +122,103 @@ class DiaController extends Controller
         return redirect()->route('dia.conversation', $conversation->id);
     }
 
+    // Label ringkas untuk daftar obrolan / notif saat pesan berupa media
+    protected function mediaLabel(?string $type): string
+    {
+        return ['image' => '📷 Foto', 'audio' => '🎤 Voice note', 'video' => '🎬 Video'][$type] ?? '';
+    }
+
     public function send(Request $request, $id)
     {
-        $request->validate(['body' => 'required|string|max:1000']);
+        $request->validate([
+            'body'       => 'nullable|string|max:1000',
+            'media_url'  => 'nullable|string|max:255',
+            'media_type' => 'nullable|in:image,audio,video',
+        ]);
+        if (!$request->filled('body') && !$request->filled('media_url')) {
+            return response()->json(['error' => 'Pesan kosong'], 422);
+        }
+
         $userId       = Auth::id();
         $conversation = Conversation::findOrFail($id);
-
         $this->resolveConversationAccess($conversation, $userId);
 
-        $clean = \App\Helpers\WordFilter::clean($request->body);
+        $clean     = \App\Helpers\WordFilter::clean((string) $request->body);
+        $mediaUrl  = $request->filled('media_url') ? $request->media_url : null;
+        $mediaType = $mediaUrl ? $request->media_type : null;
+        $lastMsg   = $clean !== '' ? $clean : $this->mediaLabel($mediaType);
 
         $message = Message::create([
             'conversation_id' => $id,
             'user_id'         => $userId,
             'body'            => $clean,
+            'media_url'       => $mediaUrl,
+            'media_type'      => $mediaType,
         ]);
 
         $conversation->update([
-            'last_message'    => $clean,
+            'last_message'    => $lastMsg,
             'last_message_at' => now(),
         ]);
 
-        // Notify all participants
         $recipientIds = $this->conversationParticipants($conversation, $userId);
         foreach ($recipientIds as $recipId) {
             try {
                 NotifHelper::send(
                     $recipId, $userId,
                     'message', Auth::user()->name . ' mengirim pesan',
-                    $clean,
-                    url('/dia/conversation/' . $id)
+                    $lastMsg, url('/dia/conversation/' . $id)
                 );
             } catch (\Throwable $e) {}
         }
 
-        // Detect @mentions — invite users not yet in conversation
-        $this->processMentions($request->body, $conversation, $userId);
+        $this->processMentions((string) $request->body, $conversation, $userId);
 
         return response()->json([
             'success' => true,
             'message' => [
-                'id'      => $message->id,
-                'body'    => $message->body,
-                'user_id' => $userId,
-                'name'    => Auth::user()->name,
-                'avatar'  => Auth::user()->avatar,
-                'time'    => $message->created_at->diffForHumans(),
-                'mine'    => true,
+                'id'         => $message->id,
+                'body'       => $message->body,
+                'media_url'  => $mediaUrl ? asset($mediaUrl) : null,
+                'media_type' => $mediaType,
+                'user_id'    => $userId,
+                'name'       => Auth::user()->name,
+                'avatar'     => Auth::user()->avatar,
+                'time'       => $message->created_at->diffForHumans(),
+                'mine'       => true,
             ]
+        ]);
+    }
+
+    // Upload media chat — disimpan sementara di public/chat_media, auto-prune > 24 jam
+    public function uploadMedia(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|max:10240',
+            'type' => 'required|in:image,audio,video',
+        ]);
+
+        $dir = public_path('chat_media');
+        if (!is_dir($dir)) @mkdir($dir, 0755, true);
+
+        // Bersihkan file lama (> 24 jam) — ringan, tanpa cron
+        try {
+            $cutoff = time() - 86400;
+            foreach (glob($dir . '/*') as $f) {
+                if (is_file($f) && filemtime($f) < $cutoff) @unlink($f);
+            }
+        } catch (\Throwable $e) {}
+
+        $file = $request->file('file');
+        $ext  = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin');
+        $name = $request->type . '_' . Auth::id() . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+        $file->move($dir, $name);
+
+        return response()->json([
+            'ok'   => true,
+            'path' => 'chat_media/' . $name,    // disimpan di DB (relatif)
+            'url'  => asset('chat_media/' . $name),
+            'type' => $request->type,
         ]);
     }
 
@@ -189,13 +238,15 @@ class DiaController extends Controller
         if ($joinedAt) $query->where('created_at', '>=', $joinedAt);
 
         $messages = $query->get()->map(fn($msg) => [
-            'id'      => $msg->id,
-            'body'    => $msg->body,
-            'user_id' => $msg->user_id,
-            'name'    => $msg->user->name,
-            'avatar'  => $msg->user->avatar,
-            'time'    => $msg->created_at->diffForHumans(),
-            'mine'    => ($msg->user_id === $userId),
+            'id'         => $msg->id,
+            'body'       => $msg->body,
+            'media_url'  => $msg->media_url ? asset($msg->media_url) : null,
+            'media_type' => $msg->media_type,
+            'user_id'    => $msg->user_id,
+            'name'       => $msg->user->name,
+            'avatar'     => $msg->user->avatar,
+            'time'       => $msg->created_at->diffForHumans(),
+            'mine'       => ($msg->user_id === $userId),
         ]);
 
         return response()->json(['messages' => $messages]);
@@ -254,13 +305,15 @@ class DiaController extends Controller
             ->orderBy('id')
             ->get()
             ->map(fn($msg) => [
-                'id'      => $msg->id,
-                'body'    => $msg->body,
-                'user_id' => $msg->user_id,
-                'name'    => $msg->user->name,
-                'avatar'  => $msg->user->avatar,
-                'time'    => $msg->created_at->diffForHumans(),
-                'mine'    => ($msg->user_id === $userId),
+                'id'         => $msg->id,
+                'body'       => $msg->body,
+                'media_url'  => $msg->media_url ? asset($msg->media_url) : null,
+                'media_type' => $msg->media_type,
+                'user_id'    => $msg->user_id,
+                'name'       => $msg->user->name,
+                'avatar'     => $msg->user->avatar,
+                'time'       => $msg->created_at->diffForHumans(),
+                'mine'       => ($msg->user_id === $userId),
             ]);
 
         return response()->json(['messages' => $messages]);
@@ -309,34 +362,44 @@ class DiaController extends Controller
 
     public function sendGroup(Request $request, $id)
     {
-        $request->validate(['body' => 'required|string|max:1000']);
+        $request->validate([
+            'body'       => 'nullable|string|max:1000',
+            'media_url'  => 'nullable|string|max:255',
+            'media_type' => 'nullable|in:image,audio,video',
+        ]);
+        if (!$request->filled('body') && !$request->filled('media_url')) {
+            return response()->json(['error' => 'Pesan kosong'], 422);
+        }
+
         $userId = Auth::id();
         $group  = Group::findOrFail($id);
-
         if (!$group->isMember($userId)) abort(403);
 
-        $clean = \App\Helpers\WordFilter::clean($request->body);
+        $clean     = \App\Helpers\WordFilter::clean((string) $request->body);
+        $mediaUrl  = $request->filled('media_url') ? $request->media_url : null;
+        $mediaType = $mediaUrl ? $request->media_type : null;
+        $lastMsg   = $clean !== '' ? $clean : $this->mediaLabel($mediaType);
 
         $message = GroupMessage::create([
-            'group_id' => $id,
-            'user_id'  => $userId,
-            'body'     => $clean,
+            'group_id'   => $id,
+            'user_id'    => $userId,
+            'body'       => $clean,
+            'media_url'  => $mediaUrl,
+            'media_type' => $mediaType,
         ]);
 
         $group->update([
-            'last_message'    => $clean,
+            'last_message'    => $lastMsg,
             'last_message_at' => now(),
         ]);
 
-        // Notify all other group members
         foreach ($group->members as $gm) {
             if ($gm->user_id === $userId) continue;
             try {
                 NotifHelper::send(
                     $gm->user_id, $userId,
                     'message', Auth::user()->name . ' di grup ' . $group->name,
-                    $clean,
-                    url('/dia/group/' . $id)
+                    $lastMsg, url('/dia/group/' . $id)
                 );
             } catch (\Throwable $e) {}
         }
@@ -344,13 +407,15 @@ class DiaController extends Controller
         return response()->json([
             'success' => true,
             'message' => [
-                'id'      => $message->id,
-                'body'    => $message->body,
-                'user_id' => $userId,
-                'name'    => Auth::user()->name,
-                'avatar'  => Auth::user()->avatar,
-                'time'    => $message->created_at->diffForHumans(),
-                'mine'    => true,
+                'id'         => $message->id,
+                'body'       => $message->body,
+                'media_url'  => $mediaUrl ? asset($mediaUrl) : null,
+                'media_type' => $mediaType,
+                'user_id'    => $userId,
+                'name'       => Auth::user()->name,
+                'avatar'     => Auth::user()->avatar,
+                'time'       => $message->created_at->diffForHumans(),
+                'mine'       => true,
             ]
         ]);
     }

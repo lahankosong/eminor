@@ -124,6 +124,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dia/group/{id}/poll', [DiaController::class, 'pollGroupMessages'])->name('dia.group.poll');
     Route::post('/dia/ping', [DiaController::class, 'ping'])->name('dia.ping');
     Route::post('/dia/locate', [DiaController::class, 'locate'])->name('dia.locate');
+    Route::post('/dia/upload', [DiaController::class, 'uploadMedia'])->name('dia.upload');
     Route::post('/dia/invite/{id}/accept',  [DiaController::class, 'acceptInvite'])->name('dia.invite.accept');
     Route::post('/dia/invite/{id}/decline', [DiaController::class, 'declineInvite'])->name('dia.invite.decline');
 

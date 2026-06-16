@@ -403,6 +403,23 @@ if (tableExists($conn, $dbname, 'users')) {
     markMigration($conn, '2026_06_15_000005_add_city_to_users_table');
 }
 
+// ── 6i. Kolom media di messages & group_messages ─────────────────────────────
+echo '<h2>6i. Kolom media (chat)</h2>';
+foreach (['messages', 'group_messages'] as $mt) {
+    if (!tableExists($conn, $dbname, $mt)) continue;
+    if (!columnExists($conn, $dbname, $mt, 'media_url')) {
+        runSQL($conn, "ADD media_url ke $mt", "ALTER TABLE `$mt` ADD COLUMN `media_url` varchar(255) DEFAULT NULL AFTER `body`");
+    } else {
+        echo '<pre class="info">&#8212; ' . $mt . '.media_url sudah ada</pre>';
+    }
+    if (!columnExists($conn, $dbname, $mt, 'media_type')) {
+        runSQL($conn, "ADD media_type ke $mt", "ALTER TABLE `$mt` ADD COLUMN `media_type` varchar(20) DEFAULT NULL AFTER `media_url`");
+    } else {
+        echo '<pre class="info">&#8212; ' . $mt . '.media_type sudah ada</pre>';
+    }
+}
+markMigration($conn, '2026_06_16_000001_add_media_to_messages_tables');
+
 // ── 7. Mark remaining pending migrations ─────────────────────────────────────
 echo '<h2>7. Tandai migration yang pending sebagai selesai</h2>';
 $toMark = [
