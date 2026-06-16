@@ -690,10 +690,14 @@ function kitaAutoLoc() {
     if (!navigator.geolocation) return;
     var st = document.getElementById('kitaLocStatus');
     st.style.display = ''; st.textContent = '📍 mendeteksi lokasi…';
+    // Pengaman: kalau callback geolocation tak pernah datang (mis. TWA hang),
+    // jangan biarkan "mendeteksi" selamanya — sembunyikan setelah 14 detik.
+    var settled = false;
+    var guard = setTimeout(function(){ if (!settled) { settled = true; st.style.display = 'none'; } }, 14000);
     navigator.geolocation.getCurrentPosition(
-        function(pos){ kitaPostReverse(pos.coords.latitude, pos.coords.longitude); },
-        function(err){ st.style.display = 'none'; },   // ditolak/gagal → tanpa lokasi (jangan pakai IP yg meleset jauh)
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+        function(pos){ if (settled) return; settled = true; clearTimeout(guard); kitaPostReverse(pos.coords.latitude, pos.coords.longitude); },
+        function(err){ if (settled) return; settled = true; clearTimeout(guard); st.style.display = 'none'; },
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 300000 }
     );
 }
 function kitaPostReverse(lat, lon) {
