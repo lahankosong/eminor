@@ -62,6 +62,26 @@ class AiAgentController extends Controller
         return view('admin.ai-agent', compact('songs', 'providers', 'saved', 'lastSongId', 'cloudinary'));
     }
 
+    /* ===================== Halaman Pengaturan AI ===================== */
+
+    public function aiSettings()
+    {
+        $providers = collect();
+        try {
+            $providers = AiProvider::orderBy('name')->get();
+        } catch (\Throwable $e) {
+            // tabel belum ada — jalankan fixdb.php
+        }
+
+        $cloudinary = [
+            'cloud'      => (string) SiteSetting::get('cloudinary_cloud', ''),
+            'key'        => (string) SiteSetting::get('cloudinary_key', ''),
+            'secret_set' => (bool) SiteSetting::get('cloudinary_secret'),
+        ];
+
+        return view('admin.ai-settings', compact('providers', 'cloudinary'));
+    }
+
     /* ===================== Provider CRUD ===================== */
 
     public function storeProvider(Request $request)
@@ -71,7 +91,7 @@ class AiAgentController extends Controller
         if ($kind === 'image') {
             $data = $request->validate([
                 'name'     => 'required|string|max:100',
-                'format'   => 'required|in:pollinations,dalle',
+                'format'   => 'required|in:pollinations,dalle,imagen',
                 'base_url' => 'nullable|string|max:255',
                 'model'    => 'nullable|string|max:120',
                 'api_key'  => 'nullable|string|max:300',
@@ -197,6 +217,13 @@ class AiAgentController extends Controller
         return '1024x1024';
     }
 
+    protected function imagenAspect(int $w, int $h): string
+    {
+        if ($w > $h) return '16:9';
+        if ($h > $w) return '9:16';
+        return '1:1';
+    }
+
     /** Generate gambar → kembalikan raw bytes. */
     protected function callImageProvider(?AiProvider $provider, string $prompt, int $w, int $h): string
     {
@@ -221,6 +248,24 @@ class AiAgentController extends Controller
             $url = $resp->json('data.0.url');
             if ($url) return Http::timeout(60)->get($url)->body();
             throw new \Exception('Image API tidak mengembalikan gambar.');
+        }
+
+        if ($provider && $format === 'imagen') {
+            $key = $provider->api_key;
+            if (!$key) throw new \Exception('API key untuk "' . $provider->name . '" belum diisi.');
+            $base  = rtrim($provider->base_url ?: 'https://generativelanguage.googleapis.com/v1beta', '/');
+            $model = $provider->model ?: 'imagen-3.0-generate-002';
+            $resp = Http::timeout(120)->post(
+                $base . '/models/' . $model . ':predict?key=' . urlencode($key),
+                [
+                    'instances'  => [['prompt' => $prompt]],
+                    'parameters' => ['sampleCount' => 1, 'aspectRatio' => $this->imagenAspect($w, $h)],
+                ]
+            );
+            if (!$resp->successful()) throw new \Exception('Imagen error (' . $resp->status() . '): ' . $resp->body());
+            $b64 = $resp->json('predictions.0.bytesBase64Encoded');
+            if ($b64) return base64_decode($b64);
+            throw new \Exception('Imagen tidak mengembalikan gambar (cek model/akses Imagen di API key).');
         }
 
         // Pollinations.ai — gratis, tanpa API key
