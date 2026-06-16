@@ -926,15 +926,16 @@ function kitaDeletePost(id) {
     if(!confirm('Hapus postingan ini?'))return;
     fetch(BASE_URL+'/kita/'+id, {
         method:'DELETE',
-        headers:{'X-CSRF-TOKEN':csrfToken,'Content-Type':'application/json'}
+        headers:{'X-CSRF-TOKEN':csrfToken,'Content-Type':'application/json','Accept':'application/json'}
     })
-    .then(function(r){return r.json();})
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     .then(function(d){
         if(d.success){
             var el=document.getElementById('kitaPost'+id);
             if(el) el.remove();
-        }
-    });
+        } else { alert('Gagal menghapus postingan.'); }
+    })
+    .catch(function(e){ alert('Gagal menghapus postingan ('+e.message+'). Coba muat ulang.'); });
 }
 
 function escHtml(t){

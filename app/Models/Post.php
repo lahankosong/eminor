@@ -11,6 +11,13 @@ class Post extends Model
         'likes_count', 'comments_count', 'is_pinned'
     ];
 
+    protected $casts = [
+        'user_id'        => 'integer',
+        'likes_count'    => 'integer',
+        'comments_count' => 'integer',
+        'is_pinned'      => 'boolean',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
