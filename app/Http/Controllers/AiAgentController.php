@@ -253,19 +253,45 @@ class AiAgentController extends Controller
         if ($provider && $format === 'imagen') {
             $key = $provider->api_key;
             if (!$key) throw new \Exception('API key untuk "' . $provider->name . '" belum diisi.');
-            $base  = rtrim($provider->base_url ?: 'https://generativelanguage.googleapis.com/v1beta', '/');
+
+            // Normalisasi base URL — buang bagian /models/... bila terlanjur disertakan
+            $base = rtrim($provider->base_url ?: 'https://generativelanguage.googleapis.com/v1beta', '/');
+            if (($pos = strpos($base, '/models')) !== false) {
+                $base = rtrim(substr($base, 0, $pos), '/');
+            }
             $model = $provider->model ?: 'imagen-3.0-generate-002';
+
+            // Model Imagen (imagen-*) pakai :predict; model Gemini native image pakai :generateContent
+            if (str_starts_with($model, 'imagen')) {
+                $resp = Http::timeout(120)->post(
+                    $base . '/models/' . $model . ':predict?key=' . urlencode($key),
+                    [
+                        'instances'  => [['prompt' => $prompt]],
+                        'parameters' => ['sampleCount' => 1, 'aspectRatio' => $this->imagenAspect($w, $h)],
+                    ]
+                );
+                if (!$resp->successful()) throw new \Exception('Imagen error (' . $resp->status() . '): ' . $resp->body());
+                $b64 = $resp->json('predictions.0.bytesBase64Encoded');
+                if ($b64) return base64_decode($b64);
+                throw new \Exception('Imagen tidak mengembalikan gambar (cek akses Imagen/billing di API key).');
+            }
+
+            // Gemini native image (mis. gemini-2.5-flash-image) → generateContent + responseModalities
+            $hint = $prompt . ' (aspect ratio ' . $this->imagenAspect($w, $h) . ')';
             $resp = Http::timeout(120)->post(
-                $base . '/models/' . $model . ':predict?key=' . urlencode($key),
+                $base . '/models/' . $model . ':generateContent?key=' . urlencode($key),
                 [
-                    'instances'  => [['prompt' => $prompt]],
-                    'parameters' => ['sampleCount' => 1, 'aspectRatio' => $this->imagenAspect($w, $h)],
+                    'contents'         => [['parts' => [['text' => $hint]]]],
+                    'generationConfig' => ['responseModalities' => ['TEXT', 'IMAGE']],
                 ]
             );
-            if (!$resp->successful()) throw new \Exception('Imagen error (' . $resp->status() . '): ' . $resp->body());
-            $b64 = $resp->json('predictions.0.bytesBase64Encoded');
-            if ($b64) return base64_decode($b64);
-            throw new \Exception('Imagen tidak mengembalikan gambar (cek model/akses Imagen di API key).');
+            if (!$resp->successful()) throw new \Exception('Gemini image error (' . $resp->status() . '): ' . $resp->body());
+            $parts = $resp->json('candidates.0.content.parts', []);
+            foreach ($parts as $p) {
+                $b64 = $p['inlineData']['data'] ?? $p['inline_data']['data'] ?? null;
+                if ($b64) return base64_decode($b64);
+            }
+            throw new \Exception('Gemini tidak mengembalikan gambar — pastikan model image (mis. gemini-2.5-flash-image), bukan model teks.');
         }
 
         // Pollinations.ai — gratis, tanpa API key
