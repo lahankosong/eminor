@@ -5,10 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Song;
 use App\Models\AiGeneration;
 use App\Models\AiProvider;
+use App\Models\AiImage;
 use App\Models\ContentPlan;
+use App\Models\SiteSetting;
+use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Crypt;
 
 class AiAgentController extends Controller
 {
@@ -48,23 +52,186 @@ class AiAgentController extends Controller
             // tabel belum ada / kolom beda — abaikan
         }
 
-        return view('admin.ai-agent', compact('songs', 'providers', 'saved', 'lastSongId'));
+        // Pengaturan Cloudinary (untuk panel penyimpanan gambar)
+        $cloudinary = [
+            'cloud'      => (string) SiteSetting::get('cloudinary_cloud', ''),
+            'key'        => (string) SiteSetting::get('cloudinary_key', ''),
+            'secret_set' => (bool) SiteSetting::get('cloudinary_secret'),
+        ];
+
+        return view('admin.ai-agent', compact('songs', 'providers', 'saved', 'lastSongId', 'cloudinary'));
     }
 
     /* ===================== Provider CRUD ===================== */
 
     public function storeProvider(Request $request)
     {
-        $data = $request->validate([
-            'name'     => 'required|string|max:100',
-            'base_url' => 'required|string|max:255',
-            'model'    => 'required|string|max:120',
-            'format'   => 'required|in:openai,anthropic',
-            'api_key'  => 'nullable|string|max:300',
-        ]);
+        $kind = $request->input('kind', 'text');
+
+        if ($kind === 'image') {
+            $data = $request->validate([
+                'name'     => 'required|string|max:100',
+                'format'   => 'required|in:pollinations,dalle',
+                'base_url' => 'nullable|string|max:255',
+                'model'    => 'nullable|string|max:120',
+                'api_key'  => 'nullable|string|max:300',
+            ]);
+            $data['kind']     = 'image';
+            $data['base_url'] = $data['base_url'] ?? '';
+            $data['model']    = $data['model'] ?? '';
+        } else {
+            $data = $request->validate([
+                'name'     => 'required|string|max:100',
+                'base_url' => 'required|string|max:255',
+                'model'    => 'required|string|max:120',
+                'format'   => 'required|in:openai,anthropic',
+                'api_key'  => 'nullable|string|max:300',
+            ]);
+            $data['kind'] = 'text';
+        }
+
         $data['enabled'] = true;
         AiProvider::create($data);
         return back()->with('success', 'Provider AI "' . $data['name'] . '" disimpan.');
+    }
+
+    /* ===================== Pengaturan Cloudinary ===================== */
+
+    public function saveSettings(Request $request)
+    {
+        $data = $request->validate([
+            'cloudinary_cloud'  => 'nullable|string|max:120',
+            'cloudinary_key'    => 'nullable|string|max:120',
+            'cloudinary_secret' => 'nullable|string|max:200',
+        ]);
+
+        if ($request->has('cloudinary_cloud')) SiteSetting::set('cloudinary_cloud', trim((string) $data['cloudinary_cloud']));
+        if ($request->has('cloudinary_key'))   SiteSetting::set('cloudinary_key', trim((string) $data['cloudinary_key']));
+        // secret hanya ditimpa bila diisi (biar tidak terhapus saat edit field lain)
+        if (!empty($data['cloudinary_secret'])) {
+            SiteSetting::set('cloudinary_secret', Crypt::encryptString(trim($data['cloudinary_secret'])));
+        }
+
+        return back()->with('success', 'Pengaturan Cloudinary disimpan.');
+    }
+
+    /* ===================== Generate Gambar (Fase A) ===================== */
+
+    public function generateImage(Request $request)
+    {
+        $data = $request->validate([
+            'prompt'      => 'required|string|max:1500',
+            'ratio'       => 'nullable|in:9:16,16:9,1:1',
+            'provider_id' => 'nullable|integer',
+            'song_id'     => 'nullable|integer',
+        ]);
+
+        $cloud = new CloudinaryService();
+        if (!$cloud->configured()) {
+            return response()->json(['error' => 'Cloudinary belum dikonfigurasi. Buka Pengaturan AI → isi kredensial Cloudinary.'], 422);
+        }
+
+        // pilih provider gambar (by id, lalu fallback ke provider image aktif pertama)
+        $provider = null;
+        if (!empty($data['provider_id'])) {
+            $provider = AiProvider::where('id', $data['provider_id'])->where('kind', 'image')->first();
+        }
+        if (!$provider) {
+            $provider = AiProvider::where('kind', 'image')->where('enabled', true)->orderBy('id')->first();
+        }
+        $providerName = $provider ? $provider->name : 'Pollinations (gratis)';
+
+        [$w, $h] = $this->ratioDims($data['ratio'] ?? '9:16');
+
+        try {
+            $bytes = $this->callImageProvider($provider, $data['prompt'], $w, $h);
+            $up = $cloud->uploadBytes($bytes);
+
+            $img = AiImage::create([
+                'user_id'   => auth()->id(),
+                'song_id'   => $data['song_id'] ?? null,
+                'prompt'    => $data['prompt'],
+                'provider'  => $providerName,
+                'url'       => $up['url'],
+                'public_id' => $up['public_id'],
+                'ratio'     => $data['ratio'] ?? '9:16',
+            ]);
+
+            return response()->json([
+                'success'  => true,
+                'id'       => $img->id,
+                'url'      => $up['url'],
+                'provider' => $providerName,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('AI image generate error', ['error' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function destroyImage($id)
+    {
+        $img = AiImage::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        try {
+            if ($img->public_id) (new CloudinaryService())->destroy($img->public_id);
+        } catch (\Throwable $e) {
+            // gagal hapus di Cloudinary — tetap hapus record lokal
+        }
+        $img->delete();
+        return response()->json(['success' => true]);
+    }
+
+    protected function ratioDims(string $ratio): array
+    {
+        return match ($ratio) {
+            '16:9'  => [1280, 720],
+            '1:1'   => [1024, 1024],
+            default => [768, 1344], // 9:16
+        };
+    }
+
+    protected function dalleSize(int $w, int $h): string
+    {
+        if ($w > $h) return '1792x1024';
+        if ($h > $w) return '1024x1792';
+        return '1024x1024';
+    }
+
+    /** Generate gambar → kembalikan raw bytes. */
+    protected function callImageProvider(?AiProvider $provider, string $prompt, int $w, int $h): string
+    {
+        $format = $provider->format ?? 'pollinations';
+
+        if ($provider && $format === 'dalle') {
+            $key = $provider->api_key;
+            if (!$key) throw new \Exception('API key untuk "' . $provider->name . '" belum diisi.');
+            $resp = Http::timeout(120)->withToken($key)->post(
+                rtrim($provider->base_url ?: 'https://api.openai.com/v1', '/') . '/images/generations',
+                [
+                    'model'           => $provider->model ?: 'dall-e-3',
+                    'prompt'          => $prompt,
+                    'n'               => 1,
+                    'size'            => $this->dalleSize($w, $h),
+                    'response_format' => 'b64_json',
+                ]
+            );
+            if (!$resp->successful()) throw new \Exception('Image API error (' . $resp->status() . '): ' . $resp->body());
+            $b64 = $resp->json('data.0.b64_json');
+            if ($b64) return base64_decode($b64);
+            $url = $resp->json('data.0.url');
+            if ($url) return Http::timeout(60)->get($url)->body();
+            throw new \Exception('Image API tidak mengembalikan gambar.');
+        }
+
+        // Pollinations.ai — gratis, tanpa API key
+        $model = ($provider && $provider->model) ? $provider->model : 'flux';
+        $url = 'https://image.pollinations.ai/prompt/' . rawurlencode($prompt)
+            . '?width=' . $w . '&height=' . $h . '&nologo=true&model=' . rawurlencode($model);
+        $resp = Http::timeout(150)->get($url);
+        if (!$resp->successful()) throw new \Exception('Pollinations error (' . $resp->status() . ')');
+        $body = $resp->body();
+        if (strlen($body) < 1000) throw new \Exception('Gambar gagal dibuat, coba lagi sebentar.');
+        return $body;
     }
 
     public function destroyProvider($id)

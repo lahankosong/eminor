@@ -78,6 +78,9 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::post('/ai-agent/provider', [AiAgentController::class, 'storeProvider'])->name('ai-agent.provider.store');
     Route::delete('/ai-agent/provider/{id}', [AiAgentController::class, 'destroyProvider'])->name('ai-agent.provider.destroy');
     Route::post('/ai-agent/schedule', [AiAgentController::class, 'scheduleToCalendar'])->name('ai-agent.schedule');
+    Route::post('/ai-agent/settings', [AiAgentController::class, 'saveSettings'])->name('ai-agent.settings');
+    Route::post('/ai-agent/image', [AiAgentController::class, 'generateImage'])->name('ai-agent.image');
+    Route::delete('/ai-agent/image/{id}', [AiAgentController::class, 'destroyImage'])->name('ai-agent.image.destroy');
 });
 
 Route::middleware(['auth'])->group(function () {

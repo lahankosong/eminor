@@ -59,6 +59,14 @@
     .narr-text { font-size:13px; color:var(--text); line-height:1.5; }
     .narr-prompt { font-size:11px; color:var(--text-3); margin-top:5px; line-height:1.5; background:var(--bg-3); border:1px solid var(--border-2); border-radius:6px; padding:6px 8px; font-family:monospace; }
     .narr-copy { font-size:10px; color:var(--accent); cursor:pointer; margin-left:8px; }
+    .narr-img-btn { font-size:10px; color:var(--accent); cursor:pointer; margin-left:8px; }
+    .img-toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:9px 12px; margin-bottom:1rem; }
+    .gen-img-wrap { margin-top:8px; }
+    .gen-img-wrap img { max-width:170px; max-height:300px; border-radius:8px; border:1px solid var(--border); display:block; }
+    .gen-img-actions { display:flex; gap:10px; margin-top:5px; }
+    .gen-img-actions a, .gen-img-actions span { font-size:10px; color:var(--text-3); cursor:pointer; text-decoration:none; }
+    .gen-img-actions a:hover { color:var(--text); }
+    .gen-img-loading { font-size:11px; color:var(--text-3); margin-top:6px; }
 
     .sched-bar { position:sticky; bottom:0; background:var(--bg-2); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-top:1rem; display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
     .sched-bar .fg { margin-bottom:0; }
@@ -75,6 +83,11 @@
 
 @section('content')
 
+@php
+    $textProviders  = $providers->filter(fn($p) => ($p->kind ?? 'text') === 'text')->values();
+    $imageProviders = $providers->filter(fn($p) => ($p->kind ?? 'text') === 'image')->values();
+@endphp
+
 <div class="ai-header">
     <div>
         <h2>AI Agent v2</h2>
@@ -89,11 +102,11 @@
 
 {{-- ===== PENGATURAN AI (provider) ===== --}}
 <details class="card">
-    <summary>⚙️ Pengaturan AI — Provider &amp; API Key ({{ $providers->count() }})</summary>
+    <summary>⚙️ Pengaturan AI — Provider Teks &amp; API Key ({{ $textProviders->count() }})</summary>
     <div class="card-body">
-        @if($providers->count())
+        @if($textProviders->count())
         <div style="margin-bottom:1rem;">
-            @foreach($providers as $prov)
+            @foreach($textProviders as $prov)
             <div class="prov-item">
                 <div style="flex:1;min-width:0;">
                     <span class="prov-name">{{ $prov->name }}</span>
@@ -146,6 +159,92 @@
     </div>
 </details>
 
+{{-- ===== PENYIMPANAN & GENERATOR GAMBAR ===== --}}
+<details class="card">
+    <summary>🖼️ Generator Gambar &amp; Penyimpanan Cloudinary
+        @if($cloudinary['cloud'] && $cloudinary['secret_set'])
+            <span class="prov-key-ok" style="font-size:11px;margin-left:8px;">● aktif</span>
+        @else
+            <span class="prov-key-no" style="font-size:11px;margin-left:8px;">● belum diatur</span>
+        @endif
+    </summary>
+    <div class="card-body">
+        {{-- Kredensial Cloudinary --}}
+        <div style="font-size:12px;color:var(--text-2);font-weight:600;margin-bottom:8px;">📦 Penyimpanan Cloudinary (gratis 25GB)</div>
+        <p style="font-size:11px;color:var(--text-3);margin-bottom:10px;line-height:1.6;">
+            Daftar di <b>cloudinary.com</b> → Dashboard → salin <b>Cloud Name</b>, <b>API Key</b>, <b>API Secret</b>.
+            Gambar AI disimpan di Cloudinary (bukan hosting), DB cuma menyimpan URL. Server kamu tetap ringan.
+        </p>
+        <form method="POST" action="{{ route('admin.ai-agent.settings') }}">
+            @csrf
+            <div class="row2">
+                <div class="fg"><label>Cloud Name</label><input type="text" name="cloudinary_cloud" class="fi" value="{{ $cloudinary['cloud'] }}" placeholder="dxxxxxx" autocomplete="off"></div>
+                <div class="fg"><label>API Key</label><input type="text" name="cloudinary_key" class="fi" value="{{ $cloudinary['key'] }}" placeholder="1234567890" autocomplete="off"></div>
+            </div>
+            <div class="fg">
+                <label>API Secret (terenkripsi){{ $cloudinary['secret_set'] ? ' — sudah tersimpan, isi untuk ganti' : '' }}</label>
+                <input type="password" name="cloudinary_secret" class="fi" placeholder="{{ $cloudinary['secret_set'] ? '••••••••• (biarkan kosong jika tidak diganti)' : 'API secret' }}" autocomplete="off">
+            </div>
+            <button class="btn btn-primary" type="submit">Simpan Cloudinary</button>
+        </form>
+
+        <hr style="border:none;border-top:1px solid var(--border);margin:1.25rem 0;">
+
+        {{-- Provider gambar --}}
+        <div style="font-size:12px;color:var(--text-2);font-weight:600;margin-bottom:8px;">🎨 Provider Generator Gambar</div>
+        @if($imageProviders->count())
+        <div style="margin-bottom:1rem;">
+            @foreach($imageProviders as $prov)
+            <div class="prov-item">
+                <div style="flex:1;min-width:0;">
+                    <span class="prov-name">{{ $prov->name }}</span>
+                    <span class="prov-badge">{{ $prov->format }}</span>
+                    <div class="prov-meta">{{ $prov->model ?: 'default' }}
+                        @if($prov->format === 'dalle') · @if($prov->api_key)<span class="prov-key-ok">● key terisi</span>@else<span class="prov-key-no">● key kosong</span>@endif @endif
+                    </div>
+                </div>
+                <form method="POST" action="{{ route('admin.ai-agent.provider.destroy', $prov->id) }}" onsubmit="return confirm('Hapus provider {{ $prov->name }}?')">
+                    @csrf @method('DELETE')
+                    <button class="btn-del">Hapus</button>
+                </form>
+            </div>
+            @endforeach
+        </div>
+        @else
+        <p style="font-size:12px;color:var(--text-3);margin-bottom:1rem;">Belum ada provider gambar. <b>Pollinations</b> (gratis, tanpa API key) otomatis dipakai sebagai default. Tambah di bawah untuk pilihan lain (mis. DALL-E).</p>
+        @endif
+
+        <form method="POST" action="{{ route('admin.ai-agent.provider.store') }}">
+            @csrf
+            <input type="hidden" name="kind" value="image">
+            <div class="fg">
+                <label>Preset cepat</label>
+                <select class="fi" id="imgPresetSelect" onchange="applyImgPreset(this.value)">
+                    <option value="">— Pilih preset / isi manual —</option>
+                    <option value="pollinations">Pollinations Flux (GRATIS, tanpa key)</option>
+                    <option value="pollinations-turbo">Pollinations Turbo (gratis, cepat)</option>
+                    <option value="dalle">OpenAI DALL-E 3 (butuh key)</option>
+                </select>
+            </div>
+            <div class="row2">
+                <div class="fg"><label>Nama</label><input type="text" name="name" id="iName" class="fi" placeholder="Pollinations Flux" required></div>
+                <div class="fg"><label>Model</label><input type="text" name="model" id="iModel" class="fi" placeholder="flux / dall-e-3"></div>
+            </div>
+            <div class="row2">
+                <div class="fg"><label>Format</label>
+                    <select name="format" id="iFormat" class="fi">
+                        <option value="pollinations">pollinations (gratis)</option>
+                        <option value="dalle">dalle (openai images)</option>
+                    </select>
+                </div>
+                <div class="fg"><label>Base URL (khusus DALL-E)</label><input type="text" name="base_url" id="iUrl" class="fi" placeholder="https://api.openai.com/v1"></div>
+            </div>
+            <div class="fg"><label>API Key (khusus DALL-E — terenkripsi)</label><input type="password" name="api_key" id="iKey" class="fi" placeholder="sk-..." autocomplete="off"></div>
+            <button class="btn btn-primary" type="submit">Simpan Provider Gambar</button>
+        </form>
+    </div>
+</details>
+
 {{-- ===== GENERATE ===== --}}
 <div class="card">
     <div class="card-head">✨ Generate Konten</div>
@@ -164,7 +263,7 @@
                 <label>AI Provider</label>
                 <select class="fi" id="providerSelect">
                     <option value="">— Pilih AI —</option>
-                    @foreach($providers as $prov)
+                    @foreach($textProviders as $prov)
                     <option value="{{ $prov->id }}">{{ $prov->name }} ({{ $prov->model }})</option>
                     @endforeach
                 </select>
@@ -262,6 +361,24 @@
         <div class="lbl">Niche</div>
         <div class="val" id="nicheVal"></div>
     </div>
+
+    <div class="img-toolbar">
+        <span style="font-size:11px;color:var(--text-3);">🎨 Buat gambar pakai:</span>
+        <select class="fi" id="imgProviderSelect" style="width:auto;padding:6px 9px;font-size:12px;">
+            <option value="">Pollinations (gratis)</option>
+            @foreach($imageProviders as $prov)
+            <option value="{{ $prov->id }}">{{ $prov->name }}</option>
+            @endforeach
+        </select>
+        <select class="fi" id="imgRatioSelect" style="width:auto;padding:6px 9px;font-size:12px;">
+            <option value="9:16">9:16 Potrait</option>
+            <option value="16:9">16:9 Landscape</option>
+            <option value="1:1">1:1 Kotak</option>
+        </select>
+        @if(!($cloudinary['cloud'] && $cloudinary['secret_set']))
+        <span style="font-size:11px;color:#f87171;">⚠️ Atur Cloudinary dulu di panel atas untuk menyimpan gambar.</span>
+        @endif
+    </div>
     <div id="topicsWrap"></div>
     <div id="longFormWrap"></div>
     <div id="umumWrap"></div>
@@ -284,6 +401,8 @@ var CSRF = '{{ csrf_token() }}';
 var ROUTE_GEN_BASE = '{{ url('admin/ai-agent/generate') }}';
 var ROUTE_SCHEDULE = '{{ route('admin.ai-agent.schedule') }}';
 var ROUTE_CALENDAR = '{{ route('admin.calendar') }}';
+var ROUTE_IMAGE    = '{{ route('admin.ai-agent.image') }}';
+var CLOUD_READY    = {{ ($cloudinary['cloud'] && $cloudinary['secret_set']) ? 'true' : 'false' }};
 var currentSongId = null;
 var SAVED = {!! json_encode($saved) !!};       // hasil tersimpan per song_id
 var LAST_SONG = {{ $lastSongId ?? 'null' }};   // generasi terakhir
@@ -306,6 +425,63 @@ function applyPreset(k) {
 }
 
 function esc(s){ return (s||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+// ===== Generator gambar (Fase A) =====
+var IMG_PRESETS = {
+    'pollinations':       {name:'Pollinations Flux',  model:'flux',  format:'pollinations', base_url:'', key:''},
+    'pollinations-turbo': {name:'Pollinations Turbo', model:'turbo', format:'pollinations', base_url:'', key:''},
+    'dalle':              {name:'DALL-E 3',           model:'dall-e-3', format:'dalle', base_url:'https://api.openai.com/v1', key:''},
+};
+function applyImgPreset(k){
+    if (!k || !IMG_PRESETS[k]) return;
+    var p = IMG_PRESETS[k];
+    document.getElementById('iName').value = p.name;
+    document.getElementById('iModel').value = p.model;
+    document.getElementById('iFormat').value = p.format;
+    document.getElementById('iUrl').value = p.base_url;
+}
+
+function imgTools(promptStr){
+    var enc = encodeURIComponent(promptStr || '');
+    return '<span class="narr-copy" onclick="copyText(this,\'' + enc + '\')">[copy]</span>' +
+           '<span class="narr-img-btn" onclick="genImage(this,\'' + enc + '\')">🖼️ buat gambar</span>' +
+           '<div class="gen-img-wrap"></div>';
+}
+
+function genImage(btn, enc){
+    if (!CLOUD_READY) { alert('Atur kredensial Cloudinary dulu di panel "Generator Gambar & Penyimpanan".'); return; }
+    var prompt = decodeURIComponent(enc);
+    var wrap = btn.closest('.narr-prompt').querySelector('.gen-img-wrap');
+    var provId = document.getElementById('imgProviderSelect').value;
+    var ratio  = document.getElementById('imgRatioSelect').value;
+    btn.style.pointerEvents = 'none'; btn.textContent = '⏳ membuat…';
+    wrap.innerHTML = '<div class="gen-img-loading"><span class="spinner"></span> Membuat gambar… (10–40 detik)</div>';
+
+    fetch(ROUTE_IMAGE, {
+        method:'POST',
+        headers:{'X-CSRF-TOKEN':CSRF,'Content-Type':'application/json','Accept':'application/json'},
+        body: JSON.stringify({ prompt: prompt, ratio: ratio, provider_id: provId || null, song_id: currentSongId })
+    })
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, d:d}; }); })
+    .then(function(res){
+        btn.style.pointerEvents = ''; btn.textContent = '🖼️ buat lagi';
+        if (!res.ok || res.d.error) {
+            wrap.innerHTML = '<div class="gen-img-loading" style="color:#f87171;">⚠️ ' + esc(res.d.error || 'Gagal membuat gambar.') + '</div>';
+            return;
+        }
+        wrap.innerHTML =
+            '<img src="' + res.d.url + '" alt="hasil">' +
+            '<div class="gen-img-actions">' +
+                '<a href="' + res.d.url + '" target="_blank" download>⬇️ unduh</a>' +
+                '<span onclick="copyText(this,\'' + encodeURIComponent(res.d.url) + '\')">🔗 salin URL</span>' +
+                '<span style="color:var(--text-3);">via ' + esc(res.d.provider) + '</span>' +
+            '</div>';
+    })
+    .catch(function(e){
+        btn.style.pointerEvents = ''; btn.textContent = '🖼️ buat gambar';
+        wrap.innerHTML = '<div class="gen-img-loading" style="color:#f87171;">⚠️ ' + e.message + '</div>';
+    });
+}
 
 function doGenerate() {
     var songId = document.getElementById('songSelect').value;
@@ -377,8 +553,7 @@ function renderResults(d) {
                 '<input type="checkbox" class="narrChk" data-type="short" data-text="' + esc(n.text) + '" data-prompt="' + esc(n.image_prompt) + '" onchange="updateCount()">' +
                 '<div class="narr-body">' +
                     '<div class="narr-text">' + esc(n.text) + '</div>' +
-                    '<div class="narr-prompt">🎨 ' + esc(n.image_prompt) +
-                        '<span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(n.image_prompt) + '\')">[copy]</span>' +
+                    '<div class="narr-prompt">🎨 ' + esc(n.image_prompt) + imgTools(n.image_prompt) +
                     '</div>' +
                 '</div></div>';
         });
@@ -393,7 +568,7 @@ function renderResults(d) {
     if (lf && lf.narration) {
         var scenes = (lf.scenes || []).map(function(sc, i){
             return '<div class="narr-prompt">🎨 ' + (i+1) + '. ' + esc(sc.image_prompt) +
-                '<span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(sc.image_prompt) + '\')">[copy]</span></div>';
+                imgTools(sc.image_prompt) + '</div>';
         }).join('');
         var lfScenesText = (lf.scenes || []).map(function(sc, i){ return (i+1) + '. ' + sc.image_prompt; }).join('\n');
         var lfCombined = (lf.narration || '') + (lfScenesText ? '\n\nImage prompts:\n' + lfScenesText : '');
@@ -422,7 +597,7 @@ function renderResults(d) {
             var scenesArr = (u.scenes && u.scenes.length) ? u.scenes : (u.image_prompt ? [{image_prompt:u.image_prompt}] : []);
             var scenesHtml = scenesArr.map(function(sc, i){
                 return '<div class="narr-prompt">🎨 ' + (i+1) + '. ' + esc(sc.image_prompt) +
-                    '<span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(sc.image_prompt) + '\')">[copy]</span></div>';
+                    imgTools(sc.image_prompt) + '</div>';
             }).join('');
             var scenesText = scenesArr.map(function(sc, i){ return (i+1) + '. ' + sc.image_prompt; }).join('\n');
             var combined = 'Angle: ' + (u.angle||'') + '\n\nNarasi:\n' + (u.narration||'') + (scenesText ? '\n\nImage prompts:\n' + scenesText : '');

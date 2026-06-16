@@ -420,6 +420,38 @@ foreach (['messages', 'group_messages'] as $mt) {
 }
 markMigration($conn, '2026_06_16_000001_add_media_to_messages_tables');
 
+// ── 6j. Tabel ai_images + kolom kind di ai_providers ─────────────────────────
+echo '<h2>6j. AI Images & provider kind</h2>';
+if (!tableExists($conn, $dbname, 'ai_images')) {
+    runSQL($conn, 'CREATE TABLE ai_images', "
+        CREATE TABLE `ai_images` (
+            `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `user_id` bigint(20) UNSIGNED NOT NULL,
+            `song_id` bigint(20) UNSIGNED DEFAULT NULL,
+            `prompt` text NOT NULL,
+            `provider` varchar(60) DEFAULT NULL,
+            `url` varchar(500) NOT NULL,
+            `public_id` varchar(255) DEFAULT NULL,
+            `ratio` varchar(12) DEFAULT NULL,
+            `created_at` timestamp NULL DEFAULT NULL,
+            `updated_at` timestamp NULL DEFAULT NULL,
+            PRIMARY KEY (`id`),
+            KEY `ai_images_user_id_index` (`user_id`),
+            KEY `ai_images_song_id_index` (`song_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ");
+} else {
+    echo '<pre class="info">&#8212; Tabel ai_images sudah ada</pre>';
+}
+markMigration($conn, '2026_06_17_000001_create_ai_images_table');
+
+if (tableExists($conn, $dbname, 'ai_providers') && !columnExists($conn, $dbname, 'ai_providers', 'kind')) {
+    runSQL($conn, 'ADD kind ke ai_providers', "ALTER TABLE `ai_providers` ADD COLUMN `kind` varchar(12) NOT NULL DEFAULT 'text' AFTER `format`");
+} else {
+    echo '<pre class="info">&#8212; ai_providers.kind sudah ada</pre>';
+}
+markMigration($conn, '2026_06_17_000002_add_kind_to_ai_providers_table');
+
 // ── 7. Mark remaining pending migrations ─────────────────────────────────────
 echo '<h2>7. Tandai migration yang pending sebagai selesai</h2>';
 $toMark = [
