@@ -82,6 +82,21 @@ class AiAgentController extends Controller
         return view('admin.ai-settings', compact('providers', 'cloudinary'));
     }
 
+    /* ===================== Video Builder (Fase C) ===================== */
+
+    public function videoBuilder()
+    {
+        $images = collect();
+        try {
+            $images = AiImage::where('user_id', auth()->id())
+                ->latest()->take(40)
+                ->get(['id', 'url', 'prompt', 'ratio']);
+        } catch (\Throwable $e) {
+            // tabel belum ada — jalankan fixdb.php
+        }
+        return view('admin.video-builder', compact('images'));
+    }
+
     /* ===================== Pemotong Lagu (Fase B) ===================== */
 
     public function audioCut()

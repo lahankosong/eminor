@@ -331,7 +331,7 @@
     </div>
     <div style="padding:0 1.25rem 1rem;font-size:11px;color:var(--text-4);">
         ⚙️ <a href="{{ route('admin.ai-settings') }}" style="color:var(--accent);">Pengaturan AI</a> (provider teks/gambar/suara) ·
-        🎬 Video Builder <span style="opacity:0.7;">segera (Fase C)</span> — gabung aset jadi video
+        🎬 <a href="{{ route('admin.video-builder') }}" style="color:var(--accent);">Video Builder</a> — gabung gambar + audio jadi video
     </div>
 </div>
 
