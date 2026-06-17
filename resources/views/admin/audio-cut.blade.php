@@ -284,9 +284,10 @@ async function loadFfmpeg(){
         ffmpeg.on('progress', function(p){
             if (p && p.progress >= 0 && p.progress <= 1) setStatus('✂️ Memproses… ' + Math.round(p.progress*100) + '%');
         });
-        // Semua same-origin (di-host di /public/ffmpeg) → tak perlu blob, worker & importScripts lancar
+        // JANGAN oper classWorkerURL: kalau diisi, worker dibuat sbg {type:"module"}
+        // → importScripts mati → core UMD gagal diimpor. Dikosongkan → 814.ffmpeg.js
+        // dimuat otomatis dari /ffmpeg/ sebagai classic worker (importScripts jalan).
         await ffmpeg.load({
-            classWorkerURL: FFMPEG_BASE + '/814.ffmpeg.js',
             coreURL: FFMPEG_BASE + '/ffmpeg-core.js',
             wasmURL: FFMPEG_BASE + '/ffmpeg-core.wasm',
         });
