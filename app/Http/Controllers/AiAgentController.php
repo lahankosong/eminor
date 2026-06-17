@@ -110,6 +110,16 @@ class AiAgentController extends Controller
             $data['kind']     = 'image';
             $data['base_url'] = $data['base_url'] ?? '';
             $data['model']    = $data['model'] ?? '';
+        } elseif ($kind === 'tts') {
+            $data = $request->validate([
+                'name'     => 'required|string|max:100',
+                'format'   => 'required|in:gemini-tts',
+                'base_url' => 'nullable|string|max:255',
+                'model'    => 'required|string|max:120',
+                'api_key'  => 'required|string|max:300',
+            ]);
+            $data['kind']     = 'tts';
+            $data['base_url'] = $data['base_url'] ?: 'https://generativelanguage.googleapis.com/v1beta';
         } else {
             $data = $request->validate([
                 'name'     => 'required|string|max:100',
@@ -215,6 +225,94 @@ class AiAgentController extends Controller
         }
         $img->delete();
         return response()->json(['success' => true]);
+    }
+
+    /* ===================== Text-to-Speech narasi ===================== */
+
+    public function generateTts(Request $request)
+    {
+        $data = $request->validate([
+            'text'        => 'required|string|max:6000',
+            'voice'       => 'nullable|string|max:40',
+            'provider_id' => 'nullable|integer',
+        ]);
+
+        // pilih provider TTS (by id → fallback ke provider tts aktif pertama)
+        $provider = null;
+        if (!empty($data['provider_id'])) {
+            $provider = AiProvider::where('id', $data['provider_id'])->where('kind', 'tts')->first();
+        }
+        if (!$provider) {
+            $provider = AiProvider::where('kind', 'tts')->where('enabled', true)->orderBy('id')->first();
+        }
+        if (!$provider) {
+            return response()->json(['error' => 'Belum ada provider TTS. Tambahkan di Pengaturan AI (key Gemini).'], 422);
+        }
+
+        $key = $provider->api_key;
+        if (!$key) return response()->json(['error' => 'API key provider TTS belum diisi.'], 422);
+
+        $voice = $data['voice'] ?: 'Kore';
+        $base  = rtrim($provider->base_url ?: 'https://generativelanguage.googleapis.com/v1beta', '/');
+        if (($pos = strpos($base, '/models')) !== false) $base = rtrim(substr($base, 0, $pos), '/');
+        $model = $provider->model ?: 'gemini-2.5-flash-preview-tts';
+
+        try {
+            $resp = Http::timeout(180)->post(
+                $base . '/models/' . $model . ':generateContent?key=' . urlencode($key),
+                [
+                    'contents'         => [['parts' => [['text' => $data['text']]]]],
+                    'generationConfig' => [
+                        'responseModalities' => ['AUDIO'],
+                        'speechConfig'       => [
+                            'voiceConfig' => ['prebuiltVoiceConfig' => ['voiceName' => $voice]],
+                        ],
+                    ],
+                ]
+            );
+
+            if (!$resp->successful()) {
+                $body = $resp->body();
+                if ($resp->status() === 429 || str_contains($body, 'RESOURCE_EXHAUSTED')) {
+                    return response()->json(['error' => 'Kuota TTS habis / butuh billing aktif di Google. Coba lagi nanti atau aktifkan billing.'], 429);
+                }
+                return response()->json(['error' => 'TTS error (' . $resp->status() . '): ' . mb_substr($body, 0, 300)], 500);
+            }
+
+            $inline = $resp->json('candidates.0.content.parts.0.inlineData')
+                   ?? $resp->json('candidates.0.content.parts.0.inline_data');
+            $b64  = $inline['data'] ?? null;
+            $mime = $inline['mimeType'] ?? ($inline['mime_type'] ?? 'audio/L16;rate=24000');
+            if (!$b64) {
+                return response()->json(['error' => 'TTS tidak mengembalikan audio (cek model/akses TTS di key).'], 500);
+            }
+
+            $pcm  = base64_decode($b64);
+            $rate = preg_match('/rate=(\d+)/', $mime, $m) ? (int) $m[1] : 24000;
+            $wav  = $this->pcmToWav($pcm, $rate);
+
+            return response()->json([
+                'success'  => true,
+                'audio'    => 'data:audio/wav;base64,' . base64_encode($wav),
+                'voice'    => $voice,
+                'provider' => $provider->name,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('TTS generate error', ['error' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /** Bungkus PCM 16-bit LE mono menjadi WAV agar bisa diputar/unduh. */
+    protected function pcmToWav(string $pcm, int $sampleRate = 24000, int $channels = 1, int $bits = 16): string
+    {
+        $byteRate   = $sampleRate * $channels * intdiv($bits, 8);
+        $blockAlign = $channels * intdiv($bits, 8);
+        $dataLen    = strlen($pcm);
+        $header  = pack('A4VA4', 'RIFF', 36 + $dataLen, 'WAVE');
+        $header .= pack('A4VvvVVvv', 'fmt ', 16, 1, $channels, $sampleRate, $byteRate, $blockAlign, $bits);
+        $header .= pack('A4V', 'data', $dataLen);
+        return $header . $pcm;
     }
 
     protected function ratioDims(string $ratio): array

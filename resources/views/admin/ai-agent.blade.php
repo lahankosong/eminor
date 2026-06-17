@@ -67,6 +67,12 @@
     .gen-img-actions a, .gen-img-actions span { font-size:10px; color:var(--text-3); cursor:pointer; text-decoration:none; }
     .gen-img-actions a:hover { color:var(--text); }
     .gen-img-loading { font-size:11px; color:var(--text-3); margin-top:6px; }
+    .tts-block { margin-top:8px; }
+    .tts-wrap { margin-top:6px; }
+    .tts-wrap audio { width:100%; max-width:420px; height:36px; display:block; }
+    .tts-actions { display:flex; gap:10px; margin-top:5px; }
+    .tts-actions a, .tts-actions span { font-size:10px; color:var(--text-3); cursor:pointer; text-decoration:none; }
+    .tts-actions a:hover, .tts-actions span:hover { color:var(--text); }
 
     .sched-bar { position:sticky; bottom:0; background:var(--bg-2); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-top:1rem; display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
     .sched-bar .fg { margin-bottom:0; }
@@ -86,6 +92,7 @@
 @php
     $textProviders  = $providers->filter(fn($p) => ($p->kind ?? 'text') === 'text')->values();
     $imageProviders = $providers->filter(fn($p) => ($p->kind ?? 'text') === 'image')->values();
+    $ttsProviders   = $providers->filter(fn($p) => ($p->kind ?? 'text') === 'tts')->values();
 @endphp
 
 <div class="ai-header">
@@ -237,6 +244,27 @@
         <span style="font-size:11px;color:#f87171;">⚠️ Atur Cloudinary dulu di panel atas untuk menyimpan gambar.</span>
         @endif
     </div>
+
+    <div class="img-toolbar">
+        <span style="font-size:11px;color:var(--text-3);">🔊 Suara narasi pakai:</span>
+        <select class="fi" id="ttsProviderSelect" style="width:auto;padding:6px 9px;font-size:12px;">
+            @forelse($ttsProviders as $prov)
+            <option value="{{ $prov->id }}">{{ $prov->name }}</option>
+            @empty
+            <option value="">(belum ada — atur di Pengaturan AI)</option>
+            @endforelse
+        </select>
+        <select class="fi" id="ttsVoiceSelect" style="width:auto;padding:6px 9px;font-size:12px;">
+            <option value="Kore">Kore (perempuan, tegas)</option>
+            <option value="Aoede">Aoede (perempuan, ramah)</option>
+            <option value="Leda">Leda (perempuan, muda)</option>
+            <option value="Puck">Puck (laki, ceria)</option>
+            <option value="Charon">Charon (laki, dalam)</option>
+            <option value="Orus">Orus (laki, mantap)</option>
+            <option value="Fenrir">Fenrir (laki, energik)</option>
+            <option value="Zephyr">Zephyr (cerah)</option>
+        </select>
+    </div>
     <div id="topicsWrap"></div>
     <div id="longFormWrap"></div>
     <div id="umumWrap"></div>
@@ -260,7 +288,9 @@ var ROUTE_GEN_BASE = '{{ url('admin/ai-agent/generate') }}';
 var ROUTE_SCHEDULE = '{{ route('admin.ai-agent.schedule') }}';
 var ROUTE_CALENDAR = '{{ route('admin.calendar') }}';
 var ROUTE_IMAGE    = '{{ route('admin.ai-agent.image') }}';
+var ROUTE_TTS      = '{{ route('admin.ai-agent.tts') }}';
 var CLOUD_READY    = {{ ($cloudinary['cloud'] && $cloudinary['secret_set']) ? 'true' : 'false' }};
+var HAS_TTS        = {{ $ttsProviders->count() ? 'true' : 'false' }};
 var currentSongId = null;
 var SAVED = {!! json_encode($saved) !!};       // hasil tersimpan per song_id
 var LAST_SONG = {{ $lastSongId ?? 'null' }};   // generasi terakhir
@@ -308,6 +338,75 @@ function genImage(btn, enc){
         btn.style.pointerEvents = ''; btn.textContent = '🖼️ buat gambar';
         wrap.innerHTML = '<div class="gen-img-loading" style="color:#f87171;">⚠️ ' + e.message + '</div>';
     });
+}
+
+// ====== TTS narasi (suara) ======
+function narrAudioTools(text){
+    var enc = encodeURIComponent(text || '');
+    return '<div class="tts-block">' +
+        '<span class="narr-img-btn" onclick="genTts(this,\'' + enc + '\')">🔊 buat suara narasi</span>' +
+        '<div class="tts-wrap"></div></div>';
+}
+
+function genTts(btn, enc){
+    if (!HAS_TTS){ alert('Belum ada provider TTS. Tambahkan key Gemini di Pengaturan AI → Suara Narasi.'); return; }
+    var text = decodeURIComponent(enc);
+    var wrap = btn.closest('.tts-block').querySelector('.tts-wrap');
+    var provId = document.getElementById('ttsProviderSelect').value;
+    var voice  = document.getElementById('ttsVoiceSelect').value;
+    if (!provId){ alert('Pilih provider TTS di bar atas hasil.'); return; }
+    btn.style.pointerEvents = 'none'; btn.textContent = '⏳ membuat suara…';
+    wrap.innerHTML = '<div class="gen-img-loading"><span class="spinner"></span> Membuat suara… (10–40 detik)</div>';
+
+    fetch(ROUTE_TTS, {
+        method:'POST',
+        headers:{'X-CSRF-TOKEN':CSRF,'Content-Type':'application/json','Accept':'application/json'},
+        body: JSON.stringify({ text: text, voice: voice, provider_id: provId })
+    })
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, d:d}; }); })
+    .then(function(res){
+        btn.style.pointerEvents = ''; btn.textContent = '🔊 buat ulang';
+        if (!res.ok || res.d.error){
+            wrap.innerHTML = '<div class="gen-img-loading" style="color:#f87171;">⚠️ ' + esc(res.d.error || 'Gagal membuat suara.') + '</div>';
+            return;
+        }
+        var dataUri = res.d.audio;
+        wrap.innerHTML =
+            '<audio controls src="' + dataUri + '"></audio>' +
+            '<div class="tts-actions">' +
+                '<a href="' + dataUri + '" download="narasi_' + voice + '.wav">⬇️ unduh</a>' +
+                '<span onclick="saveTts(this,\'' + voice + '\')">💾 simpan ke perangkat</span>' +
+                '<span style="color:var(--text-3);">suara ' + esc(res.d.voice) + '</span>' +
+            '</div>';
+        wrap.querySelector('audio').dataset.uri = dataUri;
+    })
+    .catch(function(e){
+        btn.style.pointerEvents = ''; btn.textContent = '🔊 buat suara narasi';
+        wrap.innerHTML = '<div class="gen-img-loading" style="color:#f87171;">⚠️ ' + e.message + '</div>';
+    });
+}
+
+// Simpan suara ke IndexedDB 'mafAudioClips' (sama dgn Pemotong Lagu → siap untuk Fase C)
+function ttsIdbOpen(){
+    return new Promise(function(res, rej){
+        var r = indexedDB.open('mafAudioClips', 1);
+        r.onupgradeneeded = function(){ r.result.createObjectStore('clips', { keyPath:'id', autoIncrement:true }); };
+        r.onsuccess = function(){ res(r.result); };
+        r.onerror = function(){ rej(r.error); };
+    });
+}
+function saveTts(el, voice){
+    var uri = el.closest('.tts-wrap').querySelector('audio').dataset.uri;
+    fetch(uri).then(function(r){ return r.blob(); }).then(function(blob){
+        return ttsIdbOpen().then(function(db){
+            db.transaction('clips','readwrite').objectStore('clips').add({
+                name: 'Narasi (' + voice + ')', ext: 'wav', blob: blob, size: blob.size, createdAt: Date.now()
+            });
+        });
+    }).then(function(){
+        var old = el.textContent; el.textContent = '✓ tersimpan'; el.style.color = '#4ade80';
+        setTimeout(function(){ el.textContent = old; el.style.color = ''; }, 1500);
+    }).catch(function(e){ alert('Gagal simpan: ' + e.message); });
 }
 
 function doGenerate() {
@@ -410,6 +509,7 @@ function renderResults(d) {
                 '<div class="narr-text" style="font-weight:600;margin-bottom:6px;">' + esc(lf.title || '') +
                     ' <span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(lf.narration) + '\')">[copy narasi]</span></div>' +
                 '<div class="narr-prompt" style="white-space:pre-wrap;font-family:inherit;line-height:1.7;">' + esc(lf.narration) + '</div>' +
+                narrAudioTools(lf.narration) +
                 (scenes ? '<div style="margin-top:8px;font-size:11px;color:var(--text-3);">Image prompts (vertical 9:16):</div>' + scenes : '') +
             '</div></div></div>';
     }
@@ -437,6 +537,7 @@ function renderResults(d) {
                     '<div style="font-size:12px;color:var(--text-3);">💡 ' + esc(u.angle) + '</div>' +
                     '<div class="narr-prompt" style="white-space:pre-wrap;font-family:inherit;line-height:1.7;margin-top:6px;">' + esc(u.narration) +
                         ' <span class="narr-copy" onclick="copyText(this,\'' + encodeURIComponent(u.narration) + '\')">[copy narasi]</span></div>' +
+                    narrAudioTools(u.narration) +
                     (scenesHtml ? '<div style="margin-top:8px;font-size:11px;color:var(--text-3);">Image prompts (9:16):</div>' + scenesHtml : '') +
                 '</div></div></div>';
         });

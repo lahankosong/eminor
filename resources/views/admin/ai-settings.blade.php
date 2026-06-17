@@ -44,6 +44,7 @@
 @php
     $textProviders  = $providers->filter(fn($p) => ($p->kind ?? 'text') === 'text')->values();
     $imageProviders = $providers->filter(fn($p) => ($p->kind ?? 'text') === 'image')->values();
+    $ttsProviders   = $providers->filter(fn($p) => ($p->kind ?? 'text') === 'tts')->values();
 @endphp
 
 <div class="ai-header">
@@ -205,6 +206,60 @@
             </div>
             <div class="fg"><label>API Key (DALL-E / Imagen — terenkripsi)</label><input type="password" name="api_key" id="iKey" class="fi" placeholder="sk-... / AIza..." autocomplete="off"></div>
             <button class="btn btn-primary" type="submit">Simpan Provider Gambar</button>
+        </form>
+    </div>
+</details>
+
+{{-- ===== SUARA NARASI (TTS) ===== --}}
+<details class="card">
+    <summary>🔊 Suara Narasi (TTS Gemini)
+        @if($ttsProviders->count())
+            <span class="prov-key-ok" style="font-size:11px;margin-left:8px;">● {{ $ttsProviders->count() }} provider</span>
+        @else
+            <span class="prov-key-no" style="font-size:11px;margin-left:8px;">● belum diatur</span>
+        @endif
+    </summary>
+    <div class="card-body">
+        <p style="font-size:11px;color:var(--text-3);margin-bottom:10px;line-height:1.6;">
+            Ubah naskah narasi (video panjang / tema umum) jadi suara untuk video. Pakai <b>API key Gemini</b> ([aistudio.google.com]).
+            Catatan: model TTS bisa butuh <b>billing aktif</b>; bahasa mengikuti teks (Indonesia otomatis).
+        </p>
+        @if($ttsProviders->count())
+        <div style="margin-bottom:1rem;">
+            @foreach($ttsProviders as $prov)
+            <div class="prov-item">
+                <div style="flex:1;min-width:0;">
+                    <span class="prov-name">{{ $prov->name }}</span>
+                    <span class="prov-badge">{{ $prov->model }}</span>
+                    <div class="prov-meta">@if($prov->api_key)<span class="prov-key-ok">● key terisi</span>@else<span class="prov-key-no">● key kosong</span>@endif</div>
+                </div>
+                <form method="POST" action="{{ route('admin.ai-agent.provider.destroy', $prov->id) }}" onsubmit="return confirm('Hapus provider {{ $prov->name }}?')">
+                    @csrf @method('DELETE')
+                    <button class="btn-del">Hapus</button>
+                </form>
+            </div>
+            @endforeach
+        </div>
+        @else
+        <p style="font-size:12px;color:var(--text-3);margin-bottom:1rem;">Belum ada provider TTS. Tambah di bawah.</p>
+        @endif
+
+        <form method="POST" action="{{ route('admin.ai-agent.provider.store') }}">
+            @csrf
+            <input type="hidden" name="kind" value="tts">
+            <input type="hidden" name="format" value="gemini-tts">
+            <input type="hidden" name="base_url" value="https://generativelanguage.googleapis.com/v1beta">
+            <div class="row2">
+                <div class="fg"><label>Nama</label><input type="text" name="name" id="tName" class="fi" placeholder="Gemini TTS" value="Gemini TTS" required></div>
+                <div class="fg"><label>Model</label>
+                    <select name="model" id="tModel" class="fi">
+                        <option value="gemini-2.5-flash-preview-tts">gemini-2.5-flash-preview-tts</option>
+                        <option value="gemini-3.1-flash-tts-preview">gemini-3.1-flash-tts-preview</option>
+                    </select>
+                </div>
+            </div>
+            <div class="fg"><label>API Key Gemini (terenkripsi)</label><input type="password" name="api_key" id="tKey" class="fi" placeholder="AIza..." autocomplete="off" required></div>
+            <button class="btn btn-primary" type="submit">Simpan Provider TTS</button>
         </form>
     </div>
 </details>
