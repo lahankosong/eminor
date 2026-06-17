@@ -561,7 +561,12 @@ class AiAgentController extends Controller
             . '; tetap memakai palet brand (retro blue, warm cream, burnt orange) & nuansa sinematik.';
 
         $header = <<<EOT
-Kamu content strategist musik Indonesia yang menulis seperti manusia asli — hangat, relatable, tidak kaku. Audiens: 25–40 tahun, galau malam hari, scrolling HP sebelum tidur.
+Kamu content creator musik Indonesia yang nulis caption kayak anak muda beneran — santai, relatable, nggak kaku, nggak lebay. Audiens: Gen Z & milenial (17–32 th), scrolling TikTok/IG malam-malam.
+
+GAYA BAHASA (WAJIB untuk SEMUA caption/narasi/teks Indonesia):
+- Bahasa sehari-hari anak muda: "nggak", "banget", "yaudah", "overthinking", "healing", "vibes", "relate", "capek", "gapapa". Slang yang NATURAL aja — jangan dipaksain/cringe.
+- Pendek & punchy, to the point. HINDARI kata formal/puitis berat (ganti "merenungkan"→"mikirin", "menghantui"→"keinget terus", "senja"→"sore").
+- Boleh nyentil perasaan tapi ringan & relatable, kayak ngobrol sama temen — bukan puisi.
 
 DATA LAGU:
 - Judul: {$song->title}
@@ -572,7 +577,7 @@ DATA LAGU:
 IDENTITAS VISUAL BRAND (konsisten di semua image prompt):
 - Palet: retro blue, warm cream, burnt orange
 - Mood: sinematik, intimate, melankolis tapi tidak lebay
-- Karakter: orang Indonesia 25–35 tahun, urban, thoughtful
+- Karakter: anak muda Indonesia 20–30 tahun, urban, thoughtful
 - Gaya: candid, natural light, depth of field lensa 50mm/85mm
 
 TUGAS:
@@ -583,7 +588,7 @@ EOT;
         $schema = ['"niche": "..."'];
         $n = 2;
         if (in_array('short', $want)) {
-            $tasks .= "\n{$n}. SHORT VIDEO: pecah niche jadi 3–5 topik kejadian sehari-hari yang SANGAT spesifik & berbeda (label max 5 kata). Tiap topik 5 narasi pendek (punchy, gaya notes HP jam 2 pagi, 1–2 kalimat, Indonesia). Tiap narasi 1 image prompt (BAHASA INGGRIS, max 400 char, ikuti ATURAN GAMBAR, karakter Indonesia).";
+            $tasks .= "\n{$n}. SHORT VIDEO: pecah niche jadi 3–5 topik kejadian sehari-hari yang SANGAT spesifik & berbeda (label max 5 kata). Tiap topik 5 CAPTION super pendek buat teks overlay video: 1 BARIS, MAKS 8–10 kata, punchy, gaya ngomong anak muda yang relatable (ikuti GAYA BAHASA). DILARANG kalimat panjang/formal/puitis. Contoh vibe: \"yaudah, healing dulu aja\" / \"capek tapi gabisa berhenti\". Tiap caption 1 image prompt (BAHASA INGGRIS, max 400 char, ikuti ATURAN GAMBAR, karakter Indonesia).";
             $schema[] = '"topics": [{"id":1,"label":"max 5 kata","narrations":[{"text":"narasi","image_prompt":"english 9:16 prompt"},{"text":"...","image_prompt":"..."},{"text":"...","image_prompt":"..."},{"text":"...","image_prompt":"..."},{"text":"...","image_prompt":"..."}]}]';
             $n++;
         }
