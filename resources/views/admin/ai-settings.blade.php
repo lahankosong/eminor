@@ -186,7 +186,6 @@
                     <option value="pollinations">Pollinations Flux (GRATIS, tanpa key)</option>
                     <option value="pollinations-turbo">Pollinations Turbo (gratis, cepat)</option>
                     <option value="gemini-image">Gemini 2.5 Flash Image / Nano Banana (key)</option>
-                    <option value="imagen3">Google Imagen 3 (key + billing)</option>
                     <option value="dalle">OpenAI DALL-E 3 (butuh key)</option>
                 </select>
             </div>
@@ -231,8 +230,7 @@ function applyPreset(k) {
 var IMG_PRESETS = {
     'pollinations':       {name:'Pollinations Flux',  model:'flux',  format:'pollinations', base_url:''},
     'pollinations-turbo': {name:'Pollinations Turbo', model:'turbo', format:'pollinations', base_url:''},
-    'gemini-image':       {name:'Gemini Flash Image', model:'gemini-2.5-flash-image', format:'imagen', base_url:'https://generativelanguage.googleapis.com/v1beta'},
-    'imagen3':            {name:'Imagen 3',           model:'imagen-3.0-generate-002', format:'imagen', base_url:'https://generativelanguage.googleapis.com/v1beta'},
+    'gemini-image':       {name:'Nano Banana',        model:'gemini-2.5-flash-image', format:'imagen', base_url:'https://generativelanguage.googleapis.com/v1beta'},
     'dalle':              {name:'DALL-E 3',           model:'dall-e-3', format:'dalle', base_url:'https://api.openai.com/v1'},
 };
 function applyImgPreset(k) {
