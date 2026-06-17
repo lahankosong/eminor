@@ -2,6 +2,40 @@
 
 ---
 
+## 2026-06-17 — Pipeline Konten: Generate Gambar (Cloudinary) + Pemotong Lagu (ffmpeg.wasm)
+**Commit**: `f84193d` (generate gambar), `a15e60f` (pisah pengaturan + Imagen), `b4d4b52` & `2a6a1d6` (fix Gemini image), `1eb3b63` (Pemotong Lagu), `49a91f8`→`58b7463` (fix ffmpeg.wasm)
+
+Mulai membangun **pipeline produksi konten otomatis** di admin (topik → caption + image_prompt → **gambar** → **potong lagu** → video). Prinsip utama: **media tidak membebani hosting** — gambar di Cloudinary (eksternal), audio diproses & disimpan di perangkat.
+
+### Fase A — Generate Gambar dari prompt (`/admin/ai-agent`)
+- Tombol **🖼️ buat gambar** di tiap `image_prompt` (short/long/umum) → generate → tampil inline → unduh / salin URL.
+- **Provider gambar** (kolom `kind=image` di `ai_providers`): **Pollinations** (gratis, tanpa key, default) · **DALL-E** · **Gemini Imagen / gemini-2.5-flash-image**.
+- **Penyimpanan Cloudinary** (`app/Services/CloudinaryService.php`, signed upload/destroy): server hanya transit, DB simpan **URL string** di tabel **`ai_images`**. Kredensial di `site_settings` (secret terenkripsi `Crypt`). fixdb **section 6j** (`ai_images` + kolom `kind`).
+- **Penting (billing)**: generasi gambar **Gemini/Imagen butuh billing aktif** (free tier limit 0 → 429). Gemini gratis hanya untuk **teks**. **Pollinations Flux** = satu-satunya opsi gambar gratis tanpa key. Gemini image pakai `:generateContent`+`responseModalities` (bukan `:predict`, itu khusus model `imagen-*`).
+
+### Pisah halaman Pengaturan AI (`/admin/ai-settings`)
+- Provider teks, provider gambar, kredensial Cloudinary pindah ke halaman sendiri. Halaman **AI Agent jadi murni tool** generate (link ⚙️ di header).
+
+### Fase B — Pemotong Lagu (`/admin/audio-cut`, menu "✂️ Pemotong Lagu")
+- Pilih lagu dari pustaka (`asset(audio_file)`, same-origin) **atau** upload MP3 → region selector + preview bagian → **potong** via **ffmpeg.wasm** (`-ss/-t -c copy`) **100% di browser** (server 0 beban). Hasil: unduh **atau** simpan di **IndexedDB `mafAudioClips`** (untuk Fase C).
+- **ffmpeg.wasm di-host sendiri di `/public/ffmpeg/`** (4 file: `ffmpeg.js`, `814.ffmpeg.js`, `ffmpeg-core.js`, `ffmpeg-core.wasm` 32MB). **Pelajaran penting**: jangan oper `classWorkerURL` → kalau diisi, worker dibuat `{type:"module"}` → `importScripts` mati → core UMD gagal diimpor. Dikosongkan → `814.ffmpeg.js` auto-load dari `/ffmpeg/` sebagai **classic worker** (importScripts jalan). Self-host = same-origin, anti masalah CDN/worker/impor. **Status: mesin termuat & siap (terverifikasi).**
+
+### Catatan
+- Belum: **nonaktifkan input lagu penuh** di AI Agent (sumber jadi teks/link + part lagu spesifik) — bagian dari ide Fase B, ditunda.
+- **Berikutnya (Fase C)**: gabung gambar + potongan lagu → video short/panjang (rencana ffmpeg.wasm di browser). Plus **tombol akses Admin di Android/fanbase** untuk role admin (belum ada).
+
+---
+
+## 2026-06-16 — Media Chat (foto/voice/video) + Lokasi Chat pakai GPS + Filter Kata
+**Commit**: `ecbc79c` (media chat), `3dc3398` `a4c2440` `b924c1d` (lokasi GPS), `e6d969a` `44fdc78` (geolocation TWA)
+
+- **Media chat ala WhatsApp (Dia)**: kirim **foto / voice note / video** (📎 file, 🎤 MediaRecorder). Server hanya transit (`public/chat_media`, **auto-prune >24 jam**), DB simpan **URL string** (`media_url`/`media_type` di `messages` & `group_messages`). Tiap pengguna cache media di **IndexedDB device** (`diaMedia`) → tetap tampil walau server sudah hapus, hilang jika cache dibersihkan. fixdb **section 6i**. Helper `WordFilter` (sensor kata makian) di `send`/`sendGroup`.
+- **Lokasi chat pakai GPS** (IP "sampai 100 km meleset" → ganti GPS + Nominatim zoom 12 ≈ kecamatan). Badge musisi pakai **lokasi manual** (profil), info lokasi jaringan dipindah ke ikon **ⓘ** di header chat (popup "lokasi terakhir kirim pesan").
+- **Geolocation TWA Android** (maftune, di luar repo Laravel): `ACCESS_FINE_LOCATION` + `DelegationService` + `locationdelegation:1.1.2` (1.1.0 tidak ada di Maven). Doc `build_android.md`. Browser/PWA sudah akurat; APK perlu reinstall + grant izin lokasi.
+- Fix: post Kita tak bisa dihapus (Post/PostComment kurang `$casts` integer → `'5' !== 5` 403) + guard 14s `kitaAutoLoc` agar tak hang.
+
+---
+
 ## 2026-06-15 — Badge level warna + notif follow + Cari Personil (Fase 1 MVP selesai)
 **Commit**: `85be106` (setelah pull merge admin redesign + page tracking dari sesi lain di `4f00a57`)
 
@@ -538,3 +572,12 @@ Semua halaman yang menggunakan `layouts.app` diperbarui: warna hardcode (`#0a0a0
 | Welcome banner member baru (Aku) | ✅ Ditambahkan 2026-06-13 |
 | Log bergabung member di feed Kita | ✅ Ditambahkan 2026-06-13 (MemberLog + fallback users) |
 | Login user baru tidak 500 | ✅ Diperbaiki 2026-06-13 (isolated try-catch + \Throwable) |
+| Media chat foto/voice/video (Dia) | ✅ Ditambahkan 2026-06-16 (cache device, server transit auto-prune) |
+| Lokasi chat akurat (GPS, bukan IP) | ✅ Diperbaiki 2026-06-16 (GPS + Nominatim ≈ kecamatan) |
+| Filter kata makian di chat | ✅ Ditambahkan 2026-06-16 (WordFilter) |
+| Generate gambar AI dari prompt | ✅ Ditambahkan 2026-06-17 (Pollinations gratis / DALL-E / Imagen) |
+| Penyimpanan gambar Cloudinary | ✅ Ditambahkan 2026-06-17 (eksternal, DB hanya URL) |
+| Halaman Pengaturan AI terpisah | ✅ Ditambahkan 2026-06-17 (/admin/ai-settings) |
+| Pemotong Lagu (ambil part lagu) | ✅ Ditambahkan 2026-06-17 (ffmpeg.wasm di browser, self-host) |
+| Tombol akses Admin di Android | ⏳ Belum (role admin belum punya akses panel dari HP) |
+| Fase C: gabung gambar+lagu → video | ⏳ Rencana berikutnya |

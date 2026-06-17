@@ -30,8 +30,13 @@ app/
     NotificationController.php      — Notifikasi (baca, tandai semua)
     ProfileController.php           — Halaman profil
     SongController.php              — Halaman detail lagu + komentar lagu
-    AiAgentController.php           — Generasi lirik AI
+    AiAgentController.php           — AI Agent: generate konten + gambar (Cloudinary) + Pemotong Lagu
+    MusicianController.php          — Direktori musisi + profil + follow (ekosistem Fase 1)
+    BandPostController.php          — Cari Personil (band posts)
     HomeController.php              — Landing page
+
+  Services/
+    CloudinaryService.php           — Upload/hapus media ke Cloudinary (signed; secret terenkripsi di site_settings)
 
   Models/
     User.php
@@ -44,12 +49,14 @@ app/
     DiaMessage.php, DiaInvite.php
     AppNotification.php             — tabel: notifications
     Song.php, SongComment.php
-    AiGeneration.php
+    AiGeneration.php, AiProvider.php (kind: text|image), AiImage.php (gambar AI → Cloudinary URL)
+    MusicianProfile.php, Follow.php, BandPost.php   — ekosistem Fase 1
     Thread.php, ThreadReply.php
-    SiteSetting.php
+    SiteSetting.php                 — key-value (termasuk kredensial Cloudinary)
 
   Helpers/
     NotifHelper.php                 — NotifHelper::send() → AppNotification::create()
+    WordFilter.php                  — sensor kata makian di chat (WordFilter::clean())
 
 resources/views/
   layouts/
@@ -63,8 +70,17 @@ resources/views/
   admin/
     index.blade.php, create.blade.php, edit.blade.php
     settings.blade.php, ai-agent.blade.php
+    ai-settings.blade.php            — Pengaturan AI (provider teks/gambar + Cloudinary)
+    audio-cut.blade.php              — Pemotong Lagu (ffmpeg.wasm di browser)
+    calendar.blade.php, promo.blade.php
+  fanbase/
+    musisi/, partials/dia-media.blade.php
   home.blade.php, welcome.blade.php, profile.blade.php
   community/, songs/, partials/
+
+public/
+  ffmpeg/                            — ffmpeg.wasm di-host sendiri (4 file; core.wasm 32MB) untuk Pemotong Lagu
+  chat_media/                        — media chat transit (auto-prune >24 jam)
 
 routes/web.php
 ```
@@ -97,7 +113,10 @@ routes/web.php
 - Chat DM (percakapan personal) + Chat Grup
 - DM: `Conversation::firstOrCreate` dengan min/max user ID
 - Grup: buat grup, pilih anggota, kirim pesan
-- Model: `Conversation` (casts integer ✓), `Message` (fillable ✓, cast user_id ✓), `Group`, `GroupMember` (fillable ✓), `GroupMessage` (fillable ✓, cast user_id ✓)
+- **Media chat (ala WhatsApp)**: foto / voice note / video. Server hanya transit (`public/chat_media`, auto-prune >24 jam), DB simpan URL (`media_url`/`media_type`); tiap device cache media di IndexedDB `diaMedia` (tetap tampil walau server hapus). Endpoint `/dia/upload`.
+- **Sensor kata makian** via `WordFilter::clean()` di `send`/`sendGroup`.
+- **Lokasi GPS** (bukan IP): saat kirim pesan, GPS + Nominatim (≈ kecamatan) → `users.city`; info di ikon ⓘ header chat.
+- Model: `Conversation` (casts integer ✓), `Message` (fillable+media ✓, cast user_id ✓), `Group`, `GroupMember` (fillable ✓), `GroupMessage` (fillable+media ✓, cast user_id ✓)
 
 ---
 
@@ -165,9 +184,11 @@ routes/web.php
 - **PWA**: `public/manifest.json` + `public/sw.js` → installable "Add to Home Screen"
 - **Android (maftune)**: TWA wrap PWA → APK `com.maftune.app`; auto-update saat web di-deploy.
   Lihat `build_android.md` + `public/.well-known/assetlinks.json`
-- **Admin Panel**: CRUD lagu, pengaturan situs, AI agent generasi lirik
+- **Admin Panel**: CRUD lagu, pengaturan situs, AI agent
+- **AI Agent — Pipeline Konten** (`/admin/ai-agent`): topik → caption + image_prompt → **generate gambar** (Pollinations gratis / DALL-E / Gemini Imagen) → simpan ke **Cloudinary** (DB hanya URL, tabel `ai_images`). Pengaturan provider + Cloudinary terpisah di `/admin/ai-settings`. Catatan: gambar Gemini/Imagen butuh **billing** (free tier limit 0); Pollinations gratis tanpa key.
+- **Pemotong Lagu** (`/admin/audio-cut`): ambil part lagu (mis. verse) untuk video; potong via **ffmpeg.wasm 100% di browser** (server 0 beban), hasil di IndexedDB `mafAudioClips`. ffmpeg di-host sendiri di `/public/ffmpeg/` (jangan oper `classWorkerURL` → memaksa module worker; biarkan classic worker auto-load supaya `importScripts` jalan).
 - **Community**: thread diskusi + chat publik (pakai `layouts/app`, terpisah dari fanbase)
-- **Deploy**: `deploy.php?key=margono2026` (tarik ZIP GitHub) + `fixdb.php` (bersihkan cache)
+- **Deploy**: `deploy.php?key=margono2026` (tarik ZIP GitHub) + `fixdb.php` (bersihkan cache; section 6i media chat, 6j ai_images)
 
 ---
 
