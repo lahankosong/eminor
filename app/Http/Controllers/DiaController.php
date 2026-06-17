@@ -194,7 +194,11 @@ class DiaController extends Controller
     public function uploadMedia(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|max:10240',
+            // Validasi tipe MIME asli (bukan sekadar ekstensi/field) — cegah upload skrip
+            'file' => 'required|file|max:10240|mimetypes:'
+                . 'image/jpeg,image/png,image/webp,image/gif,'
+                . 'audio/webm,audio/ogg,audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/x-wav,'
+                . 'video/mp4,video/webm,video/ogg,video/quicktime',
             'type' => 'required|in:image,audio,video',
         ]);
 
@@ -210,7 +214,17 @@ class DiaController extends Controller
         } catch (\Throwable $e) {}
 
         $file = $request->file('file');
-        $ext  = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin');
+
+        // Ekstensi DITENTUKAN SERVER dari MIME terdeteksi + whitelist per tipe (abaikan nama klien)
+        $allowed = [
+            'image' => ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+            'audio' => ['webm', 'ogg', 'oga', 'mp3', 'mpga', 'm4a', 'aac', 'wav'],
+            'video' => ['mp4', 'webm', 'ogv', 'ogg', 'mov'],
+        ];
+        $fallback = ['image' => 'jpg', 'audio' => 'webm', 'video' => 'mp4'];
+        $guessed  = strtolower((string) $file->extension());   // ditebak dari isi/MIME, server-side
+        $ext = in_array($guessed, $allowed[$request->type] ?? [], true) ? $guessed : $fallback[$request->type];
+
         $name = $request->type . '_' . Auth::id() . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
         $file->move($dir, $name);
 

@@ -1,0 +1,17 @@
+# Folder upload media chat — JANGAN pernah eksekusi skrip di sini
+Options -Indexes -ExecCGI
+
+php_flag engine off
+
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .pht .phar .cgi .pl .py
+RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .pht .phar
+
+<FilesMatch "\.(php[0-9]?|phtml|pht|phar|cgi|pl|py|sh|asp|aspx|jsp)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
