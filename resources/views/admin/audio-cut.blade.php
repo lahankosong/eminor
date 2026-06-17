@@ -152,11 +152,13 @@
     </div>
 </div>
 
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
 <script>
 // Helper pengganti @ffmpeg/util (hindari ketergantungan path CDN)
 async function toBlobURL(url, mime){
-    var buf = await (await fetch(url)).arrayBuffer();
+    var resp = await fetch(url);
+    if (!resp.ok) throw new Error('Unduh gagal (' + resp.status + '): ' + url);
+    var buf = await resp.arrayBuffer();
     return URL.createObjectURL(new Blob([buf], { type: mime }));
 }
 async function fetchFile(input){
@@ -281,12 +283,14 @@ async function loadFfmpeg(){
     setStatus('<span class="spinner"></span> Mengunduh mesin pemotong… (sekali saja, lalu di-cache)');
     try {
         var FF = (window.FFmpegWASM || window.FFmpeg);
+        if (!FF || !FF.FFmpeg) throw new Error('Library ffmpeg tidak termuat (cek koneksi/CDN).');
         ffmpeg = new FF.FFmpeg();
+        ffmpeg.on('log', function(l){ if (l && l.message) console.log('[ffmpeg]', l.message); });
         ffmpeg.on('progress', function(p){
             if (p && p.progress >= 0 && p.progress <= 1) setStatus('✂️ Memproses… ' + Math.round(p.progress*100) + '%');
         });
-        var base = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
-        var ffBase = 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd';
+        var base = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
+        var ffBase = 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd';
         await ffmpeg.load({
             // worker di-blob-kan agar same-origin (worker lintas-origin diblokir browser)
             classWorkerURL: await toBlobURL(ffBase + '/814.ffmpeg.js', 'text/javascript'),
@@ -299,8 +303,10 @@ async function loadFfmpeg(){
         cut.style.display = 'inline-block'; cut.disabled = false;
         setStatus('✓ Mesin siap. Klik "Potong bagian ini".');
     } catch(e){
+        console.error('ffmpeg load error:', e);
         btn.disabled = false;
-        setStatus('⚠️ Gagal memuat mesin: ' + e.message);
+        var msg = (e && (e.message || e.reason || e.type)) || (typeof e === 'string' ? e : JSON.stringify(e));
+        setStatus('⚠️ Gagal memuat mesin: ' + msg + ' — lihat Console (F12) untuk detail.');
     }
 }
 
