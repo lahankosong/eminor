@@ -187,6 +187,32 @@
         .fb-logout-text { font-size:11px; }
         .fb-logout svg { flex-shrink:0; }
 
+        /* Menu akun (foto profil → dropdown: Profil / Admin / Keluar) */
+        .fb-profile-menu { position:relative; }
+        .fb-profile-dropdown {
+            display:none; position:absolute; top:calc(100% + 10px); right:0;
+            width:230px; background:#fff; border:1px solid var(--border);
+            border-radius:var(--radius); box-shadow:var(--shadow-lg);
+            z-index:1000; overflow:hidden;
+        }
+        .fb-profile-dropdown.open { display:block; }
+        .fb-profile-dd-head {
+            display:flex; align-items:center; gap:10px; padding:12px 14px;
+            border-bottom:1px solid var(--border-lt);
+        }
+        .fb-profile-dd-head img { width:38px; height:38px; border-radius:50%; object-fit:cover; flex-shrink:0; }
+        .fb-profile-dd-name { font-size:13px; font-weight:600; color:var(--text-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .fb-profile-dd-email { font-size:11px; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .fb-profile-dd-item {
+            display:flex; align-items:center; gap:10px; padding:11px 14px;
+            font-size:13px; color:var(--text-1); text-decoration:none; transition:0.15s;
+        }
+        .fb-profile-dd-item:hover { background:var(--sky-lt); }
+        .fb-profile-dd-item svg { flex-shrink:0; color:var(--text-3); }
+        .fb-profile-dd-item.danger { color:#e11d48; border-top:1px solid var(--border-lt); }
+        .fb-profile-dd-item.danger svg { color:#e11d48; }
+        .fb-profile-dd-item.danger:hover { background:#fef2f2; }
+
         /* ===== LAYOUT GRID ===== */
         .fb-layout {
             display:grid;
@@ -670,11 +696,6 @@
 <div class="fb-topbar">
     <a href="{{ route('aku') }}" class="fb-brand">MARGONOANDI <span>· fanbase</span></a>
     <div class="fb-topbar-right">
-        @if(Auth::check() && in_array(Auth::user()->email, config('admin.emails', [])))
-        <a href="{{ route('admin.index') }}" class="fb-notif-btn {{ request()->routeIs('admin.*') ? 'active' : '' }}" title="Panel Admin" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </a>
-        @endif
         <a href="{{ route('musisi.index') }}" class="fb-notif-btn {{ request()->routeIs('musisi*') ? 'active' : '' }}" title="Direktori Musisi" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
         </a>
@@ -693,11 +714,32 @@
                 </div>
             </div>
         </div>
-        <img src="{{ Auth::user()->avatar ?? asset('images/default-avatar.png') }}" class="fb-avatar" alt="">
-        <a href="{{ route('logout') }}" class="fb-logout">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            <span class="fb-logout-text">Keluar</span>
-        </a>
+        <div class="fb-profile-menu">
+            <img src="{{ Auth::user()->avatar ?? asset('images/default-avatar.png') }}" class="fb-avatar" id="fbProfileBtn" alt="" role="button" tabindex="0" title="Menu akun">
+            <div class="fb-profile-dropdown" id="fbProfileDropdown">
+                <div class="fb-profile-dd-head">
+                    <img src="{{ Auth::user()->avatar ?? asset('images/default-avatar.png') }}" alt="">
+                    <div style="min-width:0;">
+                        <div class="fb-profile-dd-name">{{ Auth::user()->name }}</div>
+                        <div class="fb-profile-dd-email">{{ Auth::user()->email }}</div>
+                    </div>
+                </div>
+                <a href="{{ route('profile') }}" class="fb-profile-dd-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Profil
+                </a>
+                @if(Auth::check() && in_array(Auth::user()->email, config('admin.emails', [])))
+                <a href="{{ route('admin.index') }}" class="fb-profile-dd-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    Panel Admin
+                </a>
+                @endif
+                <a href="{{ route('logout') }}" class="fb-profile-dd-item danger">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Keluar
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -1274,6 +1316,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     fbPollNotifCount();
     setInterval(fbPollNotifCount, 30000);
+
+    // Menu akun (foto profil → Profil / Admin / Keluar)
+    var pBtn = document.getElementById('fbProfileBtn');
+    var pDd  = document.getElementById('fbProfileDropdown');
+    if (pBtn && pDd) {
+        pBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            fbCloseNotif();                       // tutup notif kalau terbuka
+            pDd.classList.toggle('open');
+        });
+        document.addEventListener('click', function(e) {
+            if (!pDd.contains(e.target) && e.target !== pBtn) pDd.classList.remove('open');
+        });
+    }
 });
 
 function fbOpenNotif() {
