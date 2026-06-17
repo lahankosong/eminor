@@ -286,7 +286,10 @@ async function loadFfmpeg(){
             if (p && p.progress >= 0 && p.progress <= 1) setStatus('✂️ Memproses… ' + Math.round(p.progress*100) + '%');
         });
         var base = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+        var ffBase = 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd';
         await ffmpeg.load({
+            // worker di-blob-kan agar same-origin (worker lintas-origin diblokir browser)
+            classWorkerURL: await toBlobURL(ffBase + '/814.ffmpeg.js', 'text/javascript'),
             coreURL: await toBlobURL(base + '/ffmpeg-core.js', 'text/javascript'),
             wasmURL: await toBlobURL(base + '/ffmpeg-core.wasm', 'application/wasm'),
         });
