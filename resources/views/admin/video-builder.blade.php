@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
 @push('styles')
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Caveat:wght@700&family=Poppins:wght@800&display=swap" rel="stylesheet">
 <style>
     .ai-header { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--border); }
     .ai-header h2 { font-size:1rem; font-weight:500; color:var(--text); }
@@ -95,9 +96,32 @@
     </div>
 </div>
 
-{{-- 3. PENGATURAN + RENDER --}}
+{{-- 3. CAPTION OVERLAY --}}
 <div class="card">
-    <div class="card-head"><span>3 · Format &amp; Rakit</span></div>
+    <div class="card-head"><span>3 · Caption Overlay <span class="muted">(opsional)</span></span></div>
+    <div class="card-body">
+        <p class="muted" style="margin-bottom:10px;">Tempel dari AI Agent: <b>narasi</b> (build-up) tampil sepanjang video, <b>🎯 gong</b> muncul di detik akhir. Kosongkan kalau tak mau caption.</p>
+        <div style="margin-bottom:10px;">
+            <label class="muted">Narasi (build-up)</label>
+            <textarea class="fi" id="capNarasi" rows="2" style="width:100%;resize:vertical;margin-top:4px;" placeholder="tiap malam mikirin hal yang sama, padahal besok kerja"></textarea>
+        </div>
+        <div style="margin-bottom:12px;">
+            <label class="muted">🎯 Gong (pamungkas)</label>
+            <input type="text" class="fi" id="capGong" style="width:100%;margin-top:4px;" placeholder="overthinking emang gratis ya">
+        </div>
+        <label class="muted">Template</label>
+        <div class="ratio-opt" id="tplOpt" style="margin-top:6px;">
+            <span class="ratio-btn sel" data-t="impact"  onclick="pickTpl(this)">Impact</span>
+            <span class="ratio-btn" data-t="boxbold" onclick="pickTpl(this)">Bold Box</span>
+            <span class="ratio-btn" data-t="neon"    onclick="pickTpl(this)">Neon</span>
+            <span class="ratio-btn" data-t="tulis"   onclick="pickTpl(this)">Tulisan tangan</span>
+        </div>
+    </div>
+</div>
+
+{{-- 4. PENGATURAN + RENDER --}}
+<div class="card">
+    <div class="card-head"><span>4 · Format &amp; Rakit</span></div>
     <div class="card-body">
         <div class="ratio-opt" id="ratioOpt">
             <span class="ratio-btn sel" data-r="9:16" onclick="pickRatio(this)">📱 9:16 (Short)</span>
@@ -136,7 +160,20 @@ async function fetchBytes(input){
 var selImage = null;   // {kind:'url'|'file', src|file, ext}
 var selAudio = null;   // {kind:'idb'|'file', blob, ext, name}
 var ratio = '9:16';
+var selTpl = 'impact';
 var ffmpeg = null, ffmpegLoaded = false, busy = false, lastUrl = null;
+
+// Template caption: family (font web), warna, stroke, shadow, box
+var CAP_TEMPLATES = {
+    impact:  { family:'Anton',       weight:'400', color:'#ffffff', stroke:'#000000', shadow:null,                  box:null },
+    boxbold: { family:'Poppins',     weight:'800', color:'#ffffff', stroke:null,      shadow:'rgba(0,0,0,0.6)',    box:'rgba(0,0,0,0.55)' },
+    neon:    { family:'Bebas Neue',  weight:'400', color:'#FFE14D', stroke:null,      shadow:'rgba(255,196,0,0.95)', box:null },
+    tulis:   { family:'Caveat',      weight:'700', color:'#ffffff', stroke:null,      shadow:'rgba(0,0,0,0.75)',   box:null },
+};
+function pickTpl(el){
+    document.querySelectorAll('#tplOpt .ratio-btn').forEach(function(x){ x.classList.remove('sel'); });
+    el.classList.add('sel'); selTpl = el.dataset.t;
+}
 
 function setStatus(h){ document.getElementById('status').innerHTML = h || ''; }
 function extFromType(t, fallback){ if(!t) return fallback; var m=t.split('/')[1]; return m ? m.replace('jpeg','jpg').split(';')[0] : fallback; }
@@ -195,7 +232,7 @@ loadAudio();
 
 // ===== Ratio =====
 function pickRatio(el){
-    document.querySelectorAll('.ratio-btn').forEach(function(x){ x.classList.remove('sel'); });
+    document.querySelectorAll('#ratioOpt .ratio-btn').forEach(function(x){ x.classList.remove('sel'); });
     el.classList.add('sel'); ratio = el.dataset.r;
 }
 function ratioDims(){
@@ -216,6 +253,51 @@ async function ensureFfmpeg(){
     ffmpegLoaded = true;
 }
 
+// ===== Caption → PNG (canvas) =====
+function wrapText(ctx, text, maxW){
+    var words = (text||'').split(/\s+/), lines = [], line = '';
+    for (var i=0;i<words.length;i++){
+        var test = line ? line + ' ' + words[i] : words[i];
+        if (ctx.measureText(test).width > maxW && line){ lines.push(line); line = words[i]; }
+        else line = test;
+    }
+    if (line) lines.push(line);
+    return lines.length ? lines : [''];
+}
+function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+async function captionPng(text, tpl, W, H, region, sizeFactor){
+    var fpx = Math.round(H * sizeFactor);
+    try { await document.fonts.load(tpl.weight + ' ' + fpx + "px '" + tpl.family + "'"); } catch(e){}
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var x = cv.getContext('2d');
+    x.font = tpl.weight + ' ' + fpx + "px '" + tpl.family + "', sans-serif";
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    var lines = wrapText(x, text, W * 0.86), lineH = fpx * 1.22, totalH = lines.length * lineH;
+    var cy = region === 'center' ? H/2 : H - totalH/2 - H*0.12;
+    lines.forEach(function(ln, i){
+        var yy = cy - totalH/2 + lineH/2 + i*lineH;
+        if (tpl.box){
+            var tw = x.measureText(ln).width;
+            x.fillStyle = tpl.box;
+            roundRect(x, (W-tw)/2 - fpx*0.32, yy - lineH*0.48, tw + fpx*0.64, lineH*0.96, 10); x.fill();
+        }
+        if (tpl.shadow){ x.shadowColor = tpl.shadow; x.shadowBlur = fpx*0.28; x.shadowOffsetY = fpx*0.05; }
+        if (tpl.stroke){ x.lineWidth = Math.max(2, fpx*0.13); x.strokeStyle = tpl.stroke; x.lineJoin='round'; x.strokeText(ln, W/2, yy); }
+        x.fillStyle = tpl.color; x.fillText(ln, W/2, yy);
+        x.shadowColor = 'transparent'; x.shadowBlur = 0; x.shadowOffsetY = 0;
+    });
+    return await new Promise(function(res){ cv.toBlob(function(b){ b.arrayBuffer().then(function(ab){ res(new Uint8Array(ab)); }); }, 'image/png'); });
+}
+function probeDuration(blob){
+    return new Promise(function(res){
+        var a = new Audio(); a.preload = 'metadata';
+        a.onloadedmetadata = function(){ res(isFinite(a.duration) ? a.duration : 0); };
+        a.onerror = function(){ res(0); };
+        a.src = URL.createObjectURL(blob);
+    });
+}
+
 async function doRender(){
     if (!selImage){ alert('Pilih gambar dulu.'); return; }
     if (!selAudio){ alert('Pilih audio dulu.'); return; }
@@ -229,27 +311,55 @@ async function doRender(){
         var audName = 'aud.' + (selAudio.ext || 'mp3');
 
         setStatus('<span class="spinner"></span> Memuat aset…');
-        var imgBytes = await fetchBytes(selImage.kind === 'url' ? selImage.src : selImage.file);
-        await ffmpeg.writeFile(imgName, imgBytes);
+        await ffmpeg.writeFile(imgName, await fetchBytes(selImage.kind === 'url' ? selImage.src : selImage.file));
         await ffmpeg.writeFile(audName, await fetchBytes(selAudio.blob));
 
-        var vf = 'scale=' + W + ':' + H + ':force_original_aspect_ratio=decrease,pad=' + W + ':' + H + ':(ow-iw)/2:(oh-ih)/2:black,setsar=1,format=yuv420p';
-        setStatus('<span class="spinner"></span> Merender video…');
+        // ===== Caption overlay =====
+        var narasi = (document.getElementById('capNarasi').value || '').trim();
+        var gong   = (document.getElementById('capGong').value || '').trim();
+        var tpl = CAP_TEMPLATES[selTpl] || CAP_TEMPLATES.impact;
+        var hasN = narasi !== '', hasG = gong !== '', T = 0;
+        if (hasN && hasG){
+            setStatus('<span class="spinner"></span> Menyiapkan caption…');
+            var dur = await probeDuration(selAudio.blob);
+            T = dur > 0 ? Math.max(dur*0.55, dur - 2.6) : 0;
+        }
+        if (hasN) await ffmpeg.writeFile('cap_n.png', await captionPng(narasi, tpl, W, H, 'lower', 0.052));
+        if (hasG) await ffmpeg.writeFile('cap_g.png', await captionPng(gong,   tpl, W, H, 'center', 0.085));
 
-        // coba H.264; bila gagal, fallback ke mpeg4
-        var rc = await ffmpeg.exec(['-loop','1','-i',imgName,'-i',audName,
-            '-vf',vf,'-c:v','libx264','-preset','ultrafast','-tune','stillimage',
-            '-r','25','-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart','out.mp4']);
-        if (rc !== 0) {
+        // Susun filter_complex: skala+pad gambar, lalu overlay PNG (repeatlast → tampil sepanjang durasi)
+        var fc = '[0:v]scale=' + W + ':' + H + ':force_original_aspect_ratio=decrease,pad=' + W + ':' + H + ':(ow-iw)/2:(oh-ih)/2:black,setsar=1,format=yuv420p[bg]';
+        var last = '[bg]', idx = 2, inputs = ['-loop','1','-i',imgName,'-i',audName];
+        if (hasN){
+            inputs.push('-i','cap_n.png');
+            var enN = (hasG && T>0) ? ":enable='lt(t," + T.toFixed(2) + ")'" : '';
+            fc += ';' + last + '[' + idx + ':v]overlay=0:0' + enN + '[v' + idx + ']'; last = '[v'+idx+']'; idx++;
+        }
+        if (hasG){
+            inputs.push('-i','cap_g.png');
+            var enG = (hasN && T>0) ? ":enable='gte(t," + T.toFixed(2) + ")'" : '';
+            fc += ';' + last + '[' + idx + ':v]overlay=0:0' + enG + '[v' + idx + ']'; last = '[v'+idx+']'; idx++;
+        }
+
+        function buildArgs(codec){
+            var v = codec === 'libx264'
+                ? ['-c:v','libx264','-preset','ultrafast','-pix_fmt','yuv420p']
+                : ['-c:v','mpeg4','-q:v','4'];
+            return inputs.concat(['-filter_complex',fc,'-map',last,'-map','1:a','-r','25'], v,
+                ['-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart','out.mp4']);
+        }
+
+        setStatus('<span class="spinner"></span> Merender video…');
+        var rc = await ffmpeg.exec(buildArgs('libx264'));
+        if (rc !== 0){
             setStatus('<span class="spinner"></span> Merender (mode kompatibel)…');
             try { ffmpeg.deleteFile('out.mp4'); } catch(e){}
-            rc = await ffmpeg.exec(['-loop','1','-i',imgName,'-i',audName,
-                '-vf',vf,'-c:v','mpeg4','-q:v','4','-r','25','-c:a','aac','-b:a','160k','-shortest','out.mp4']);
+            rc = await ffmpeg.exec(buildArgs('mpeg4'));
         }
         if (rc !== 0) throw new Error('Render gagal (kode ' + rc + '). Coba audio/gambar lain.');
 
         var data = await ffmpeg.readFile('out.mp4');
-        try { ffmpeg.deleteFile(imgName); ffmpeg.deleteFile(audName); ffmpeg.deleteFile('out.mp4'); } catch(e){}
+        [imgName, audName, 'cap_n.png', 'cap_g.png', 'out.mp4'].forEach(function(f){ try{ ffmpeg.deleteFile(f); }catch(e){} });
 
         if (lastUrl) URL.revokeObjectURL(lastUrl);
         var blob = new Blob([data.buffer], { type:'video/mp4' });
