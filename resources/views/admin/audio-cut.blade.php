@@ -153,7 +153,20 @@
 </div>
 
 <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
-<script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/util.js"></script>
+<script>
+// Helper pengganti @ffmpeg/util (hindari ketergantungan path CDN)
+async function toBlobURL(url, mime){
+    var buf = await (await fetch(url)).arrayBuffer();
+    return URL.createObjectURL(new Blob([buf], { type: mime }));
+}
+async function fetchFile(input){
+    var data;
+    if (typeof input === 'string') data = await (await fetch(input)).arrayBuffer();
+    else if (input instanceof Blob) data = await input.arrayBuffer();
+    else data = input;
+    return new Uint8Array(data);
+}
+</script>
 <script>
 // ====== State ======
 var player = document.getElementById('player');
@@ -274,8 +287,8 @@ async function loadFfmpeg(){
         });
         var base = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
         await ffmpeg.load({
-            coreURL: await FFmpegUtil.toBlobURL(base + '/ffmpeg-core.js', 'text/javascript'),
-            wasmURL: await FFmpegUtil.toBlobURL(base + '/ffmpeg-core.wasm', 'application/wasm'),
+            coreURL: await toBlobURL(base + '/ffmpeg-core.js', 'text/javascript'),
+            wasmURL: await toBlobURL(base + '/ffmpeg-core.wasm', 'application/wasm'),
         });
         ffmpegLoaded = true;
         btn.style.display = 'none';
@@ -299,7 +312,7 @@ async function doCut(){
     setStatus('<span class="spinner"></span> Menyiapkan…');
     try {
         var inName = 'in.' + srcExt, outName = 'out.' + srcExt;
-        await ffmpeg.writeFile(inName, await FFmpegUtil.fetchFile(srcUrl));
+        await ffmpeg.writeFile(inName, await fetchFile(srcUrl));
         setStatus('<span class="spinner"></span> Memotong bagian…');
         await ffmpeg.exec(['-ss', s.toFixed(2), '-i', inName, '-t', dur.toFixed(2), '-c', 'copy', outName]);
         var data = await ffmpeg.readFile(outName);
