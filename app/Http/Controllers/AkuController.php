@@ -161,8 +161,7 @@ class AkuController extends Controller
 
     private function isAdmin()
     {
-        return in_array(Auth::user()->email,
-            explode(',', env('ADMIN_EMAILS', '')));
+        return in_array(Auth::user()->email, config('admin.emails', []));
     }
 
     public function update(Request $request, $id) {

@@ -14,8 +14,8 @@ class IsAdmin
                 ->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        $adminEmails = explode(',', env('ADMIN_EMAILS', ''));
-        
+        $adminEmails = config('admin.emails', []);
+
         if (!in_array(auth()->user()->email, $adminEmails)) {
             return redirect()->route('home')
                 ->with('error', 'Akses ditolak.');

@@ -1,4 +1,25 @@
+# Cegah directory listing
+Options -Indexes
+
+# Blokir akses langsung ke file sensitif (env, dotfiles, source, dependency, docs)
+<IfModule mod_authz_core.c>
+    <FilesMatch "^(\.env.*|\.git.*|\.htaccess|composer\.(json|lock)|package(-lock)?\.json|artisan|phpunit\.xml|.*\.md|vendor\.zip|routes\.txt)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+    <FilesMatch "^(\.env.*|\.git.*|\.htaccess|composer\.(json|lock)|package(-lock)?\.json|artisan|phpunit\.xml|.*\.md|vendor\.zip|routes\.txt)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Tolak akses langsung ke folder internal Laravel
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|tests)(/.*)?$ - [F,L]
+
+    # Sisanya diarahkan ke public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>

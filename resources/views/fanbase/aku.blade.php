@@ -330,7 +330,7 @@
         <div class="aku-page-title">&#127968; Aku</div>
         <div class="aku-page-sub">Catatan &amp; cerita dari Rakhman Andi</div>
     </div>
-    @if(Auth::check() && in_array(Auth::user()->email, explode(',', env('ADMIN_EMAILS',''))))
+    @if(Auth::check() && in_array(Auth::user()->email, config('admin.emails', [])))
     <div class="admin-badge">&#9733; Admin</div>
     @endif
 </div>
@@ -351,7 +351,7 @@
 @endif
 
 {{-- ADMIN FORM --}}
-@if(Auth::check() && in_array(Auth::user()->email, explode(',', env('ADMIN_EMAILS',''))))
+@if(Auth::check() && in_array(Auth::user()->email, config('admin.emails', [])))
 <div class="aku-form">
     <span class="aku-form-label">Tulis sesuatu untuk fanbase</span>
     <form method="POST" action="{{ route('aku.store') }}" enctype="multipart/form-data">
@@ -394,7 +394,7 @@
                 @if($post->is_pinned)
                 <span class="aku-pin-badge">&#128204;</span>
                 @endif
-                @if(Auth::check() && in_array(Auth::user()->email, explode(',', env('ADMIN_EMAILS',''))))
+                @if(Auth::check() && in_array(Auth::user()->email, config('admin.emails', [])))
                 <button class="aku-top-btn aku-edit-btn" title="Edit"
                         onclick="akuEditPost({{ $post->id }})">&#9998;</button>
                 <form method="POST" action="{{ route('aku.destroy', $post->id) }}"
@@ -458,7 +458,7 @@
                                 <span class="aku-comment-name">{{ $comment->user->name }}</span>
                                 <div style="display:flex;align-items:center;gap:6px;">
                                     <span class="aku-comment-time">{{ $comment->created_at->diffForHumans() }}</span>
-                                    @if(Auth::id() === $comment->user_id || Auth::check() && in_array(Auth::user()->email, explode(',', env('ADMIN_EMAILS',''))))
+                                    @if(Auth::id() === $comment->user_id || Auth::check() && in_array(Auth::user()->email, config('admin.emails', [])))
                                     <button class="aku-comment-delete"
                                             onclick="akuDeleteComment({{ $post->id }}, {{ $comment->id }})">&#10005;</button>
                                     @endif
