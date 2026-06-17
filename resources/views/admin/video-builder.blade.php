@@ -296,11 +296,30 @@ function drawCaptionOn(x, text, tpl, W, H, region, sizeFactor){
         x.shadowColor = 'transparent'; x.shadowBlur = 0; x.shadowOffsetY = 0;
     });
 }
-async function captionPng(text, tpl, W, H, region, sizeFactor){
-    try { await document.fonts.load(tpl.weight + ' ' + Math.round(H*sizeFactor) + "px '" + tpl.family + "'"); } catch(e){}
+function loadImageEl(src){
+    return new Promise(function(res, rej){
+        var im = new Image();
+        im.onload = function(){ res(im); };
+        im.onerror = function(){ rej(new Error('Gambar gagal dimuat.')); };
+        im.src = src;
+    });
+}
+function coverDraw(ctx, im, W, H){
+    var iw = im.naturalWidth || im.width, ih = im.naturalHeight || im.height;
+    var s = Math.max(W/iw, H/ih), dw = iw*s, dh = ih*s;
+    ctx.drawImage(im, (W-dw)/2, (H-dh)/2, dw, dh);
+}
+// Bake caption LANGSUNG ke frame gambar → JPEG bytes (tanpa overlay filter ffmpeg)
+async function frameJpeg(im, W, H, caps, tpl){
     var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-    drawCaptionOn(cv.getContext('2d'), text, tpl, W, H, region, sizeFactor);
-    return await new Promise(function(res){ cv.toBlob(function(b){ b.arrayBuffer().then(function(ab){ res(new Uint8Array(ab)); }); }, 'image/png'); });
+    var x = cv.getContext('2d');
+    coverDraw(x, im, W, H);
+    for (var i=0;i<caps.length;i++){
+        var c = caps[i]; if (!c.text) continue;
+        try { await document.fonts.load(tpl.weight + ' ' + Math.round(H*c.size) + "px '" + tpl.family + "'"); } catch(e){}
+        drawCaptionOn(x, c.text, tpl, W, H, c.region, c.size);
+    }
+    return await new Promise(function(res){ cv.toBlob(function(b){ b.arrayBuffer().then(function(ab){ res(new Uint8Array(ab)); }); }, 'image/jpeg', 0.92); });
 }
 
 var previewSeq = 0;
@@ -336,62 +355,62 @@ async function doRender(){
     if (busy) return;
     var btn = document.getElementById('renderBtn');
     busy = true; btn.disabled = true;
+    var tmpUrl = null;
     try {
         await ensureFfmpeg();
         var dims = ratioDims(), W = dims[0], H = dims[1];
-        var imgName = 'img.' + (selImage.ext || 'jpg');
         var audName = 'aud.' + (selAudio.ext || 'mp3');
 
         setStatus('<span class="spinner"></span> Memuat aset…');
-        await ffmpeg.writeFile(imgName, await fetchBytes(selImage.kind === 'url' ? selImage.src : selImage.file));
+        // gambar via blob URL (hindari canvas taint) → Image element
+        var imgBytes = await fetchBytes(selImage.kind === 'url' ? selImage.src : selImage.file);
+        tmpUrl = URL.createObjectURL(new Blob([imgBytes]));
+        var im = await loadImageEl(tmpUrl);
         await ffmpeg.writeFile(audName, await fetchBytes(selAudio.blob));
 
-        // ===== Caption overlay =====
         var narasi = (document.getElementById('capNarasi').value || '').trim();
         var gong   = (document.getElementById('capGong').value || '').trim();
         var tpl = CAP_TEMPLATES[selTpl] || CAP_TEMPLATES.impact;
-        var hasN = narasi !== '', hasG = gong !== '', T = 0;
-        if (hasN && hasG){
+        var hasN = narasi !== '', hasG = gong !== '';
+        var dur = (hasN && hasG) ? await probeDuration(selAudio.blob) : 0;
+        var args;
+
+        if (hasN && hasG && dur > 1.5){
+            // 2 segmen: frame narasi (build-up) → frame gong (pamungkas) di detik akhir, lalu concat
             setStatus('<span class="spinner"></span> Menyiapkan caption…');
-            var dur = await probeDuration(selAudio.blob);
-            T = dur > 0 ? Math.max(dur*0.55, dur - 2.6) : 0;
-        }
-        if (hasN) await ffmpeg.writeFile('cap_n.png', await captionPng(narasi, tpl, W, H, 'lower', 0.052));
-        if (hasG) await ffmpeg.writeFile('cap_g.png', await captionPng(gong,   tpl, W, H, 'center', 0.085));
-
-        // Susun filter_complex: skala+pad gambar, lalu overlay PNG (repeatlast → tampil sepanjang durasi)
-        var fc = '[0:v]scale=' + W + ':' + H + ':force_original_aspect_ratio=decrease,pad=' + W + ':' + H + ':(ow-iw)/2:(oh-ih)/2:black,setsar=1,format=yuv420p[bg]';
-        var last = '[bg]', idx = 2, inputs = ['-loop','1','-i',imgName,'-i',audName];
-        if (hasN){
-            inputs.push('-loop','1','-i','cap_n.png');   // -loop 1: PNG jangan jadi input terpendek (-shortest)
-            var enN = (hasG && T>0) ? ":enable='lt(t," + T.toFixed(2) + ")'" : '';
-            fc += ';' + last + '[' + idx + ':v]overlay=0:0' + enN + '[v' + idx + ']'; last = '[v'+idx+']'; idx++;
-        }
-        if (hasG){
-            inputs.push('-loop','1','-i','cap_g.png');
-            var enG = (hasN && T>0) ? ":enable='gte(t," + T.toFixed(2) + ")'" : '';
-            fc += ';' + last + '[' + idx + ':v]overlay=0:0' + enG + '[v' + idx + ']'; last = '[v'+idx+']'; idx++;
-        }
-
-        function buildArgs(codec){
-            var v = codec === 'libx264'
-                ? ['-c:v','libx264','-preset','ultrafast','-pix_fmt','yuv420p']
-                : ['-c:v','mpeg4','-q:v','4'];
-            return inputs.concat(['-filter_complex',fc,'-map',last,'-map','1:a','-r','25'], v,
-                ['-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart','out.mp4']);
+            var gongSec = Math.min(2.6, dur * 0.4), T = Math.max(0.5, dur - gongSec);
+            await ffmpeg.writeFile('fa.jpg', await frameJpeg(im, W, H, [{text:narasi, region:'lower',  size:0.052}], tpl));
+            await ffmpeg.writeFile('fb.jpg', await frameJpeg(im, W, H, [{text:gong,   region:'center', size:0.085}], tpl));
+            args = function(codec){
+                var v = codec === 'libx264' ? ['-c:v','libx264','-preset','ultrafast','-pix_fmt','yuv420p'] : ['-c:v','mpeg4','-q:v','4'];
+                return ['-loop','1','-t',T.toFixed(2),'-i','fa.jpg','-loop','1','-t',gongSec.toFixed(2),'-i','fb.jpg','-i',audName,
+                    '-filter_complex','[0:v][1:v]concat=n=2:v=1:a=0,format=yuv420p[v]','-map','[v]','-map','2:a','-r','25']
+                    .concat(v, ['-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart','out.mp4']);
+            };
+        } else {
+            // 1 frame: caption (kalau ada) di-bake ke gambar
+            var caps = [];
+            if (hasN) caps.push({text:narasi, region:'lower',  size:0.052});
+            if (hasG) caps.push({text:gong,   region:'center', size:0.085});
+            await ffmpeg.writeFile('frame.jpg', await frameJpeg(im, W, H, caps, tpl));
+            args = function(codec){
+                var v = codec === 'libx264' ? ['-c:v','libx264','-preset','ultrafast','-tune','stillimage','-pix_fmt','yuv420p'] : ['-c:v','mpeg4','-q:v','4'];
+                return ['-loop','1','-i','frame.jpg','-i',audName,'-r','25']
+                    .concat(v, ['-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart','out.mp4']);
+            };
         }
 
         setStatus('<span class="spinner"></span> Merender video…');
-        var rc = await ffmpeg.exec(buildArgs('libx264'));
+        var rc = await ffmpeg.exec(args('libx264'));
         if (rc !== 0){
             setStatus('<span class="spinner"></span> Merender (mode kompatibel)…');
             try { ffmpeg.deleteFile('out.mp4'); } catch(e){}
-            rc = await ffmpeg.exec(buildArgs('mpeg4'));
+            rc = await ffmpeg.exec(args('mpeg4'));
         }
         if (rc !== 0) throw new Error('Render gagal (kode ' + rc + '). Coba audio/gambar lain.');
 
         var data = await ffmpeg.readFile('out.mp4');
-        [imgName, audName, 'cap_n.png', 'cap_g.png', 'out.mp4'].forEach(function(f){ try{ ffmpeg.deleteFile(f); }catch(e){} });
+        ['fa.jpg','fb.jpg','frame.jpg', audName, 'out.mp4'].forEach(function(f){ try{ ffmpeg.deleteFile(f); }catch(e){} });
 
         if (lastUrl) URL.revokeObjectURL(lastUrl);
         var blob = new Blob([data.buffer], { type:'video/mp4' });
@@ -406,6 +425,7 @@ async function doRender(){
         console.error('render error:', e);
         setStatus('⚠️ ' + ((e && e.message) || e));
     } finally {
+        if (tmpUrl) URL.revokeObjectURL(tmpUrl);
         busy = false; btn.disabled = false;
     }
 }
