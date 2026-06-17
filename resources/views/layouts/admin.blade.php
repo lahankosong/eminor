@@ -212,6 +212,10 @@
                class="adm-nav-item {{ request()->routeIs('admin.ai-agent') ? 'active' : '' }}">
                 <span class="adm-nav-icon">✨</span> AI Agent
             </a>
+            <a href="{{ route('admin.audio-cut') }}"
+               class="adm-nav-item {{ request()->routeIs('admin.audio-cut') ? 'active' : '' }}">
+                <span class="adm-nav-icon">✂️</span> Pemotong Lagu
+            </a>
             <a href="{{ route('admin.calendar') }}"
                class="adm-nav-item {{ request()->routeIs('admin.calendar') ? 'active' : '' }}">
                 <span class="adm-nav-icon">📅</span> Kalender

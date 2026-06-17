@@ -82,6 +82,17 @@ class AiAgentController extends Controller
         return view('admin.ai-settings', compact('providers', 'cloudinary'));
     }
 
+    /* ===================== Pemotong Lagu (Fase B) ===================== */
+
+    public function audioCut()
+    {
+        $songs = Song::whereNotNull('audio_file')->where('audio_file', '!=', '')
+            ->orderBy('track_number')
+            ->get(['id', 'title', 'era', 'audio_file']);
+
+        return view('admin.audio-cut', compact('songs'));
+    }
+
     /* ===================== Provider CRUD ===================== */
 
     public function storeProvider(Request $request)
