@@ -57,6 +57,7 @@
     .narr input[type=checkbox] { margin-top:3px; width:15px; height:15px; cursor:pointer; flex-shrink:0; }
     .narr-body { flex:1; min-width:0; }
     .narr-text { font-size:13px; color:var(--text); line-height:1.5; }
+    .narr-gong { font-size:13px; font-weight:700; color:var(--accent); margin-top:4px; letter-spacing:0.01em; }
     .narr-prompt { font-size:11px; color:var(--text-3); margin-top:5px; line-height:1.5; background:var(--bg-3); border:1px solid var(--border-2); border-radius:6px; padding:6px 8px; font-family:monospace; }
     .narr-copy { font-size:10px; color:var(--accent); cursor:pointer; margin-left:8px; }
     .narr-img-btn { font-size:10px; color:var(--accent); cursor:pointer; margin-left:8px; }
@@ -475,10 +476,12 @@ function renderResults(d) {
             '<span class="topic-title">' + (ti+1) + '. ' + esc(t.label) + '</span>' +
             '<span class="mini-btn" onclick="toggleTopic(this)">Pilih semua</span></div>';
         (t.narrations || []).forEach(function(n){
+            var combo = (n.text || '') + (n.gong ? '  →  GONG: ' + n.gong : '');
             html += '<div class="narr">' +
-                '<input type="checkbox" class="narrChk" data-type="short" data-text="' + esc(n.text) + '" data-prompt="' + esc(n.image_prompt) + '" onchange="updateCount()">' +
+                '<input type="checkbox" class="narrChk" data-type="short" data-text="' + esc(combo) + '" data-prompt="' + esc(n.image_prompt) + '" onchange="updateCount()">' +
                 '<div class="narr-body">' +
                     '<div class="narr-text">' + esc(n.text) + '</div>' +
+                    (n.gong ? '<div class="narr-gong">🎯 ' + esc(n.gong) + '</div>' : '') +
                     '<div class="narr-prompt">🎨 ' + esc(n.image_prompt) + imgTools(n.image_prompt) +
                     '</div>' +
                 '</div></div>';

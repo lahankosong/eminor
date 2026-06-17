@@ -588,8 +588,8 @@ EOT;
         $schema = ['"niche": "..."'];
         $n = 2;
         if (in_array('short', $want)) {
-            $tasks .= "\n{$n}. SHORT VIDEO: pecah niche jadi 3–5 topik kejadian sehari-hari yang SANGAT spesifik & berbeda (label max 5 kata). Tiap topik 5 CAPTION super pendek buat teks overlay video: 1 BARIS, MAKS 8–10 kata, punchy, gaya ngomong anak muda yang relatable (ikuti GAYA BAHASA). DILARANG kalimat panjang/formal/puitis. Contoh vibe: \"yaudah, healing dulu aja\" / \"capek tapi gabisa berhenti\". Tiap caption 1 image prompt (BAHASA INGGRIS, max 400 char, ikuti ATURAN GAMBAR, karakter Indonesia).";
-            $schema[] = '"topics": [{"id":1,"label":"max 5 kata","narrations":[{"text":"narasi","image_prompt":"english 9:16 prompt"},{"text":"...","image_prompt":"..."},{"text":"...","image_prompt":"..."},{"text":"...","image_prompt":"..."},{"text":"...","image_prompt":"..."}]}]';
+            $tasks .= "\n{$n}. SHORT VIDEO: pecah niche jadi 3–5 topik kejadian sehari-hari yang SANGAT spesifik & berbeda (label max 5 kata). Tiap topik 5 item. SETIAP item = struktur video pendek dengan 3 bagian: (a) \"text\" = NARASI build-up gaya CURHAT, simple & relatable, 1–2 baris pendek, ngalir natural menuntun ke klimaks (ikuti GAYA BAHASA, jangan formal/puitis); (b) \"gong\" = kata kunci PAMUNGKAS / punchline super pendek (MAKS 5–7 kata) yang nendang, muncul di DETIK TERAKHIR sebagai klimaks — harus nyambung & jadi 'aha' dari narasinya; (c) \"image_prompt\" = BAHASA INGGRIS, max 400 char, ikuti ATURAN GAMBAR, karakter Indonesia. Contoh: text \"tiap malam mikirin hal yang sama, padahal besok kerja\" → gong \"overthinking emang gratis ya\".";
+            $schema[] = '"topics": [{"id":1,"label":"max 5 kata","narrations":[{"text":"narasi curhat build-up","gong":"kata kunci pamungkas pendek","image_prompt":"english 9:16 prompt"},{"text":"...","gong":"...","image_prompt":"..."},{"text":"...","gong":"...","image_prompt":"..."},{"text":"...","gong":"...","image_prompt":"..."},{"text":"...","gong":"...","image_prompt":"..."}]}]';
             $n++;
         }
         if (in_array('long', $want)) {
