@@ -24,11 +24,13 @@
     .muted { font-size:11px; color:var(--text-3); }
 
     /* Image grid */
-    .img-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(82px,1fr)); gap:8px; }
-    .img-pick { position:relative; aspect-ratio:9/16; border-radius:8px; overflow:hidden; border:2px solid var(--border); cursor:pointer; background:var(--bg-3); }
+    .img-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(56px,1fr)); gap:6px; max-height:240px; overflow-y:auto; padding:2px; }
+    .img-pick { position:relative; aspect-ratio:9/16; border-radius:6px; overflow:hidden; border:2px solid var(--border); cursor:pointer; background:var(--bg-3); }
     .img-pick img { width:100%; height:100%; object-fit:cover; display:block; }
     .img-pick.sel { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-dim); }
-    .img-pick.sel::after { content:'✓'; position:absolute; top:3px; right:5px; color:#fff; background:var(--accent); border-radius:50%; width:18px; height:18px; font-size:12px; display:flex; align-items:center; justify-content:center; }
+    .img-pick.sel::after { content:'✓'; position:absolute; top:2px; left:3px; color:#fff; background:var(--accent); border-radius:50%; width:15px; height:15px; font-size:10px; display:flex; align-items:center; justify-content:center; }
+    .img-del { position:absolute; top:2px; right:2px; width:17px; height:17px; border:none; border-radius:50%; background:rgba(0,0,0,0.6); color:#fff; font-size:13px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
+    .img-del:hover { background:#ef4444; }
 
     /* Audio list */
     .aud-item { display:flex; align-items:center; gap:10px; padding:9px 11px; border:1px solid var(--border); border-radius:8px; margin-bottom:7px; cursor:pointer; }
@@ -71,8 +73,9 @@
         @if($images->count())
         <div class="img-grid" id="imgGrid">
             @foreach($images as $img)
-            <div class="img-pick" data-src="{{ $img->url }}" onclick="pickImage(this)" title="{{ \Illuminate\Support\Str::limit($img->prompt, 80) }}">
+            <div class="img-pick" data-id="{{ $img->id }}" data-src="{{ $img->url }}" onclick="pickImage(this)" title="{{ \Illuminate\Support\Str::limit($img->prompt, 80) }}">
                 <img src="{{ $img->url }}" loading="lazy" alt="">
+                <button class="img-del" title="Hapus" onclick="delImage(event, this)">×</button>
             </div>
             @endforeach
         </div>
@@ -185,6 +188,8 @@
 <script src="{{ asset('ffmpeg/ffmpeg.js') }}"></script>
 <script>
 var FFMPEG_BASE = '{{ asset('ffmpeg') }}';
+var CSRF = '{{ csrf_token() }}';
+var IMG_DEL_BASE = '{{ url('admin/ai-agent/image') }}';
 async function fetchBytes(input){
     var data;
     if (typeof input === 'string') data = await (await fetch(input)).arrayBuffer();
@@ -239,6 +244,21 @@ function pickImage(el){
     el.classList.add('sel');
     selImage = { kind:'url', src: el.dataset.src, ext:'jpg' };
     document.getElementById('imgInfo').textContent = '🖼️ Gambar dari galeri AI dipilih.';
+}
+function delImage(ev, btn){
+    ev.stopPropagation();
+    var cell = btn.closest('.img-pick'), id = cell.dataset.id, src = cell.dataset.src;
+    if (!confirm('Hapus gambar ini dari stok? (terhapus juga di Cloudinary)')) return;
+    btn.disabled = true;
+    fetch(IMG_DEL_BASE + '/' + id, { method:'DELETE', headers:{'X-CSRF-TOKEN':CSRF,'Accept':'application/json'} })
+        .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json().catch(function(){return {};}); })
+        .then(function(){
+            cell.remove();
+            if (selImage && selImage.kind==='url' && selImage.src===src){ selImage=null; document.getElementById('imgInfo').textContent='Belum ada gambar dipilih.'; }
+            var grid = document.getElementById('imgGrid');
+            if (grid && !grid.querySelector('.img-pick')) grid.innerHTML = '<div class="empty-row" style="grid-column:1/-1;">Stok kosong.</div>';
+        })
+        .catch(function(e){ btn.disabled=false; alert('Gagal hapus: '+e.message); });
 }
 document.getElementById('imgUpload').addEventListener('change', function(){
     var f=this.files[0]; if(!f) return;
