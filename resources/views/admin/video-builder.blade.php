@@ -28,7 +28,11 @@
     .img-pick { position:relative; aspect-ratio:9/16; border-radius:6px; overflow:hidden; border:2px solid var(--border); cursor:pointer; background:var(--bg-3); }
     .img-pick img { width:100%; height:100%; object-fit:cover; display:block; }
     .img-pick.sel { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-dim); }
-    .img-pick.sel::after { content:'✓'; position:absolute; top:2px; left:3px; color:#fff; background:var(--accent); border-radius:50%; width:15px; height:15px; font-size:10px; display:flex; align-items:center; justify-content:center; }
+    .img-pick.sel::after { content:attr(data-ord); position:absolute; top:2px; left:3px; color:#fff; background:var(--accent); border-radius:50%; min-width:15px; height:15px; padding:0 3px; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+    .vb-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.1rem; align-items:start; }
+    .vb-grid > .card { margin-bottom:0; }
+    .vb-right { position:sticky; top:70px; }
+    @media (max-width:900px){ .vb-grid { grid-template-columns:1fr; } .vb-right { position:static; } }
     .img-del { position:absolute; top:2px; right:2px; width:17px; height:17px; border:none; border-radius:50%; background:rgba(0,0,0,0.6); color:#fff; font-size:13px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
     .img-del:hover { background:#ef4444; }
 
@@ -65,6 +69,7 @@
     </div>
 </div>
 
+<div class="vb-grid">
 {{-- CARD A: ASET & CAPTION --}}
 <div class="card">
     <div class="card-head"><span>🎨 Aset &amp; Caption</span></div>
@@ -73,19 +78,17 @@
         <div class="sec"><span>Gambar</span>
             <label class="btn btn-soft" style="font-size:11px;padding:4px 10px;cursor:pointer;">+ Upload<input type="file" id="imgUpload" accept="image/*" hidden></label>
         </div>
-        @if($images->count())
         <div class="img-grid" id="imgGrid">
-            @foreach($images as $img)
+            @forelse($images as $img)
             <div class="img-pick" data-id="{{ $img->id }}" data-src="{{ $img->url }}" onclick="pickImage(this)" title="{{ \Illuminate\Support\Str::limit($img->prompt, 80) }}">
                 <img src="{{ $img->url }}" loading="lazy" alt="">
                 <button class="img-del" title="Hapus" onclick="delImage(event, this)">×</button>
             </div>
-            @endforeach
+            @empty
+            <div class="empty-row" style="grid-column:1/-1;">Belum ada gambar. Buat di <a href="{{ route('admin.ai-agent') }}" style="color:var(--accent);">AI Agent</a> atau + Upload.</div>
+            @endforelse
         </div>
-        @else
-        <div class="empty-row">Belum ada gambar. Buat di <a href="{{ route('admin.ai-agent') }}" style="color:var(--accent);">AI Agent</a> atau + Upload.</div>
-        @endif
-        <div class="muted" id="imgInfo" style="margin-top:6px;"></div>
+        <div class="muted" id="imgInfo" style="margin-top:6px;">Pilih 1 gambar (statis) atau beberapa (urut = scene berganti).</div>
 
         {{-- Audio --}}
         <div class="sec"><span>Audio</span>
@@ -127,7 +130,7 @@
 </div>
 
 {{-- CARD B: RAKIT & HASIL --}}
-<div class="card">
+<div class="card vb-right">
     <div class="card-head"><span>🎬 Rakit Video</span></div>
     <div class="card-body">
         <div class="row" style="align-items:center;">
@@ -154,6 +157,7 @@
         <div id="vidList"><div class="empty-row">Belum ada video tersimpan.</div></div>
     </div>
 </div>
+</div>{{-- /vb-grid --}}
 
 <script src="{{ asset('ffmpeg/ffmpeg.js') }}"></script>
 <script>
@@ -170,7 +174,7 @@ async function fetchBytes(input){
 </script>
 <script>
 // ===== State =====
-var selImage = null;   // {kind:'url'|'file', src|file, ext}
+var selImages = [];    // urutan scene: [{kind:'url'|'file', src|file, ext, el}]
 var selAudio = null;   // {kind:'idb'|'file', blob, ext, name}
 var ratio = '9:16';
 var selTpl = 'impact';
@@ -205,33 +209,59 @@ function onSizeChange(){
 function setStatus(h){ document.getElementById('status').innerHTML = h || ''; }
 function extFromType(t, fallback){ if(!t) return fallback; var m=t.split('/')[1]; return m ? m.replace('jpeg','jpg').split(';')[0] : fallback; }
 
-// ===== Gambar =====
+// ===== Gambar (multi-select → scene berurutan) =====
 function pickImage(el){
-    document.querySelectorAll('.img-pick').forEach(function(x){ x.classList.remove('sel'); });
-    el.classList.add('sel');
-    selImage = { kind:'url', src: el.dataset.src, ext:'jpg' };
-    document.getElementById('imgInfo').textContent = '🖼️ Gambar dari galeri AI dipilih.';
+    var i = selImages.findIndex(function(s){ return s.el === el; });
+    if (i >= 0){ selImages.splice(i,1); el.classList.remove('sel'); }
+    else {
+        var isUp = el.dataset.upload === '1';
+        selImages.push(isUp ? {kind:'file', file:el._file, ext:el._ext||'jpg', el:el}
+                            : {kind:'url', src:el.dataset.src, ext:'jpg', el:el});
+        el.classList.add('sel');
+    }
+    renumberImages();
+}
+function renumberImages(){
+    selImages.forEach(function(s, idx){ if (s.el) s.el.dataset.ord = (idx+1); });
+    document.querySelectorAll('.img-pick').forEach(function(c){ if (!c.classList.contains('sel')) c.removeAttribute('data-ord'); });
+    var info = document.getElementById('imgInfo'); if (!info) return;
+    var n = selImages.length;
+    info.textContent = n ? (n===1 ? '1 gambar dipilih.' : n + ' gambar — jadi ' + n + ' scene berurutan.') : 'Belum ada gambar dipilih.';
 }
 function delImage(ev, btn){
     ev.stopPropagation();
-    var cell = btn.closest('.img-pick'), id = cell.dataset.id, src = cell.dataset.src;
+    var cell = btn.closest('.img-pick'), id = cell.dataset.id;
     if (!confirm('Hapus gambar ini dari stok? (terhapus juga di Cloudinary)')) return;
     btn.disabled = true;
     fetch(IMG_DEL_BASE + '/' + id, { method:'DELETE', headers:{'X-CSRF-TOKEN':CSRF,'Accept':'application/json'} })
         .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json().catch(function(){return {};}); })
         .then(function(){
-            cell.remove();
-            if (selImage && selImage.kind==='url' && selImage.src===src){ selImage=null; document.getElementById('imgInfo').textContent='Belum ada gambar dipilih.'; }
+            selImages = selImages.filter(function(s){ return s.el !== cell; });
+            cell.remove(); renumberImages();
             var grid = document.getElementById('imgGrid');
             if (grid && !grid.querySelector('.img-pick')) grid.innerHTML = '<div class="empty-row" style="grid-column:1/-1;">Stok kosong.</div>';
         })
         .catch(function(e){ btn.disabled=false; alert('Gagal hapus: '+e.message); });
 }
+function delUpload(ev, btn){
+    ev.stopPropagation();
+    var cell = btn.closest('.img-pick');
+    selImages = selImages.filter(function(s){ return s.el !== cell; });
+    cell.remove(); renumberImages();
+}
 document.getElementById('imgUpload').addEventListener('change', function(){
-    var f=this.files[0]; if(!f) return;
-    document.querySelectorAll('.img-pick').forEach(function(x){ x.classList.remove('sel'); });
-    selImage = { kind:'file', file:f, ext: extFromType(f.type,'jpg') };
-    document.getElementById('imgInfo').textContent = '🖼️ Upload: ' + f.name;
+    var f = this.files[0]; if (!f) return;
+    var grid = document.getElementById('imgGrid');
+    var er = grid.querySelector('.empty-row'); if (er) er.remove();
+    var url = URL.createObjectURL(f);
+    var cell = document.createElement('div');
+    cell.className = 'img-pick'; cell.dataset.upload = '1'; cell.dataset.src = url;
+    cell._file = f; cell._ext = extFromType(f.type,'jpg');
+    cell.innerHTML = '<img src="'+url+'" alt=""><button class="img-del" title="Hapus" onclick="delUpload(event,this)">×</button>';
+    cell.addEventListener('click', function(ev){ if (ev.target.classList.contains('img-del')) return; pickImage(cell); });
+    grid.insertBefore(cell, grid.firstChild);
+    pickImage(cell);
+    this.value = '';
 });
 
 // ===== Audio (IndexedDB mafAudioClips) =====
@@ -416,67 +446,95 @@ function probeDuration(blob){
     });
 }
 
+function vcodec(c, still){ return c==='libx264' ? ['-c:v','libx264','-preset','ultrafast'].concat(still?['-tune','stillimage']:[], ['-pix_fmt','yuv420p']) : ['-c:v','mpeg4','-q:v','4']; }
+function aTail(){ return ['-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart','out.mp4']; }
+
 async function doRender(){
-    if (!selImage){ alert('Pilih gambar dulu.'); return; }
+    if (!selImages.length){ alert('Pilih minimal 1 gambar.'); return; }
     if (!selAudio){ alert('Pilih audio dulu.'); return; }
     if (busy) return;
     var btn = document.getElementById('renderBtn');
     busy = true; btn.disabled = true;
-    var tmpUrl = null;
+    var tmpUrls = [];
     try {
         await ensureFfmpeg();
         var dims = ratioDims(), W = dims[0], H = dims[1];
         var audName = 'aud.' + (selAudio.ext || 'mp3');
 
         setStatus('<span class="spinner"></span> Memuat aset…');
-        // gambar via blob URL (hindari canvas taint) → Image element
-        var imgBytes = await fetchBytes(selImage.kind === 'url' ? selImage.src : selImage.file);
-        tmpUrl = URL.createObjectURL(new Blob([imgBytes]));
-        var im = await loadImageEl(tmpUrl);
+        // muat semua gambar via blob URL (hindari canvas taint)
+        var ims = [];
+        for (var si=0; si<selImages.length; si++){
+            var s = selImages[si];
+            var bytes = await fetchBytes(s.kind === 'url' ? s.src : s.file);
+            var u = URL.createObjectURL(new Blob([bytes])); tmpUrls.push(u);
+            ims.push(await loadImageEl(u));
+        }
         await ffmpeg.writeFile(audName, await fetchBytes(selAudio.blob));
 
         var narasi = (document.getElementById('capNarasi').value || '').trim();
         var gong   = (document.getElementById('capGong').value || '').trim();
         var tpl = CAP_TEMPLATES[selTpl] || CAP_TEMPLATES.impact;
         var hasN = narasi !== '', hasG = gong !== '';
-        var dur = (hasN && hasG) ? await probeDuration(selAudio.blob) : 0;
-        var args;
+        var dur = await probeDuration(selAudio.blob);
+        var N = ims.length;
 
-        var vCount = 0;
-        if (hasN && hasG && dur > 1.5){
-            // narasi (build-up) → gong masuk dgn animasi fade+zoom, lalu hold; semua di-concat
-            setStatus('<span class="spinner"></span> Menyiapkan caption…');
-            var gongSec = Math.min(2.8, Math.max(1.2, dur * 0.4)), T = Math.max(0.5, dur - gongSec);
-            var specs = [ {a:0.35,s:0.80,d:0.07}, {a:0.7,s:0.97,d:0.07}, {a:1.0,s:1.10,d:0.07}, {a:1.0,s:1.0,d:Math.max(0.4, gongSec-0.21)} ];
-            var cN = {text:narasi, cx:posN.x*W, cy:posN.y*H, size:narSize, family:capFont, color:capColor};
-            await ffmpeg.writeFile('v0.jpg', await frameJpeg(im, W, H, [cN], tpl));
-            for (var gi=0; gi<specs.length; gi++){
-                await ffmpeg.writeFile('v'+(gi+1)+'.jpg', await frameJpeg(im, W, H, [{text:gong, cx:posG.x*W, cy:posG.y*H, size:gongSize*specs[gi].s, alpha:specs[gi].a, family:capFont, color:capColor}], tpl));
+        function narCap(){ return {text:narasi, cx:posN.x*W, cy:posN.y*H, size:narSize, family:capFont, color:capColor}; }
+        function gongCap(sc, al){ return {text:gong, cx:posG.x*W, cy:posG.y*H, size:gongSize*(sc||1), alpha:al, family:capFont, color:capColor}; }
+
+        // ===== Bangun daftar segmen {im, caps, dur} =====
+        var segments = [];
+        if (N === 1){
+            if (hasN && hasG && dur > 1.5){
+                // 1 gambar: narasi → gong masuk (animasi fade+zoom) → hold
+                var gongSec = Math.min(2.8, Math.max(1.2, dur*0.4)), T = Math.max(0.5, dur - gongSec);
+                var specs = [ {a:0.35,s:0.80,d:0.07}, {a:0.7,s:0.97,d:0.07}, {a:1.0,s:1.10,d:0.07}, {a:1.0,s:1.0,d:Math.max(0.4, gongSec-0.21)} ];
+                segments.push({ im:ims[0], caps:[narCap()], dur:T });
+                specs.forEach(function(sp){ segments.push({ im:ims[0], caps:[gongCap(sp.s, sp.a)], dur:sp.d }); });
+            } else {
+                var caps = []; if (hasN) caps.push(narCap()); if (hasG) caps.push(gongCap(1,1));
+                segments.push({ im:ims[0], caps:caps, dur: 0 });   // dur 0 → loop + shortest
             }
-            vCount = 1 + specs.length;
-            args = function(codec){
-                var v = codec === 'libx264' ? ['-c:v','libx264','-preset','ultrafast','-pix_fmt','yuv420p'] : ['-c:v','mpeg4','-q:v','4'];
-                var ins = ['-loop','1','-t',T.toFixed(2),'-i','v0.jpg'], lbl = '[0:v]';
-                for (var k=0;k<specs.length;k++){ ins.push('-loop','1','-t',specs[k].d.toFixed(2),'-i','v'+(k+1)+'.jpg'); lbl += '['+(k+1)+':v]'; }
-                ins.push('-i',audName);
-                return ins.concat(['-filter_complex', lbl + 'concat=n='+vCount+':v=1:a=0,format=yuv420p[v]',
-                    '-map','[v]','-map',vCount+':a','-r','25'], v,
-                    ['-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart','out.mp4']);
-            };
         } else {
-            // 1 frame: caption (kalau ada) di-bake ke gambar
-            var caps = [];
-            if (hasN) caps.push({text:narasi, cx:posN.x*W, cy:posN.y*H, size:narSize,  family:capFont, color:capColor});
-            if (hasG) caps.push({text:gong,   cx:posG.x*W, cy:posG.y*H, size:gongSize, family:capFont, color:capColor});
-            await ffmpeg.writeFile('frame.jpg', await frameJpeg(im, W, H, caps, tpl));
+            // ===== MULTI-SCENE: tiap gambar = 1 scene bergantian; narasi di build-up, gong di akhir =====
+            if (!dur || dur < 1) dur = N * 2;
+            var segLen = dur / N, gSec = hasG ? Math.min(2.6, Math.max(1.0, Math.min(segLen, dur*0.3))) : 0, gStart = dur - gSec;
+            for (var i=0; i<N; i++){
+                var s0 = i*segLen, s1 = (i+1)*segLen;
+                if (!hasG || s1 <= gStart + 0.02){
+                    segments.push({ im:ims[i], caps: hasN?[narCap()]:[], dur: segLen });
+                } else if (s0 >= gStart){
+                    segments.push({ im:ims[i], caps: [gongCap(1,1)], dur: segLen });
+                } else {
+                    if (hasN) segments.push({ im:ims[i], caps:[narCap()], dur: gStart - s0 });
+                    segments.push({ im:ims[i], caps:[gongCap(1,1)], dur: s1 - gStart });
+                }
+            }
+        }
+
+        // ===== Tulis frame per segmen =====
+        setStatus('<span class="spinner"></span> Menyiapkan frame…');
+        var written = [];
+        for (var k=0; k<segments.length; k++){
+            var fn = 'v'+k+'.jpg';
+            await ffmpeg.writeFile(fn, await frameJpeg(segments[k].im, W, H, segments[k].caps, tpl));
+            written.push(fn);
+        }
+
+        var args;
+        if (segments.length === 1 && !segments[0].dur){
+            args = function(codec){ return ['-loop','1','-i','v0.jpg','-i',audName,'-r','25'].concat(vcodec(codec,true), aTail()); };
+        } else {
             args = function(codec){
-                var v = codec === 'libx264' ? ['-c:v','libx264','-preset','ultrafast','-tune','stillimage','-pix_fmt','yuv420p'] : ['-c:v','mpeg4','-q:v','4'];
-                return ['-loop','1','-i','frame.jpg','-i',audName,'-r','25']
-                    .concat(v, ['-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart','out.mp4']);
+                var ins = [], lbl = '';
+                for (var k2=0; k2<segments.length; k2++){ ins.push('-loop','1','-t',(segments[k2].dur||1).toFixed(2),'-i','v'+k2+'.jpg'); lbl += '['+k2+':v]'; }
+                ins.push('-i', audName);
+                return ins.concat(['-filter_complex', lbl + 'concat=n='+segments.length+':v=1:a=0,format=yuv420p[v]',
+                    '-map','[v]','-map', segments.length+':a','-r','25'], vcodec(codec,false), aTail());
             };
         }
 
-        setStatus('<span class="spinner"></span> Merender video…');
+        setStatus('<span class="spinner"></span> Merender video' + (N>1 ? ' ('+N+' scene)' : '') + '…');
         var rc = await ffmpeg.exec(args('libx264'));
         if (rc !== 0){
             setStatus('<span class="spinner"></span> Merender (mode kompatibel)…');
@@ -486,23 +544,22 @@ async function doRender(){
         if (rc !== 0) throw new Error('Render gagal (kode ' + rc + '). Coba audio/gambar lain.');
 
         var data = await ffmpeg.readFile('out.mp4');
-        ['v0.jpg','v1.jpg','v2.jpg','v3.jpg','v4.jpg','frame.jpg', audName, 'out.mp4'].forEach(function(f){ try{ ffmpeg.deleteFile(f); }catch(e){} });
+        written.concat([audName,'out.mp4']).forEach(function(f){ try{ ffmpeg.deleteFile(f); }catch(e){} });
 
         if (lastUrl) URL.revokeObjectURL(lastUrl);
         var blob = new Blob([data.buffer], { type:'video/mp4' });
-        lastBlob = blob;
-        lastUrl = URL.createObjectURL(blob);
+        lastBlob = blob; lastUrl = URL.createObjectURL(blob);
         document.getElementById('resultVideo').src = lastUrl;
         var dl = document.getElementById('dlBtn'); dl.href = lastUrl;
         dl.download = 'maftune_' + ratio.replace(':','x') + '_' + Date.now() + '.mp4';
-        document.getElementById('resultMeta').textContent = ratio + ' · ' + Math.round(blob.size/1024) + ' KB';
+        document.getElementById('resultMeta').textContent = ratio + ' · ' + N + ' scene · ' + Math.round(blob.size/1024) + ' KB';
         document.getElementById('resultWrap').style.display = 'block';
         setStatus('✓ Video jadi! Unduh lalu upload ke TikTok / IG / YouTube.');
     } catch(e){
         console.error('render error:', e);
         setStatus('⚠️ ' + ((e && e.message) || e));
     } finally {
-        if (tmpUrl) URL.revokeObjectURL(tmpUrl);
+        tmpUrls.forEach(function(u){ URL.revokeObjectURL(u); });
         busy = false; btn.disabled = false;
     }
 }
