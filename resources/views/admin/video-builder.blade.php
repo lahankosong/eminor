@@ -47,6 +47,8 @@
     @keyframes spin { to { transform:rotate(360deg); } }
     .result-video { max-width:280px; border-radius:10px; border:1px solid var(--border); display:block; margin-top:10px; }
     .empty-row { font-size:12px; color:var(--text-3); padding:8px 0; }
+    .sec { display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:11px; font-weight:600; color:var(--text-2); text-transform:uppercase; letter-spacing:0.04em; margin:16px 0 8px; padding-top:12px; border-top:1px solid var(--border-2); }
+    .sec:first-child { border-top:none; padding-top:0; margin-top:0; }
 </style>
 @endpush
 
@@ -63,13 +65,14 @@
     </div>
 </div>
 
-{{-- 1. GAMBAR --}}
+{{-- CARD A: ASET & CAPTION --}}
 <div class="card">
-    <div class="card-head">
-        <span>1 · Pilih Gambar</span>
-        <label class="btn btn-soft" style="font-size:11px;padding:5px 11px;cursor:pointer;">+ Upload<input type="file" id="imgUpload" accept="image/*" hidden></label>
-    </div>
+    <div class="card-head"><span>🎨 Aset &amp; Caption</span></div>
     <div class="card-body">
+        {{-- Gambar --}}
+        <div class="sec"><span>Gambar</span>
+            <label class="btn btn-soft" style="font-size:11px;padding:4px 10px;cursor:pointer;">+ Upload<input type="file" id="imgUpload" accept="image/*" hidden></label>
+        </div>
         @if($images->count())
         <div class="img-grid" id="imgGrid">
             @foreach($images as $img)
@@ -80,107 +83,74 @@
             @endforeach
         </div>
         @else
-        <div class="empty-row">Belum ada gambar AI. Buat dulu di <a href="{{ route('admin.ai-agent') }}" style="color:var(--accent);">AI Agent → 🖼️ buat gambar</a>, atau <b>+ Upload</b> gambar sendiri.</div>
+        <div class="empty-row">Belum ada gambar. Buat di <a href="{{ route('admin.ai-agent') }}" style="color:var(--accent);">AI Agent</a> atau + Upload.</div>
         @endif
-        <div class="muted" id="imgInfo" style="margin-top:10px;">Belum ada gambar dipilih.</div>
-    </div>
-</div>
+        <div class="muted" id="imgInfo" style="margin-top:6px;"></div>
 
-{{-- 2. AUDIO --}}
-<div class="card">
-    <div class="card-head">
-        <span>2 · Pilih Audio</span>
-        <label class="btn btn-soft" style="font-size:11px;padding:5px 11px;cursor:pointer;">+ Upload<input type="file" id="audUpload" accept="audio/*" hidden></label>
-    </div>
-    <div class="card-body">
-        <p class="muted" style="margin-bottom:10px;">Dari <b>Pemotong Lagu</b> (potongan lagu) &amp; <b>narasi TTS</b> yang kamu simpan (tersimpan di perangkat ini).</p>
-        <div id="audList"><div class="empty-row">Memuat potongan tersimpan…</div></div>
-        <div class="muted" id="audInfo" style="margin-top:6px;">Belum ada audio dipilih.</div>
-    </div>
-</div>
+        {{-- Audio --}}
+        <div class="sec"><span>Audio</span>
+            <label class="btn btn-soft" style="font-size:11px;padding:4px 10px;cursor:pointer;">+ Upload<input type="file" id="audUpload" accept="audio/*" hidden></label>
+        </div>
+        <div id="audList" style="max-height:200px;overflow-y:auto;"><div class="empty-row">Memuat…</div></div>
+        <div class="muted" id="audInfo" style="margin-top:6px;"></div>
 
-{{-- 3. CAPTION OVERLAY --}}
-<div class="card">
-    <div class="card-head"><span>3 · Caption Overlay <span class="muted">(opsional)</span></span></div>
-    <div class="card-body">
-        <p class="muted" style="margin-bottom:10px;">Tempel dari AI Agent: <b>narasi</b> (build-up) tampil sepanjang video, <b>🎯 gong</b> muncul di detik akhir. Kosongkan kalau tak mau caption.</p>
-        <div style="margin-bottom:10px;">
-            <label class="muted">Narasi (build-up)</label>
-            <textarea class="fi" id="capNarasi" rows="2" style="width:100%;resize:vertical;margin-top:4px;" placeholder="tiap malam mikirin hal yang sama, padahal besok kerja"></textarea>
+        {{-- Caption --}}
+        <div class="sec"><span>Caption (opsional)</span></div>
+        <div class="row" style="gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+            <textarea class="fi" id="capNarasi" rows="2" style="flex:1;min-width:170px;resize:vertical;" placeholder="narasi build-up…"></textarea>
+            <input type="text" class="fi" id="capGong" style="flex:1;min-width:170px;" placeholder="🎯 gong pamungkas…">
         </div>
-        <div style="margin-bottom:12px;">
-            <label class="muted">🎯 Gong (pamungkas)</label>
-            <input type="text" class="fi" id="capGong" style="width:100%;margin-top:4px;" placeholder="overthinking emang gratis ya">
+        <div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
+            <select class="fi" id="capFontSel" onchange="onFontChange()" style="flex:1;min-width:120px;">
+                <option value="">Font: template</option>
+                <option>Anton</option><option>Bebas Neue</option><option>Poppins</option><option>Montserrat</option><option>Oswald</option><option>Playfair Display</option><option>Lobster</option><option>Caveat</option>
+            </select>
+            <span class="muted">Narasi</span>
+            <select class="fi" id="narSizeRange" onchange="onSizeChange()" style="width:auto;">
+                <option value="4">4</option><option value="5" selected>5</option><option value="6">6</option><option value="7">7</option>
+            </select>
+            <span class="muted">Gong</span>
+            <select class="fi" id="gongSizeRange" onchange="onSizeChange()" style="width:auto;">
+                <option value="7">7</option><option value="9" selected>9</option><option value="11">11</option><option value="13">13</option>
+            </select>
+            <input type="color" id="capColorSel" value="#ffffff" oninput="onColorChange()" title="Warna" style="width:42px;height:38px;border:1px solid var(--border);border-radius:8px;background:var(--bg-3);cursor:pointer;">
         </div>
-        <div class="row" style="gap:12px;margin-bottom:10px;flex-wrap:wrap;">
-            <div style="flex:1;min-width:130px;">
-                <label class="muted">Font</label>
-                <select class="fi" id="capFontSel" onchange="onFontChange()" style="width:100%;margin-top:4px;">
-                    <option value="">(ikut template)</option>
-                    <option>Anton</option><option>Bebas Neue</option><option>Poppins</option>
-                    <option>Montserrat</option><option>Oswald</option><option>Playfair Display</option>
-                    <option>Lobster</option><option>Caveat</option>
-                </select>
-            </div>
-            <div style="width:70px;">
-                <label class="muted">Warna</label>
-                <input type="color" id="capColorSel" value="#ffffff" oninput="onColorChange()" style="width:100%;height:38px;margin-top:4px;border:1px solid var(--border);border-radius:8px;background:var(--bg-3);cursor:pointer;">
-            </div>
-        </div>
-        <div class="row" style="gap:14px;margin-bottom:12px;flex-wrap:wrap;">
-            <div style="flex:1;min-width:130px;">
-                <label class="muted">Ukuran narasi: <span id="narSizeLbl">5.2</span></label>
-                <input type="range" id="narSizeRange" min="3" max="9" step="0.2" value="5.2" oninput="onSizeChange()" style="width:100%;accent-color:var(--accent);">
-            </div>
-            <div style="flex:1;min-width:130px;">
-                <label class="muted">Ukuran gong: <span id="gongSizeLbl">8.5</span></label>
-                <input type="range" id="gongSizeRange" min="5" max="14" step="0.2" value="8.5" oninput="onSizeChange()" style="width:100%;accent-color:var(--accent);">
-            </div>
-        </div>
-        <label class="muted">Template (preset font + warna + efek)</label>
-        <div class="ratio-opt" id="tplOpt" style="margin-top:6px;">
+        <div class="ratio-opt" id="tplOpt" style="margin-bottom:10px;">
             <span class="ratio-btn sel" data-t="impact"  onclick="pickTpl(this)">Impact</span>
             <span class="ratio-btn" data-t="boxbold" onclick="pickTpl(this)">Bold Box</span>
             <span class="ratio-btn" data-t="neon"    onclick="pickTpl(this)">Neon</span>
-            <span class="ratio-btn" data-t="tulis"   onclick="pickTpl(this)">Tulisan tangan</span>
+            <span class="ratio-btn" data-t="tulis"   onclick="pickTpl(this)">Tulis tangan</span>
         </div>
-        <div style="margin-top:12px;">
-            <label class="muted">Preview — <b>seret teks</b> untuk atur posisi (narasi &amp; gong)</label>
-            <div style="margin-top:6px;"><canvas id="capPreview" style="border:1px solid var(--border);border-radius:8px;max-width:100%;display:block;cursor:grab;touch-action:none;"></canvas></div>
-        </div>
+        <div class="muted" style="margin-bottom:5px;">Preview — seret teks untuk atur posisi</div>
+        <canvas id="capPreview" style="border:1px solid var(--border);border-radius:8px;max-width:100%;display:block;cursor:grab;touch-action:none;"></canvas>
     </div>
 </div>
 
-{{-- 4. PENGATURAN + RENDER --}}
+{{-- CARD B: RAKIT & HASIL --}}
 <div class="card">
-    <div class="card-head"><span>4 · Format &amp; Rakit</span></div>
+    <div class="card-head"><span>🎬 Rakit Video</span></div>
     <div class="card-body">
-        <div class="ratio-opt" id="ratioOpt">
-            <span class="ratio-btn sel" data-r="9:16" onclick="pickRatio(this)">📱 9:16 (Short)</span>
-            <span class="ratio-btn" data-r="1:1" onclick="pickRatio(this)">⬛ 1:1</span>
-            <span class="ratio-btn" data-r="16:9" onclick="pickRatio(this)">🖥️ 16:9</span>
-        </div>
-        <p class="muted" style="margin:10px 0;">Pertama kali memuat mesin (ffmpeg ±30MB, sekali, lalu di-cache). Durasi video = panjang audio. <b>Short (≤60 dtk) paling cepat</b>; video panjang bisa beberapa menit.</p>
-        <div class="row">
-            <button class="btn btn-primary" id="renderBtn" onclick="doRender()">🎬 Rakit Video</button>
+        <div class="row" style="align-items:center;">
+            <span class="muted">Format</span>
+            <select class="fi" id="ratioSel" onchange="onRatioChange()" style="width:auto;">
+                <option value="9:16">📱 9:16 Short</option>
+                <option value="1:1">⬛ 1:1</option>
+                <option value="16:9">🖥️ 16:9</option>
+            </select>
+            <button class="btn btn-primary" id="renderBtn" onclick="doRender()">🎬 Rakit</button>
         </div>
         <div class="status" id="status"></div>
 
         <div id="resultWrap" style="display:none;margin-top:12px;">
             <video class="result-video" id="resultVideo" controls></video>
             <div class="row" style="margin-top:10px;">
-                <a class="btn btn-accent" id="dlBtn" download="video.mp4">⬇️ Unduh MP4</a>
-                <button class="btn btn-soft" onclick="saveVideo()">💾 Simpan ke perangkat</button>
+                <a class="btn btn-accent" id="dlBtn" download="video.mp4">⬇️ Unduh</a>
+                <button class="btn btn-soft" onclick="saveVideo()">💾 Simpan</button>
                 <span class="muted" id="resultMeta"></span>
             </div>
         </div>
-    </div>
-</div>
 
-{{-- 5. VIDEO TERSIMPAN --}}
-<div class="card">
-    <div class="card-head"><span>📁 Video Tersimpan</span><span class="muted">di perangkat ini (IndexedDB)</span></div>
-    <div class="card-body">
+        <div class="sec"><span>Video Tersimpan</span></div>
         <div id="vidList"><div class="empty-row">Belum ada video tersimpan.</div></div>
     </div>
 </div>
@@ -205,7 +175,7 @@ var selAudio = null;   // {kind:'idb'|'file', blob, ext, name}
 var ratio = '9:16';
 var selTpl = 'impact';
 var capFont = '', capColor = '';                       // '' = ikut template
-var narSize = 0.052, gongSize = 0.085;                 // sizeFactor (×H)
+var narSize = 0.05, gongSize = 0.09;                   // sizeFactor (×H)
 var posN = {x:0.5, y:0.84}, posG = {x:0.5, y:0.5};     // posisi caption (normalized, bisa di-seret)
 var ffmpeg = null, ffmpegLoaded = false, busy = false, lastUrl = null, lastBlob = null;
 
@@ -227,11 +197,8 @@ function pickTpl(el){
 function onFontChange(){ capFont = document.getElementById('capFontSel').value; renderPreview(); }
 function onColorChange(){ capColor = document.getElementById('capColorSel').value; renderPreview(); }
 function onSizeChange(){
-    var n = parseFloat(document.getElementById('narSizeRange').value);
-    var g = parseFloat(document.getElementById('gongSizeRange').value);
-    narSize = n/100; gongSize = g/100;
-    document.getElementById('narSizeLbl').textContent = n.toFixed(1);
-    document.getElementById('gongSizeLbl').textContent = g.toFixed(1);
+    narSize  = parseFloat(document.getElementById('narSizeRange').value)/100;
+    gongSize = parseFloat(document.getElementById('gongSizeRange').value)/100;
     renderPreview();
 }
 
@@ -311,9 +278,8 @@ window.addEventListener('load', renderPreview);
 renderPreview();
 
 // ===== Ratio =====
-function pickRatio(el){
-    document.querySelectorAll('#ratioOpt .ratio-btn').forEach(function(x){ x.classList.remove('sel'); });
-    el.classList.add('sel'); ratio = el.dataset.r;
+function onRatioChange(){
+    ratio = document.getElementById('ratioSel').value;
     renderPreview();
 }
 function ratioDims(){
