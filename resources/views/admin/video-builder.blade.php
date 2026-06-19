@@ -156,7 +156,7 @@
             <input type="number" class="fi" id="gongStart" min="0" step="0.5" placeholder="muncul" style="width:70px;" title="gong muncul detik">
             <input type="number" class="fi" id="gongEnd" min="0" step="0.5" placeholder="hilang" style="width:70px;" title="gong hilang detik">
         </div>
-        <div class="muted" style="margin-top:4px;">Kosong = otomatis (narasi build-up, gong di akhir).</div>
+        <div class="muted" style="margin-top:4px;">Kosong = otomatis (narasi build-up, gong di akhir).<span id="timingDur"></span></div>
     </div>
 </div>
 
@@ -232,7 +232,7 @@ var VFX = {
     bw:          'grayscale(1) contrast(1.12)',
     vivid:       'saturate(1.45) contrast(1.1)'
 };
-function onEffectChange(){ vfFilter = VFX[document.getElementById('vfxSel').value] || 'none'; }
+function onEffectChange(){ vfFilter = VFX[document.getElementById('vfxSel').value] || 'none'; renderPreview(); }
 var ffmpeg = null, ffmpegLoaded = false, busy = false, lastUrl = null, lastBlob = null;
 
 // Template caption: family (font web), warna, stroke, shadow, box
@@ -259,6 +259,14 @@ function onSizeChange(){
 }
 
 function clamp(v,a,b){ return Math.min(b, Math.max(a, v)); }
+function fmtTime(s){ s=Math.max(0,s||0); var m=Math.floor(s/60), x=Math.round(s%60); if(x===60){m++;x=0;} return m+':'+(x<10?'0':'')+x; }
+var selDur = 0;
+function onAudioSelected(){
+    var info = document.getElementById('audInfo');
+    if (info) info.textContent = selAudio ? ('🔊 ' + (selAudio.name||'Audio') + (selDur ? ' · ' + fmtTime(selDur) + ' (' + selDur.toFixed(1) + ' dtk)' : '')) : '';
+    var th = document.getElementById('timingDur');
+    if (th) th.textContent = selDur ? (' · durasi audio: ' + selDur.toFixed(1) + ' dtk') : '';
+}
 function setStatus(h){ document.getElementById('status').innerHTML = h || ''; }
 function extFromType(t, fallback){ if(!t) return fallback; var m=t.split('/')[1]; return m ? m.replace('jpeg','jpg').split(';')[0] : fallback; }
 
@@ -273,6 +281,7 @@ function pickImage(el){
         el.classList.add('sel');
     }
     renumberImages();
+    updatePreviewImg();
 }
 function renumberImages(){
     selImages.forEach(function(s, idx){ if (s.el) s.el.dataset.ord = (idx+1); });
@@ -337,21 +346,25 @@ async function loadAudio(){
         var kb = Math.round(c.size/1024);
         var d = document.createElement('div');
         d.className = 'aud-item';
-        d.innerHTML = '<div style="flex:1;min-width:0;"><div class="aud-name">'+(c.name||'Audio').replace(/</g,'&lt;')+'</div><div class="aud-meta">.'+c.ext+' · '+kb+' KB</div></div>';
-        d.addEventListener('click', function(){
+        d.innerHTML = '<div style="flex:1;min-width:0;"><div class="aud-name">'+(c.name||'Audio').replace(/</g,'&lt;')+'</div><div class="aud-meta">.'+c.ext+' · '+kb+' KB <span class="aud-dur"></span></div></div>';
+        var durSpan = d.querySelector('.aud-dur');
+        probeDuration(c.blob).then(function(dd){ c._dur = dd; if (durSpan) durSpan.textContent = '· ' + fmtTime(dd); });
+        d.addEventListener('click', async function(){
             document.querySelectorAll('.aud-item').forEach(function(x){ x.classList.remove('sel'); });
             d.classList.add('sel');
             selAudio = { kind:'idb', blob:c.blob, ext:c.ext||'wav', name:c.name };
-            document.getElementById('audInfo').textContent = '🔊 ' + (c.name||'Audio') + ' dipilih.';
+            selDur = c._dur || await probeDuration(c.blob); c._dur = selDur;
+            onAudioSelected();
         });
         list.appendChild(d);
     });
 }
-document.getElementById('audUpload').addEventListener('change', function(){
+document.getElementById('audUpload').addEventListener('change', async function(){
     var f=this.files[0]; if(!f) return;
     document.querySelectorAll('.aud-item').forEach(function(x){ x.classList.remove('sel'); });
     selAudio = { kind:'file', blob:f, ext: extFromType(f.type,'mp3'), name:f.name };
-    document.getElementById('audInfo').textContent = '🔊 Upload: ' + f.name;
+    selDur = await probeDuration(f);
+    onAudioSelected();
 });
 loadAudio();
 
@@ -452,7 +465,20 @@ async function frameJpeg(im, W, H, caps, tpl, im2, blend){
     return await new Promise(function(res){ cv.toBlob(function(b){ b.arrayBuffer().then(function(ab){ res(new Uint8Array(ab)); }); }, 'image/jpeg', 0.92); });
 }
 
-var previewSeq = 0, boxN = null, boxG = null;
+var previewSeq = 0, boxN = null, boxG = null, previewImg = null, previewKey = null;
+async function updatePreviewImg(){
+    if (!selImages.length){ previewImg = null; previewKey = null; renderPreview(); return; }
+    var s = selImages[0];
+    var key = s.kind === 'url' ? s.src : (s.el ? s.el.dataset.src : 'file');
+    if (key === previewKey && previewImg){ renderPreview(); return; }
+    previewKey = key;
+    try {
+        var bytes = await fetchBytes(s.kind === 'url' ? s.src : s.file);
+        var u = URL.createObjectURL(new Blob([bytes]));
+        previewImg = await loadImageEl(u); URL.revokeObjectURL(u);
+    } catch(e){ previewImg = null; }
+    renderPreview();
+}
 async function renderPreview(){
     var cv = document.getElementById('capPreview'); if (!cv) return;
     var seq = ++previewSeq;
@@ -460,8 +486,8 @@ async function renderPreview(){
     var PH = 250, PW = Math.round(PH * AR);
     cv.width = PW; cv.height = PH;
     var x = cv.getContext('2d');
-    var g = x.createLinearGradient(0,0,0,PH); g.addColorStop(0,'#3a4a57'); g.addColorStop(1,'#1b2630');
-    x.fillStyle = g; x.fillRect(0,0,PW,PH);
+    if (previewImg){ coverDraw(x, previewImg, PW, PH); }
+    else { var g = x.createLinearGradient(0,0,0,PH); g.addColorStop(0,'#3a4a57'); g.addColorStop(1,'#1b2630'); x.fillStyle = g; x.fillRect(0,0,PW,PH); }
     var tpl = CAP_TEMPLATES[selTpl] || CAP_TEMPLATES.impact;
     var nar = (document.getElementById('capNarasi').value||'').trim() || 'contoh narasi build-up';
     var gng = (document.getElementById('capGong').value||'').trim() || 'gong pamungkas';
