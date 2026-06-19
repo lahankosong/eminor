@@ -472,11 +472,11 @@ function drawCaptionOn(x, text, tpl, W, H, o){
 function watermarkText(){ var e = document.getElementById('wmInput'); return e ? (e.value||'').trim() : ''; }
 function drawWatermark(ctx, W, H){
     var t = watermarkText(); if (!t) return;
-    var fp = Math.max(11, Math.round(H*0.022));
+    var fp = Math.max(8, Math.round(H*0.013));
     ctx.font = '600 ' + fp + "px 'Poppins', sans-serif";
-    ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.globalAlpha = 0.78; ctx.fillStyle = '#fff';
-    ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = fp*0.4; ctx.shadowOffsetY = 1;
-    ctx.fillText(t, W - fp*0.7, H - fp*0.6);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.globalAlpha = 0.7; ctx.fillStyle = '#fff';
+    ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = fp*0.4; ctx.shadowOffsetY = 1;
+    ctx.fillText(t, W - fp*0.8, H - fp*0.7);
     ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0; ctx.globalAlpha=1;
     ctx.textAlign='center'; ctx.textBaseline='middle';
 }
