@@ -117,6 +117,14 @@
     <div class="card-body">
         <div class="gen-bar">
             <div class="fg">
+                <label>Sumber</label>
+                <select class="fi" id="sourceType" onchange="onSourceType()">
+                    <option value="lagu">🎵 Lagu</option>
+                    <option value="link">🔗 Link berita</option>
+                    <option value="text">📝 Teks</option>
+                </select>
+            </div>
+            <div class="fg" id="songFg">
                 <label>Lagu</label>
                 <select class="fi" id="songSelect">
                     <option value="">— Pilih lagu —</option>
@@ -146,10 +154,10 @@
             <button class="btn btn-primary" id="genBtn" onclick="doGenerate()">Generate</button>
         </div>
 
-        <div class="fg" style="margin-top:12px;">
-            <label>Sumber tambahan (opsional) — teks atau link Wikipedia</label>
-            <textarea class="fi" id="sourceInput" rows="2" placeholder="Tempel teks cerita / link, mis. https://id.wikipedia.org/wiki/Roro_Jonggrang"></textarea>
-            <span style="font-size:11px;color:var(--text-3);margin-top:3px;">Berguna untuk kategori Umum — cerita diambil dari sumber, lagu jadi backsound.</span>
+        <div class="fg" id="sourceFg" style="margin-top:12px;display:none;">
+            <label id="sourceLabel">Sumber</label>
+            <textarea class="fi" id="sourceInput" rows="2" placeholder="Tempel link atau teks…"></textarea>
+            <span style="font-size:11px;color:var(--text-3);margin-top:3px;">AI akan membaca/mengolah isi link atau teks ini menjadi konten (tanpa lagu).</span>
         </div>
 
         <details style="margin-top:6px;">
@@ -434,16 +442,30 @@ function saveTts(el, voice){
     }).catch(function(e){ alert('Gagal simpan: ' + e.message); });
 }
 
+function onSourceType(){
+    var t = document.getElementById('sourceType').value;
+    document.getElementById('songFg').style.display   = (t==='lagu') ? '' : 'none';
+    document.getElementById('sourceFg').style.display = (t==='lagu') ? 'none' : '';
+    var lbl = document.getElementById('sourceLabel'), inp = document.getElementById('sourceInput');
+    if (t==='link'){ lbl.textContent='Link berita/artikel'; inp.placeholder='https://...'; }
+    else if (t==='text'){ lbl.textContent='Teks bahan konten'; inp.placeholder='Tempel teks yang mau diolah jadi konten…'; }
+}
 function doGenerate() {
-    var songId = document.getElementById('songSelect').value;
+    var stype = document.getElementById('sourceType').value;
     var provId = document.getElementById('providerSelect').value;
-    if (!songId) { alert('Pilih lagu dulu.'); return; }
     if (!provId) { alert('Pilih AI provider dulu (atau tambah di Pengaturan AI).'); return; }
+    var sv = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+    var songId = '0', source = '';
+    if (stype === 'lagu'){
+        songId = document.getElementById('songSelect').value;
+        if (!songId) { alert('Pilih lagu dulu.'); return; }
+    } else {
+        source = (sv('sourceInput')||'').trim();
+        if (!source) { alert(stype==='link' ? 'Tempel link dulu.' : 'Isi teks dulu.'); return; }
+    }
     if (!confirm('Generate akan memakai kuota/kredit AI provider yang dipilih. Lanjutkan?')) return;
 
     var mode = document.getElementById('modeSelect').value;
-    var sv = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
-    var source = sv('sourceInput');
     var style = {
         orientation: sv('styleOrientation'),
         art:    sv('styleArt'),

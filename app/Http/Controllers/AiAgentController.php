@@ -514,16 +514,17 @@ class AiAgentController extends Controller
 
     public function generate(Request $request, $id)
     {
-        $song = Song::findOrFail($id);
+        // id 0 = tanpa lagu (konten dari link/teks)
+        $song = ($id && (int) $id !== 0) ? Song::find($id) : null;
 
         $provider = AiProvider::find($request->input('provider_id'));
         if (!$provider) {
             return response()->json(['error' => 'Pilih provider AI dulu (atau tambahkan di Pengaturan AI).'], 422);
         }
 
-        $lyrics = $song->lyrics ? "Lirik:\n" . $song->lyrics
-            : "Lirik belum ada — gunakan judul, hook, dan deskripsi sebagai panduan.";
-        $hook = $song->story_hook ?? $song->description ?? $song->title;
+        $lyrics = $song ? ($song->lyrics ? "Lirik:\n" . $song->lyrics
+            : "Lirik belum ada — gunakan judul, hook, dan deskripsi sebagai panduan.") : '';
+        $hook = $song ? ($song->story_hook ?? $song->description ?? $song->title) : '';
 
         $mode = $request->input('mode', 'short');           // short | long | umum | all
         $want = $mode === 'all' ? ['short', 'long', 'umum'] : [$mode];
@@ -547,6 +548,17 @@ class AiAgentController extends Controller
             }
         }
 
+        if (!$song && $sourceText === '') {
+            return response()->json(['error' => 'Pilih lagu, atau isi sumber (link/teks) dulu.'], 422);
+        }
+        if ($song) {
+            $subjectBlock = "DATA LAGU:\n- Judul: {$song->title}\n- Era: {$song->era}\n- Hook: {$hook}\n{$lyrics}";
+            $nicheFrom = 'lirik lagu';
+        } else {
+            $subjectBlock = "BAHAN KONTEN (olah jadi konten menarik untuk audiens):\n" . mb_substr($sourceText, 0, 3500);
+            $nicheFrom = 'bahan/sumber di atas';
+        }
+
         // Pengaturan gaya gambar (opsional) — nilai sudah dalam frasa Inggris dari frontend
         $st = (array) $request->input('style', []);
         $orient = $st['orientation'] ?? '9:16';
@@ -568,11 +580,7 @@ GAYA BAHASA (WAJIB untuk SEMUA caption/narasi/teks Indonesia):
 - Pendek & punchy, to the point. HINDARI kata formal/puitis berat (ganti "merenungkan"→"mikirin", "menghantui"→"keinget terus", "senja"→"sore").
 - Boleh nyentil perasaan tapi ringan & relatable, kayak ngobrol sama temen — bukan puisi.
 
-DATA LAGU:
-- Judul: {$song->title}
-- Era: {$song->era}
-- Hook: {$hook}
-{$lyrics}
+{$subjectBlock}
 
 IDENTITAS VISUAL BRAND (konsisten di semua image prompt):
 - Palet: retro blue, warm cream, burnt orange
@@ -581,7 +589,7 @@ IDENTITAS VISUAL BRAND (konsisten di semua image prompt):
 - Gaya: candid, natural light, depth of field lensa 50mm/85mm
 
 TUGAS:
-1. NICHE: tentukan satu sudut konten/niche paling kuat dari lirik (1 kalimat, bahasa Indonesia).
+1. NICHE: tentukan satu sudut konten/niche paling kuat dari {$nicheFrom} (1 kalimat, bahasa Indonesia).
 EOT;
 
         $tasks  = '';
@@ -608,7 +616,7 @@ EOT;
 
         $prompt = $header . "\n" . $tasks
             . "\n\nATURAN GAMBAR (berlaku untuk SEMUA image prompt): " . $styleLine
-            . ($sourceText ? "\n\nSUMBER TAMBAHAN:\n" . $sourceText : "")
+            . ($song && $sourceText ? "\n\nSUMBER TAMBAHAN:\n" . $sourceText : "")
             . "\n\nBalas HANYA JSON valid tanpa markdown tanpa backtick:\n{\n  "
             . implode(",\n  ", $schema) . "\n}";
 
@@ -637,7 +645,7 @@ EOT;
                 if (isset($result['topics']))    $update['topics'] = json_encode($result['topics']);
                 if (isset($result['long_form'])) $update['scripts'] = json_encode($result['long_form']);
                 if (isset($result['umum']))      $update['visual_sequences'] = json_encode($result['umum']);
-                if ($update) {
+                if ($update && $song) {
                     AiGeneration::updateOrCreate(
                         ['song_id' => $song->id, 'user_id' => auth()->id()],
                         $update
@@ -649,8 +657,8 @@ EOT;
 
             return response()->json([
                 'success'   => true,
-                'song'      => $song->title,
-                'song_id'   => $song->id,
+                'song'      => $song ? $song->title : 'Sumber',
+                'song_id'   => $song ? $song->id : 0,
                 'provider'  => $provider->name,
                 'mode'      => $mode,
                 'niche'     => $result['niche'] ?? null,
