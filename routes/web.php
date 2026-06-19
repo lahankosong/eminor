@@ -87,6 +87,7 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::post('/ai-agent/image', [AiAgentController::class, 'generateImage'])->name('ai-agent.image');
     Route::delete('/ai-agent/image/{id}', [AiAgentController::class, 'destroyImage'])->name('ai-agent.image.destroy');
     Route::post('/ai-agent/tts', [AiAgentController::class, 'generateTts'])->name('ai-agent.tts');
+    Route::post('/ai-agent/transcribe', [AiAgentController::class, 'transcribe'])->name('ai-agent.transcribe');
 });
 
 Route::middleware(['auth'])->group(function () {

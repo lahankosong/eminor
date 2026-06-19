@@ -153,6 +153,9 @@
             </select>
             <span class="muted" style="opacity:0.7;">(transisi aktif jika ≥2 gambar)</span>
         </div>
+        <label class="muted" style="display:flex;align-items:center;gap:5px;cursor:pointer;margin-top:9px;">
+            <input type="checkbox" id="autoSub"> 📝 Auto subtitle dari audio (dipakai jika narasi &amp; gong kosong)
+        </label>
 
         <div class="sec"><span>Timing caption (detik)</span></div>
         <div class="row" style="gap:8px;flex-wrap:wrap;align-items:center;">
@@ -240,6 +243,7 @@
 var FFMPEG_BASE = '{{ asset('ffmpeg') }}';
 var CSRF = '{{ csrf_token() }}';
 var IMG_DEL_BASE = '{{ url('admin/ai-agent/image') }}';
+var ROUTE_TRANSCRIBE = '{{ route('admin.ai-agent.transcribe') }}';
 async function fetchBytes(input){
     var data;
     if (typeof input === 'string') data = await (await fetch(input)).arrayBuffer();
@@ -580,6 +584,16 @@ function probeDuration(blob){
         a.src = URL.createObjectURL(blob);
     });
 }
+var autoSubs = [];   // [{start,end,text}] hasil transkrip
+async function transcribeAudio(blob){
+    var fd = new FormData();
+    fd.append('audio', blob, 'a.' + (selAudio.ext || 'mp3'));
+    var r = await fetch(ROUTE_TRANSCRIBE, { method:'POST', headers:{'X-CSRF-TOKEN':CSRF,'Accept':'application/json'}, body: fd });
+    var d = await r.json().catch(function(){ return {}; });
+    if (!r.ok || d.error) throw new Error(d.error || ('HTTP ' + r.status));
+    return (d.segments || []).map(function(s){ return { start: parseFloat(s.start)||0, end: parseFloat(s.end)||0, text: (s.text||'').trim() }; })
+        .filter(function(s){ return s.text && s.end > s.start; });
+}
 
 function vcodec(c, still){ return c==='libx264' ? ['-c:v','libx264','-preset','ultrafast'].concat(still?['-tune','stillimage']:[], ['-pix_fmt','yuv420p']) : ['-c:v','mpeg4','-q:v','4']; }
 function aTail(){ return ['-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart','out.mp4']; }
@@ -610,6 +624,14 @@ async function renderToBlob(){
         var dur = await probeDuration(selAudio.blob);
         var N = ims.length;
 
+        // Auto subtitle (kalau caption kosong & dicentang)
+        autoSubs = [];
+        if (!hasN && !hasG && document.getElementById('autoSub').checked){
+            setStatus('<span class="spinner"></span> Membuat subtitle otomatis dari audio…');
+            try { autoSubs = await transcribeAudio(selAudio.blob); }
+            catch(e){ console.warn('transcribe:', e); setStatus('⚠️ Subtitle gagal: ' + (e.message||e) + ' — lanjut tanpa subtitle.'); }
+        }
+
         function narCap(){ return {text:narasi, cx:posN.x*W, cy:posN.y*H, size:narSize, family:capFont, color:capColor}; }
         function gongCap(sc, al){ return {text:gong, cx:posG.x*W, cy:posG.y*H, size:gongSize*(sc||1), alpha:al, family:capFont, color:capColor}; }
 
@@ -622,13 +644,18 @@ async function renderToBlob(){
         var nS = pf('narStart');  if (nS===null) nS = 0;
         var nE = pf('narEnd');    if (nE===null) nE = gS;
         nS=clamp(nS,0,dur); nE=clamp(nE,nS,dur); gS=clamp(gS,0,dur); gE=clamp(gE,gS,dur);
-        function capsAt(t){ var c=[]; if(hasN && t>=nS && t<nE) c.push(narCap()); if(hasG && t>=gS && t<gE) c.push(gongCap(1,1)); return c; }
+        function capsAt(t){
+            var c=[]; if(hasN && t>=nS && t<nE) c.push(narCap()); if(hasG && t>=gS && t<gE) c.push(gongCap(1,1));
+            if (autoSubs.length){ for (var sj=0; sj<autoSubs.length; sj++){ if (t>=autoSubs[sj].start && t<autoSubs[sj].end){ c.push({text:autoSubs[sj].text, cx:posN.x*W, cy:posN.y*H, size:narSize, family:capFont, color:capColor}); break; } } }
+            return c;
+        }
 
         // ===== Bangun blok gambar (scene + crossfade) lalu pecah di batas timing caption =====
         var segments = [];
-        if (N === 1 && !hasN && !hasG){
+        if (N === 1 && !hasN && !hasG && !autoSubs.length){
             segments = [{ im:ims[0], crop:crops[0], caps:[], dur:0 }];   // diam, loop + shortest
         } else {
+            var capEdges = [nS,nE,gS,gE]; autoSubs.forEach(function(s){ capEdges.push(s.start); capEdges.push(s.end); });
             var blocks = [];
             if (N === 1){
                 blocks = [{ im:ims[0], crop:crops[0], dur:dur, t0:0 }];
@@ -646,7 +673,7 @@ async function renderToBlob(){
             blocks.forEach(function(b){
                 if (b.im2){ b.caps = capsAt(b.t0 + b.dur/2); segments.push(b); return; }   // crossfade: utuh
                 var edges = [b.t0, b.t0 + b.dur];
-                [nS,nE,gS,gE].forEach(function(e){ if (e > b.t0 + 0.02 && e < b.t0 + b.dur - 0.02) edges.push(e); });
+                capEdges.forEach(function(e){ if (e > b.t0 + 0.02 && e < b.t0 + b.dur - 0.02) edges.push(e); });
                 edges.sort(function(a,b2){ return a-b2; });
                 var ue = []; edges.forEach(function(e){ if (!ue.length || e - ue[ue.length-1] > 0.02) ue.push(e); });
                 for (var s=0; s<ue.length-1; s++){

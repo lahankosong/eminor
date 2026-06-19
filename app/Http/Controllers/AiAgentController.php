@@ -318,6 +318,52 @@ class AiAgentController extends Controller
         }
     }
 
+    /** Auto-subtitle: transkrip audio (Gemini) → segmen ber-timing untuk caption otomatis. */
+    public function transcribe(Request $request)
+    {
+        $request->validate(['audio' => 'required|file|max:20480']);
+
+        // pakai key Gemini dari provider TTS, atau provider teks ber-endpoint Gemini
+        $provider = AiProvider::where('kind', 'tts')->whereNotNull('api_key')->orderBy('id')->first()
+            ?: AiProvider::whereNotNull('api_key')->where('base_url', 'like', '%generativelanguage%')->orderBy('id')->first();
+        if (!$provider || !$provider->api_key) {
+            return response()->json(['error' => 'Butuh provider Gemini (TTS atau teks) dengan API key untuk subtitle otomatis.'], 422);
+        }
+
+        $file = $request->file('audio');
+        $mime = $file->getMimeType() ?: 'audio/mpeg';
+        $b64  = base64_encode(file_get_contents($file->getRealPath()));
+        $prompt = "Transkrip audio bahasa Indonesia ini untuk SUBTITLE video pendek. "
+            . "Balas HANYA JSON array tanpa markdown: [{\"start\":detik_mulai,\"end\":detik_selesai,\"text\":\"...\"}]. "
+            . "Tiap segmen MAKS 6 kata, timing seakurat mungkin (detik desimal). Kalau instrumental / tak ada ucapan, balas [].";
+
+        try {
+            $resp = Http::timeout(150)->post(
+                'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . urlencode($provider->api_key),
+                [
+                    'contents'         => [['parts' => [['inlineData' => ['mimeType' => $mime, 'data' => $b64]], ['text' => $prompt]]]],
+                    'generationConfig' => ['temperature' => 0.2],
+                ]
+            );
+            if (!$resp->successful()) {
+                $body = $resp->body();
+                if ($resp->status() === 429 || str_contains($body, 'RESOURCE_EXHAUSTED')) {
+                    return response()->json(['error' => 'Kuota Gemini habis / butuh billing untuk transkrip audio.'], 429);
+                }
+                return response()->json(['error' => 'Transkrip gagal (' . $resp->status() . ').'], 500);
+            }
+            $text  = (string) $resp->json('candidates.0.content.parts.0.text', '');
+            $clean = trim(preg_replace('/^```(json)?|```$/i', '', trim($text)));
+            $s = strpos($clean, '['); $e = strrpos($clean, ']');
+            if ($s !== false && $e !== false) $clean = substr($clean, $s, $e - $s + 1);
+            $segs = json_decode($clean, true);
+            return response()->json(['segments' => is_array($segs) ? $segs : []]);
+        } catch (\Throwable $ex) {
+            Log::error('transcribe error', ['e' => $ex->getMessage()]);
+            return response()->json(['error' => $ex->getMessage()], 500);
+        }
+    }
+
     /** Bungkus PCM 16-bit LE mono menjadi WAV agar bisa diputar/unduh. */
     protected function pcmToWav(string $pcm, int $sampleRate = 24000, int $channels = 1, int $bits = 16): string
     {
