@@ -171,6 +171,11 @@
 <div class="card vb-right">
     <div class="card-head"><span>🎬 Rakit Video</span></div>
     <div class="card-body">
+        <div id="batchBanner" style="display:none;background:var(--accent-dim);border:1px solid var(--accent);border-radius:8px;padding:8px 11px;margin-bottom:10px;font-size:12px;color:var(--text);"></div>
+        <div class="row" style="align-items:center;margin-bottom:8px;">
+            <span class="muted">Watermark</span>
+            <input type="text" class="fi" id="wmInput" value="margonoandi.my.id" oninput="renderPreview()" style="flex:1;min-width:130px;" placeholder="kosongkan = tanpa">
+        </div>
         <div class="row" style="align-items:center;">
             <span class="muted">Format</span>
             <select class="fi" id="ratioSel" onchange="onRatioChange()" style="width:auto;">
@@ -183,6 +188,7 @@
                 <option value="1080">1080p HD</option>
             </select>
             <button class="btn btn-primary" id="renderBtn" onclick="doRender()">🎬 Rakit</button>
+            <button class="btn btn-accent" id="batchBtn" onclick="doBatch()" style="display:none;">🎬 Rakit semua</button>
         </div>
         <div class="status" id="status"></div>
 
@@ -463,6 +469,17 @@ function drawCaptionOn(x, text, tpl, W, H, o){
     });
     return { x: cx - maxW/2, y: cyC - totalH/2, w: maxW, h: totalH };
 }
+function watermarkText(){ var e = document.getElementById('wmInput'); return e ? (e.value||'').trim() : ''; }
+function drawWatermark(ctx, W, H){
+    var t = watermarkText(); if (!t) return;
+    var fp = Math.max(11, Math.round(H*0.022));
+    ctx.font = '600 ' + fp + "px 'Poppins', sans-serif";
+    ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.globalAlpha = 0.78; ctx.fillStyle = '#fff';
+    ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = fp*0.4; ctx.shadowOffsetY = 1;
+    ctx.fillText(t, W - fp*0.7, H - fp*0.6);
+    ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0; ctx.globalAlpha=1;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+}
 function loadImageEl(src){
     return new Promise(function(res, rej){
         var im = new Image();
@@ -497,6 +514,7 @@ async function frameJpeg(im, W, H, caps, tpl, im2, blend, crop, crop2){
         drawCaptionOn(x, c.text, tpl, W, H, { size:c.size, cx:c.cx, cy:c.cy, family:c.family, color:c.color });
         x.globalAlpha = 1;
     }
+    drawWatermark(x, W, H);
     return await new Promise(function(res){ cv.toBlob(function(b){ b.arrayBuffer().then(function(ab){ res(new Uint8Array(ab)); }); }, 'image/jpeg', 0.92); });
 }
 
@@ -531,6 +549,7 @@ async function renderPreview(){
     if (seq !== previewSeq) return;
     boxN = drawCaptionOn(x, nar, tpl, PW, PH, { size:narSize,  cx:posN.x*PW, cy:posN.y*PH, family:capFont, color:capColor });
     boxG = drawCaptionOn(x, gng, tpl, PW, PH, { size:gongSize, cx:posG.x*PW, cy:posG.y*PH, family:capFont, color:capColor });
+    drawWatermark(x, PW, PH);
 }
 // Seret caption di preview untuk atur posisi
 (function(){
@@ -565,12 +584,7 @@ function probeDuration(blob){
 function vcodec(c, still){ return c==='libx264' ? ['-c:v','libx264','-preset','ultrafast'].concat(still?['-tune','stillimage']:[], ['-pix_fmt','yuv420p']) : ['-c:v','mpeg4','-q:v','4']; }
 function aTail(){ return ['-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart','out.mp4']; }
 
-async function doRender(){
-    if (!selImages.length){ alert('Pilih minimal 1 gambar.'); return; }
-    if (!selAudio){ alert('Pilih audio dulu.'); return; }
-    if (busy) return;
-    var btn = document.getElementById('renderBtn');
-    busy = true; btn.disabled = true;
+async function renderToBlob(){
     var tmpUrls = [];
     try {
         await ensureFfmpeg();
@@ -685,23 +699,57 @@ async function doRender(){
 
         var data = await ffmpeg.readFile('out.mp4');
         written.concat([audName,'out.mp4']).forEach(function(f){ try{ ffmpeg.deleteFile(f); }catch(e){} });
+        return new Blob([data.buffer], { type:'video/mp4' });
+    } finally {
+        tmpUrls.forEach(function(u){ URL.revokeObjectURL(u); });
+    }
+}
 
+async function doRender(){
+    if (!selImages.length){ alert('Pilih minimal 1 gambar.'); return; }
+    if (!selAudio){ alert('Pilih audio dulu.'); return; }
+    if (busy) return;
+    var btn = document.getElementById('renderBtn'); busy = true; btn.disabled = true;
+    try {
+        var blob = await renderToBlob();
         if (lastUrl) URL.revokeObjectURL(lastUrl);
-        var blob = new Blob([data.buffer], { type:'video/mp4' });
         lastBlob = blob; lastUrl = URL.createObjectURL(blob);
         document.getElementById('resultVideo').src = lastUrl;
         var dl = document.getElementById('dlBtn'); dl.href = lastUrl;
         dl.download = 'maftune_' + ratio.replace(':','x') + '_' + Date.now() + '.mp4';
-        document.getElementById('resultMeta').textContent = ratio + ' · ' + N + ' scene · ' + Math.round(blob.size/1024) + ' KB';
+        document.getElementById('resultMeta').textContent = ratio + ' · ' + selImages.length + ' scene · ' + Math.round(blob.size/1024) + ' KB';
         document.getElementById('resultWrap').style.display = 'block';
         setStatus('✓ Video jadi! Unduh lalu upload ke TikTok / IG / YouTube.');
-    } catch(e){
-        console.error('render error:', e);
-        setStatus('⚠️ ' + ((e && e.message) || e));
-    } finally {
-        tmpUrls.forEach(function(u){ URL.revokeObjectURL(u); });
-        busy = false; btn.disabled = false;
-    }
+    } catch(e){ console.error('render error:', e); setStatus('⚠️ ' + ((e && e.message) || e)); }
+    finally { busy = false; btn.disabled = false; }
+}
+
+var batchItems = [];
+async function doBatch(){
+    if (!batchItems.length) return;
+    if (!selAudio){ alert('Pilih audio dulu (dipakai untuk semua video).'); return; }
+    if (busy) return;
+    if (!confirm('Render ' + batchItems.length + ' video sekaligus? Bisa makan waktu.')) return;
+    var bb = document.getElementById('batchBtn'); busy = true; bb.disabled = true;
+    var ok = 0;
+    try {
+        for (var i=0; i<batchItems.length; i++){
+            var it = batchItems[i];
+            document.getElementById('capNarasi').value = it.narasi || '';
+            document.getElementById('capGong').value = it.gong || '';
+            selImages = [];
+            document.querySelectorAll('.img-pick').forEach(function(x){ x.classList.remove('sel'); x.removeAttribute('data-ord'); });
+            if (it.image){ var found=null; document.querySelectorAll('.img-pick').forEach(function(x){ if(x.dataset.src===it.image) found=x; }); if(found) pickImage(found); }
+            if (!selImages.length){ continue; }
+            setStatus('<span class="spinner"></span> Batch ' + (i+1) + '/' + batchItems.length + '…');
+            var blob = await renderToBlob();
+            await vidAdd({ name:'Batch '+(i+1)+' · '+((it.gong||it.narasi||'video').slice(0,28)), ratio:ratio, blob:blob, size:blob.size, createdAt:Date.now() });
+            ok++;
+        }
+        setStatus('✓ ' + ok + ' video tersimpan di "Video Tersimpan".');
+        renderVideoList();
+    } catch(e){ console.error(e); setStatus('⚠️ Batch berhenti: ' + ((e&&e.message)||e) + ' (' + ok + ' berhasil)'); }
+    finally { busy = false; bb.disabled = false; }
 }
 
 // ===== Video library (IndexedDB 'mafVideos') =====
@@ -801,6 +849,7 @@ function getConfig(){
         narStart: document.getElementById('narStart').value, narEnd: document.getElementById('narEnd').value,
         gongStart: document.getElementById('gongStart').value, gongEnd: document.getElementById('gongEnd').value,
         ratio: document.getElementById('ratioSel').value, quality: document.getElementById('qualitySel').value,
+        watermark: document.getElementById('wmInput').value,
         imgs: selImages.filter(function(s){ return s.kind==='url'; }).map(function(s){ return {src:s.src, crop:s.crop||null}; }),
         audio: selAudio ? selAudio.name : null
     };
@@ -814,6 +863,7 @@ function applyConfig(c){
     ['narStart','narEnd','gongStart','gongEnd'].forEach(function(id){ document.getElementById(id).value = c[id]||''; });
     document.getElementById('ratioSel').value = c.ratio||'9:16'; ratio = c.ratio||'9:16';
     document.getElementById('qualitySel').value = c.quality||'720'; quality = parseInt(c.quality||'720',10);
+    document.getElementById('wmInput').value = (c.watermark != null) ? c.watermark : 'margonoandi.my.id';
     var tb = document.querySelector('#tplOpt .ratio-btn[data-t="'+(c.tpl||'impact')+'"]'); if (tb) pickTpl(tb);
     document.getElementById('capFontSel').value = c.font||''; capFont = c.font||'';
     if (c.color){ document.getElementById('capColorSel').value = c.color; capColor = c.color; }
@@ -873,6 +923,25 @@ renderProjects();
     }
     renderPreview();
     setStatus('✓ Narasi/gong dari AI Agent dimuat. Pilih audio lalu Rakit.');
+})();
+
+// ===== Batch dari AI Agent (sessionStorage 'vb_batch') =====
+(function(){
+    var raw; try { raw = sessionStorage.getItem('vb_batch'); } catch(e){}
+    if (!raw) return;
+    try { sessionStorage.removeItem('vb_batch'); } catch(e){}
+    var arr; try { arr = JSON.parse(raw); } catch(e){ return; }
+    if (!Array.isArray(arr) || !arr.length) return;
+    batchItems = arr;
+    var bn = document.getElementById('batchBanner');
+    bn.style.display = 'block';
+    bn.textContent = '🎬 Batch: ' + arr.length + ' video dari AI Agent. Pilih audio + atur template/efek/watermark, lalu klik "Rakit semua".';
+    document.getElementById('batchBtn').style.display = 'inline-block';
+    // tampilkan item pertama sebagai preview
+    document.getElementById('capNarasi').value = arr[0].narasi || '';
+    document.getElementById('capGong').value = arr[0].gong || '';
+    if (arr[0].image){ var found=null; document.querySelectorAll('.img-pick').forEach(function(x){ if(x.dataset.src===arr[0].image) found=x; }); if(found) pickImage(found); }
+    renderPreview();
 })();
 </script>
 

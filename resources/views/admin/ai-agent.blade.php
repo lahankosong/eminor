@@ -307,6 +307,20 @@ function toVideo(btn){
     try { sessionStorage.setItem('vb_prefill', JSON.stringify({ narasi: narasi, gong: gong, image: img })); } catch(e){}
     window.location = '{{ route('admin.video-builder') }}';
 }
+// Kirim SEMUA item topik (batch) ke Video Builder
+function toBatch(btn){
+    var topic = btn.closest('.topic'); if (!topic) return;
+    var items = [];
+    topic.querySelectorAll('.narr-body').forEach(function(body){
+        var v = body.querySelector('[data-narasi]'); if (!v) return;
+        var img = null, im = body.querySelector('.gen-img-wrap img'); if (im) img = im.src;
+        items.push({ narasi: decodeURIComponent(v.dataset.narasi||''), gong: decodeURIComponent(v.dataset.gong||''), image: img });
+    });
+    if (!items.length){ alert('Tidak ada item di topik ini.'); return; }
+    if (!confirm('Kirim ' + items.length + ' item ke Video Builder (batch)? Pastikan gambar tiap item sudah dibuat (🖼️) agar ikut terbawa.')) return;
+    try { sessionStorage.setItem('vb_batch', JSON.stringify(items)); } catch(e){}
+    window.location = '{{ route('admin.video-builder') }}';
+}
 
 // ===== Generator gambar (Fase A) =====
 function imgTools(promptStr){
@@ -484,7 +498,8 @@ function renderResults(d) {
     (d.topics || []).forEach(function(t, ti){
         var html = '<div class="topic"><div class="topic-head">' +
             '<span class="topic-title">' + (ti+1) + '. ' + esc(t.label) + '</span>' +
-            '<span class="mini-btn" onclick="toggleTopic(this)">Pilih semua</span></div>';
+            '<span style="display:flex;gap:6px;"><span class="mini-btn" onclick="toBatch(this)">🎬 Batch video</span>' +
+            '<span class="mini-btn" onclick="toggleTopic(this)">Pilih semua</span></span></div>';
         (t.narrations || []).forEach(function(n){
             var combo = (n.text || '') + (n.gong ? '  →  GONG: ' + n.gong : '');
             html += '<div class="narr">' +
