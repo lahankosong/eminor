@@ -193,11 +193,19 @@
         .adm-mnav-item.active, .adm-mnav-item:hover { color:var(--sky-dk); }
         .adm-mnav-icon { font-size:18px; line-height:1; }
 
+        .adm-drawer-ov { display:none; }
+
         @media (max-width:768px) {
             .adm-layout { grid-template-columns:1fr; }
             .adm-sidebar { display:none; }
             .adm-main { padding:1rem 1rem 5rem; }
             .adm-mobile-nav { display:block; }
+            .adm-sidebar.adm-open {
+                display:block; position:fixed; top:56px; left:0; bottom:0;
+                width:250px; max-width:82vw; padding:1rem 0.875rem; height:auto;
+                z-index:201; background:#fff; box-shadow:2px 0 24px rgba(0,0,0,0.25);
+            }
+            .adm-drawer-ov.open { display:block; position:fixed; inset:56px 0 0 0; background:rgba(0,0,0,0.45); z-index:200; }
         }
     </style>
     @stack('styles')
@@ -247,7 +255,7 @@
 <div class="adm-layout">
 
     <!-- LEFT SIDEBAR -->
-    <aside class="adm-sidebar">
+    <aside class="adm-sidebar" id="admSidebar">
         <div class="adm-sidebar-label">Utama</div>
         <nav class="adm-nav">
             <a href="{{ route('admin.index') }}"
@@ -310,6 +318,9 @@
     </main>
 </div>
 
+<!-- DRAWER OVERLAY (mobile) -->
+<div class="adm-drawer-ov" id="admDrawerOv" onclick="admDrawer(false)"></div>
+
 <!-- MOBILE BOTTOM NAV -->
 <nav class="adm-mobile-nav">
     <div class="adm-mobile-nav-inner">
@@ -318,28 +329,35 @@
             <span class="adm-mnav-icon">📊</span>
             <span>Dashboard</span>
         </a>
-        <a href="{{ route('admin.index') }}#songs"
-           class="adm-mnav-item">
-            <span class="adm-mnav-icon">🎵</span>
-            <span>Lagu</span>
-        </a>
         <a href="{{ route('admin.ai-agent') }}"
            class="adm-mnav-item {{ request()->routeIs('admin.ai-agent') ? 'active' : '' }}">
             <span class="adm-mnav-icon">✨</span>
-            <span>AI Agent</span>
+            <span>Generate</span>
+        </a>
+        <a href="{{ route('admin.video-builder') }}"
+           class="adm-mnav-item {{ request()->routeIs('admin.video-builder') ? 'active' : '' }}">
+            <span class="adm-mnav-icon">🎬</span>
+            <span>Video</span>
         </a>
         <a href="{{ route('admin.calendar') }}"
            class="adm-mnav-item {{ request()->routeIs('admin.calendar') ? 'active' : '' }}">
             <span class="adm-mnav-icon">📅</span>
-            <span>Kalender</span>
+            <span>Jadwal</span>
         </a>
-        <a href="{{ route('admin.settings') }}"
-           class="adm-mnav-item {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-            <span class="adm-mnav-icon">⚙️</span>
-            <span>Setting</span>
+        <a href="javascript:void(0)" onclick="admDrawer(true)" class="adm-mnav-item">
+            <span class="adm-mnav-icon">☰</span>
+            <span>Menu</span>
         </a>
     </div>
 </nav>
+
+<script>
+function admDrawer(open){
+    var s = document.getElementById('admSidebar'), o = document.getElementById('admDrawerOv');
+    if (s) s.classList.toggle('adm-open', open);
+    if (o) o.classList.toggle('open', open);
+}
+</script>
 
 @stack('scripts')
 </body>
