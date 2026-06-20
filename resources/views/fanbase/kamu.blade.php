@@ -133,7 +133,7 @@
     .chord-card svg { width:78px; height:auto; }
     .chord-tip { margin-top:1rem; font-size:12px; color:var(--text-2); background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:11px 14px; line-height:1.6; }
     .barre-player { display:flex; gap:16px; align-items:center; flex-wrap:wrap; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; margin-top:12px; box-shadow:var(--shadow-sm); }
-    .barre-diagram svg { width:104px; height:auto; }
+    .barre-diagram svg { width:212px; max-width:100%; height:auto; }
     .barre-ctrl { flex:1; min-width:180px; }
     .barre-name { font-family:'Sora',sans-serif; font-size:2rem; font-weight:700; color:var(--sky-dk); line-height:1; }
     .barre-fret { font-size:12px; color:var(--text-3); margin:2px 0 10px; }
@@ -701,6 +701,8 @@
         <span class="chord-chip" data-s="Emin" onclick="barreShape('Emin',this)">Bentuk Em (Fm)</span>
         <span class="chord-chip" data-s="Amaj" onclick="barreShape('Amaj',this)">Bentuk A</span>
         <span class="chord-chip" data-s="Amin" onclick="barreShape('Amin',this)">Bentuk Am</span>
+        <span class="chord-chip" data-s="Dmaj" onclick="barreShape('Dmaj',this)">Bentuk D</span>
+        <span class="chord-chip" data-s="Dmin" onclick="barreShape('Dmin',this)">Bentuk Dm</span>
         <span class="chord-chip" data-s="E7" onclick="barreShape('E7',this)">Bentuk E7</span>
         <span class="chord-chip" data-s="A7" onclick="barreShape('A7',this)">Bentuk A7</span>
     </div>
@@ -798,6 +800,34 @@ function chordSvg(c){
     }
     return s+'</svg>';
 }
+// Diagram HORIZONTAL (untuk chord geser) — fret kiri→kanan, senar atas→bawah (E..e)
+function chordSvgH(c){
+    var ns=6, nf=4, W=204, H=104, padL=30, padT=14, padR=12, padB=14;
+    var gw=W-padL-padR, gh=H-padT-padB, fx=gw/nf, sy=gh/(ns-1), fr=c.f, fg=c.fg||[];
+    var fretted=fr.filter(function(v){return v>0;});
+    var maxF=fretted.length?Math.max.apply(null,fretted):0, minF=fretted.length?Math.min.apply(null,fretted):0;
+    var base=(maxF<=nf)?1:minF, labels=['E','A','D','G','B','e'];
+    var colX=function(pos){ return padL+(pos-0.5)*fx; };
+    var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+    for(var i=0;i<ns;i++){ var y=padT+i*sy; s+='<line x1="'+padL+'" y1="'+y+'" x2="'+(padL+gw)+'" y2="'+y+'" stroke="#cfe1ec" stroke-width="1"/>'; s+='<text x="6" y="'+(y+3.2)+'" font-size="9" fill="#7a9db0">'+labels[i]+'</text>'; }
+    for(var f=0; f<=nf; f++){ var x=padL+f*fx; s+='<line x1="'+x+'" y1="'+padT+'" x2="'+x+'" y2="'+(padT+gh)+'" stroke="#cfe1ec" stroke-width="1"/>'; }
+    if(base===1){ s+='<rect x="'+(padL-3)+'" y="'+padT+'" width="3" height="'+gh+'" rx="1" fill="#5a7282"/>'; }
+    else { s+='<text x="'+padL+'" y="'+(padT-4)+'" font-size="9" text-anchor="middle" fill="#7a9db0">'+base+'fr</text>'; }
+    for(var i=0;i<ns;i++){ var y=padT+i*sy, v=fr[i];
+        if(v<0){ s+='<text x="'+(padL-10)+'" y="'+(y+3.5)+'" font-size="10" text-anchor="middle" fill="#e0567a">&#215;</text>'; }
+        else if(v===0){ s+='<circle cx="'+(padL-10)+'" cy="'+y+'" r="3.3" fill="none" stroke="#7a9db0" stroke-width="1.2"/>'; }
+    }
+    var barreRows=[]; for(var i=0;i<ns;i++){ if(fr[i]>0 && fr[i]===base) barreRows.push(i); }
+    var hasBarre=barreRows.length>=2, r1=barreRows[0], r2=barreRows[barreRows.length-1];
+    if(hasBarre){ var bx=colX(1); s+='<rect x="'+(bx-6.4)+'" y="'+(padT+r1*sy-6.4)+'" width="12.8" height="'+((r2-r1)*sy+12.8)+'" rx="6.4" fill="#2186A8"/>'; }
+    for(var i=0;i<ns;i++){ var v=fr[i]; if(v<=0) continue;
+        if(hasBarre && v===base){ if(i===r1){ var fn0=fg[i]; if(fn0>0) s+='<text x="'+colX(1)+'" y="'+(padT+i*sy+3.2)+'" font-size="9" text-anchor="middle" fill="#fff" font-weight="700">'+fn0+'</text>'; } continue; }
+        var pos=v-base+1, x=colX(pos), y=padT+i*sy;
+        s+='<circle cx="'+x+'" cy="'+y+'" r="6.4" fill="#2186A8"/>';
+        var fn=fg[i]; if(fn>0) s+='<text x="'+x+'" y="'+(y+3.2)+'" font-size="9" text-anchor="middle" fill="#fff" font-weight="700">'+fn+'</text>';
+    }
+    return s+'</svg>';
+}
 function renderChords(cat){
     var grid=document.getElementById('chordGrid'); if(!grid) return;
     grid.innerHTML='';
@@ -815,21 +845,25 @@ renderChords('all');
 
 /* ===== CHORD GESER (BARRE) ===== */
 var BARRE = {
-    Emaj:{root:6, suf:'',  off:[0,2,2,1,0,0],   fg:[1,3,4,2,1,1]},
-    Emin:{root:6, suf:'m', off:[0,2,2,0,0,0],   fg:[1,3,4,1,1,1]},
-    E7:  {root:6, suf:'7', off:[0,2,0,1,0,0],   fg:[1,3,1,2,1,1]},
-    Amaj:{root:5, suf:'',  off:[-99,0,2,2,2,0], fg:[0,1,3,3,3,1]},
-    Amin:{root:5, suf:'m', off:[-99,0,2,2,1,0], fg:[0,1,3,4,2,1]},
-    A7:  {root:5, suf:'7', off:[-99,0,2,0,2,0], fg:[0,1,3,1,3,1]}
+    Emaj:{root:6, suf:'',  off:[0,2,2,1,0,0],     fg:[1,3,4,2,1,1]},
+    Emin:{root:6, suf:'m', off:[0,2,2,0,0,0],     fg:[1,3,4,1,1,1]},
+    E7:  {root:6, suf:'7', off:[0,2,0,1,0,0],     fg:[1,3,1,2,1,1]},
+    Amaj:{root:5, suf:'',  off:[-99,0,2,2,2,0],   fg:[0,1,3,3,3,1]},
+    Amin:{root:5, suf:'m', off:[-99,0,2,2,1,0],   fg:[0,1,3,4,2,1]},
+    A7:  {root:5, suf:'7', off:[-99,0,2,0,2,0],   fg:[0,1,3,1,3,1]},
+    Dmaj:{root:4, suf:'',  off:[-99,-99,0,2,3,2], fg:[0,0,1,2,4,3]},
+    Dmin:{root:4, suf:'m', off:[-99,-99,0,2,3,1], fg:[0,0,1,3,4,2]}
 };
 var NOTES_E=['E','F','F#','G','G#','A','A#','B','C','C#','D','D#'];
 var NOTES_A=['A','A#','B','C','C#','D','D#','E','F','F#','G','G#'];
+var NOTES_D=['D','D#','E','F','F#','G','G#','A','A#','B','C','C#'];
+var NOTES_BY_ROOT = {6:NOTES_E, 5:NOTES_A, 4:NOTES_D};
 var barreState = {shape:'Emaj', fret:1};
 function barreRender(){
     var sh=BARRE[barreState.shape], p=barreState.fret;
     var f=sh.off.map(function(o){ return o===-99 ? -1 : p+o; });
-    var root=(sh.root===6?NOTES_E:NOTES_A)[p%12];
-    var dia=document.getElementById('barreDiagram'); if(dia) dia.innerHTML = chordSvg({f:f, fg:sh.fg});
+    var root=NOTES_BY_ROOT[sh.root][p%12];
+    var dia=document.getElementById('barreDiagram'); if(dia) dia.innerHTML = chordSvgH({f:f, fg:sh.fg});
     var nm=document.getElementById('barreName'); if(nm) nm.textContent = root + sh.suf;
     var fl=document.getElementById('barreFretLbl'); if(fl) fl.textContent = 'Barre di fret ' + p;
 }
