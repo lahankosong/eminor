@@ -132,6 +132,15 @@
     .chord-card .cc-tip { font-size:10px; color:var(--text-3); margin-top:6px; line-height:1.4; }
     .chord-card svg { width:78px; height:auto; }
     .chord-tip { margin-top:1rem; font-size:12px; color:var(--text-2); background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:11px 14px; line-height:1.6; }
+    .barre-player { display:flex; gap:16px; align-items:center; flex-wrap:wrap; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; margin-top:12px; box-shadow:var(--shadow-sm); }
+    .barre-diagram svg { width:104px; height:auto; }
+    .barre-ctrl { flex:1; min-width:180px; }
+    .barre-name { font-family:'Sora',sans-serif; font-size:2rem; font-weight:700; color:var(--sky-dk); line-height:1; }
+    .barre-fret { font-size:12px; color:var(--text-3); margin:2px 0 10px; }
+    .barre-btns { display:flex; align-items:center; gap:8px; }
+    .barre-btns button { background:var(--surface); border:1px solid var(--border); color:var(--text-2); border-radius:8px; padding:6px 10px; font-size:12px; cursor:pointer; }
+    .barre-btns button:hover { border-color:var(--sky); color:var(--sky-dk); }
+    .barre-btns input[type=range] { flex:1; accent-color:var(--sky); }
 
     /* ===== GUITAR TUNER ===== */
     .tuner-card {
@@ -682,6 +691,32 @@
         </div>
     </div>
     <div class="chord-grid" id="chordGrid"></div>
+
+    <div class="chord-head" style="margin-top:1.5rem;">
+        <div class="chord-title">&#127899; Chord Geser (Barre)</div>
+        <p class="chord-sub">Satu bentuk, geser naik = nada naik. Bisa untuk semua kunci (termasuk #/&#9837;). Pakai jari telunjuk menekan semua senar di garis barre.</p>
+    </div>
+    <div class="chord-filter" id="barreShapes">
+        <span class="chord-chip active" data-s="Emaj" onclick="barreShape('Emaj',this)">Bentuk E (F)</span>
+        <span class="chord-chip" data-s="Emin" onclick="barreShape('Emin',this)">Bentuk Em (Fm)</span>
+        <span class="chord-chip" data-s="Amaj" onclick="barreShape('Amaj',this)">Bentuk A</span>
+        <span class="chord-chip" data-s="Amin" onclick="barreShape('Amin',this)">Bentuk Am</span>
+        <span class="chord-chip" data-s="E7" onclick="barreShape('E7',this)">Bentuk E7</span>
+        <span class="chord-chip" data-s="A7" onclick="barreShape('A7',this)">Bentuk A7</span>
+    </div>
+    <div class="barre-player">
+        <div class="barre-diagram" id="barreDiagram"></div>
+        <div class="barre-ctrl">
+            <div class="barre-name" id="barreName">F</div>
+            <div class="barre-fret" id="barreFretLbl">Fret 1</div>
+            <div class="barre-btns">
+                <button type="button" onclick="barreMove(-1)">&#9664; turun</button>
+                <input type="range" id="barreFret" min="1" max="11" value="1" oninput="barreSlide()">
+                <button type="button" onclick="barreMove(1)">naik &#9654;</button>
+            </div>
+        </div>
+    </div>
+
     <div class="chord-tip">&#128161; Tekan senar tepat di belakang garis fret (bukan di atasnya). Petik satu-satu dulu untuk cek tiap senar bunyi bersih, baru strum. Latih perpindahan <b>C &harr; G &harr; D &harr; Em</b> pelan-pelan tiap hari.</div>
 </div>
 
@@ -746,11 +781,16 @@ function chordSvg(c){
     if(base===1){ s+='<rect x="'+padX+'" y="'+(top-3)+'" width="'+gw+'" height="3" rx="1" fill="#5a7282"/>'; }
     else { s+='<text x="'+(padX-3)+'" y="'+(top+fy*0.72)+'" font-size="9" text-anchor="end" fill="#7a9db0">'+base+'fr</text>'; }
     for(var i=0;i<ns;i++){ var x=padX+i*sx; s+='<line x1="'+x+'" y1="'+top+'" x2="'+x+'" y2="'+(top+gh)+'" stroke="#cfe1ec" stroke-width="1"/>'; }
+    // garis barre: >=2 senar ditekan di fret terendah (base)
+    var barreCols=[]; for(var i=0;i<ns;i++){ if(fr[i]>0 && fr[i]===base) barreCols.push(i); }
+    var hasBarre = barreCols.length>=2, c1=barreCols[0], c2=barreCols[barreCols.length-1];
+    if(hasBarre){ var by=top+0.5*fy; s+='<rect x="'+(padX+c1*sx-6.6)+'" y="'+(by-6.6)+'" width="'+((c2-c1)*sx+13.2)+'" height="13.2" rx="6.6" fill="#2186A8"/>'; }
     for(var i=0;i<ns;i++){
         var x=padX+i*sx, v=fr[i];
         if(v<0){ s+='<text x="'+x+'" y="'+(top-6)+'" font-size="11" text-anchor="middle" fill="#e0567a">&#215;</text>'; }
         else if(v===0){ s+='<circle cx="'+x+'" cy="'+(top-10)+'" r="3.6" fill="none" stroke="#7a9db0" stroke-width="1.3"/>'; }
         else {
+            if(hasBarre && v===base){ if(i===c1){ var fn0=fg[i]; if(fn0>0) s+='<text x="'+x+'" y="'+(top+0.5*fy+3.3)+'" font-size="9" text-anchor="middle" fill="#fff" font-weight="700">'+fn0+'</text>'; } continue; }
             var pos=v-base+1, cy=top+(pos-0.5)*fy;
             s+='<circle cx="'+x+'" cy="'+cy+'" r="6.6" fill="#2186A8"/>';
             var fn=fg[i]; if(fn>0) s+='<text x="'+x+'" y="'+(cy+3.3)+'" font-size="9" text-anchor="middle" fill="#fff" font-weight="700">'+fn+'</text>';
@@ -772,6 +812,38 @@ function chordFilter(cat, el){
     el.classList.add('active'); renderChords(cat);
 }
 renderChords('all');
+
+/* ===== CHORD GESER (BARRE) ===== */
+var BARRE = {
+    Emaj:{root:6, suf:'',  off:[0,2,2,1,0,0],   fg:[1,3,4,2,1,1]},
+    Emin:{root:6, suf:'m', off:[0,2,2,0,0,0],   fg:[1,3,4,1,1,1]},
+    E7:  {root:6, suf:'7', off:[0,2,0,1,0,0],   fg:[1,3,1,2,1,1]},
+    Amaj:{root:5, suf:'',  off:[-99,0,2,2,2,0], fg:[0,1,3,3,3,1]},
+    Amin:{root:5, suf:'m', off:[-99,0,2,2,1,0], fg:[0,1,3,4,2,1]},
+    A7:  {root:5, suf:'7', off:[-99,0,2,0,2,0], fg:[0,1,3,1,3,1]}
+};
+var NOTES_E=['E','F','F#','G','G#','A','A#','B','C','C#','D','D#'];
+var NOTES_A=['A','A#','B','C','C#','D','D#','E','F','F#','G','G#'];
+var barreState = {shape:'Emaj', fret:1};
+function barreRender(){
+    var sh=BARRE[barreState.shape], p=barreState.fret;
+    var f=sh.off.map(function(o){ return o===-99 ? -1 : p+o; });
+    var root=(sh.root===6?NOTES_E:NOTES_A)[p%12];
+    var dia=document.getElementById('barreDiagram'); if(dia) dia.innerHTML = chordSvg({f:f, fg:sh.fg});
+    var nm=document.getElementById('barreName'); if(nm) nm.textContent = root + sh.suf;
+    var fl=document.getElementById('barreFretLbl'); if(fl) fl.textContent = 'Barre di fret ' + p;
+}
+function barreShape(s, el){
+    barreState.shape=s;
+    document.querySelectorAll('#barreShapes .chord-chip').forEach(function(x){ x.classList.remove('active'); });
+    el.classList.add('active'); barreRender();
+}
+function barreMove(d){
+    barreState.fret = Math.min(11, Math.max(1, barreState.fret + d));
+    document.getElementById('barreFret').value = barreState.fret; barreRender();
+}
+function barreSlide(){ barreState.fret = parseInt(document.getElementById('barreFret').value,10)||1; barreRender(); }
+barreRender();
 
 /* ===== NOTE COLOR ===== */
 function selectColor(color, el) {
