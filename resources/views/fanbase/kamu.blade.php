@@ -132,9 +132,14 @@
     .chord-card .cc-tip { font-size:10px; color:var(--text-3); margin-top:6px; line-height:1.4; }
     .chord-card svg { width:78px; height:auto; }
     .chord-tip { margin-top:1rem; font-size:12px; color:var(--text-2); background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:11px 14px; line-height:1.6; }
-    .barre-player { display:flex; gap:16px; align-items:center; flex-wrap:wrap; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; margin-top:12px; box-shadow:var(--shadow-sm); }
-    .barre-diagram svg { width:212px; max-width:100%; height:auto; }
-    .barre-ctrl { flex:1; min-width:180px; }
+    .barre-player { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; margin-top:12px; box-shadow:var(--shadow-sm); }
+    .barre-diagram { overflow-x:auto; }
+    .barre-diagram svg { width:100%; min-width:330px; height:auto; }
+    .barre-row { display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-top:12px; }
+    .barre-base { text-align:center; flex-shrink:0; }
+    .barre-base svg { width:62px; height:auto; }
+    .barre-base-lbl { font-size:11px; color:var(--text-3); margin-top:2px; }
+    .barre-ctrl { flex:1; min-width:170px; }
     .barre-name { font-family:'Sora',sans-serif; font-size:2rem; font-weight:700; color:var(--sky-dk); line-height:1; }
     .barre-fret { font-size:12px; color:var(--text-3); margin:2px 0 10px; }
     .barre-btns { display:flex; align-items:center; gap:8px; }
@@ -708,13 +713,19 @@
     </div>
     <div class="barre-player">
         <div class="barre-diagram" id="barreDiagram"></div>
-        <div class="barre-ctrl">
-            <div class="barre-name" id="barreName">F</div>
-            <div class="barre-fret" id="barreFretLbl">Fret 1</div>
-            <div class="barre-btns">
-                <button type="button" onclick="barreMove(-1)">&#9664; turun</button>
-                <input type="range" id="barreFret" min="1" max="11" value="1" oninput="barreSlide()">
-                <button type="button" onclick="barreMove(1)">naik &#9654;</button>
+        <div class="barre-row">
+            <div class="barre-base">
+                <div id="barreBaseSvg"></div>
+                <div class="barre-base-lbl">Bentuk dasar: <b id="barreBaseName">E</b></div>
+            </div>
+            <div class="barre-ctrl">
+                <div class="barre-name" id="barreName">F</div>
+                <div class="barre-fret" id="barreFretLbl">Posisi fret 1</div>
+                <div class="barre-btns">
+                    <button type="button" onclick="barreMove(-1)">&#9664; turun</button>
+                    <input type="range" id="barreFret" min="1" max="12" value="1" oninput="barreSlide()">
+                    <button type="button" onclick="barreMove(1)">naik &#9654;</button>
+                </div>
             </div>
         </div>
     </div>
@@ -800,30 +811,27 @@ function chordSvg(c){
     }
     return s+'</svg>';
 }
-// Diagram HORIZONTAL (untuk chord geser) — fret kiri→kanan, senar atas→bawah (E..e)
-function chordSvgH(c){
-    var ns=6, nf=4, W=204, H=104, padL=30, padT=14, padR=12, padB=14;
-    var gw=W-padL-padR, gh=H-padT-padB, fx=gw/nf, sy=gh/(ns-1), fr=c.f, fg=c.fg||[];
-    var fretted=fr.filter(function(v){return v>0;});
-    var maxF=fretted.length?Math.max.apply(null,fretted):0, minF=fretted.length?Math.min.apply(null,fretted):0;
-    var base=(maxF<=nf)?1:minF, labels=['E','A','D','G','B','e'];
-    var colX=function(pos){ return padL+(pos-0.5)*fx; };
+// Diagram LEHER PENUH (fret 1-15) untuk chord geser — senar atas→bawah (E..e)
+function neckSvg(fr, fg){
+    fg = fg || [];
+    var ns=6, nFr=15, padL=28, padT=18, padR=10, padB=18, fw=20, sy=15;
+    var gh=(ns-1)*sy, W=padL+nFr*fw+padR, H=padT+gh+padB, labels=['E','A','D','G','B','e'];
+    var fx=function(f){ return padL+(f-0.5)*fw; }, ry=function(i){ return padT+i*sy; };
     var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
-    for(var i=0;i<ns;i++){ var y=padT+i*sy; s+='<line x1="'+padL+'" y1="'+y+'" x2="'+(padL+gw)+'" y2="'+y+'" stroke="#cfe1ec" stroke-width="1"/>'; s+='<text x="6" y="'+(y+3.2)+'" font-size="9" fill="#7a9db0">'+labels[i]+'</text>'; }
-    for(var f=0; f<=nf; f++){ var x=padL+f*fx; s+='<line x1="'+x+'" y1="'+padT+'" x2="'+x+'" y2="'+(padT+gh)+'" stroke="#cfe1ec" stroke-width="1"/>'; }
-    if(base===1){ s+='<rect x="'+(padL-3)+'" y="'+padT+'" width="3" height="'+gh+'" rx="1" fill="#5a7282"/>'; }
-    else { s+='<text x="'+padL+'" y="'+(padT-4)+'" font-size="9" text-anchor="middle" fill="#7a9db0">'+base+'fr</text>'; }
-    for(var i=0;i<ns;i++){ var y=padT+i*sy, v=fr[i];
-        if(v<0){ s+='<text x="'+(padL-10)+'" y="'+(y+3.5)+'" font-size="10" text-anchor="middle" fill="#e0567a">&#215;</text>'; }
-        else if(v===0){ s+='<circle cx="'+(padL-10)+'" cy="'+y+'" r="3.3" fill="none" stroke="#7a9db0" stroke-width="1.2"/>'; }
-    }
-    var barreRows=[]; for(var i=0;i<ns;i++){ if(fr[i]>0 && fr[i]===base) barreRows.push(i); }
-    var hasBarre=barreRows.length>=2, r1=barreRows[0], r2=barreRows[barreRows.length-1];
-    if(hasBarre){ var bx=colX(1); s+='<rect x="'+(bx-6.4)+'" y="'+(padT+r1*sy-6.4)+'" width="12.8" height="'+((r2-r1)*sy+12.8)+'" rx="6.4" fill="#2186A8"/>'; }
+    // titik penanda fret (inlay)
+    [3,5,7,9,15].forEach(function(f){ s+='<circle cx="'+fx(f)+'" cy="'+(padT+2.5*sy)+'" r="2.7" fill="#d4e6f0"/>'; });
+    s+='<circle cx="'+fx(12)+'" cy="'+(padT+1.5*sy)+'" r="2.7" fill="#d4e6f0"/><circle cx="'+fx(12)+'" cy="'+(padT+4.5*sy)+'" r="2.7" fill="#d4e6f0"/>';
+    for(var i=0;i<ns;i++){ var y=ry(i); s+='<line x1="'+padL+'" y1="'+y+'" x2="'+(padL+nFr*fw)+'" y2="'+y+'" stroke="#cfe1ec" stroke-width="1"/>'; s+='<text x="4" y="'+(y+3.2)+'" font-size="9" fill="#7a9db0">'+labels[i]+'</text>'; }
+    for(var f=1; f<=nFr; f++){ var x=padL+f*fw; s+='<line x1="'+x+'" y1="'+padT+'" x2="'+x+'" y2="'+(padT+gh)+'" stroke="#cfe1ec" stroke-width="1"/>'; }
+    s+='<rect x="'+(padL-2)+'" y="'+padT+'" width="2.5" height="'+gh+'" fill="#5a7282"/>';
+    [3,5,7,9,12,15].forEach(function(f){ s+='<text x="'+fx(f)+'" y="'+(padT+gh+10)+'" font-size="8" text-anchor="middle" fill="#9bb6c4">'+f+'</text>'; });
+    for(var i=0;i<ns;i++){ if(fr[i]<0) s+='<text x="'+(padL-9)+'" y="'+(ry(i)+3.5)+'" font-size="10" text-anchor="middle" fill="#e0567a">&#215;</text>'; }
+    var fretted=fr.filter(function(v){return v>0;}), minF=fretted.length?Math.min.apply(null,fretted):0;
+    var bRows=[]; for(var i=0;i<ns;i++){ if(fr[i]>0 && fr[i]===minF) bRows.push(i); }
+    if(bRows.length>=2){ var r1=bRows[0], r2=bRows[bRows.length-1], bx=fx(minF); s+='<rect x="'+(bx-6.2)+'" y="'+(ry(r1)-6.2)+'" width="12.4" height="'+((r2-r1)*sy+12.4)+'" rx="6.2" fill="#2186A8"/>'; }
     for(var i=0;i<ns;i++){ var v=fr[i]; if(v<=0) continue;
-        if(hasBarre && v===base){ if(i===r1){ var fn0=fg[i]; if(fn0>0) s+='<text x="'+colX(1)+'" y="'+(padT+i*sy+3.2)+'" font-size="9" text-anchor="middle" fill="#fff" font-weight="700">'+fn0+'</text>'; } continue; }
-        var pos=v-base+1, x=colX(pos), y=padT+i*sy;
-        s+='<circle cx="'+x+'" cy="'+y+'" r="6.4" fill="#2186A8"/>';
+        if(bRows.length>=2 && v===minF){ if(i===bRows[0]){ var fn0=fg[i]; if(fn0>0) s+='<text x="'+fx(minF)+'" y="'+(ry(i)+3.2)+'" font-size="9" text-anchor="middle" fill="#fff" font-weight="700">'+fn0+'</text>'; } continue; }
+        var x=fx(v), y=ry(i); s+='<circle cx="'+x+'" cy="'+y+'" r="6.2" fill="#2186A8"/>';
         var fn=fg[i]; if(fn>0) s+='<text x="'+x+'" y="'+(y+3.2)+'" font-size="9" text-anchor="middle" fill="#fff" font-weight="700">'+fn+'</text>';
     }
     return s+'</svg>';
@@ -845,14 +853,14 @@ renderChords('all');
 
 /* ===== CHORD GESER (BARRE) ===== */
 var BARRE = {
-    Emaj:{root:6, suf:'',  off:[0,2,2,1,0,0],     fg:[1,3,4,2,1,1]},
-    Emin:{root:6, suf:'m', off:[0,2,2,0,0,0],     fg:[1,3,4,1,1,1]},
-    E7:  {root:6, suf:'7', off:[0,2,0,1,0,0],     fg:[1,3,1,2,1,1]},
-    Amaj:{root:5, suf:'',  off:[-99,0,2,2,2,0],   fg:[0,1,3,3,3,1]},
-    Amin:{root:5, suf:'m', off:[-99,0,2,2,1,0],   fg:[0,1,3,4,2,1]},
-    A7:  {root:5, suf:'7', off:[-99,0,2,0,2,0],   fg:[0,1,3,1,3,1]},
-    Dmaj:{root:4, suf:'',  off:[-99,-99,0,2,3,2], fg:[0,0,1,2,4,3]},
-    Dmin:{root:4, suf:'m', off:[-99,-99,0,2,3,1], fg:[0,0,1,3,4,2]}
+    Emaj:{root:6, suf:'',  off:[0,2,2,1,0,0],     fg:[1,3,4,2,1,1], bfg:[0,2,3,1,0,0]},
+    Emin:{root:6, suf:'m', off:[0,2,2,0,0,0],     fg:[1,3,4,1,1,1], bfg:[0,2,3,0,0,0]},
+    E7:  {root:6, suf:'7', off:[0,2,0,1,0,0],     fg:[1,3,1,2,1,1], bfg:[0,2,0,1,0,0]},
+    Amaj:{root:5, suf:'',  off:[-99,0,2,2,2,0],   fg:[0,1,3,3,3,1], bfg:[0,0,1,2,3,0]},
+    Amin:{root:5, suf:'m', off:[-99,0,2,2,1,0],   fg:[0,1,3,4,2,1], bfg:[0,0,2,3,1,0]},
+    A7:  {root:5, suf:'7', off:[-99,0,2,0,2,0],   fg:[0,1,3,1,3,1], bfg:[0,0,1,0,2,0]},
+    Dmaj:{root:4, suf:'',  off:[-99,-99,0,2,3,2], fg:[0,0,1,2,4,3], bfg:[0,0,0,1,3,2]},
+    Dmin:{root:4, suf:'m', off:[-99,-99,0,2,3,1], fg:[0,0,1,3,4,2], bfg:[0,0,0,2,3,1]}
 };
 var NOTES_E=['E','F','F#','G','G#','A','A#','B','C','C#','D','D#'];
 var NOTES_A=['A','A#','B','C','C#','D','D#','E','F','F#','G','G#'];
@@ -863,9 +871,13 @@ function barreRender(){
     var sh=BARRE[barreState.shape], p=barreState.fret;
     var f=sh.off.map(function(o){ return o===-99 ? -1 : p+o; });
     var root=NOTES_BY_ROOT[sh.root][p%12];
-    var dia=document.getElementById('barreDiagram'); if(dia) dia.innerHTML = chordSvgH({f:f, fg:sh.fg});
+    var dia=document.getElementById('barreDiagram'); if(dia) dia.innerHTML = neckSvg(f, sh.fg);
     var nm=document.getElementById('barreName'); if(nm) nm.textContent = root + sh.suf;
-    var fl=document.getElementById('barreFretLbl'); if(fl) fl.textContent = 'Barre di fret ' + p;
+    var fl=document.getElementById('barreFretLbl'); if(fl) fl.textContent = 'Posisi fret ' + p;
+    // bentuk dasar (posisi terbuka)
+    var baseF=sh.off.map(function(o){ return o===-99 ? -1 : o; });
+    var bs=document.getElementById('barreBaseSvg'); if(bs) bs.innerHTML = chordSvg({f:baseF, fg:sh.bfg||sh.fg});
+    var bn=document.getElementById('barreBaseName'); if(bn) bn.textContent = NOTES_BY_ROOT[sh.root][0] + sh.suf;
 }
 function barreShape(s, el){
     barreState.shape=s;
