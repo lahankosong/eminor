@@ -8,6 +8,23 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
+    /** Notif terbaru (untuk ditampilkan service worker saat push). */
+    public function latest()
+    {
+        $n = AppNotification::where('user_id', Auth::id())->whereNull('read_at')->latest('id')->first()
+          ?: AppNotification::where('user_id', Auth::id())->latest('id')->first();
+
+        if (!$n) {
+            return response()->json(['id' => 0, 'title' => 'Margonoandi', 'body' => 'Ada notifikasi baru', 'url' => url('/dia')]);
+        }
+        return response()->json([
+            'id'    => $n->id,
+            'title' => ($n->icon ? $n->icon . ' ' : '') . ($n->title ?: 'Margonoandi'),
+            'body'  => $n->body ?: '',
+            'url'   => $n->url ?: url('/'),
+        ]);
+    }
+
     public function index()
     {
         try {

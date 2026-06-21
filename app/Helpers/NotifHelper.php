@@ -30,5 +30,8 @@ class NotifHelper
             'url'          => $url,
             'icon'         => $icons[$type] ?? '🔔',
         ]);
+
+        // Notifikasi sistem (Android tray) via Web Push — best-effort, jangan ganggu alur utama
+        try { \App\Helpers\WebPush::sendToUser($toUserId); } catch (\Throwable $e) {}
     }
 }

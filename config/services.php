@@ -41,4 +41,10 @@ return [
     'redirect' => env('GOOGLE_REDIRECT_URI'),
 ],
 
+    'vapid' => [
+        'public'          => env('VAPID_PUBLIC_KEY'),
+        'private_pem_b64' => env('VAPID_PRIVATE_PEM_B64'),
+        'subject'         => env('VAPID_SUBJECT', 'mailto:admin@margonoandi.my.id'),
+    ],
+
 ];

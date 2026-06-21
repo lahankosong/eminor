@@ -507,6 +507,22 @@ if (tableExists($conn, $dbname, 'songs')) {
     echo '<pre class="info">&#8212; tabel songs belum ada, skip</pre>';
 }
 
+// ── 9y. Web Push (notifikasi Android) ──────────────────────────────────────────
+echo '<h2>9y. Web Push</h2>';
+runSQL($conn, 'CREATE TABLE push_subscriptions',
+    "CREATE TABLE IF NOT EXISTS `push_subscriptions` (
+        `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        `user_id` bigint(20) UNSIGNED NOT NULL,
+        `endpoint` varchar(500) NOT NULL,
+        `p256dh` varchar(255) DEFAULT NULL,
+        `auth` varchar(255) DEFAULT NULL,
+        `created_at` timestamp NULL DEFAULT NULL,
+        `updated_at` timestamp NULL DEFAULT NULL,
+        PRIMARY KEY (`id`),
+        KEY `push_subscriptions_user_id_index` (`user_id`),
+        KEY `push_subscriptions_endpoint_index` (`endpoint`(191))
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
 // ── 10. Verifikasi akhir ──────────────────────────────────────────────────────
 echo '<h2>10. Verifikasi Tabel Kritis</h2>';
 $check = [

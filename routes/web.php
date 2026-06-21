@@ -167,4 +167,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.count');
+    Route::get('/notifications/latest', [NotificationController::class, 'latest'])->name('notifications.latest');
+
+    // Web Push (notifikasi sistem Android via service worker)
+    Route::post('/push/subscribe', [\App\Http\Controllers\PushController::class, 'subscribe'])->name('push.subscribe');
+    Route::post('/push/unsubscribe', [\App\Http\Controllers\PushController::class, 'unsubscribe'])->name('push.unsubscribe');
 });

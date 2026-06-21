@@ -1570,11 +1570,47 @@ function fbMarkAllRead() {
     }).then(function() { fbLoadNotifs(); }).catch(function(){});
 }
 
-// ===== PWA SERVICE WORKER =====
+// ===== PWA SERVICE WORKER + WEB PUSH =====
+var MAF_VAPID = '{{ config('services.vapid.public') }}';
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js').catch(function(){});
+        navigator.serviceWorker.register('/sw.js').then(function(reg){
+            try { fbSetupPush(reg); } catch(e){}
+        }).catch(function(){});
     });
+}
+function fbUrlB64ToUint8(s) {
+    var pad = '='.repeat((4 - s.length % 4) % 4);
+    var b64 = (s + pad).replace(/-/g, '+').replace(/_/g, '/');
+    var raw = atob(b64), arr = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+    return arr;
+}
+function fbSendSub(sub) {
+    try {
+        var j = sub.toJSON();
+        fetch('/push/subscribe', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': fbCsrfToken(), 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endpoint: j.endpoint, p256dh: (j.keys||{}).p256dh, auth: (j.keys||{}).auth })
+        }).catch(function(){});
+    } catch(e){}
+}
+function fbSetupPush(reg) {
+    if (!('PushManager' in window) || !MAF_VAPID || typeof Notification === 'undefined') return;
+    function subscribe() {
+        reg.pushManager.getSubscription().then(function(sub){
+            if (sub) { fbSendSub(sub); return; }
+            reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: fbUrlB64ToUint8(MAF_VAPID)
+            }).then(fbSendSub).catch(function(){});
+        }).catch(function(){});
+    }
+    if (Notification.permission === 'granted') { subscribe(); return; }
+    if (Notification.permission === 'denied') return;
+    // minta izin (di TWA Android 13+ memunculkan dialog sistem)
+    Notification.requestPermission().then(function(p){ if (p === 'granted') subscribe(); }).catch(function(){});
 }
 
 // ===== MEMBER SEARCH (right sidebar desktop) =====

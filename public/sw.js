@@ -1,5 +1,46 @@
-const CACHE = 'margonoandi-v1';
+const CACHE = 'margonoandi-v2';
 const SHELL = ['/', '/kamu', '/kita', '/dia', '/images/Margonoandi.jpeg', '/images/default-avatar.png'];
+
+// ===== WEB PUSH: notifikasi sistem (muncul di tray Android, walau app tertutup) =====
+self.addEventListener('push', function(e) {
+    e.waitUntil(
+        fetch('/notifications/latest', { credentials: 'include', headers: { 'Accept': 'application/json' } })
+            .then(function(r){ return r.ok ? r.json() : null; })
+            .then(function(d){
+                var title = (d && d.title) ? d.title : 'Margonoandi';
+                var body  = (d && d.body)  ? d.body  : 'Ada notifikasi baru';
+                var url   = (d && d.url)   ? d.url   : '/dia';
+                var tag   = (d && d.id)    ? ('maf-' + d.id) : 'maf-notif';
+                return self.registration.showNotification(title, {
+                    body: body,
+                    icon: '/images/Margonoandi.jpeg',
+                    badge: '/images/Margonoandi.jpeg',
+                    tag: tag,
+                    renotify: true,
+                    data: { url: url }
+                });
+            })
+            .catch(function(){
+                return self.registration.showNotification('Margonoandi', {
+                    body: 'Ada notifikasi baru', icon: '/images/Margonoandi.jpeg', data: { url: '/dia' }
+                });
+            })
+    );
+});
+
+self.addEventListener('notificationclick', function(e) {
+    e.notification.close();
+    var target = (e.notification.data && e.notification.data.url) || '/';
+    e.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(list){
+            for (var i = 0; i < list.length; i++) {
+                var c = list[i];
+                if ('focus' in c) { try { c.navigate(target); } catch (err) {} return c.focus(); }
+            }
+            if (self.clients.openWindow) return self.clients.openWindow(target);
+        })
+    );
+});
 
 self.addEventListener('install', function(e) {
     e.waitUntil(
