@@ -34,6 +34,10 @@ class GoogleController extends Controller
                 try {
                     MemberLog::create(['user_id' => $user->id]);
                 } catch (\Throwable $e) {}
+                // Bot sambutan: kirim pesan selamat datang + ajakan dukungan via chat (Dia)
+                try {
+                    \App\Helpers\WelcomeBot::sendWelcome($user);
+                } catch (\Throwable $e) {}
             }
 
             Auth::login($user, true);
