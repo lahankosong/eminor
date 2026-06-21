@@ -7,7 +7,10 @@
         min-height: 90vh; display: flex; flex-direction: column;
         justify-content: flex-end; padding: 0 2rem 4rem;
         position: relative; overflow: hidden;
+        transition: min-height 0.5s ease, padding 0.5s ease;
     }
+    .hero.collapsed { min-height: auto; padding-top: 6rem; padding-bottom: 2rem; justify-content: flex-start; }
+    .hero.collapsed .scroll-hint { display: none; }
     .hero-bg {
         position: absolute; inset: 0; z-index: 0;
         background: linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 55%, var(--bg) 100%);
@@ -34,6 +37,16 @@
         text-transform: uppercase; margin-bottom: 1.25rem;
     }
     .hero-byline span { color: var(--text-2); }
+    .hero-id-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .hero-id-row .hero-byline { margin-bottom: 0; }
+    .hero-collapse {
+        background: var(--card-bg); border: 1px solid var(--border); color: var(--text-3);
+        border-radius: 50px; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+        padding: 5px 13px; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+    }
+    .hero-collapse:hover { color: var(--text); border-color: var(--text-3); }
+    .hero-body { overflow: hidden; transition: max-height 0.55s ease, opacity 0.4s ease; max-height: 1200px; opacity: 1; }
+    .hero-body.hidden { max-height: 0; opacity: 0; }
     .hero-title {
         font-size: clamp(1.8rem, 5vw, 3.8rem); font-weight: 300;
         letter-spacing: 0.1em; line-height: 1.2;
@@ -373,17 +386,21 @@
 @section('content')
 
 {{-- HERO --}}
-<div class="hero">
+<div class="hero" id="heroSection">
     <div class="hero-bg"></div>
     @if(file_exists(public_path('images/margonoandi.jpg')))
     <img src="{{ asset('images/margonoandi.jpg') }}" class="hero-photo" alt="Rakhman Andi">
     @endif
     <div class="hero-content">
-        <p class="hero-byline">
-            {{ $settings['artist_name'] ?? 'Rakhman Andi' }} ·
-            <span>{{ $settings['artist_role'] ?? 'Songwriter' }}</span> ·
-            Project <span>{{ $settings['artist_project'] ?? 'Margonoandi' }}</span>
-        </p>
+        <div class="hero-id-row">
+            <p class="hero-byline">
+                {{ $settings['artist_name'] ?? 'Rakhman Andi' }} ·
+                <span>{{ $settings['artist_role'] ?? 'Songwriter' }}</span> ·
+                Project <span>{{ $settings['artist_project'] ?? 'Margonoandi' }}</span>
+            </p>
+            <button class="hero-collapse" id="heroCollapse" onclick="toggleHero()" aria-expanded="true">Sembunyikan &#9652;</button>
+        </div>
+        <div class="hero-body" id="heroBody">
         <h1 class="hero-title">
             {{ $settings['tagline_1'] ?? 'Tiga chord.' }}<br>
             {{ $settings['tagline_2'] ?? 'Satu rindu.' }}<br>
@@ -400,6 +417,7 @@
                 Baca ceritanya &#9662;
             </button>
         </div>
+        </div>{{-- /hero-body --}}
     </div>
     <div class="scroll-hint">
         <div class="scroll-line"></div>
@@ -414,6 +432,22 @@ function toggleHeroStory(){
     b.innerHTML = open ? 'Tutup cerita &#9652;' : 'Baca ceritanya &#9662;';
     b.setAttribute('aria-expanded', open ? 'true' : 'false');
 }
+function setHeroCollapsed(collapsed, animate){
+    var hero=document.getElementById('heroSection'), body=document.getElementById('heroBody'), btn=document.getElementById('heroCollapse');
+    if(!hero||!body||!btn) return;
+    if(!animate){ var ht=hero.style.transition, bt=body.style.transition; hero.style.transition='none'; body.style.transition='none'; }
+    hero.classList.toggle('collapsed', collapsed);
+    body.classList.toggle('hidden', collapsed);
+    btn.innerHTML = collapsed ? 'Tampilkan intro &#9662;' : 'Sembunyikan &#9652;';
+    btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    if(!animate){ requestAnimationFrame(function(){ hero.style.transition=''; body.style.transition=''; }); }
+}
+function toggleHero(){
+    var collapsed = !document.getElementById('heroSection').classList.contains('collapsed');
+    setHeroCollapsed(collapsed, true);
+    try { localStorage.setItem('heroCollapsed', collapsed ? '1' : '0'); } catch(e){}
+}
+try { if(localStorage.getItem('heroCollapsed')==='1') setHeroCollapsed(true, false); } catch(e){}
 </script>
 
 @php $fbEntry = auth()->check() ? route('aku') : route('google.login'); @endphp
