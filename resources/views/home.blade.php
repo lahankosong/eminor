@@ -202,13 +202,13 @@
     .fb-promo { text-align: center; }
     .fb-promo-intro { font-size: 14px; color: var(--text-2); max-width: 520px; margin: 0 auto 2rem; line-height: 1.7; }
     .fb-promo-grid {
-        display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 14px; max-width: 760px; margin: 0 auto 2rem;
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+        gap: 10px; max-width: 640px; margin: 0 auto 2rem;
     }
-    .fb-promo-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1rem; text-align: left; }
-    .fb-promo-card .ic { font-size: 26px; line-height: 1; }
-    .fb-promo-card h4 { font-size: 14px; font-weight: 600; color: var(--text); margin: 0.6rem 0 0.25rem; }
-    .fb-promo-card p { font-size: 12px; color: var(--text-3); line-height: 1.5; margin: 0; }
+    .fb-promo-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 0.85rem 0.8rem; text-align: left; }
+    .fb-promo-card .ic { font-size: 20px; line-height: 1; }
+    .fb-promo-card h4 { font-size: 12.5px; font-weight: 600; color: var(--text); margin: 0.5rem 0 0.2rem; }
+    .fb-promo-card p { font-size: 11px; color: var(--text-3); line-height: 1.45; margin: 0; }
     .fb-promo-cta { text-decoration: none; display: inline-block; font-size: 15px; padding: 13px 28px; }
     .fb-promo-note { font-size: 12px; color: var(--text-3); margin-top: 0.85rem; }
 
@@ -386,7 +386,7 @@
 @section('content')
 
 {{-- HERO --}}
-<div class="hero" id="heroSection">
+<div class="hero collapsed" id="heroSection">
     <div class="hero-bg"></div>
     @if(file_exists(public_path('images/margonoandi.jpg')))
     <img src="{{ asset('images/margonoandi.jpg') }}" class="hero-photo" alt="Rakhman Andi">
@@ -398,9 +398,9 @@
                 <span>{{ $settings['artist_role'] ?? 'Songwriter' }}</span> ·
                 Project <span>{{ $settings['artist_project'] ?? 'Margonoandi' }}</span>
             </p>
-            <button class="hero-collapse" id="heroCollapse" onclick="toggleHero()" aria-expanded="true">Sembunyikan &#9652;</button>
+            <button class="hero-collapse" id="heroCollapse" onclick="toggleHero()" aria-expanded="false">Tampilkan intro &#9662;</button>
         </div>
-        <div class="hero-body" id="heroBody">
+        <div class="hero-body hidden" id="heroBody">
         <h1 class="hero-title">
             {{ $settings['tagline_1'] ?? 'Tiga chord.' }}<br>
             {{ $settings['tagline_2'] ?? 'Satu rindu.' }}<br>
@@ -447,7 +447,7 @@ function toggleHero(){
     setHeroCollapsed(collapsed, true);
     try { localStorage.setItem('heroCollapsed', collapsed ? '1' : '0'); } catch(e){}
 }
-try { if(localStorage.getItem('heroCollapsed')==='1') setHeroCollapsed(true, false); } catch(e){}
+try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, false); } catch(e){}
 </script>
 
 @php $fbEntry = auth()->check() ? route('aku') : route('google.login'); @endphp
@@ -457,15 +457,12 @@ try { if(localStorage.getItem('heroCollapsed')==='1') setHeroCollapsed(true, fal
     <div class="fb-ticker-track">
         @php
             $ticks = [
-                '&#127928; Stem gitar <b>gratis</b>',
-                '&#127932; Belajar <b>chord gitar &amp; piano</b>',
-                '&#127911; Dengar <b>semua lagu</b>',
-                '&#128172; Ngobrol bareng <b>sesama fans</b>',
-                '&#127908; <b>Cari personil</b> band',
-                '&#128221; Catatan lirik &amp; ide lagu',
-                '&#128205; Temukan <b>musisi terdekat</b>',
+                '&#127925; <b>'.e($settings['tagline_1'] ?? 'Tiga chord.').'</b>',
+                '<b>'.e($settings['tagline_2'] ?? 'Tenggelam oleh waktu').'</b>',
+                '<b>'.e($settings['tagline_3'] ?? 'Bangkit dengan nafas Ai').'</b>',
+                e($settings['artist_name'] ?? 'Rakhman Andi').' &middot; '.e($settings['artist_role'] ?? 'Songwriter').' &middot; Project '.e($settings['artist_project'] ?? 'Margonoandi'),
                 '&#128719;&#65039; Budaya baru, <b>dimulai dari kamar tidur</b>',
-                '&#128640; <b>Mulai sekarang &rarr;</b>',
+                '&#128640; <b>Mulai gerakannya &rarr;</b>',
             ];
         @endphp
         @for ($i = 0; $i < 2; $i++)
