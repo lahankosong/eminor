@@ -30,6 +30,14 @@ class SongController extends Controller
         return view('songs.show', compact('song', 'comments', 'prevSong', 'nextSong'));
     }
 
+    public function play($id)
+    {
+        try {
+            Song::where('id', $id)->increment('play_count');
+        } catch (\Throwable $e) {}
+        return response()->json(['ok' => true]);
+    }
+
     public function comment(Request $request, $slug)
     {
         if (!Auth::check()) {

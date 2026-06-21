@@ -499,6 +499,14 @@ if (file_exists($logFile)) {
     echo '<pre class="info">&#8212; File log tidak ditemukan</pre>';
 }
 
+// ── 9z. Statistik pemutaran lagu ───────────────────────────────────────────────
+echo '<h2>9z. Statistik Lagu</h2>';
+if (tableExists($conn, $dbname, 'songs')) {
+    runSQL($conn, 'ADD COLUMN play_count ke songs', "ALTER TABLE `songs` ADD COLUMN `play_count` bigint(20) UNSIGNED NOT NULL DEFAULT 0");
+} else {
+    echo '<pre class="info">&#8212; tabel songs belum ada, skip</pre>';
+}
+
 // ── 10. Verifikasi akhir ──────────────────────────────────────────────────────
 echo '<h2>10. Verifikasi Tabel Kritis</h2>';
 $check = [

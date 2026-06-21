@@ -1169,9 +1169,9 @@
 $fbTracksData = \App\Models\Song::whereNotNull('audio_file')
     ->where('audio_file','!=','')->where('is_active',true)
     ->orderBy('track_number')
-    ->get(['title','era','audio_file','youtube_id'])
+    ->get(['id','title','era','audio_file','youtube_id'])
     ->map(function($s){
-        return ['title'=>$s->title,'era'=>$s->era??'','audio'=>asset($s->audio_file),'thumb'=>'https://img.youtube.com/vi/'.$s->youtube_id.'/mqdefault.jpg'];
+        return ['id'=>$s->id,'title'=>$s->title,'era'=>$s->era??'','audio'=>asset($s->audio_file),'thumb'=>'https://img.youtube.com/vi/'.$s->youtube_id.'/mqdefault.jpg'];
     });
 @endphp
 var fbTracks=@json($fbTracksData),fbTotal=fbTracks.length,fbCurrent=-1,fbPlaying=false,fbAudio=document.getElementById('fbAudio');
@@ -1244,6 +1244,8 @@ function fbPlayTrack(i){
     fbAudio.src=t.audio;
     fbAudio.play().then(function(){fbPlaying=true;fbSaveState();fbUpdateUI();}).catch(function(){});
     document.querySelectorAll('.fb-song-item').forEach(function(el,j){el.classList.toggle('playing',j===i);});
+    // catat pemutaran (fire-and-forget)
+    try { if(t&&t.id) fetch('/lagu/'+t.id+'/play',{method:'POST',keepalive:true,headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}); } catch(e){}
 }
 function fbTogglePlay(){
     if(fbCurrent<0){fbPlayTrack(0);return;}

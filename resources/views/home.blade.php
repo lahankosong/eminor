@@ -787,6 +787,15 @@ window.playSong = function(index) {
     var song = songs[index];
     var el;
 
+    // catat pemutaran (fire-and-forget)
+    try {
+        var _m = document.querySelector('meta[name="csrf-token"]');
+        if (song.id) fetch('/lagu/' + song.id + '/play', {
+            method: 'POST', keepalive: true,
+            headers: { 'X-CSRF-TOKEN': _m ? _m.content : '' }
+        });
+    } catch (e) {}
+
     el = document.getElementById('mainPlayer');
     if (el) el.src = 'https://www.youtube.com/embed/' + song.youtube_id + '?rel=0&autoplay=1';
 

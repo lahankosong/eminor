@@ -49,6 +49,9 @@ Route::get('/logout', [GoogleController::class, 'logout'])->name('logout');
 
 // Halaman per lagu
 Route::get('/lagu/{slug}', [SongController::class, 'show'])->name('song.show');
+// Catat pemutaran lagu (publik, fire-and-forget) — dibatasi throttle agar tak diabuse
+Route::post('/lagu/{id}/play', [SongController::class, 'play'])
+     ->whereNumber('id')->middleware('throttle:120,1')->name('song.play');
 Route::post('/lagu/{slug}/comment', [SongController::class, 'comment'])
      ->name('song.comment')->middleware('auth');
 

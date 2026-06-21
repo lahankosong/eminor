@@ -55,9 +55,10 @@ class AdminController extends Controller
                 ->sortByDesc('time')->take(10)->values();
         } catch (\Throwable $e) {}
 
-        // Top songs: featured first, then active
+        // Top songs: paling banyak diputar
         $topSongs = $songs->where('is_active', 1)
-            ->sortByDesc('featured')->take(6)->values();
+            ->sortByDesc('play_count')->take(6)->values();
+        $totalPlays = (int) $songs->sum('play_count');
 
         // Traffic: landing page vs masuk fanbase
         $traffic = ['homepage' => [], 'fanbase' => [], 'today_hp' => 0, 'today_fb' => 0, 'total_hp' => 0, 'total_fb' => 0];
@@ -88,7 +89,7 @@ class AdminController extends Controller
         return view('admin.index', compact(
             'songs', 'totalSongs', 'activeSongs',
             'totalMembers', 'dau', 'totalPosts',
-            'recentActivity', 'topSongs', 'traffic'
+            'recentActivity', 'topSongs', 'traffic', 'totalPlays'
         ));
     }
 

@@ -512,8 +512,8 @@
         {{-- TOP SONGS --}}
         <div class="dash-card">
             <div class="dash-card-head">
-                <div class="dash-card-title">Lagu Unggulan</div>
-                <a href="#songs" class="dash-card-link">Lihat semua</a>
+                <div class="dash-card-title">Paling Diputar</div>
+                <a href="#songs" class="dash-card-link">{{ number_format($totalPlays ?? 0) }}× total</a>
             </div>
             <div class="topsong-list">
                 @forelse($topSongs as $i => $song)
@@ -523,7 +523,7 @@
                     </div>
                     <div class="topsong-info">
                         <div class="topsong-title">{{ $song->title }}</div>
-                        <div class="topsong-meta">{{ $song->era ?? 'Era' }} · Track #{{ $song->track_number }}</div>
+                        <div class="topsong-meta">{{ $song->era ?? 'Era' }} · <b style="color:var(--accent,#38A8CC);">{{ number_format($song->play_count ?? 0) }}×</b> diputar</div>
                     </div>
                     @if($song->featured)
                         <span class="topsong-badge featured">⭐ Featured</span>
@@ -607,6 +607,7 @@
                     <th>YouTube ID</th>
                     <th>Key</th>
                     <th>Chord</th>
+                    <th>Diputar</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -629,6 +630,7 @@
                             <span class="badge badge-nochord">Belum</span>
                         @endif
                     </td>
+                    <td data-label="Diputar" style="font-weight:600;color:var(--text-1);">{{ number_format($song->play_count ?? 0) }}<span style="color:var(--text-3);font-weight:400;">×</span></td>
                     <td data-label="Status">
                         @if($song->is_active)
                             <span class="badge badge-active">Aktif</span>
