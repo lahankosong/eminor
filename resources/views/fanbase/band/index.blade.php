@@ -19,6 +19,8 @@
     .bp-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 700; }
     .bp-badge.urgent { background: #fee2e2; color: #b91c1c; }
     .bp-badge.open { background: #dcfce7; color: #15803d; }
+    [data-theme="dark"] .bp-badge.urgent { background: rgba(239,68,68,0.18); color: #fca5a5; }
+    [data-theme="dark"] .bp-badge.open { background: rgba(34,197,94,0.18); color: #86efac; }
     .bp-badge.closed { background: var(--surface); color: var(--text-3); }
     .bp-tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0; }
     .bp-tag { font-size: 11px; padding: 2px 9px; border-radius: 20px; background: var(--surface); color: var(--orange); border: 1px solid var(--border-lt); font-weight: 600; }

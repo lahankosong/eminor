@@ -10,6 +10,8 @@
     .bs-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 700; }
     .bs-badge.urgent { background: #fee2e2; color: #b91c1c; }
     .bs-badge.open { background: #dcfce7; color: #15803d; }
+    [data-theme="dark"] .bs-badge.urgent { background: rgba(239,68,68,0.18); color: #fca5a5; }
+    [data-theme="dark"] .bs-badge.open { background: rgba(34,197,94,0.18); color: #86efac; }
     .bs-badge.closed { background: var(--surface); color: var(--text-3); }
     .bs-author { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); margin-bottom: 1rem; }
     .bs-author img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }

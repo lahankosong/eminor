@@ -381,6 +381,8 @@
     }
     .note-action-btn:hover { background: #fff; color: var(--text-1); }
     .note-action-btn.delete:hover { color: #ef4444; }
+    [data-theme="dark"] .note-action-btn { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.14); color: var(--text-2); }
+    [data-theme="dark"] .note-action-btn:hover { background: rgba(255,255,255,0.18); color: var(--text-1); }
 
     .empty-notes {
         text-align: center; padding: 3rem 1rem; color: var(--text-4);
