@@ -165,6 +165,33 @@
     .comm-feat { font-size: 12px; color: var(--text-3); display: flex; flex-direction: column; align-items: center; gap: 6px; }
     .comm-feat span:first-child { font-size: 20px; }
 
+    /* FANBASE TICKER */
+    .fb-ticker {
+        display: block; text-decoration: none;
+        background: var(--card-bg);
+        border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+        overflow: hidden; white-space: nowrap; padding: 11px 0;
+    }
+    .fb-ticker:hover .fb-ticker-track { animation-play-state: paused; }
+    .fb-ticker-track { display: inline-block; white-space: nowrap; animation: fbticker 30s linear infinite; will-change: transform; }
+    .fb-ticker-track span { display: inline-block; margin: 0 1.4rem; font-size: 13px; color: var(--text-2); font-weight: 500; }
+    .fb-ticker-track span b { color: var(--accent); font-weight: 600; }
+    @keyframes fbticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* FANBASE PROMO */
+    .fb-promo { text-align: center; }
+    .fb-promo-intro { font-size: 14px; color: var(--text-2); max-width: 520px; margin: 0 auto 2rem; line-height: 1.7; }
+    .fb-promo-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 14px; max-width: 760px; margin: 0 auto 2rem;
+    }
+    .fb-promo-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1rem; text-align: left; }
+    .fb-promo-card .ic { font-size: 26px; line-height: 1; }
+    .fb-promo-card h4 { font-size: 14px; font-weight: 600; color: var(--text); margin: 0.6rem 0 0.25rem; }
+    .fb-promo-card p { font-size: 12px; color: var(--text-3); line-height: 1.5; margin: 0; }
+    .fb-promo-cta { text-decoration: none; display: inline-block; font-size: 15px; padding: 13px 28px; }
+    .fb-promo-note { font-size: 12px; color: var(--text-3); margin-top: 0.85rem; }
+
     /* STICKY PLAYER */
     .sticky-player {
         position: fixed; bottom: 0; left: 0; right: 0;
@@ -341,6 +368,48 @@
         <div class="scroll-line"></div>
         <span>scroll</span>
     </div>
+</div>
+
+@php $fbEntry = auth()->check() ? route('aku') : route('google.login'); @endphp
+
+{{-- FANBASE TICKER --}}
+<a href="{{ $fbEntry }}" class="fb-ticker" aria-label="Masuk fanbase">
+    <div class="fb-ticker-track">
+        @php
+            $ticks = [
+                '&#127928; Stem gitar <b>gratis</b>',
+                '&#127932; Belajar <b>chord gitar &amp; piano</b>',
+                '&#127911; Dengar <b>semua lagu</b>',
+                '&#128172; Ngobrol bareng <b>sesama fans</b>',
+                '&#127908; <b>Cari personil</b> band',
+                '&#128221; Catatan lirik &amp; ide lagu',
+                '&#128205; Temukan <b>musisi terdekat</b>',
+                '&#128640; <b>Masuk fanbase &rarr;</b>',
+            ];
+        @endphp
+        @for ($i = 0; $i < 2; $i++)
+            @foreach ($ticks as $t)<span>{!! $t !!}</span>@endforeach
+        @endfor
+    </div>
+</a>
+
+<hr class="divider">
+
+{{-- FANBASE PROMO CTA --}}
+<div class="section fb-promo">
+    <p class="section-eyebrow">Gratis untuk semua fans</p>
+    <p class="section-heading">Bukan cuma dengar lagu.</p>
+    <p class="fb-promo-intro">Di dalam fanbase ada alat &amp; ruang buat kamu yang main musik &mdash; semuanya gratis, cukup login.</p>
+    <div class="fb-promo-grid">
+        <div class="fb-promo-card"><div class="ic">&#127928;</div><h4>Tuner Gitar</h4><p>Stem gitar akurat langsung dari HP.</p></div>
+        <div class="fb-promo-card"><div class="ic">&#127932;</div><h4>Belajar Chord</h4><p>Kamus chord gitar &amp; piano, chord geser + suara.</p></div>
+        <div class="fb-promo-card"><div class="ic">&#127911;</div><h4>Putar Semua Lagu</h4><p>Dengar koleksi lagu Margonoandi kapan saja.</p></div>
+        <div class="fb-promo-card"><div class="ic">&#128172;</div><h4>Komunitas</h4><p>Diskusi, curhat &amp; ngobrol bareng fans lain.</p></div>
+        <div class="fb-promo-card"><div class="ic">&#127908;</div><h4>Cari Personil</h4><p>Direktori musisi &amp; lowongan band terdekat.</p></div>
+        <div class="fb-promo-card"><div class="ic">&#128221;</div><h4>Catatan Pribadi</h4><p>Simpan lirik, ide lagu &amp; chord favoritmu.</p></div>
+    </div>
+    <a href="{{ $fbEntry }}" class="btn-primary fb-promo-cta">&#128640; Masuk Fanbase &mdash; Gratis</a>
+    <p class="fb-promo-note">@auth Kamu sudah login &mdash; lanjut ke dalam. @else Cukup login pakai Google, langsung bisa dipakai. @endauth</p>
 </div>
 
 <hr class="divider">
