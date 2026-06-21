@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @push('styles')
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
     /* HERO */
     .hero {
@@ -380,10 +382,95 @@
         .story-cards { grid-template-columns: 1fr; }
         .community-features { gap: 1rem; }
     }
+    /* ============================================================
+       AURORA STUDIO — refresh visual (homepage)
+       ============================================================ */
+    /* layer aurora di belakang konten, di atas bg navy */
+    .aurora-bg { position: fixed; inset: -12%; z-index: -1; pointer-events: none; overflow: hidden; }
+    .aurora-bg b { position: absolute; display: block; border-radius: 50%; filter: blur(70px); will-change: transform; }
+    .aurora-bg .a1 { width: 46vw; height: 46vw; left: -6%; top: -8%;
+        background: radial-gradient(circle, var(--accent) 0%, transparent 62%); opacity: 0.28;
+        animation: ard1 28s ease-in-out infinite alternate; }
+    .aurora-bg .a2 { width: 42vw; height: 42vw; right: -8%; bottom: -12%;
+        background: radial-gradient(circle, var(--accent-2) 0%, transparent 62%); opacity: 0.22;
+        animation: ard2 34s ease-in-out infinite alternate; }
+    .aurora-bg .a3 { width: 36vw; height: 36vw; left: 42%; top: 38%;
+        background: radial-gradient(circle, #6f6cff 0%, transparent 62%); opacity: 0.15;
+        animation: ard3 40s ease-in-out infinite alternate; }
+    @keyframes ard1 { from { transform: translate(0,0) scale(1); } to { transform: translate(7vw,5vh) scale(1.18); } }
+    @keyframes ard2 { from { transform: translate(0,0) scale(1); } to { transform: translate(-6vw,-4vh) scale(1.12); } }
+    @keyframes ard3 { from { transform: translate(0,0) scale(1); } to { transform: translate(-5vw,4vh) scale(1.20); } }
+    [data-theme="light"] .aurora-bg { opacity: 0.65; }
+
+    /* display font + gradient accent text */
+    .hero-title, .section-heading, .fb-movement h2 { font-family: 'Space Grotesk', 'Inter', sans-serif; }
+    .hero-title { letter-spacing: 0.015em; font-weight: 500; }
+    .grad-text, .fb-movement h2 b {
+        background: linear-gradient(100deg, var(--accent) 0%, var(--accent-2) 100%);
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent; color: transparent;
+    }
+
+    /* tombol primary: gradient + glow + sheen sweep */
+    .btn-primary {
+        background: linear-gradient(100deg, var(--accent) 0%, var(--accent-2) 125%);
+        color: #fff; position: relative; overflow: hidden;
+        box-shadow: 0 6px 22px -8px var(--accent);
+        transition: transform 0.2s ease, box-shadow 0.25s ease, opacity 0.2s ease;
+    }
+    .btn-primary:hover { opacity: 1; transform: translateY(-2px); box-shadow: 0 11px 30px -8px var(--accent); }
+    .btn-primary::after {
+        content: ''; position: absolute; top: 0; left: -120%; width: 60%; height: 100%;
+        background: linear-gradient(100deg, transparent, rgba(255,255,255,0.38), transparent);
+        transform: skewX(-20deg); transition: left 0.6s ease; pointer-events: none;
+    }
+    .btn-primary:hover::after { left: 145%; }
+
+    /* ticker: tepi memudar + gradasi halus */
+    .fb-ticker {
+        background: linear-gradient(90deg, var(--bg-2), var(--card-bg), var(--bg-2));
+        -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+        mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+    }
+
+    /* kartu fitur: angkat + border menyala */
+    .fb-promo-card { transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.25s ease; }
+    .fb-promo-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 12px 28px -14px var(--accent); }
+    .fb-role { transition: transform 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
+    .fb-role:hover { transform: translateY(-2px); border-color: var(--accent); color: var(--text); }
+
+    /* movement banner sedikit glassy */
+    .fb-movement { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+
+    /* motif equalizer */
+    .eq { display: inline-flex; align-items: flex-end; gap: 3px; height: 15px; vertical-align: middle; margin-right: 9px; }
+    .eq i { width: 3px; background: linear-gradient(var(--accent), var(--accent-2)); border-radius: 2px; transform-origin: bottom; animation: eqb 1s ease-in-out infinite; }
+    .eq i:nth-child(1){ height: 40%; animation-delay: -0.2s; }
+    .eq i:nth-child(2){ height: 80%; animation-delay: -0.5s; }
+    .eq i:nth-child(3){ height: 55%; animation-delay: -0.1s; }
+    .eq i:nth-child(4){ height: 95%; animation-delay: -0.7s; }
+    .eq i:nth-child(5){ height: 65%; animation-delay: -0.35s; }
+    @keyframes eqb { 0%,100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
+
+    /* scroll reveal */
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+
+    /* polish */
+    ::selection { background: var(--accent); color: #fff; }
+    .btn-primary:focus-visible, .btn-ghost:focus-visible, .hero-collapse:focus-visible, .fb-ticker:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .aurora-bg b, .eq i { animation: none !important; }
+        .reveal { opacity: 1 !important; transform: none !important; }
+        .btn-primary::after { display: none; }
+    }
 </style>
 @endpush
 
 @section('content')
+
+<div class="aurora-bg" aria-hidden="true"><b class="a1"></b><b class="a2"></b><b class="a3"></b></div>
 
 {{-- HERO --}}
 <div class="hero collapsed" id="heroSection">
@@ -476,7 +563,7 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
 {{-- FANBASE MOVEMENT / PROMO CTA --}}
 <div class="section fb-promo">
     <div class="fb-movement">
-        <p class="section-eyebrow">Sebuah gerakan, bukan sekadar aplikasi</p>
+        <p class="section-eyebrow"><span class="eq"><i></i><i></i><i></i><i></i><i></i></span>Sebuah gerakan, bukan sekadar aplikasi</p>
         <h2>Ekosistem musik Indonesia,<br><b>dimulai dari kamar tidur.</b></h2>
         <p class="fb-promo-intro">Bukan soal kamu sudah terkenal atau belum. Budaya baru ini lahir dari siapa saja yang cinta musik &mdash; dari kamar tidurmu, malam ini. Tempat para musisi rumahan saling kenal, saling bantu, dan tumbuh bareng.</p>
 
@@ -903,5 +990,17 @@ document.addEventListener('keydown', function(e) {
 
 console.log('Home loaded:', songs.length, 'songs');
 });
+
+/* ===== AURORA STUDIO: scroll-reveal ===== */
+(function(){
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !('IntersectionObserver' in window)) return;
+    var els = document.querySelectorAll('main .section, .fb-ticker');
+    if (!els.length) return;
+    var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    els.forEach(function(el){ el.classList.add('reveal'); io.observe(el); });
+})();
 </script>
 @endpush
