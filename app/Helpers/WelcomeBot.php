@@ -25,11 +25,11 @@ class WelcomeBot
         );
     }
 
-    /** Kirim rangkaian pesan sambutan ke user baru lewat chat (Dia). */
-    public static function sendWelcome(User $newUser): void
+    /** Kirim rangkaian pesan sambutan ke user lewat chat (Dia). Idempoten: skip kalau sudah pernah disambut. Return true bila benar-benar dikirim. */
+    public static function sendWelcome(User $newUser): bool
     {
         $bot = self::botUser();
-        if ($bot->id === $newUser->id) return;
+        if ($bot->id === $newUser->id) return false;
 
         $minId = min($bot->id, $newUser->id);
         $maxId = max($bot->id, $newUser->id);
@@ -38,6 +38,11 @@ class WelcomeBot
             'user_one_id' => $minId,
             'user_two_id' => $maxId,
         ]);
+
+        // Sudah pernah disambut? (ada pesan dari bot) -> jangan kirim lagi
+        if (Message::where('conversation_id', $conv->id)->where('user_id', $bot->id)->exists()) {
+            return false;
+        }
 
         $first = trim(strtok($newUser->name ?? 'kawan', ' ')) ?: 'kawan';
 
@@ -66,6 +71,8 @@ class WelcomeBot
                 $msgs[0], url('/dia/conversation/' . $conv->id)
             );
         } catch (\Throwable $e) {}
+
+        return true;
     }
 
     /** Apakah percakapan ini dengan bot? (cek by google_id, hemat query) */

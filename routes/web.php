@@ -70,6 +70,7 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::get('/edit/{id}', [AdminController::class, 'edit'])->name('edit');
     Route::put('/update/{id}', [AdminController::class, 'update'])->name('update');
     Route::delete('/destroy/{id}', [AdminController::class, 'destroy'])->name('destroy');
+    Route::post('/blast-welcome', [AdminController::class, 'blastWelcome'])->name('blast-welcome');
     Route::get('/settings', [SiteSettingController::class, 'index'])->name('settings');
     Route::post('/settings', [SiteSettingController::class, 'update'])->name('settings.update');
     Route::get('/promo', [PromoTemplateController::class, 'index'])->name('promo');

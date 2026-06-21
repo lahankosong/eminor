@@ -111,6 +111,12 @@
     .dia-tool-btn:hover { background:var(--surface); }
     .dia-tool-btn.recording { background:#fee2e2; animation:diaPulse 1s infinite; }
     [data-theme="dark"] .dia-tool-btn.recording { background:rgba(239,68,68,0.18); }
+    /* indikator "mengetik" bot */
+    .dia-typing-bubble { display:inline-flex; gap:4px; align-items:center; padding:10px 14px; }
+    .dia-typing-bubble span { width:7px; height:7px; border-radius:50%; background:var(--text-3); animation:diaTyping 1.1s infinite ease-in-out; }
+    .dia-typing-bubble span:nth-child(2){ animation-delay:.15s; }
+    .dia-typing-bubble span:nth-child(3){ animation-delay:.3s; }
+    @keyframes diaTyping { 0%,60%,100%{ opacity:.3; transform:translateY(0); } 30%{ opacity:1; transform:translateY(-3px); } }
     @keyframes diaPulse { 0%,100%{opacity:1;} 50%{opacity:0.45;} }
     .dia-media { display:block; margin-bottom:4px; }
     .dia-media-img { max-width:220px; max-height:280px; border-radius:12px; cursor:pointer; display:block; background:var(--surface); }
@@ -666,7 +672,10 @@ try {
 @endphp
 var diaUsers = {!! $_diaUsersJson !!};
 
-@if(isset($conversation)) var convId  = {{ $conversation->id }}; @endif
+@if(isset($conversation)) var convId  = {{ $conversation->id }};
+@php $diaOtherU = ((int)$conversation->user_one_id === (int)auth()->id()) ? $conversation->userTwo : $conversation->userOne; @endphp
+window.diaBot = {{ ($diaOtherU && $diaOtherU->google_id === 'bot-margonoandi') ? 'true' : 'false' }};
+@endif
 @if(isset($group))        var groupId = {{ $group->id }};        @endif
 
 var diaLastMsgId = 0;
@@ -739,6 +748,8 @@ function diaSend() {
     var ml = document.getElementById('diaMentionList');
     if (ml) ml.classList.remove('show');
 
+    var typingEl = (typeof window.diaBot !== 'undefined' && window.diaBot) ? diaShowTyping() : null;
+
     fetch('/dia/conversation/' + convId + '/send', {
         method:'POST',
         headers:{'X-CSRF-TOKEN':csrfToken,'Content-Type':'application/json','Accept':'application/json'},
@@ -746,6 +757,7 @@ function diaSend() {
     })
     .then(function(r){ return r.json(); })
     .then(function(d){
+        if (typingEl) { diaRemoveTyping(typingEl); typingEl = null; }
         if (d.success && d.message) {
             diaAppend(d.message, true);
             if (d.message.id && d.message.id > diaLastMsgId) diaLastMsgId = d.message.id;
@@ -756,8 +768,20 @@ function diaSend() {
         }
     })
     .catch(function(){})
-    .finally(function(){ diaSending = false; });
+    .finally(function(){ diaSending = false; if (typingEl) diaRemoveTyping(typingEl); });
 }
+
+function diaShowTyping() {
+    var area = document.getElementById('diaMessages');
+    if (!area) return null;
+    var div = document.createElement('div');
+    div.className = 'dia-msg others dia-typing';
+    div.innerHTML = '<div class="dia-msg-wrap"><div class="dia-msg-bubble dia-typing-bubble"><span></span><span></span><span></span></div></div>';
+    area.appendChild(div);
+    area.scrollTop = area.scrollHeight;
+    return div;
+}
+function diaRemoveTyping(el) { if (el && el.parentNode) el.parentNode.removeChild(el); }
 
 function diaSendGroup() {
     if (diaSending) return;

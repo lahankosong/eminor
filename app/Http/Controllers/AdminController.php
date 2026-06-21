@@ -93,6 +93,25 @@ class AdminController extends Controller
         ));
     }
 
+    /** Kirim pesan sambutan bot ke semua user lama yang belum menerimanya (idempoten). */
+    public function blastWelcome()
+    {
+        $sent = 0;
+        try {
+            User::where('google_id', '!=', 'bot-margonoandi')
+                ->orderBy('id')
+                ->chunkById(100, function ($users) use (&$sent) {
+                    foreach ($users as $u) {
+                        try {
+                            if (\App\Helpers\WelcomeBot::sendWelcome($u)) $sent++;
+                        } catch (\Throwable $e) {}
+                    }
+                });
+        } catch (\Throwable $e) {}
+
+        return back()->with('success', "Blast sambutan selesai — terkirim ke {$sent} user baru (yang sudah pernah disambut dilewati).");
+    }
+
     public function edit($id)
     {
         $song = Song::findOrFail($id);

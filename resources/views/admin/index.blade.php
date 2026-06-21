@@ -506,6 +506,17 @@
                         <div class="qa-item-sub">Bio, link, tampilan</div>
                     </div>
                 </a>
+                <form method="POST" action="{{ route('admin.blast-welcome') }}" style="margin:0;"
+                      onsubmit="return confirm('Kirim pesan sambutan bot ke SEMUA user lama yang belum menerimanya? Tindakan ini tidak bisa dibatalkan.');">
+                    @csrf
+                    <button type="submit" class="qa-item" style="width:100%;border:none;background:none;cursor:pointer;font:inherit;text-align:left;">
+                        <span class="qa-item-icon">📣</span>
+                        <div>
+                            <div>Blast Sambutan</div>
+                            <div class="qa-item-sub">Welcome bot ke user lama</div>
+                        </div>
+                    </button>
+                </form>
             </div>
         </div>
 
