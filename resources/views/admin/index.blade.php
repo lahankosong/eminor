@@ -303,38 +303,6 @@
     </div>
 </div>
 
-{{-- PIPELINE PRODUKSI --}}
-<div class="dash-card" style="margin-bottom:1.25rem;">
-    <div class="dash-card-head">
-        <div class="dash-card-title">🎬 Pipeline Produksi Konten</div>
-        <span style="font-size:11px;color:var(--text-4);">Lagu → Generate → Audio → Jadwal</span>
-    </div>
-    @php
-        $pipeline = [
-            ['n'=>1,'ic'=>'🎵','t'=>'Lagu','d'=>'kelola lagu','u'=>route('admin.index').'#songs'],
-            ['n'=>2,'ic'=>'✨','t'=>'Content Generator','d'=>'niche → narasi → prompt','u'=>route('admin.ai-agent')],
-            ['n'=>3,'ic'=>'✂️','t'=>'Pemotong Lagu','d'=>'ambil part lagu','u'=>route('admin.audio-cut')],
-            ['n'=>4,'ic'=>'🔊','t'=>'Buat Aset','d'=>'gambar & suara narasi','u'=>route('admin.ai-agent')],
-            ['n'=>5,'ic'=>'📅','t'=>'Jadwal Posting','d'=>'rencana & status','u'=>route('admin.calendar')],
-        ];
-    @endphp
-    <div style="padding:1rem 1.25rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;">
-        @foreach($pipeline as $s)
-        <a href="{{ $s['u'] }}" style="display:block;background:var(--bg-3);border:1px solid var(--border);border-radius:12px;padding:0.9rem;text-decoration:none;transition:0.15s;"
-           onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
-            <div style="font-size:11px;color:var(--text-4);font-weight:700;">Langkah {{ $s['n'] }}</div>
-            <div style="font-size:1.35rem;line-height:1.2;margin:3px 0;">{{ $s['ic'] }}</div>
-            <div style="font-size:13px;font-weight:600;color:var(--text);">{{ $s['t'] }}</div>
-            <div style="font-size:11px;color:var(--text-3);margin-top:1px;">{{ $s['d'] }}</div>
-        </a>
-        @endforeach
-    </div>
-    <div style="padding:0 1.25rem 1rem;font-size:11px;color:var(--text-4);">
-        ⚙️ <a href="{{ route('admin.ai-settings') }}" style="color:var(--accent);">Pengaturan AI</a> (provider teks/gambar/suara) ·
-        🎬 <a href="{{ route('admin.video-builder') }}" style="color:var(--accent);">Video Builder</a> — gabung gambar + audio jadi video
-    </div>
-</div>
-
 {{-- METRIC CARDS --}}
 <div class="metric-grid">
     <div class="metric-card sky">
@@ -431,8 +399,10 @@
     <div class="dash-card">
         <div class="dash-card-head">
             <div class="dash-card-title">Aktivitas Terbaru</div>
+            <button type="button" class="dash-card-link" style="background:none;border:none;cursor:pointer;font:inherit;"
+                onclick="var l=document.getElementById('activityList');var h=(l.style.display==='none');l.style.display=h?'':'none';this.textContent=h?'Sembunyikan':'Tampilkan';">Sembunyikan</button>
         </div>
-        <div class="activity-list">
+        <div class="activity-list" id="activityList">
             @forelse($recentActivity as $item)
             <div class="activity-item">
                 @if($item->user?->avatar)
@@ -464,61 +434,6 @@
 
     {{-- RIGHT COLUMN --}}
     <div style="display:flex;flex-direction:column;gap:1.25rem;">
-
-        {{-- QUICK ACTIONS --}}
-        <div class="dash-card">
-            <div class="dash-card-head">
-                <div class="dash-card-title">Quick Actions</div>
-            </div>
-            <div class="qa-list">
-                <a href="{{ route('admin.create') }}" class="qa-item">
-                    <span class="qa-item-icon">🎵</span>
-                    <div>
-                        <div>Tambah Lagu Baru</div>
-                        <div class="qa-item-sub">Unggah lagu & lirik</div>
-                    </div>
-                </a>
-                <a href="{{ route('admin.ai-agent') }}" class="qa-item">
-                    <span class="qa-item-icon">✨</span>
-                    <div>
-                        <div>Generate Konten AI</div>
-                        <div class="qa-item-sub">Topik, narasi & image prompt</div>
-                    </div>
-                </a>
-                <a href="{{ route('admin.calendar') }}" class="qa-item">
-                    <span class="qa-item-icon">📅</span>
-                    <div>
-                        <div>Jadwal Konten</div>
-                        <div class="qa-item-sub">Lihat & atur kalender</div>
-                    </div>
-                </a>
-                <a href="{{ route('admin.promo') }}" class="qa-item">
-                    <span class="qa-item-icon">📋</span>
-                    <div>
-                        <div>Template Promo</div>
-                        <div class="qa-item-sub">Caption TikTok, IG, YouTube</div>
-                    </div>
-                </a>
-                <a href="{{ route('admin.settings') }}" class="qa-item">
-                    <span class="qa-item-icon">⚙️</span>
-                    <div>
-                        <div>Pengaturan Situs</div>
-                        <div class="qa-item-sub">Bio, link, tampilan</div>
-                    </div>
-                </a>
-                <form method="POST" action="{{ route('admin.blast-welcome') }}" style="margin:0;"
-                      onsubmit="return confirm('Kirim pesan sambutan bot ke SEMUA user lama yang belum menerimanya? Tindakan ini tidak bisa dibatalkan.');">
-                    @csrf
-                    <button type="submit" class="qa-item" style="width:100%;border:none;background:none;cursor:pointer;font:inherit;text-align:left;">
-                        <span class="qa-item-icon">📣</span>
-                        <div>
-                            <div>Blast Sambutan</div>
-                            <div class="qa-item-sub">Welcome bot ke user lama</div>
-                        </div>
-                    </button>
-                </form>
-            </div>
-        </div>
 
         {{-- TOP SONGS --}}
         <div class="dash-card">

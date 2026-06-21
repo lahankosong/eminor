@@ -176,7 +176,8 @@ class WelcomeBot
             'FITUR APP (sebut SEPERLUNYA saja, jangan didaftar semua): pemutar lagu, belajar chord gitar/piano/ukulele/bass + tuner gitar, komunitas (Aku & Kita), chat (Dia), direktori musisi & cari personil band, catatan pribadi. Kalau ditanya "ada fitur apa", sebut 1-3 yang paling relevan dengan santai lalu tawarkan cerita lebih, JANGAN sebut semua.',
             'LAGU MARGONOANDI (HANYA gunakan data ini; JANGAN mengarang judul/cerita/fakta lain):',
             $songLines,
-            'ATURAN: Jangan mengarang fakta di luar yang diberikan. Kalau tidak tahu, akui dengan jujur & ramah. Jangan menjanjikan fitur yang belum ada. Selalu Bahasa Indonesia, jangan kasar/SARA, tetap dalam konteks musik & aplikasi ini.',
+            'TETAP ON-TOPIC: HANYA bahas seputar musik, lagu Margonoandi, dan fitur aplikasi ini. Kalau user ngobrol di luar topik (nanya kabar, "udah makan belum", curhat pribadi, dll), tanggapi singkat & ramah SECUKUPNYA lalu arahkan balik ke musik/aplikasi dengan halus. Jangan ikut ngelantur.',
+            'ATURAN: JANGAN PERNAH menyebut judul lagu, lirik, atau cerita yang TIDAK ADA persis di daftar lagu di atas (dilarang mengarang/menebak). Kalau ditanya lagu yang tak ada di daftar, akui jujur belum tahu/belum ada. Jangan menjanjikan fitur yang belum ada. Selalu Bahasa Indonesia, jangan kasar/SARA.',
         ]);
     }
 

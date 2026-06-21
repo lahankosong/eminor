@@ -1535,17 +1535,14 @@ function fbAcceptInvite(inviteId, notifId, e) {
         method:'POST',
         headers:{'X-CSRF-TOKEN':fbCsrfToken(),'X-Requested-With':'XMLHttpRequest','Accept':'application/json'}
     })
-    .then(function(r){
-        if (r.redirected) { window.location.href = r.url; return; }
-        return r.json();
-    })
+    .then(function(r){ return r.json().catch(function(){ return null; }); })
     .then(function(d){
         fbCloseNotif();
-        // Redirect handled above; fallback
-        window.location.href = '/dia';
+        // Buka OBROLAN ASAL tempat mention terjadi (bukan chat baru)
+        if (d && d.conversation_id) { window.location.href = '/dia/conversation/' + d.conversation_id; }
+        else { window.location.href = '/dia'; }
     })
     .catch(function(){
-        // On redirect (302) fetch follows — location.href done above
         fbCloseNotif();
         window.location.href = '/dia';
     });

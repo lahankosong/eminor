@@ -312,6 +312,12 @@ class DiaController extends Controller
                 ->update(['read_at' => now()]);
         } catch (\Throwable $e) {}
 
+        // Ajax (dari dropdown notif): balas conversation_id agar frontend buka OBROLAN ASAL,
+        // bukan memulai chat baru.
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json(['ok' => true, 'conversation_id' => $invite->conversation_id]);
+        }
+
         return redirect()->route('dia.conversation', $invite->conversation_id);
     }
 
