@@ -1,2 +1,21 @@
 User-agent: *
-Disallow:
+Allow: /
+Allow: /lagu/
+
+# Area member / privat — tidak perlu di-index
+Disallow: /admin
+Disallow: /aku
+Disallow: /kamu
+Disallow: /kita
+Disallow: /dia
+Disallow: /musisi
+Disallow: /band
+Disallow: /profile
+Disallow: /chat
+Disallow: /notifications
+Disallow: /push
+Disallow: /geocode
+Disallow: /deploy.php
+Disallow: /fixdb.php
+
+Sitemap: https://margonoandi.my.id/sitemap.xml

@@ -4,7 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Margonoandi — Official Fanbase</title>
+
+    {{-- ===== SEO ===== --}}
+    @php
+        $seoTitle = $seo['title'] ?? 'Margonoandi — Lagu, Chord & Komunitas Musik Indonesia';
+        $seoDesc  = $seo['description'] ?? 'Dengarkan lagu Margonoandi, belajar chord gitar/piano/ukulele/bass + tuner, dan gabung komunitas musisi. Ekosistem musik Indonesia, dimulai dari kamar tidur.';
+        $seoImage = $seo['image'] ?? asset('images/Margonoandi.jpeg');
+        $seoUrl   = $seo['url'] ?? url()->current();
+        $seoType  = $seo['type'] ?? 'website';
+    @endphp
+    <title>{{ $seoTitle }}</title>
+    <meta name="description" content="{{ $seoDesc }}">
+    <link rel="canonical" href="{{ $seoUrl }}">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="{{ $seoType }}">
+    <meta property="og:site_name" content="Margonoandi">
+    <meta property="og:title" content="{{ $seoTitle }}">
+    <meta property="og:description" content="{{ $seoDesc }}">
+    <meta property="og:url" content="{{ $seoUrl }}">
+    <meta property="og:image" content="{{ $seoImage }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $seoTitle }}">
+    <meta name="twitter:description" content="{{ $seoDesc }}">
+    <meta name="twitter:image" content="{{ $seoImage }}">
+    @isset($seo['schema'])
+    <script type="application/ld+json">{!! json_encode($seo['schema'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    @endisset
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
     <style>
         /* ===== VARIABLES ===== */

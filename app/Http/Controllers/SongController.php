@@ -27,7 +27,38 @@ class SongController extends Controller
                         ->orderBy('track_number', 'asc')
                         ->first();
 
-        return view('songs.show', compact('song', 'comments', 'prevSong', 'nextSong'));
+        $desc = \Illuminate\Support\Str::limit(
+            strip_tags($song->story_hook ?: $song->description ?: ('Lagu "' . $song->title . '" dari Margonoandi.')),
+            160
+        );
+        $img = $song->youtube_id
+            ? 'https://img.youtube.com/vi/' . $song->youtube_id . '/maxresdefault.jpg'
+            : asset('images/Margonoandi.jpeg');
+        $sameAs = array_values(array_filter([
+            $song->spotify_url, $song->apple_music_url,
+            $song->youtube_id ? 'https://youtu.be/' . $song->youtube_id : null,
+        ]));
+
+        $seo = [
+            'title'       => $song->title . ' — Margonoandi' . ($song->era ? ' (' . $song->era . ')' : ''),
+            'description' => $desc,
+            'image'       => $img,
+            'url'         => route('song.show', $song->slug),
+            'type'        => 'music.song',
+            'schema'      => [
+                '@context'    => 'https://schema.org',
+                '@type'       => 'MusicRecording',
+                'name'        => $song->title,
+                'url'         => route('song.show', $song->slug),
+                'image'       => $img,
+                'description' => $desc,
+                'byArtist'    => ['@type' => 'MusicGroup', 'name' => 'Margonoandi', 'url' => url('/')],
+                'inLanguage'  => 'id',
+                'sameAs'      => $sameAs,
+            ],
+        ];
+
+        return view('songs.show', compact('song', 'comments', 'prevSong', 'nextSong', 'seo'));
     }
 
     public function play($id)

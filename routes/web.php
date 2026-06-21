@@ -28,6 +28,9 @@ use App\Http\Controllers\GeocodeController;
 // Halaman utama — track kunjungan landing page
 Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('trackvisit:homepage');
 
+// SEO: sitemap.xml dinamis
+Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
+
 // Google Auth
 Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.login');
 Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
