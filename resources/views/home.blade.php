@@ -192,6 +192,34 @@
     .fb-promo-cta { text-decoration: none; display: inline-block; font-size: 15px; padding: 13px 28px; }
     .fb-promo-note { font-size: 12px; color: var(--text-3); margin-top: 0.85rem; }
 
+    /* FANBASE MOVEMENT */
+    .fb-movement {
+        position: relative; overflow: hidden;
+        background: var(--card-bg); border: 1px solid var(--border);
+        border-radius: 20px; padding: 2.75rem 1.75rem; margin-bottom: 2.25rem;
+    }
+    .fb-movement::before {
+        content: ''; position: absolute; top: -90px; left: 50%; transform: translateX(-50%);
+        width: 380px; height: 260px;
+        background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .fb-movement > * { position: relative; z-index: 1; }
+    .fb-movement h2 { font-size: clamp(1.6rem, 5.5vw, 2.5rem); font-weight: 300; line-height: 1.18; color: var(--text); margin: 0.5rem 0 1.1rem; }
+    .fb-movement h2 b { font-weight: 600; color: var(--accent); }
+    .fb-roles-label { font-size: 13px; color: var(--text-3); margin: 1.6rem 0 0.9rem; }
+    .fb-roles { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 660px; margin: 0 auto; }
+    .fb-role { font-size: 12.5px; padding: 7px 14px; border-radius: 20px; background: var(--bg-3); border: 1px solid var(--border); color: var(--text-2); white-space: nowrap; }
+    .fb-role.you { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+    .fb-beta {
+        max-width: 580px; margin: 2rem auto 0;
+        background: var(--bg-3); border: 1px dashed var(--border); border-radius: 14px;
+        padding: 1rem 1.25rem; font-size: 12.5px; color: var(--text-3); line-height: 1.7;
+        text-align: left; display: flex; gap: 11px; align-items: flex-start;
+    }
+    .fb-beta .bic { font-size: 19px; flex-shrink: 0; line-height: 1.4; }
+    .fb-beta b { color: var(--text-2); font-weight: 600; }
+
     /* STICKY PLAYER */
     .sticky-player {
         position: fixed; bottom: 0; left: 0; right: 0;
@@ -384,7 +412,8 @@
                 '&#127908; <b>Cari personil</b> band',
                 '&#128221; Catatan lirik &amp; ide lagu',
                 '&#128205; Temukan <b>musisi terdekat</b>',
-                '&#128640; <b>Masuk fanbase &rarr;</b>',
+                '&#128719;&#65039; Budaya baru, <b>dimulai dari kamar tidur</b>',
+                '&#128640; <b>Mulai sekarang &rarr;</b>',
             ];
         @endphp
         @for ($i = 0; $i < 2; $i++)
@@ -395,21 +424,47 @@
 
 <hr class="divider">
 
-{{-- FANBASE PROMO CTA --}}
+{{-- FANBASE MOVEMENT / PROMO CTA --}}
 <div class="section fb-promo">
-    <p class="section-eyebrow">Gratis untuk semua fans</p>
-    <p class="section-heading">Bukan cuma dengar lagu.</p>
-    <p class="fb-promo-intro">Di dalam fanbase ada alat &amp; ruang buat kamu yang main musik &mdash; semuanya gratis, cukup login.</p>
+    <div class="fb-movement">
+        <p class="section-eyebrow">Sebuah gerakan, bukan sekadar aplikasi</p>
+        <h2>Ekosistem musik Indonesia,<br><b>dimulai dari kamar tidur.</b></h2>
+        <p class="fb-promo-intro">Bukan soal kamu sudah terkenal atau belum. Budaya baru ini lahir dari siapa saja yang cinta musik &mdash; dari kamar tidurmu, malam ini. Tempat para musisi rumahan saling kenal, saling bantu, dan tumbuh bareng.</p>
+
+        <p class="fb-roles-label">Apa pun latar musikmu, ada tempat di sini:</p>
+        <div class="fb-roles">
+            <span class="fb-role">&#127928; Gitaris</span>
+            <span class="fb-role">&#127925; Basis</span>
+            <span class="fb-role">&#129345; Drummer</span>
+            <span class="fb-role">&#127908; Vokalis</span>
+            <span class="fb-role">&#127929; Keyboardis</span>
+            <span class="fb-role">&#9997;&#65039; Songwriter</span>
+            <span class="fb-role">&#127898;&#65039; Arranger</span>
+            <span class="fb-role">&#127915; Event Organizer</span>
+            <span class="fb-role">&#128141; Wedding Organizer</span>
+            <span class="fb-role">&#128227; Promotor</span>
+            <span class="fb-role">&#127911; Penikmat Musik</span>
+            <span class="fb-role you">&hellip;dan kamu?</span>
+        </div>
+    </div>
+
+    <p class="section-eyebrow">Gratis untuk semua</p>
+    <p class="section-heading">Yang sudah bisa kamu pakai sekarang.</p>
     <div class="fb-promo-grid">
         <div class="fb-promo-card"><div class="ic">&#127928;</div><h4>Tuner Gitar</h4><p>Stem gitar akurat langsung dari HP.</p></div>
         <div class="fb-promo-card"><div class="ic">&#127932;</div><h4>Belajar Chord</h4><p>Kamus chord gitar &amp; piano, chord geser + suara.</p></div>
         <div class="fb-promo-card"><div class="ic">&#127911;</div><h4>Putar Semua Lagu</h4><p>Dengar koleksi lagu Margonoandi kapan saja.</p></div>
-        <div class="fb-promo-card"><div class="ic">&#128172;</div><h4>Komunitas</h4><p>Diskusi, curhat &amp; ngobrol bareng fans lain.</p></div>
+        <div class="fb-promo-card"><div class="ic">&#128172;</div><h4>Komunitas</h4><p>Diskusi, curhat &amp; ngobrol bareng musisi lain.</p></div>
         <div class="fb-promo-card"><div class="ic">&#127908;</div><h4>Cari Personil</h4><p>Direktori musisi &amp; lowongan band terdekat.</p></div>
         <div class="fb-promo-card"><div class="ic">&#128221;</div><h4>Catatan Pribadi</h4><p>Simpan lirik, ide lagu &amp; chord favoritmu.</p></div>
     </div>
-    <a href="{{ $fbEntry }}" class="btn-primary fb-promo-cta">&#128640; Masuk Fanbase &mdash; Gratis</a>
-    <p class="fb-promo-note">@auth Kamu sudah login &mdash; lanjut ke dalam. @else Cukup login pakai Google, langsung bisa dipakai. @endauth</p>
+    <a href="{{ $fbEntry }}" class="btn-primary fb-promo-cta">&#128640; Mulai dari kamarmu &mdash; Gabung Gratis</a>
+    <p class="fb-promo-note">@auth Kamu sudah di dalam &mdash; ayo lanjut berkarya. @else Cukup login pakai Google, langsung bisa dipakai. @endauth</p>
+
+    <div class="fb-beta">
+        <span class="bic">&#128679;</span>
+        <span>Jujur ya &mdash; ini <b>masih tahap beta</b>, dan untuk sekarang masih <b>menumpang di web pribadi</b> saya. Tapi kalau dukungan kalian besar, kita serius bangun <b>rumah baru</b> yang layak buat ekosistem ini. Langkah besar ini dimulai dari kamu yang berani gabung lebih dulu. &#128293;</span>
+    </div>
 </div>
 
 <hr class="divider">
