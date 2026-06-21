@@ -18,7 +18,13 @@ class GoogleController extends Controller
     public function callback()
     {
         try {
-            $googleUser = Socialite::driver('google')->user();
+            try {
+                $googleUser = Socialite::driver('google')->user();
+            } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
+                // State OAuth hilang (umum di cPanel/TWA: sesi tak terbawa balik dari Google)
+                // -> ambil profil tanpa verifikasi state.
+                $googleUser = Socialite::driver('google')->stateless()->user();
+            }
 
             $user = User::updateOrCreate(
                 ['google_id' => $googleUser->getId()],
