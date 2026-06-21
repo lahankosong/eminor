@@ -92,22 +92,18 @@
         [data-theme="dark"] .fb-alert-success { background:rgba(34,197,94,0.12); color:#86efac; border-color:rgba(34,197,94,0.3); }
         [data-theme="dark"] .fb-alert-error   { background:rgba(239,68,68,0.12); color:#fca5a5; border-color:rgba(239,68,68,0.3); }
 
-        /* ===== SPOTLIGHT NEON (khusus dark) — kartu bersinar mengikuti jari/kursor ===== */
-        .fb-spot-fill, .fb-spot-ring { position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:0; }
-        [data-theme="dark"] .fb-spot { position:relative; background:rgba(17,30,48,0.55); }
-        [data-theme="dark"] .fb-spot-fill, [data-theme="dark"] .fb-spot-ring { transition:opacity .3s ease; }
-        [data-theme="dark"] .fb-spot.spot-on .fb-spot-fill, [data-theme="dark"] .fb-spot.spot-on .fb-spot-ring { opacity:1; }
-        [data-theme="dark"] .fb-spot-fill {
-            z-index:-1;
-            background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%), rgba(56,168,204,0.32), rgba(240,112,64,0.10) 38%, transparent 62%);
-        }
+        /* ===== SPOTLIGHT NEON (khusus dark) — tepi kartu bersinar mengikuti jari/kursor ===== */
+        .fb-spot-ring { position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:0; }
+        [data-theme="dark"] .fb-spot { position:relative; }
+        [data-theme="dark"] .fb-spot-ring { transition:opacity .3s ease; }
+        [data-theme="dark"] .fb-spot.spot-on .fb-spot-ring { opacity:1; }
         [data-theme="dark"] .fb-spot-ring {
             z-index:3; padding:1.5px;
             background:radial-gradient(190px circle at var(--mx,50%) var(--my,50%), var(--sky), transparent 60%);
             -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
             -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite:exclude;
         }
-        @media (prefers-reduced-motion: reduce) { .fb-spot-fill, .fb-spot-ring { transition:none !important; } }
+        @media (prefers-reduced-motion: reduce) { .fb-spot-ring { transition:none !important; } }
 
         * { margin:0; padding:0; box-sizing:border-box; }
 
@@ -1603,13 +1599,14 @@ function fbMemberSearch(q){
 
 /* ===== SPOTLIGHT NEON: cahaya mengikuti jari/kursor di kartu (dark) ===== */
 (function(){
-    var SEL = '.aku-post, .aku-form, .kita-post, .mc-card, .member-log-card, .note-card';
+    var SEL = '.aku-post, .aku-form, .kita-post, .kita-form, .mc-card, .member-log-card, '
+            + '.mus-card, .ms-card, .mp-card, .bs-card, .bp-card, .bc-card, '
+            + '.kamu-post, .kamu-mus-card, .kamu-section, .note-card, .tuner-card, .chord-card, .barre-player';
     function attach(el){
         if (el.__spot) return; el.__spot = true;
         el.classList.add('fb-spot');
-        var fill = document.createElement('span'); fill.className = 'fb-spot-fill';
         var ring = document.createElement('span'); ring.className = 'fb-spot-ring';
-        el.appendChild(fill); el.appendChild(ring);
+        el.appendChild(ring);
         var raf = null, lx = 0, ly = 0;
         function apply(){ raf = null; el.style.setProperty('--mx', lx + 'px'); el.style.setProperty('--my', ly + 'px'); }
         el.addEventListener('pointermove', function(e){
