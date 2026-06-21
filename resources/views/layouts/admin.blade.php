@@ -266,6 +266,10 @@
                class="adm-nav-item {{ request()->routeIs('admin.index') && request()->has('tab') == 'songs' ? 'active' : '' }}">
                 <span class="adm-nav-icon">🎵</span> Kelola Lagu
             </a>
+            <a href="{{ route('admin.insights') }}"
+               class="adm-nav-item {{ request()->routeIs('admin.insights') ? 'active' : '' }}">
+                <span class="adm-nav-icon">🧠</span> Analisis Komunitas
+            </a>
         </nav>
 
         <div class="adm-sidebar-label">Konten</div>

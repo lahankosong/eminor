@@ -7,8 +7,10 @@ use App\Models\User;
 use App\Models\Post;
 use App\Models\MemberLog;
 use App\Models\PageVisit;
+use App\Models\AiProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
 
 class AdminController extends Controller
 {
@@ -110,6 +112,125 @@ class AdminController extends Controller
         } catch (\Throwable $e) {}
 
         return back()->with('success', "Blast sambutan selesai — terkirim ke {$sent} user baru (yang sudah pernah disambut dilewati).");
+    }
+
+    /* ===================== ANALISIS KOMUNITAS (base data AI internal) ===================== */
+
+    public function insights()
+    {
+        $src  = $this->gatherCommunityText(200);
+        $freq = $this->topKeywords($src['texts'], 30);
+        $ai   = null;
+        try { $ai = cache('insights_ai'); } catch (\Throwable $e) {}
+
+        return view('admin.insights', [
+            'freq'   => $freq,
+            'counts' => $src['counts'],
+            'total'  => count($src['texts']),
+            'ai'     => $ai,
+            'hasAi'  => AiProvider::where('enabled', true)->whereNotNull('api_key')->where('kind', 'text')->exists()
+                     || AiProvider::where('enabled', true)->whereNotNull('api_key')->where('base_url', 'like', '%deepseek%')->exists(),
+        ]);
+    }
+
+    public function analyzeInsights()
+    {
+        $provider = AiProvider::where('enabled', true)->whereNotNull('api_key')->where('base_url', 'like', '%deepseek%')->orderBy('id')->first()
+                 ?: AiProvider::where('enabled', true)->whereNotNull('api_key')->where('kind', 'text')->orderBy('id')->first();
+        if (!$provider || !$provider->api_key) {
+            return back()->with('error', 'Belum ada provider AI teks aktif. Pasang DeepSeek di Pengaturan AI dulu.');
+        }
+
+        $src = $this->gatherCommunityText(150);
+        if (empty($src['texts'])) {
+            return back()->with('error', 'Belum ada postingan/komentar untuk dianalisa.');
+        }
+
+        $corpus = Str::limit(implode("\n", array_map(fn ($t) => '- ' . trim($t), $src['texts'])), 8000);
+        $system = implode("\n", [
+            'Kamu analis komunitas untuk fanbase musik Margonoandi.',
+            'Dari kumpulan POSTINGAN & KOMENTAR publik komunitas di bawah, buat analisis ringkas dalam Bahasa Indonesia yang rapi (boleh pakai penomoran biasa).',
+            'Struktur keluaran:',
+            '1) TOPIK YANG SEDANG DIBICARAKAN — 5-7 tema utama (singkat per poin).',
+            '2) SUASANA/MOOD komunitas secara umum (1-2 kalimat).',
+            '3) IDE KONTEN/LAGU — 3 ide relevan dengan obrolan mereka.',
+            'Padat, tanpa basa-basi, BERDASARKAN DATA yang diberikan saja. Jangan mengarang. Jangan pakai tabel.',
+        ]);
+
+        $text = '';
+        try {
+            if ($provider->format === 'anthropic') {
+                $resp = Http::timeout(60)->withHeaders([
+                    'x-api-key' => $provider->api_key, 'anthropic-version' => '2023-06-01', 'content-type' => 'application/json',
+                ])->post(rtrim($provider->base_url, '/') . '/messages', [
+                    'model' => $provider->model, 'max_tokens' => 900, 'system' => $system,
+                    'messages' => [['role' => 'user', 'content' => $corpus]],
+                ]);
+                $text = $resp->successful() ? (string) $resp->json('content.0.text', '') : '';
+            } else {
+                $resp = Http::timeout(60)->withToken($provider->api_key)->post(rtrim($provider->base_url, '/') . '/chat/completions', [
+                    'model' => $provider->model ?: 'deepseek-chat',
+                    'messages' => [['role' => 'system', 'content' => $system], ['role' => 'user', 'content' => $corpus]],
+                    'temperature' => 0.5, 'max_tokens' => 900,
+                ]);
+                $text = $resp->successful() ? (string) $resp->json('choices.0.message.content', '') : '';
+            }
+        } catch (\Throwable $e) {
+            $text = '';
+        }
+
+        if (trim($text) === '') {
+            return back()->with('error', 'Gagal memanggil AI. Cek API key / koneksi provider.');
+        }
+
+        try {
+            cache(['insights_ai' => [
+                'text' => trim($text),
+                'at'   => now()->format('d M Y H:i'),
+                'n'    => count($src['texts']),
+            ]], now()->addDays(7));
+        } catch (\Throwable $e) {}
+
+        return back()->with('success', 'Analisis AI selesai.');
+    }
+
+    /** Kumpulkan teks publik komunitas (Aku/Kita post + komentar). Chat & catatan privat DIKECUALIKAN. */
+    private function gatherCommunityText(int $limit): array
+    {
+        $texts  = [];
+        $counts = ['Post Aku' => 0, 'Post Kita' => 0, 'Komentar Aku' => 0, 'Komentar Kita' => 0];
+        $grab = function ($class, $label) use (&$texts, &$counts, $limit) {
+            try {
+                $rows = $class::latest('id')->limit($limit)->pluck('body');
+                foreach ($rows as $b) {
+                    $b = trim((string) $b);
+                    if ($b !== '') { $texts[] = $b; $counts[$label]++; }
+                }
+            } catch (\Throwable $e) {}
+        };
+        $grab(\App\Models\AkuPost::class,    'Post Aku');
+        $grab(\App\Models\Post::class,       'Post Kita');
+        $grab(\App\Models\AkuComment::class, 'Komentar Aku');
+        $grab(\App\Models\PostComment::class,'Komentar Kita');
+        return ['texts' => $texts, 'counts' => $counts];
+    }
+
+    /** Frekuensi kata kunci sederhana (tanpa AI) sebagai "base data" mentah. */
+    private function topKeywords(array $texts, int $n): array
+    {
+        $stop = ['yang','dari','dan','atau','ini','itu','aku','kamu','dia','kita','saya','gua','gue','nya','aja','sih','kok','deh','dong','nih','gak','nggak','tidak','udah','sudah','belum','juga','biar','buat','sama','dengan','untuk','pada','ada','jadi','kalo','kalau','karena','tapi','tetapi','lebih','banget','bisa','mau','akan','lagi','masih','kayak','seperti','semua','apa','siapa','kenapa','gimana','bikin','terus','trus','dah','pun','agar','oleh','dalam','para','hai','halo','iya','engga','tau','tahu','orang','banyak','sangat','sekali','kak','min','bang','guys'];
+        $count = [];
+        foreach ($texts as $t) {
+            $t = mb_strtolower(strip_tags((string) $t));
+            $t = preg_replace('/[^\p{L}\s]+/u', ' ', $t);
+            foreach (preg_split('/\s+/', $t, -1, PREG_SPLIT_NO_EMPTY) as $w) {
+                if (mb_strlen($w) < 4) continue;
+                if (in_array($w, $stop, true)) continue;
+                $count[$w] = ($count[$w] ?? 0) + 1;
+            }
+        }
+        arsort($count);
+        return array_slice($count, 0, $n, true);
     }
 
     public function edit($id)
