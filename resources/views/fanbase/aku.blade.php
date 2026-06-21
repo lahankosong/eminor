@@ -320,6 +320,44 @@
         transition: 0.2s; flex-shrink: 0;
     }
     .welcome-banner-close:hover { background: #fef2f2; color: #ef4444; border-color: #fecaca; }
+
+    /* ============================================================
+       AURORA STUDIO — pilot (khusus halaman Aku)
+       ============================================================ */
+    /* 1. hidupkan orb ambient yang sudah ada (drift halus) */
+    @keyframes akuOrb1 { from { transform: translate(0,0) scale(1); } to { transform: translate(60px,42px) scale(1.16); } }
+    @keyframes akuOrb2 { from { transform: translate(0,0) scale(1); } to { transform: translate(-52px,-32px) scale(1.10); } }
+    @keyframes akuOrb3 { from { transform: translate(0,0) scale(1); } to { transform: translate(-44px,40px) scale(1.20); } }
+    .fb-bg-orb-1 { animation: akuOrb1 26s ease-in-out infinite alternate; }
+    .fb-bg-orb-2 { animation: akuOrb2 32s ease-in-out infinite alternate; }
+    .fb-bg-orb-3 { animation: akuOrb3 38s ease-in-out infinite alternate; }
+
+    /* 2. glow "neon" di kartu saat hover */
+    .aku-post { transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.28s ease; }
+    .aku-post:hover { transform: translateY(-3px); border-color: var(--sky); box-shadow: 0 14px 34px -14px rgba(56,168,204,0.55); }
+    .aku-post.pinned:hover { border-color: var(--orange); box-shadow: 0 14px 34px -14px rgba(240,112,64,0.5); }
+    .aku-form:focus-within { border-color: var(--sky-mid); box-shadow: 0 10px 30px -12px rgba(56,168,204,0.45); }
+
+    /* 3. tombol post: sheen sweep */
+    .btn-post-aku { position: relative; overflow: hidden; }
+    .btn-post-aku::after {
+        content: ''; position: absolute; top: 0; left: -120%; width: 55%; height: 100%;
+        background: linear-gradient(100deg, transparent, rgba(255,255,255,0.4), transparent);
+        transform: skewX(-20deg); transition: left 0.6s ease; pointer-events: none;
+    }
+    .btn-post-aku:hover::after { left: 150%; }
+
+    /* 4. entrance halus saat load (aman: base tetap terlihat) */
+    @keyframes akuIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+    .aku-post { animation: akuIn 0.55s ease backwards; }
+
+    /* 5. polish */
+    ::selection { background: var(--sky); color: #fff; }
+    .btn-post-aku:focus-visible, .aku-action-btn:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) {
+        .fb-bg-orb-1, .fb-bg-orb-2, .fb-bg-orb-3, .aku-post { animation: none !important; }
+        .btn-post-aku::after { display: none; }
+    }
 </style>
 @endpush
 
@@ -376,7 +414,8 @@
 {{-- POSTS --}}
 @if($posts->count() > 0)
     @foreach($posts as $post)
-    <div class="aku-post {{ $post->is_pinned ? 'pinned' : '' }}" id="akuPost{{ $post->id }}">
+    <div class="aku-post {{ $post->is_pinned ? 'pinned' : '' }}" id="akuPost{{ $post->id }}" style="animation-delay: {{ min($loop->index * 0.05, 0.4) }}s">
+
 
         <div class="aku-post-header">
             <img src="{{ $post->user->avatar ?? 'https://www.google.com/favicon.ico' }}"
