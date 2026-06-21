@@ -161,18 +161,46 @@ class DiaController extends Controller
             'last_message_at' => now(),
         ]);
 
-        $recipientIds = $this->conversationParticipants($conversation, $userId);
-        foreach ($recipientIds as $recipId) {
-            try {
-                NotifHelper::send(
-                    $recipId, $userId,
-                    'message', Auth::user()->name . ' mengirim pesan',
-                    $lastMsg, url('/dia/conversation/' . $id)
-                );
-            } catch (\Throwable $e) {}
+        // Deteksi percakapan dengan bot Margonoandi
+        $otherId   = ((int) $conversation->user_one_id === (int) $userId)
+                   ? (int) $conversation->user_two_id : (int) $conversation->user_one_id;
+        $isBotConv = \App\Helpers\WelcomeBot::isBotId($otherId);
+
+        if (!$isBotConv) {
+            $recipientIds = $this->conversationParticipants($conversation, $userId);
+            foreach ($recipientIds as $recipId) {
+                try {
+                    NotifHelper::send(
+                        $recipId, $userId,
+                        'message', Auth::user()->name . ' mengirim pesan',
+                        $lastMsg, url('/dia/conversation/' . $id)
+                    );
+                } catch (\Throwable $e) {}
+            }
         }
 
         $this->processMentions((string) $request->body, $conversation, $userId);
+
+        // Balasan bot (AI DeepSeek grounded -> fallback rule-based)
+        $botReply = null;
+        if ($isBotConv) {
+            try {
+                $bm = \App\Helpers\WelcomeBot::reply($conversation, Auth::user());
+                if ($bm) {
+                    $botReply = [
+                        'id'         => $bm->id,
+                        'body'       => $bm->body,
+                        'media_url'  => null,
+                        'media_type' => null,
+                        'user_id'    => $bm->user_id,
+                        'name'       => 'Margonoandi',
+                        'avatar'     => \App\Helpers\WelcomeBot::botUser()->avatar,
+                        'time'       => $bm->created_at->diffForHumans(),
+                        'mine'       => false,
+                    ];
+                }
+            } catch (\Throwable $e) {}
+        }
 
         return response()->json([
             'success' => true,
@@ -186,7 +214,8 @@ class DiaController extends Controller
                 'avatar'     => Auth::user()->avatar,
                 'time'       => $message->created_at->diffForHumans(),
                 'mine'       => true,
-            ]
+            ],
+            'botReply' => $botReply,
         ]);
     }
 

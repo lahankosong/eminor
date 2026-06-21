@@ -750,6 +750,10 @@ function diaSend() {
             diaAppend(d.message, true);
             if (d.message.id && d.message.id > diaLastMsgId) diaLastMsgId = d.message.id;
         }
+        if (d && d.botReply) {
+            diaAppend(d.botReply, false);
+            if (d.botReply.id && d.botReply.id > diaLastMsgId) diaLastMsgId = d.botReply.id;
+        }
     })
     .catch(function(){})
     .finally(function(){ diaSending = false; });

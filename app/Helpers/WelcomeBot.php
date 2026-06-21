@@ -5,6 +5,10 @@ namespace App\Helpers;
 use App\Models\User;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\AiProvider;
+use App\Models\Song;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class WelcomeBot
 {
@@ -62,5 +66,141 @@ class WelcomeBot
                 $msgs[0], url('/dia/conversation/' . $conv->id)
             );
         } catch (\Throwable $e) {}
+    }
+
+    /** Apakah percakapan ini dengan bot? (cek by google_id, hemat query) */
+    public static function isBotId($userId): bool
+    {
+        return User::where('id', $userId)->where('google_id', 'bot-margonoandi')->exists();
+    }
+
+    /** Buat balasan bot untuk percakapan (AI DeepSeek -> fallback rule-based). */
+    public static function reply(Conversation $conv, User $fromUser): ?Message
+    {
+        $bot = self::botUser();
+        if ($fromUser->id === $bot->id) return null;
+
+        $text = '';
+        try { $text = self::aiReply($conv, $bot); } catch (\Throwable $e) { $text = ''; }
+        if (trim($text) === '') {
+            $lastUser = Message::where('conversation_id', $conv->id)
+                ->where('user_id', '!=', $bot->id)->latest('id')->value('body') ?? '';
+            $text = self::ruleReply((string) $lastUser, $fromUser);
+        }
+        $text = trim(mb_substr($text, 0, 1200));
+        if ($text === '') return null;
+
+        $msg = Message::create([
+            'conversation_id' => $conv->id,
+            'user_id'         => $bot->id,
+            'body'            => $text,
+        ]);
+        $conv->update(['last_message' => $text, 'last_message_at' => now()]);
+        return $msg;
+    }
+
+    /** Panggil LLM (DeepSeek / OpenAI-compatible / Anthropic) dengan grounding. Return '' jika gagal. */
+    protected static function aiReply(Conversation $conv, User $bot): string
+    {
+        $p = AiProvider::where('enabled', true)->whereNotNull('api_key')
+                ->where('base_url', 'like', '%deepseek%')->orderBy('id')->first()
+            ?: AiProvider::where('enabled', true)->whereNotNull('api_key')
+                ->where('kind', 'text')->orderBy('id')->first();
+        if (!$p) return '';
+        $key = $p->api_key;
+        if (!$key) return '';
+
+        $hist = Message::where('conversation_id', $conv->id)
+            ->orderBy('id', 'desc')->take(12)->get()->reverse()->values();
+        $msgs = [['role' => 'system', 'content' => self::systemPrompt()]];
+        foreach ($hist as $m) {
+            $msgs[] = [
+                'role'    => ($m->user_id === $bot->id) ? 'assistant' : 'user',
+                'content' => (string) $m->body,
+            ];
+        }
+        if (count($msgs) === 1) return '';
+
+        if ($p->format === 'anthropic') {
+            $resp = Http::timeout(18)->withHeaders([
+                'x-api-key' => $key, 'anthropic-version' => '2023-06-01', 'content-type' => 'application/json',
+            ])->post(rtrim($p->base_url, '/') . '/messages', [
+                'model'      => $p->model,
+                'max_tokens' => 350,
+                'system'     => $msgs[0]['content'],
+                'messages'   => array_slice($msgs, 1),
+            ]);
+            return $resp->successful() ? (string) $resp->json('content.0.text', '') : '';
+        }
+
+        $resp = Http::timeout(18)->withToken($key)->post(rtrim($p->base_url, '/') . '/chat/completions', [
+            'model'       => $p->model ?: 'deepseek-chat',
+            'messages'    => $msgs,
+            'temperature' => 0.85,
+            'max_tokens'  => 350,
+        ]);
+        return $resp->successful() ? (string) $resp->json('choices.0.message.content', '') : '';
+    }
+
+    /** System prompt: persona + visi/misi + data lagu nyata dari DB (anti-ngarang). */
+    protected static function systemPrompt(): string
+    {
+        $songLines = '';
+        try {
+            $songs = Song::where('is_active', true)->orderBy('track_number')
+                ->get(['title', 'era', 'story_hook', 'key_signature', 'chords']);
+            $songLines = $songs->map(function ($s) {
+                $b = '- ' . $s->title;
+                if ($s->era)           $b .= ' (' . $s->era . ')';
+                if ($s->story_hook)    $b .= ' — ' . Str::limit($s->story_hook, 90);
+                if ($s->key_signature) $b .= ' [key ' . $s->key_signature . ']';
+                if (!empty($s->chords)) $b .= ' [ada chord]';
+                return $b;
+            })->implode("\n");
+        } catch (\Throwable $e) {}
+        if ($songLines === '') $songLines = '(daftar lagu belum tersedia)';
+
+        return implode("\n", [
+            'Kamu adalah "Margonoandi", bot ramah di aplikasi fanbase musik Margonoandi.',
+            'GAYA BAHASA: anak muda Indonesia banget (santai, slang ringan seperti "wih", "nih", "yuk", "bareng") TAPI tetap SOPAN & hangat. Balasan SINGKAT (1-3 kalimat), pakai 1-2 emoji secukupnya. Jangan kaku/formal dan jangan alay berlebihan.',
+            'TUGAS: menyambut & membantu user, menjawab seputar aplikasi & lagu Margonoandi, dan sesekali mengajak mereka mendukung (membagikan ke teman musisinya) tanpa memaksa.',
+            'VISI: ini sebuah gerakan ekosistem musik Indonesia "dimulai dari kamar tidur" untuk SEMUA peran (gitaris, basis, drummer, vokalis, keyboardis, songwriter, arranger, event/wedding organizer, promotor, penikmat musik). Statusnya MASIH BETA dan untuk sekarang menumpang di web pribadi Margonoandi; kalau dukungan besar, akan dibangun "rumah baru" yang layak.',
+            'FITUR APP: pemutar lagu, belajar chord (gitar/piano/ukulele/bass) + tuner gitar, komunitas (Aku & Kita), chat (Dia), direktori musisi & cari personil band, catatan pribadi.',
+            'LAGU MARGONOANDI (HANYA gunakan data ini; JANGAN mengarang judul/cerita/fakta lain):',
+            $songLines,
+            'ATURAN: Jangan mengarang fakta di luar yang diberikan. Kalau tidak tahu, akui dengan jujur & ramah. Jangan menjanjikan fitur yang belum ada. Selalu Bahasa Indonesia, jangan kasar/SARA, dan tetap dalam konteks musik & aplikasi ini.',
+        ]);
+    }
+
+    /** Balasan cadangan tanpa AI (keyword), gaya anak muda sopan. */
+    protected static function ruleReply(string $text, User $user): string
+    {
+        $t = mb_strtolower($text);
+        $first = trim(strtok($user->name ?? 'kawan', ' ')) ?: 'kawan';
+        $has = function ($keys) use ($t) {
+            foreach ((array) $keys as $k) { if ($k !== '' && strpos($t, $k) !== false) return true; }
+            return false;
+        };
+
+        if ($t === '' || $has(['halo', 'hai', 'hello', 'assalam', 'pagi', 'siang', 'sore', 'malam']))
+            return "Halo {$first}! 👋 Seneng kamu mampir. Mau eksplor apa nih — dengerin lagu, belajar chord, atau stem gitar? 🎶";
+        if ($has(['gratis', 'bayar', 'harga', 'biaya', 'premium', 'langganan']))
+            return "Tenang, semua fitur GRATIS kok 🙌 Cukup login. Kalau suka, bantu bagikan ke teman ya 🔥";
+        if ($has(['stem', 'tuner', 'setel', 'setem', 'fals']))
+            return "Buat stem gitar, buka menu Kamu → Tuner ya. Tinggal petik senarnya, nanti dipandu 🎸";
+        if ($has(['chord', 'kunci', 'gitar', 'piano', 'ukulele', 'bass', 'genjreng']))
+            return "Belajar chord ada di menu Kamu → Chord — lengkap gitar, piano, ukulele, sama bass, plus bisa dibunyikan 🎶 Cobain deh!";
+        if ($has(['dukung', 'support', 'bagi', 'share', 'sebar', 'promosi', 'ajak']))
+            return "Makasih banyak! 🙏🔥 Bantu kami dengan membagikan link aplikasi ini ke teman-teman musisimu ya. Gerakan ini dimulai dari kamu 💪";
+        if ($has(['lagu', 'dengar', 'denger', 'musik', 'putar', 'play']))
+            return "Cus dengerin lagu-lagunya di halaman utama 🎧 Sambil belajar chord-nya juga bisa. Ada genre favoritmu?";
+        if ($has(['beta', 'rumah', 'serius', 'kapan', 'rilis', 'resmi']))
+            return "Iya nih, kita masih BETA & numpang di web pribadi Margonoandi dulu. Kalau dukungan kalian gede, kita bangun rumah baru yang layak buat ekosistem ini 🏠🔥";
+        if ($has(['siapa', 'bot', 'asisten', 'kamu apa']))
+            return "Aku bot kecilnya Margonoandi 🤖 — temen ngobrol sekaligus pemandu kamu di aplikasi ini. Tanya aja apa pun soal app atau lagunya 🎶";
+        if ($has(['makasih', 'terima kasih', 'thanks', 'mantap', 'keren', 'bagus']))
+            return "Sama-sama! 🙌 Seneng bisa bantu. Jangan lupa ajak temen ya biar makin rame 🔥";
+
+        return "Hmm, aku belum yakin nangkep maksudmu 😅 Tapi aku bisa bantu soal lagu, belajar chord, tuner, atau cara dukung gerakan ini. Mau yang mana, {$first}? 🎶";
     }
 }
