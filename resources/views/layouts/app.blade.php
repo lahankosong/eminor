@@ -11,7 +11,7 @@
     {{-- ===== SEO ===== --}}
     @php
         $seoTitle = $seo['title'] ?? 'Margonoandi — Lagu, Chord & Komunitas Musik Indonesia';
-        $seoDesc  = $seo['description'] ?? 'Dengarkan lagu Margonoandi, belajar chord gitar/piano/ukulele/bass + tuner, dan gabung komunitas musisi. Ekosistem musik Indonesia, dimulai dari kamar tidur.';
+        $seoDesc  = $seo['description'] ?? 'Dengarkan lagu Margonoandi, belajar chord gitar/piano/ukulele/bass + tuner, dan gabung komunitas musisi. Ekosistem musik Indonesia, dimulai dari kamarmu.';
         $seoImage = $seo['image'] ?? asset('images/Margonoandi.jpeg');
         $seoUrl   = $seo['url'] ?? url()->current();
         $seoType  = $seo['type'] ?? 'website';

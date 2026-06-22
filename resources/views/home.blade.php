@@ -1056,7 +1056,7 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
     .ms-land-modal-bio { font-size:13px; color:var(--text-2); line-height:1.6; }
 </style>
 <div class="section ms-land">
-    <p class="section-eyebrow">Dari kamar tidur ke panggung</p>
+    <p class="section-eyebrow">Dari kamarmu ke panggung</p>
     <p class="section-heading">Musisi yang sudah gabung</p>
     <div class="ms-land-grid">
         @foreach($musicians as $m)

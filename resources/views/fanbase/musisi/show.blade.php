@@ -111,7 +111,8 @@ $cardData = [
     'genres'   => $profile->genresArray(),
     'location' => $profile->location,
     'skill'    => $profile->skill_level ? ucfirst($profile->skill_level) : '',
-    'bio'      => \Illuminate\Support\Str::limit(strip_tags((string) $profile->bio), 200),
+    'bio'      => \Illuminate\Support\Str::limit(strip_tags((string) $profile->bio), 170),
+    'url'      => route('musisi.show', $profile->id),
 ];
 @endphp
 <script>
@@ -165,11 +166,25 @@ async function msShareCard(){
         var y=680;
         y=msChips(ctx, MS_CARD.roles, cx, y, '#13344a', '#7EC8E3', 38);
         y=msChips(ctx, MS_CARD.genres, cx, y+6, '#3a2417', '#F0A070', 34);
-        if(MS_CARD.bio){ ctx.fillStyle='#cfe0ec'; ctx.font='37px "DM Sans","Inter",sans-serif'; ctx.textAlign='center'; msWrap(ctx, MS_CARD.bio, cx, y+72, W-170, 52, 4); }
-        ctx.textAlign='center';
-        ctx.fillStyle='#fff'; ctx.font='bold 44px "Sora","Inter",sans-serif'; ctx.fillText('MARGONOANDI',cx,H-160);
-        ctx.fillStyle='#9bc3d6'; ctx.font='30px "DM Sans","Inter",sans-serif'; ctx.fillText('margonoandi.my.id',cx,H-112);
-        ctx.fillStyle='#6f96ab'; ctx.font='26px "DM Sans","Inter",sans-serif'; ctx.fillText('Ekosistem musik, dimulai dari kamar tidur',cx,H-70);
+        if(MS_CARD.bio){ ctx.fillStyle='#cfe0ec'; ctx.font='37px "DM Sans","Inter",sans-serif'; ctx.textAlign='center'; msWrap(ctx, MS_CARD.bio, cx, y+72, W-170, 52, 3); }
+        // Footer: QR ke profil + branding (business-card strip)
+        var qr = await msLoadImg('https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=0&qzone=1&data=' + encodeURIComponent(MS_CARD.url || 'https://margonoandi.my.id'));
+        if (qr) {
+            var qs=200, qx=80, qy=H-262;
+            ctx.fillStyle='#fff'; msRoundRect(ctx, qx-14, qy-14, qs+28, qs+28, 18); ctx.fill();
+            ctx.drawImage(qr, qx, qy, qs, qs);
+            var tx=qx+qs+50, tcy=qy+qs/2;
+            ctx.textAlign='left';
+            ctx.fillStyle='#fff';    ctx.font='bold 46px "Sora","Inter",sans-serif'; ctx.fillText('MARGONOANDI', tx, tcy-44);
+            ctx.fillStyle='#9bc3d6'; ctx.font='30px "DM Sans","Inter",sans-serif';   ctx.fillText('margonoandi.my.id', tx, tcy+2);
+            ctx.fillStyle='#F0A070'; ctx.font='29px "DM Sans","Inter",sans-serif';   ctx.fillText('Scan untuk lihat profilku', tx, tcy+50);
+            ctx.fillStyle='#6f96ab'; ctx.font='24px "DM Sans","Inter",sans-serif';   ctx.fillText('Ekosistem musik, dimulai dari kamarmu', tx, tcy+92);
+        } else {
+            ctx.textAlign='center';
+            ctx.fillStyle='#fff';    ctx.font='bold 44px "Sora","Inter",sans-serif'; ctx.fillText('MARGONOANDI',cx,H-160);
+            ctx.fillStyle='#9bc3d6'; ctx.font='30px "DM Sans","Inter",sans-serif';   ctx.fillText('margonoandi.my.id',cx,H-112);
+            ctx.fillStyle='#6f96ab'; ctx.font='26px "DM Sans","Inter",sans-serif';   ctx.fillText('Ekosistem musik, dimulai dari kamarmu',cx,H-70);
+        }
         cv.toBlob(function(blob){
             if(!blob){ alert('Gagal membuat gambar. Coba lagi.'); reset(); return; }
             var file=new File([blob],'profil-margonoandi.png',{type:'image/png'});
