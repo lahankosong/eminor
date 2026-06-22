@@ -94,4 +94,33 @@
     </div>
 </div>
 
+@if(($matches ?? collect())->count() > 0)
+<div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:1.25rem;box-shadow:var(--shadow-sm);margin-top:1.25rem;">
+    <div style="font-family:'Sora',sans-serif;font-weight:700;color:var(--text-1);font-size:15px;">🤝 Musisi yang cocok</div>
+    <p style="font-size:12px;color:var(--text-3);margin:3px 0 1rem;">Dicocokkan otomatis dari peran yang dicari{{ $post->location ? ' & lokasi' : '' }}.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+        @foreach($matches as $m)
+        <div style="display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:10px 12px;">
+            <img src="{{ $m->user->avatar ?? asset('images/default-avatar.png') }}" onerror="this.src='{{ asset('images/default-avatar.png') }}'" style="width:46px;height:46px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="">
+            <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;color:var(--text-1);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $m->user->name ?? 'Musisi' }}</div>
+                <div style="font-size:11px;color:var(--text-3);margin-top:1px;">
+                    @foreach($m->match_roles as $r)<b style="color:var(--sky-dk);">{{ ucfirst($r) }}</b>@if(!$loop->last) · @endif @endforeach
+                    @if($m->match_loc)<span> · 📍 {{ $m->location }}</span>@endif
+                </div>
+            </div>
+            <a href="{{ route('musisi.show', $m->id) }}" style="font-size:12px;padding:6px 11px;border-radius:10px;background:var(--card);border:1px solid var(--border);color:var(--text-2);text-decoration:none;white-space:nowrap;">Lihat</a>
+            @if($post->user_id === auth()->id())
+            <form method="POST" action="{{ route('dia.start', $m->user_id) }}" style="margin:0;">
+                @csrf
+                <input type="hidden" name="intro" value="Halo! 👋 Aku lihat profilmu cocok untuk lowongan '{{ $post->title }}' yang aku posting di Margonoandi. Tertarik gabung?">
+                <button type="submit" style="font-size:12px;padding:6px 12px;border-radius:10px;background:var(--sky);color:#fff;border:none;cursor:pointer;white-space:nowrap;">💬 Ajak</button>
+            </form>
+            @endif
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
 @endsection

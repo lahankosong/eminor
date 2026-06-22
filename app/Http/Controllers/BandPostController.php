@@ -64,7 +64,39 @@ class BandPostController extends Controller
     public function show($id)
     {
         $post = BandPost::with('user')->findOrFail($id);
-        return view('fanbase.band.show', compact('post'));
+
+        // Matchmaking: musisi yang cocok dgn peran yang dicari (skor: peran x3 + genre + lokasi x2)
+        $matches = collect();
+        try {
+            $needed     = array_map('mb_strtolower', $post->rolesArray());
+            $needGenres = array_map('mb_strtolower', $post->genresArray());
+            $loc        = mb_strtolower(trim((string) $post->location));
+
+            if (!empty($needed)) {
+                $matches = \App\Models\MusicianProfile::with('user')
+                    ->where('is_active', true)
+                    ->where('user_id', '!=', $post->user_id)
+                    ->whereNotNull('roles')->where('roles', '!=', '')
+                    ->get()
+                    ->map(function ($p) use ($needed, $needGenres, $loc) {
+                        $pRoles   = array_map('mb_strtolower', $p->rolesArray());
+                        $roleHits = array_values(array_intersect($needed, $pRoles));
+                        if (count($roleHits) === 0) return null;
+                        $pGenres  = array_map('mb_strtolower', $p->genresArray());
+                        $genreHit = count(array_intersect($needGenres, $pGenres));
+                        $locHit   = ($loc !== '' && mb_strtolower(trim((string) $p->location)) === $loc) ? 1 : 0;
+                        $p->setAttribute('match_score', count($roleHits) * 3 + $genreHit + $locHit * 2);
+                        $p->setAttribute('match_roles', $roleHits);
+                        $p->setAttribute('match_loc', $locHit);
+                        return $p;
+                    })
+                    ->filter()
+                    ->sortByDesc('match_score')
+                    ->take(6)->values();
+            }
+        } catch (\Throwable $e) {}
+
+        return view('fanbase.band.show', compact('post', 'matches'));
     }
 
     public function toggleStatus($id)
