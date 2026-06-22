@@ -743,15 +743,15 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
     <div class="fb-movement">
         <p class="section-eyebrow"><span class="eq"><i></i><i></i><i></i><i></i><i></i></span>Sebuah gerakan, bukan sekadar aplikasi</p>
         <h2>Ekosistem Musik Indonesia,<br><b>Ayo kita mulai dari kamarmu.</b></h2>
-        <p class="fb-promo-intro">Bukan soal kamu sudah terkenal atau belum. Budaya baru ini lahir dari siapa saja yang cinta musik &mdash; bahkan dari kamarmu, hari ini. Tempat para musisi rumahan membangun interaksi, saling menginspirasi, dan mari tumbuh bersama.</p>
+        <p class="fb-promo-intro">Bukan soal kamu sudah terkenal atau belum. Budaya baru ini lahir dari siapa saja yang cinta musik. Bahkan dari kamarmu, hari ini. Tempat para musisi rumahan membangun interaksi, saling menginspirasi, dan mari tumbuh bersama.</p>
     {{-- CTA 2: Mulai dari kamarmu --}}
     <a href="{{ $fbEntry }}" class="btn-primary fb-promo-cta"
        @guest onclick="gtag && gtag('event', 'cta_click', {event_category:'engagement', button:'promo_gabung'})" @endguest
-    >&#128640; Mulai dari kamarmu &mdash; Ayoo Masuk</a>
+    >Ayoo Masuk</a>
     </div>
     
-    <p class="section-eyebrow">Fitur berikut ada di dalam Aplikasi</p>
-    <p class="section-heading">Bisa kamu temukan setelah Masuk dengan email terdaftar di Google</p>
+    <p class="section-eyebrow">FITUR APLIKASI LENGKAP</p>
+    <p class="section-heading">Tanpa diganggu iklan - Wajib kamu coba</p>
 
     <div class="feat-showcase">
         <div class="feat-tabs" id="featTabs">
@@ -999,8 +999,8 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
     {{-- CTA 1: Coba Sekarang --}}
     <a href="{{ $fbEntry }}" class="btn-primary fb-promo-cta"
        @guest onclick="gtag && gtag('event', 'cta_click', {event_category:'engagement', button:'coba_sekarang'})" @endguest
-    >&#10024; Coba Sekarang</a>
-    <p class="fb-promo-note">@auth Kamu sudah di dalam &mdash; ayo lanjut berkarya. @else Cukup login pakai Google &mdash; gratis &amp; aman. @endauth</p>
+    >Coba Sekarang</a>
+    <p class="fb-promo-note">@auth Kamu sudah di dalam &mdash; ayo lanjut berkarya. @else Cukup login pakai Google &mdash; Gratis &amp; Aman. @endauth</p>
 
     <hr style="border:none;border-top:1px solid var(--border);margin:2.5rem 0;">
     
