@@ -36,6 +36,7 @@ Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
 // Google Auth
 Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.login');
 Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
+Route::post('/auth/google/onetap', [GoogleController::class, 'oneTap'])->name('google.onetap');
 Route::get('/community/threads', [ThreadController::class, 'index'])->name('community.threads');
 Route::get('/community/thread/create', [ThreadController::class, 'create'])->name('community.thread.create');
 Route::post('/community/thread', [ThreadController::class, 'store'])->name('community.thread.store');

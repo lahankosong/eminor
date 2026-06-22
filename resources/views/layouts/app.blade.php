@@ -495,5 +495,43 @@
     }
 })();
 </script>
+
+@guest
+@if(config('services.google.client_id'))
+{{-- Google One Tap: popup "Lanjut sebagai ..." → login sekali tap tanpa redirect --}}
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+(function(){
+    function init(){
+        if (!window.google || !google.accounts || !google.accounts.id) { return setTimeout(init, 400); }
+        try {
+            google.accounts.id.initialize({
+                client_id: @json(config('services.google.client_id')),
+                callback: onCred,
+                auto_select: false,
+                cancel_on_tap_outside: false,
+                context: 'signin',
+                use_fedcm_for_prompt: true
+            });
+            google.accounts.id.prompt();
+        } catch(e){}
+    }
+    function onCred(resp){
+        if (!resp || !resp.credential) return;
+        var meta = document.querySelector('meta[name=csrf-token]');
+        fetch(@json(route('google.onetap')), {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json', 'X-CSRF-TOKEN': meta ? meta.content : '', 'X-Requested-With':'XMLHttpRequest' },
+            body: JSON.stringify({ credential: resp.credential })
+        }).then(function(r){ return r.json(); }).then(function(d){
+            if (d && d.ok) { window.location = d.redirect || '/aku'; }
+        }).catch(function(){});
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+})();
+</script>
+@endif
+@endguest
 </body>
 </html>
