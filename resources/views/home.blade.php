@@ -1060,7 +1060,7 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
     <p class="section-heading">Musisi yang sudah gabung</p>
     <div class="ms-land-grid">
         @foreach($musicians as $m)
-        <button type="button" class="ms-land-card" onclick='openMsLand(@json($m, JSON_HEX_APOS|JSON_HEX_QUOT))'>
+        <button type="button" class="ms-land-card" data-m='@json($m, JSON_HEX_APOS|JSON_HEX_QUOT)' onclick="openMsLand(this)">
             <img src="{{ $m['avatar'] }}" class="ms-land-av" loading="lazy" alt="" onerror="this.src='{{ asset('images/default-avatar.png') }}'">
             <div class="ms-land-name">{{ $m['name'] }}</div>
             <div class="ms-land-role">{{ implode(' · ', array_slice($m['roles'], 0, 2)) ?: 'Musisi' }}</div>
@@ -1085,7 +1085,9 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
     </div>
 </div>
 <script>
-function openMsLand(m){
+function openMsLand(btn){
+    var m;
+    try { m = JSON.parse(btn.getAttribute('data-m')); } catch(e){ return; }
     if(!m) return;
     document.getElementById('msLandAv').src = m.avatar || '';
     document.getElementById('msLandName').textContent = m.name || 'Musisi';
