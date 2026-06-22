@@ -10,7 +10,7 @@
 <div class="section" style="max-width:480px;margin:0 auto;text-align:center;">
     <p class="section-eyebrow">Profil Musisi · Margonoandi</p>
 
-    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:22px;padding:2rem 1.5rem;margin-top:1rem;">
+    <div class="ms-pub-card" style="background:var(--card-bg);border:1px solid var(--border);border-radius:22px;padding:2rem 1.5rem;margin-top:1rem;transition:transform .15s ease;transform-style:preserve-3d;will-change:transform;">
         <img src="{{ $u->avatar ?? asset('images/default-avatar.png') }}"
              onerror="this.src='{{ asset('images/default-avatar.png') }}'"
              alt="{{ $u->name ?? 'Musisi' }}"
@@ -44,5 +44,30 @@
 
     <a href="{{ route('home') }}" class="btn-ghost" style="text-decoration:none;display:inline-block;margin-top:1.25rem;">← Jelajahi Margonoandi</a>
 </div>
+
+<script>
+/* Kartu profil "menghadap" kursor (desktop) / jari (HP) / kemiringan HP (giroskop) */
+(function(){
+    var card = document.querySelector('.ms-pub-card');
+    if (!card) return;
+    function tilt(rx, ry){ card.style.transform = 'perspective(900px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg)'; }
+    function fromPoint(x, y){
+        var r = card.getBoundingClientRect();
+        tilt((0.5 - (y - r.top) / r.height) * 10, ((x - r.left) / r.width - 0.5) * 10);
+    }
+    card.addEventListener('mousemove', function(e){ fromPoint(e.clientX, e.clientY); });
+    card.addEventListener('mouseleave', function(){ card.style.transform = ''; });
+    card.addEventListener('touchstart', function(e){ var t=e.touches[0]; if(t) fromPoint(t.clientX, t.clientY); }, {passive:true});
+    card.addEventListener('touchmove',  function(e){ var t=e.touches[0]; if(t) fromPoint(t.clientX, t.clientY); }, {passive:true});
+    card.addEventListener('touchend',   function(){ card.style.transform = ''; });
+    card.addEventListener('touchcancel',function(){ card.style.transform = ''; });
+    if (window.DeviceOrientationEvent) {
+        window.addEventListener('deviceorientation', function(e){
+            if (e.gamma == null && e.beta == null) return;
+            tilt(Math.max(-9, Math.min(9, ((e.beta || 0) - 45) * 0.35)), Math.max(-9, Math.min(9, (e.gamma || 0) * 0.4)));
+        }, true);
+    }
+})();
+</script>
 
 @endsection
