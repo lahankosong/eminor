@@ -762,6 +762,7 @@
         }
     </style>
     @stack('styles')
+    @include('partials.ga')
 </head>
 <body>
 

@@ -48,6 +48,11 @@ class GoogleController extends Controller
 
             Auth::login($user, true);
 
+            session()->flash('ga_login', true);
+            if ($user->wasRecentlyCreated) {
+                session()->flash('ga_new_user', true);
+            }
+
             return redirect()->route('aku');
 
         } catch (\Throwable $e) {

@@ -249,7 +249,7 @@
         @endif
         <div class="song-hero-actions">
             <button class="hero-btn primary"
-                onclick="document.getElementById('playerSection').scrollIntoView({behavior:'smooth'})">
+                onclick="document.getElementById('playerSection').scrollIntoView({behavior:'smooth'}); gtag && gtag('event', 'play_song', {event_category:'music', song_title:'{{ addslashes($song->title) }}', song_slug:'{{ $song->slug }}'})">
                 &#9654; Putar lagu
             </button>
             @if($song->spotify_url)

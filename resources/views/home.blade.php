@@ -552,7 +552,8 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
 @php $fbEntry = auth()->check() ? route('aku') : route('google.login'); @endphp
 
 {{-- FANBASE TICKER --}}
-<a href="{{ $fbEntry }}" class="fb-ticker" aria-label="Masuk fanbase">
+<a href="{{ $fbEntry }}" class="fb-ticker" aria-label="Masuk fanbase"
+   @guest onclick="gtag && gtag('event', 'cta_click', {event_category:'engagement', button:'ticker_top'})" @endguest>
     <div class="fb-ticker-track">
         @php
             $ticks = [
@@ -606,7 +607,9 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
         <div class="fb-promo-card"><div class="ic">&#127908;</div><h4>Cari Personil</h4><p>Direktori musisi &amp; lowongan band terdekat.</p></div>
         <div class="fb-promo-card"><div class="ic">&#128221;</div><h4>Catatan Pribadi</h4><p>Simpan lirik, ide lagu &amp; chord favoritmu.</p></div>
     </div>
-    <a href="{{ $fbEntry }}" class="btn-primary fb-promo-cta">&#128640; Mulai dari kamarmu &mdash; Ayoo Masuk</a>
+    <a href="{{ $fbEntry }}" class="btn-primary fb-promo-cta"
+       @guest onclick="gtag && gtag('event', 'cta_click', {event_category:'engagement', button:'promo_gabung'})" @endguest
+    >&#128640; Mulai dari kamarmu &mdash; Ayoo Masuk</a>
     <p class="fb-promo-note">@auth Kamu sudah di dalam &mdash; ayo lanjut berkarya. @else Cukup login pakai Google, Aman langsung bisa dipakai. @endauth</p>
 
     <div class="fb-beta">
@@ -1024,4 +1027,43 @@ console.log('Home loaded:', songs.length, 'songs');
     els.forEach(function(el){ el.classList.add('reveal'); io.observe(el); });
 })();
 </script>
+
+{{-- GA4 Events: scroll depth + song interactions --}}
+@if(config('services.google_analytics_id'))
+<script>
+(function(){
+    if (typeof gtag !== 'function') return;
+
+    // Scroll depth (25 / 50 / 75 / 90%)
+    var reached = {};
+    window.addEventListener('scroll', function(){
+        var pct = Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
+        [25, 50, 75, 90].forEach(function(t){
+            if (pct >= t && !reached[t]) {
+                reached[t] = true;
+                gtag('event', 'scroll', {event_category:'engagement', event_label:'scroll_' + t, value: t});
+            }
+        });
+    }, { passive: true });
+
+    // Section visibility via IntersectionObserver
+    var sections = {
+        'featuredSection': 'section_lagu',
+        'fbPromoSection':  'section_fanbase_cta',
+    };
+    if ('IntersectionObserver' in window) {
+        Object.keys(sections).forEach(function(id){
+            var el = document.getElementById(id);
+            if (!el) return;
+            new IntersectionObserver(function(entries){
+                if (entries[0].isIntersecting) {
+                    gtag('event', 'section_view', {event_category:'engagement', event_label: sections[id]});
+                    this.disconnect();
+                }
+            }, { threshold: 0.3 }).observe(el);
+        });
+    }
+})();
+</script>
+@endif
 @endpush
