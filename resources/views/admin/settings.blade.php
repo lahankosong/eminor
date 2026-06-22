@@ -126,6 +126,7 @@
     <button class="settings-tab" onclick="showTab('hero')">Hero & Tagline</button>
     <button class="settings-tab" onclick="showTab('bio')">Bio & Project</button>
     <button class="settings-tab" onclick="showTab('social')">Platform & Sosial</button>
+    <button class="settings-tab" onclick="showTab('feat-screenshots')">📱 Screenshot Fitur</button>
 </div>
 
 <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">
@@ -282,6 +283,70 @@
         </div>
     </div>
 
+    {{-- TAB: SCREENSHOT FITUR --}}
+    <div class="tab-panel" id="tab-feat-screenshots">
+        <div class="form-section">
+            <p class="form-section-title">Screenshot Fitur di Landing Page</p>
+            <p class="form-hint" style="margin-bottom:1.25rem;">Upload screenshot asli dari aplikasi untuk ditampilkan di dalam bingkai HP pada halaman utama. Format JPG/PNG, rasio 9:16 (portrait) disarankan, maks 2MB. Jika kosong, tampilan CSS otomatis digunakan.</p>
+
+            @php
+            $featMeta = [
+                ['key'=>'feat_screenshot_0','label'=>'Maftuner','desc'=>'Tampilan tuner gitar'],
+                ['key'=>'feat_screenshot_1','label'=>'Belajar Chord','desc'=>'Kamus chord gitar/piano/ukulele'],
+                ['key'=>'feat_screenshot_2','label'=>'Portofolio Musisi','desc'=>'Halaman profil musisi'],
+                ['key'=>'feat_screenshot_3','label'=>'Cari Personil','desc'=>'Direktori & filter musisi'],
+                ['key'=>'feat_screenshot_4','label'=>'Chat','desc'=>'Percakapan antar musisi'],
+                ['key'=>'feat_screenshot_5','label'=>'Posting','desc'=>'Feed komunitas'],
+            ];
+            @endphp
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;">
+                @foreach($featMeta as $fm)
+                @php $currentPath = $settings[$fm['key']]->value ?? ''; @endphp
+                <div style="border:1px solid var(--border);border-radius:12px;padding:1rem;background:var(--bg-2);text-align:center;">
+                    {{-- Phone mini preview --}}
+                    <div style="width:80px;height:148px;margin:0 auto 0.75rem;background:#0d0d0f;border-radius:14px;border:2px solid #2a2a30;overflow:hidden;position:relative;box-shadow:0 8px 24px -8px rgba(0,0,0,0.5);">
+                        @if($currentPath)
+                            <img id="prev_{{ $fm['key'] }}"
+                                 src="{{ asset($currentPath) }}?v={{ filemtime(public_path($currentPath)) }}"
+                                 alt="{{ $fm['label'] }}"
+                                 style="width:100%;height:100%;object-fit:cover;display:block;">
+                        @else
+                            <img id="prev_{{ $fm['key'] }}"
+                                 src="" alt=""
+                                 style="width:100%;height:100%;object-fit:cover;display:{{ $currentPath ? 'block' : 'none' }};">
+                            <div id="empty_{{ $fm['key'] }}" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.2);font-size:22px;">📱</div>
+                        @endif
+                    </div>
+
+                    <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px;">{{ $fm['label'] }}</div>
+                    <div style="font-size:10px;color:var(--text-3);margin-bottom:0.75rem;">{{ $fm['desc'] }}</div>
+
+                    <input type="file" name="{{ $fm['key'] }}" id="fi_{{ $fm['key'] }}"
+                           accept="image/*" style="display:none"
+                           onchange="previewFeat('{{ $fm['key'] }}', this)">
+                    <button type="button"
+                            onclick="document.getElementById('fi_{{ $fm['key'] }}').click()"
+                            style="font-size:11px;padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);cursor:pointer;width:100%;">
+                        {{ $currentPath ? '↩ Ganti' : '⬆ Upload' }}
+                    </button>
+                    @if($currentPath)
+                    <div style="margin-top:6px;">
+                        <label style="font-size:10px;color:var(--text-3);cursor:pointer;">
+                            <input type="checkbox" name="clear_{{ $fm['key'] }}" value="1" style="margin-right:3px;">
+                            Hapus screenshot ini
+                        </label>
+                    </div>
+                    @endif
+                </div>
+                @endforeach
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn-save">Simpan Screenshot</button>
+        </div>
+    </div>
+
 </form>
 
 @endsection
@@ -312,6 +377,19 @@ function previewPhoto(input) {
         var reader = new FileReader();
         reader.onload = function(e) {
             document.getElementById('photoPreview').src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function previewFeat(key, input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var img   = document.getElementById('prev_' + key);
+            var empty = document.getElementById('empty_' + key);
+            if (img) { img.src = e.target.result; img.style.display = 'block'; }
+            if (empty) empty.style.display = 'none';
         };
         reader.readAsDataURL(input.files[0]);
     }

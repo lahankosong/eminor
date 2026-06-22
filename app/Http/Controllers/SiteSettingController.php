@@ -36,6 +36,26 @@ class SiteSettingController extends Controller
             SiteSetting::set('artist_photo', 'images/' . $filename);
         }
 
+        // Handle feature screenshots (6 slots)
+        $featLabels = ['maftuner', 'chord', 'portofolio', 'cari-personil', 'chat', 'posting'];
+        foreach ($featLabels as $i => $slug) {
+            $field = 'feat_screenshot_' . $i;
+            if ($request->hasFile($field)) {
+                $file = $request->file($field);
+                $filename = 'feat_' . $slug . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('images/features'), $filename);
+                SiteSetting::set($field, 'images/features/' . $filename);
+            }
+            // Allow clearing individual screenshot
+            if ($request->input('clear_' . $field)) {
+                $old = SiteSetting::get($field);
+                if ($old && file_exists(public_path($old))) {
+                    @unlink(public_path($old));
+                }
+                SiteSetting::set($field, '');
+            }
+        }
+
         return redirect()->route('admin.settings')
             ->with('success', 'Pengaturan berhasil disimpan.');
     }

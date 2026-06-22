@@ -477,6 +477,189 @@
         .reveal { opacity: 1 !important; transform: none !important; }
         .btn-primary::after { display: none; }
     }
+
+    /* ====== FEATURE SHOWCASE ====== */
+    .feat-showcase { max-width: 540px; margin: 0 auto; text-align: center; }
+    .feat-tabs {
+        display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+        justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; padding-bottom: 2px;
+    }
+    .feat-tabs::-webkit-scrollbar { display: none; }
+    .feat-tab {
+        flex-shrink: 0; padding: 7px 16px; border-radius: 20px;
+        border: 1px solid var(--border); background: var(--surface); color: var(--text-3);
+        font-size: 12px; font-weight: 500; cursor: pointer; transition: 0.2s; font-family: inherit;
+    }
+    .feat-tab:hover { border-color: var(--accent); color: var(--accent); }
+    .feat-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .feat-phone {
+        position: relative; width: 214px; height: 420px;
+        background: #0d0d0f; border-radius: 38px; border: 3px solid #2a2a30;
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 30px 80px -20px rgba(0,0,0,0.7), inset 0 0 20px rgba(255,255,255,0.02);
+        margin: 0 auto 1.25rem; overflow: hidden;
+    }
+    .feat-phone-inner { position: absolute; inset: 0; overflow: hidden; border-radius: 36px; }
+    .feat-notch {
+        position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+        width: 64px; height: 20px; background: #0d0d0f; border-radius: 0 0 14px 14px; z-index: 10;
+    }
+    .feat-home-bar {
+        position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+        width: 60px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 4px; z-index: 10;
+    }
+
+    .feat-screen {
+        position: absolute; inset: 0; background: #12121a;
+        display: flex; flex-direction: column; overflow: hidden;
+        opacity: 0; transform: translateX(30px);
+        transition: opacity 0.4s ease, transform 0.4s ease;
+        pointer-events: none; color: #e0e0ea; font-size: 11px;
+    }
+    .feat-screen.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+    .feat-screen.exit  { opacity: 0; transform: translateX(-30px); }
+    .fs-screenshot { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+
+    .fs-header {
+        padding: 24px 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.06);
+        display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    .fs-app-name { font-size: 13px; font-weight: 600; color: #f0f0fa; }
+    .fs-badge.green { font-size: 9px; background: rgba(34,197,94,0.15); color: #22c55e; border-radius: 8px; padding: 2px 7px; }
+
+    /* tuner */
+    .fs-tuner { display: flex; flex-direction: column; align-items: center; padding: 8px 12px 12px; flex: 1; }
+    .fs-gauge { width: 150px; height: 90px; flex-shrink: 0; }
+    .fs-gauge-fill { animation: fsgaugefill 3s ease-in-out infinite alternate; }
+    @keyframes fsgaugefill { 0%{stroke-dashoffset:120} 50%{stroke-dashoffset:65} 100%{stroke-dashoffset:40} }
+    .fs-needle { transform-origin: 90px 100px; animation: fsneedle 3s ease-in-out infinite alternate; }
+    @keyframes fsneedle { 0%{transform:rotate(-45deg)} 50%{transform:rotate(0deg)} 100%{transform:rotate(20deg)} }
+    .fs-note-big { font-size: 42px; font-weight: 700; color: #fff; line-height: 1; margin: 4px 0 2px; }
+    .fs-in-tune { font-size: 11px; color: #22c55e; font-weight: 600; letter-spacing: 0.05em; }
+    .fs-hz { font-size: 10px; color: rgba(255,255,255,0.35); margin: 3px 0 10px; }
+    .fs-strings { display: flex; gap: 5px; margin-top: 4px; }
+    .fs-str {
+        width: 30px; height: 30px; border-radius: 50%;
+        border: 1.5px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05);
+        color: rgba(255,255,255,0.6); font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit;
+    }
+    .fs-str.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* chord */
+    .fs-chord-wrap { display: flex; flex-direction: column; align-items: center; padding: 8px 14px 10px; flex: 1; }
+    .fs-inst-tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+    .fs-inst {
+        padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);
+        background: transparent; color: rgba(255,255,255,0.45); font-size: 10px; font-family: inherit; cursor: pointer;
+    }
+    .fs-inst.active { background: rgba(56,168,204,0.2); border-color: var(--accent); color: var(--accent); }
+    .fs-chord-name { font-size: 32px; font-weight: 700; color: #fff; margin: 4px 0; }
+    .fs-fretboard {
+        position: relative; width: 130px; height: 80px;
+        background: #1e1a14; border-radius: 4px; border: 1px solid rgba(255,255,255,0.12);
+        margin-bottom: 4px; overflow: hidden;
+    }
+    .fs-fret-strings { position: absolute; inset: 0; display: flex; justify-content: space-around; }
+    .fs-fret-strings span { width: 1px; background: rgba(255,255,255,0.18); height: 100%; }
+    .fs-fret-line { position: absolute; left: 0; right: 0; height: 1px; background: rgba(255,255,255,0.12); }
+    .fs-dot {
+        position: absolute; width: 12px; height: 12px;
+        background: var(--accent); border-radius: 50%; transform: translate(-50%,-50%);
+    }
+    .fs-fret-label { font-size: 9px; color: rgba(255,255,255,0.3); margin-bottom: 6px; }
+    .fs-play-btn {
+        padding: 7px 18px; border-radius: 14px; border: 1px solid rgba(56,168,204,0.4);
+        background: rgba(56,168,204,0.12); color: var(--accent); font-size: 11px; font-family: inherit; cursor: pointer; margin-top: 4px;
+    }
+
+    /* porto */
+    .fs-porto {
+        display: flex; flex-direction: column; align-items: center;
+        padding: 6px 12px 10px; flex: 1; overflow-y: auto; scrollbar-width: none;
+    }
+    .fs-porto::-webkit-scrollbar { display: none; }
+    .fs-porto-avatar {
+        width: 52px; height: 52px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), #6366f1);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px; flex-shrink: 0;
+    }
+    .fs-porto-name { font-size: 14px; font-weight: 600; color: #f0f0fa; }
+    .fs-porto-loc { font-size: 10px; color: rgba(255,255,255,0.4); margin: 2px 0 6px; }
+    .fs-porto-badges { display: flex; gap: 5px; margin-bottom: 8px; }
+    .fs-badge-chip { font-size: 9px; padding: 2px 8px; border-radius: 10px; background: rgba(99,102,241,0.2); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); }
+    .fs-porto-rows { width: 100%; margin-bottom: 8px; }
+    .fs-porto-row { display: flex; gap: 6px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: flex-start; }
+    .fs-pr-label { font-size: 9px; color: rgba(255,255,255,0.35); min-width: 36px; padding-top: 1px; flex-shrink: 0; }
+    .fs-pr-val { font-size: 10px; color: rgba(255,255,255,0.75); line-height: 1.4; }
+    .fs-socials { display: flex; gap: 5px; }
+    .fs-soc { font-size: 9px; padding: 4px 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.55); cursor: pointer; }
+    .fs-soc.yt { border-color: rgba(239,68,68,0.3); color: #f87171; }
+    .fs-soc.ig { border-color: rgba(236,72,153,0.3); color: #f472b6; }
+    .fs-soc.sp { border-color: rgba(34,197,94,0.3); color: #4ade80; }
+
+    /* cari personil */
+    .fs-cari { display: flex; flex-direction: column; padding: 8px 12px 10px; flex: 1; overflow-y: auto; scrollbar-width: none; }
+    .fs-cari::-webkit-scrollbar { display: none; }
+    .fs-search-bar {
+        display: flex; align-items: center; gap: 6px;
+        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px; padding: 7px 10px; margin-bottom: 8px; flex-shrink: 0;
+    }
+    .fs-search-ph { font-size: 11px; color: rgba(255,255,255,0.3); }
+    .fs-filter-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 7px; flex-shrink: 0; }
+    .fs-chip { font-size: 9px; padding: 3px 9px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.45); }
+    .fs-chip.active { background: rgba(56,168,204,0.15); border-color: rgba(56,168,204,0.5); color: var(--accent); }
+    .fs-result-count { font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 8px; flex-shrink: 0; }
+    .fs-musician-card { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .fs-musician-card:last-child { border-bottom: none; }
+    .fs-mus-av {
+        width: 34px; height: 34px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .fs-mus-av.sm { width: 28px; height: 28px; font-size: 10px; }
+    .fs-mus-name { font-size: 11px; font-weight: 600; color: #f0f0fa; }
+    .fs-mus-meta { font-size: 9px; color: rgba(255,255,255,0.4); }
+    .fs-mus-badge { margin-left: auto; font-size: 9px; padding: 3px 9px; border-radius: 10px; background: rgba(56,168,204,0.15); border: 1px solid rgba(56,168,204,0.3); color: var(--accent); flex-shrink: 0; }
+
+    /* chat */
+    .fs-chat-hd { display: flex; align-items: center; gap: 8px; }
+    .fs-online { font-size: 9px; color: #22c55e; }
+    .fs-chat-body { flex: 1; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; scrollbar-width: none; }
+    .fs-chat-body::-webkit-scrollbar { display: none; }
+    .fs-bubble { max-width: 75%; padding: 7px 10px; border-radius: 14px; font-size: 10px; line-height: 1.5; }
+    .fs-bubble.them { align-self: flex-start; background: rgba(255,255,255,0.07); border-radius: 14px 14px 14px 4px; color: rgba(255,255,255,0.8); }
+    .fs-bubble.me { align-self: flex-end; background: linear-gradient(135deg, var(--accent), #6366f1); border-radius: 14px 14px 4px 14px; color: #fff; }
+    .fs-chat-input { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-top: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; margin-bottom: 20px; }
+    .fs-ci-ph { font-size: 10px; color: rgba(255,255,255,0.25); }
+    .fs-ci-send { font-size: 14px; color: var(--accent); }
+
+    /* posting */
+    .fs-feed { flex: 1; padding: 6px 10px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; scrollbar-width: none; }
+    .fs-feed::-webkit-scrollbar { display: none; }
+    .fs-post { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 9px 10px; }
+    .fs-post-hd { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+    .fs-post-name { font-size: 11px; font-weight: 600; color: #f0f0fa; }
+    .fs-post-time { font-size: 9px; color: rgba(255,255,255,0.3); }
+    .fs-post-text { font-size: 10px; color: rgba(255,255,255,0.7); line-height: 1.5; margin: 0 0 7px; }
+    .fs-post-actions { display: flex; gap: 12px; font-size: 10px; color: rgba(255,255,255,0.4); }
+
+    /* dots */
+    .feat-dots { display: flex; justify-content: center; gap: 7px; margin-bottom: 1rem; }
+    .feat-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); cursor: pointer; transition: 0.25s; display: inline-block; }
+    .feat-dot.active { background: var(--accent); transform: scale(1.2); }
+
+    /* desc */
+    .feat-desc { min-height: 50px; }
+    .feat-desc-item { display: none; font-size: 13px; color: var(--text-2); line-height: 1.6; padding: 0 10px; }
+    .feat-desc-item.active { display: block; }
+    .feat-desc-item strong { color: var(--text); }
+
+    @media (max-width: 420px) {
+        .feat-phone { width: 190px; height: 374px; }
+        .feat-tabs { flex-wrap: nowrap; justify-content: flex-start; }
+    }
 </style>
 @endpush
 
@@ -599,13 +782,249 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
 
     <p class="section-eyebrow">Fitur berikut ada di dalam Aplikasi</p>
     <p class="section-heading">Bisa kamu temukan setelah Masuk dengan email terdaftar di Google</p>
-    <div class="fb-promo-grid">
-        <div class="fb-promo-card"><div class="ic">&#127928;</div><h4>Tuner Gitar</h4><p>Stem gitar akurat langsung dari HP.</p></div>
-        <div class="fb-promo-card"><div class="ic">&#127932;</div><h4>Belajar Chord</h4><p>Kamus chord gitar &amp; piano, chord geser + suara.</p></div>
-        <div class="fb-promo-card"><div class="ic">&#127911;</div><h4>Putar Semua Lagu</h4><p>Dengar koleksi lagu Margonoandi kapan saja.</p></div>
-        <div class="fb-promo-card"><div class="ic">&#128172;</div><h4>Komunitas</h4><p>Diskusi, curhat &amp; ngobrol bareng musisi lain.</p></div>
-        <div class="fb-promo-card"><div class="ic">&#127908;</div><h4>Cari Personil</h4><p>Direktori musisi &amp; lowongan band terdekat.</p></div>
-        <div class="fb-promo-card"><div class="ic">&#128221;</div><h4>Catatan Pribadi</h4><p>Simpan lirik, ide lagu &amp; chord favoritmu.</p></div>
+
+    <div class="feat-showcase">
+        <div class="feat-tabs" id="featTabs">
+            <button class="feat-tab active" onclick="switchFeat(0)">Maftuner</button>
+            <button class="feat-tab" onclick="switchFeat(1)">Chord</button>
+            <button class="feat-tab" onclick="switchFeat(2)">Portofolio</button>
+            <button class="feat-tab" onclick="switchFeat(3)">Cari Personil</button>
+            <button class="feat-tab" onclick="switchFeat(4)">Chat</button>
+            <button class="feat-tab" onclick="switchFeat(5)">Posting</button>
+        </div>
+
+        @php
+        $featShots = [
+            $settings['feat_screenshot_0'] ?? '',
+            $settings['feat_screenshot_1'] ?? '',
+            $settings['feat_screenshot_2'] ?? '',
+            $settings['feat_screenshot_3'] ?? '',
+            $settings['feat_screenshot_4'] ?? '',
+            $settings['feat_screenshot_5'] ?? '',
+        ];
+        @endphp
+
+        <div class="feat-phone">
+            <div class="feat-phone-inner">
+
+                {{-- Screen 0: Maftuner --}}
+                <div class="feat-screen active" data-screen="0">
+                    @if($featShots[0])
+                    <img src="{{ asset($featShots[0]) }}" class="fs-screenshot" alt="Maftuner">
+                    @else
+                    <div class="fs-header">
+                        <span class="fs-app-name">Maftuner</span>
+                        <span class="fs-badge green">Gratis &amp; bebas iklan</span>
+                    </div>
+                    <div class="fs-tuner">
+                        <svg class="fs-gauge" viewBox="0 0 180 110">
+                            <path d="M10 100 A 80 80 0 0 1 170 100" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="12" stroke-linecap="round"/>
+                            <path d="M10 100 A 80 80 0 0 1 170 100" fill="none" stroke="url(#gaug)" stroke-width="12" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="65" class="fs-gauge-fill"/>
+                            <defs>
+                                <linearGradient id="gaug" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#f59e0b"/>
+                                    <stop offset="50%" stop-color="#22c55e"/>
+                                    <stop offset="100%" stop-color="#f59e0b"/>
+                                </linearGradient>
+                            </defs>
+                            <line class="fs-needle" x1="90" y1="100" x2="90" y2="28" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+                            <circle cx="90" cy="100" r="5" fill="#fff"/>
+                        </svg>
+                        <div class="fs-note-big">E</div>
+                        <div class="fs-in-tune">&#10003; IN TUNE</div>
+                        <div class="fs-hz">440.0 Hz</div>
+                        <div class="fs-strings">
+                            <button class="fs-str active">E</button>
+                            <button class="fs-str">A</button>
+                            <button class="fs-str">D</button>
+                            <button class="fs-str">G</button>
+                            <button class="fs-str">B</button>
+                            <button class="fs-str">e</button>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+
+                {{-- Screen 1: Belajar Chord --}}
+                <div class="feat-screen" data-screen="1">
+                    @if($featShots[1])
+                    <img src="{{ asset($featShots[1]) }}" class="fs-screenshot" alt="Belajar Chord">
+                    @else
+                    <div class="fs-header">
+                        <span class="fs-app-name">Belajar Chord</span>
+                    </div>
+                    <div class="fs-chord-wrap">
+                        <div class="fs-inst-tabs">
+                            <button class="fs-inst active">Gitar</button>
+                            <button class="fs-inst">Piano</button>
+                            <button class="fs-inst">Ukulele</button>
+                        </div>
+                        <div class="fs-chord-name">Am</div>
+                        <div class="fs-fretboard">
+                            <div class="fs-fret-strings">
+                                <span></span><span></span><span></span><span></span><span></span><span></span>
+                            </div>
+                            <div class="fs-fret-line" style="top:20%"></div>
+                            <div class="fs-fret-line" style="top:40%"></div>
+                            <div class="fs-fret-line" style="top:60%"></div>
+                            <div class="fs-fret-line" style="top:80%"></div>
+                            <div class="fs-dot" style="top:18%;left:33%;"></div>
+                            <div class="fs-dot" style="top:18%;left:50%;"></div>
+                            <div class="fs-dot" style="top:18%;left:66%;"></div>
+                        </div>
+                        <div class="fs-fret-label">Fret 1 &mdash; Am</div>
+                        <button class="fs-play-btn">&#9654; Dengar Suara</button>
+                    </div>
+                    @endif
+                </div>
+
+                {{-- Screen 2: Portofolio Musisi --}}
+                <div class="feat-screen" data-screen="2">
+                    @if($featShots[2])
+                    <img src="{{ asset($featShots[2]) }}" class="fs-screenshot" alt="Portofolio Musisi">
+                    @else
+                    <div class="fs-header">
+                        <span class="fs-app-name">Portofolio Musisi</span>
+                    </div>
+                    <div class="fs-porto">
+                        <div class="fs-porto-avatar">MG</div>
+                        <div class="fs-porto-name">Margonoandi</div>
+                        <div class="fs-porto-loc">&#128205; Yogyakarta</div>
+                        <div class="fs-porto-badges">
+                            <span class="fs-badge-chip">Musisi</span>
+                            <span class="fs-badge-chip">Gitaris</span>
+                        </div>
+                        <div class="fs-porto-rows">
+                            <div class="fs-porto-row"><span class="fs-pr-label">Genre</span><span class="fs-pr-val">Indie Pop &middot; Folk</span></div>
+                            <div class="fs-porto-row"><span class="fs-pr-label">Posisi</span><span class="fs-pr-val">Gitaris, Vokalis</span></div>
+                            <div class="fs-porto-row"><span class="fs-pr-label">Bio</span><span class="fs-pr-val">Musisi rumahan yang percaya bahwa musik kecil bisa menyentuh hati besar.</span></div>
+                        </div>
+                        <div class="fs-socials">
+                            <span class="fs-soc yt">&#9654; YouTube</span>
+                            <span class="fs-soc ig">&#128247; IG</span>
+                            <span class="fs-soc sp">&#127925; Spotify</span>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+
+                {{-- Screen 3: Cari Personil --}}
+                <div class="feat-screen" data-screen="3">
+                    @if($featShots[3])
+                    <img src="{{ asset($featShots[3]) }}" class="fs-screenshot" alt="Cari Personil">
+                    @else
+                    <div class="fs-header">
+                        <span class="fs-app-name">Cari Personil</span>
+                    </div>
+                    <div class="fs-cari">
+                        <div class="fs-search-bar">
+                            <span>&#128269;</span>
+                            <span class="fs-search-ph">Cari musisi...</span>
+                        </div>
+                        <div class="fs-filter-chips">
+                            <span class="fs-chip active">Yogyakarta</span>
+                            <span class="fs-chip active">Gitaris</span>
+                            <span class="fs-chip">Bassist</span>
+                            <span class="fs-chip">Vokalis</span>
+                        </div>
+                        <div class="fs-result-count">23 musisi ditemukan</div>
+                        <div class="fs-musician-card">
+                            <div class="fs-mus-av" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">RN</div>
+                            <div><div class="fs-mus-name">Rizky N.</div><div class="fs-mus-meta">Gitaris &middot; Bandung</div></div>
+                            <span class="fs-mus-badge">Follow</span>
+                        </div>
+                        <div class="fs-musician-card">
+                            <div class="fs-mus-av" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">SR</div>
+                            <div><div class="fs-mus-name">Sari R.</div><div class="fs-mus-meta">Bassist &middot; Jogja</div></div>
+                            <span class="fs-mus-badge">Follow</span>
+                        </div>
+                        <div class="fs-musician-card">
+                            <div class="fs-mus-av" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)">DP</div>
+                            <div><div class="fs-mus-name">Dani P.</div><div class="fs-mus-meta">Drummer &middot; Solo</div></div>
+                            <span class="fs-mus-badge">Follow</span>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+
+                {{-- Screen 4: Chat --}}
+                <div class="feat-screen" data-screen="4">
+                    @if($featShots[4])
+                    <img src="{{ asset($featShots[4]) }}" class="fs-screenshot" alt="Chat">
+                    @else
+                    <div class="fs-header">
+                        <div class="fs-chat-hd">
+                            <div class="fs-mus-av sm" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">RN</div>
+                            <div>
+                                <div class="fs-app-name">Rizky N.</div>
+                                <div class="fs-online">&#9679; Online</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fs-chat-body">
+                        <div class="fs-bubble them">Hei, kamu pakai chord Am atau Am7 di lagu itu?</div>
+                        <div class="fs-bubble me">Am7 bro, lebih enak di bagian reff-nya &#9996;</div>
+                        <div class="fs-bubble them">Kapan ada sesi latihan bareng?</div>
+                        <div class="fs-bubble me">Sabtu sore bisa! Kamu bawa gitar akustik aja &#127928;</div>
+                    </div>
+                    <div class="fs-chat-input">
+                        <span class="fs-ci-ph">Tulis pesan...</span>
+                        <span class="fs-ci-send">&#10148;</span>
+                    </div>
+                    @endif
+                </div>
+
+                {{-- Screen 5: Posting --}}
+                <div class="feat-screen" data-screen="5">
+                    @if($featShots[5])
+                    <img src="{{ asset($featShots[5]) }}" class="fs-screenshot" alt="Posting">
+                    @else
+                    <div class="fs-header">
+                        <span class="fs-app-name">Posting</span>
+                    </div>
+                    <div class="fs-feed">
+                        <div class="fs-post">
+                            <div class="fs-post-hd">
+                                <div class="fs-mus-av sm" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">SR</div>
+                                <div><div class="fs-post-name">Sari R.</div><div class="fs-post-time">2 jam lalu</div></div>
+                            </div>
+                            <p class="fs-post-text">Akhirnya berhasil ngerekam versi akustik lagu pertama! Nunggu feedback dari kalian &#127925;&#10024;</p>
+                            <div class="fs-post-actions"><span>&#10084;&#65039; 24</span><span>&#128172; 8 komentar</span></div>
+                        </div>
+                        <div class="fs-post">
+                            <div class="fs-post-hd">
+                                <div class="fs-mus-av sm" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)">DP</div>
+                                <div><div class="fs-post-name">Dani P.</div><div class="fs-post-time">5 jam lalu</div></div>
+                            </div>
+                            <p class="fs-post-text">Lagi nyari gitaris buat project lagu folk-indie. DM kalau tertarik! &#128588;</p>
+                            <div class="fs-post-actions"><span>&#10084;&#65039; 17</span><span>&#128172; 12 komentar</span></div>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+
+            </div>
+            <div class="feat-notch"></div>
+            <div class="feat-home-bar"></div>
+        </div>
+
+        <div class="feat-dots" id="featDots">
+            <span class="feat-dot active" onclick="switchFeat(0)"></span>
+            <span class="feat-dot" onclick="switchFeat(1)"></span>
+            <span class="feat-dot" onclick="switchFeat(2)"></span>
+            <span class="feat-dot" onclick="switchFeat(3)"></span>
+            <span class="feat-dot" onclick="switchFeat(4)"></span>
+            <span class="feat-dot" onclick="switchFeat(5)"></span>
+        </div>
+
+        <div class="feat-desc" id="featDesc">
+            <div class="feat-desc-item active" data-feat="0"><strong>Maftuner</strong> &mdash; Stem gitar langsung dari HP, akurat, gratis, tanpa iklan yang meresahkan.</div>
+            <div class="feat-desc-item" data-feat="1"><strong>Belajar Chord</strong> &mdash; Kamus chord gitar, piano, dan ukulele. Visual fretboard + bisa didengarkan suaranya.</div>
+            <div class="feat-desc-item" data-feat="2"><strong>Portofolio Musisi</strong> &mdash; Tampilkan dirimu: nama, lokasi, genre, posisi, bio, link YouTube, Instagram, dan Spotify.</div>
+            <div class="feat-desc-item" data-feat="3"><strong>Cari Personil</strong> &mdash; Filter musisi berdasarkan kota, instrumen, dan genre. Temukan partner musik yang tepat.</div>
+            <div class="feat-desc-item" data-feat="4"><strong>Chat</strong> &mdash; Obrolan privat antar musisi. Lebih personal, lebih fokus, tanpa noise media sosial.</div>
+            <div class="feat-desc-item" data-feat="5"><strong>Posting</strong> &mdash; Bagikan cerita, progress, dan ide musikmu. Dapatkan sambutan dari komunitas musisi.</div>
+        </div>
     </div>
     <a href="{{ $fbEntry }}" class="btn-primary fb-promo-cta"
        @guest onclick="gtag && gtag('event', 'cta_click', {event_category:'engagement', button:'promo_gabung'})" @endguest
@@ -1066,4 +1485,52 @@ console.log('Home loaded:', songs.length, 'songs');
 })();
 </script>
 @endif
+
+<script>
+/* ====== Feature Showcase ====== */
+(function(){
+    var featTotal = 6, featCurrent = 0, featTimer = null;
+
+    window.switchFeat = function(idx) {
+        var screens = document.querySelectorAll('.feat-screen');
+        var tabs    = document.querySelectorAll('.feat-tab');
+        var dots    = document.querySelectorAll('.feat-dot');
+        var descs   = document.querySelectorAll('.feat-desc-item');
+        if (!screens.length) return;
+
+        var prev = featCurrent;
+        featCurrent = ((idx % featTotal) + featTotal) % featTotal;
+
+        screens[prev].classList.remove('active');
+        screens[prev].classList.add('exit');
+        var exitEl = screens[prev];
+        setTimeout(function(){ if(exitEl) exitEl.classList.remove('exit'); }, 420);
+
+        screens[featCurrent].classList.add('active');
+        tabs.forEach(function(t,i){ t.classList.toggle('active', i === featCurrent); });
+        dots.forEach(function(d,i){ d.classList.toggle('active', i === featCurrent); });
+        descs.forEach(function(d,i){ d.classList.toggle('active', i === featCurrent); });
+
+        var activeTab = tabs[featCurrent];
+        if (activeTab) activeTab.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+
+        featResetTimer();
+    };
+
+    function featResetTimer() {
+        clearInterval(featTimer);
+        featTimer = setInterval(function(){ switchFeat(featCurrent + 1); }, 4000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+        var showcase = document.querySelector('.feat-showcase');
+        if (!showcase) return;
+        showcase.addEventListener('mouseenter', function(){ clearInterval(featTimer); });
+        showcase.addEventListener('mouseleave', featResetTimer);
+        showcase.addEventListener('touchstart', function(){ clearInterval(featTimer); }, { passive:true });
+        showcase.addEventListener('touchend', function(){ setTimeout(featResetTimer, 2000); }, { passive:true });
+        featResetTimer();
+    });
+})();
+</script>
 @endpush
