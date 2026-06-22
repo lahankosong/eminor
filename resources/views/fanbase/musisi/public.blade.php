@@ -42,7 +42,10 @@
         <a href="{{ route('google.login') }}" class="btn-primary" style="text-decoration:none;display:block;text-align:center;margin-top:1rem;">Masuk untuk lihat lengkap &amp; hubungi</a>
     </div>
 
-    <a href="{{ route('home') }}" class="btn-ghost" style="text-decoration:none;display:inline-block;margin-top:1.25rem;">← Jelajahi Margonoandi</a>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;">
+        <button type="button" id="msCardBtn" onclick="msShareCard()" class="btn-ghost" style="cursor:pointer;">📸 Bagikan sebagai gambar</button>
+        <a href="{{ route('home') }}" class="btn-ghost" style="text-decoration:none;">← Jelajahi Margonoandi</a>
+    </div>
 </div>
 
 <script>
@@ -69,5 +72,20 @@
     }
 })();
 </script>
+
+@php
+$cardData = [
+    'name'     => $u->name ?? 'Musisi',
+    'avatar'   => $profile->photoUrl(),
+    'roles'    => array_map('ucfirst', $roles),
+    'genres'   => $genres,
+    'location' => $profile->location,
+    'skill'    => $profile->skill_level ? ucfirst($profile->skill_level) : '',
+    'bio'      => \Illuminate\Support\Str::limit(strip_tags((string) $profile->bio), 170),
+    'url'      => route('musisi.show', $profile->id),
+];
+@endphp
+<script>window.MS_CARD = {{ Illuminate\Support\Js::from($cardData) }};</script>
+<script src="{{ asset('js/musician-card.js') }}?v={{ @filemtime(public_path('js/musician-card.js')) ?: 1 }}"></script>
 
 @endsection

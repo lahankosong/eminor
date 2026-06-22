@@ -47,7 +47,14 @@ class MusicianController extends Controller
     public function edit()
     {
         $profile = $this->myProfile();
-        return view('fanbase.musisi.edit', compact('profile'));
+
+        // Pre-fill peran dari onboarding bila profil belum punya roles
+        $defaultRoles = '';
+        if (!$profile || empty($profile->roles)) {
+            $defaultRoles = User::rolesToCleanLabels(Auth::user()->roles ?? '');
+        }
+
+        return view('fanbase.musisi.edit', compact('profile', 'defaultRoles'));
     }
 
     // Simpan profil sendiri

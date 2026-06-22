@@ -50,6 +50,20 @@ class User extends Authenticatable
         return array_map(fn ($r) => $opt[$r] ?? $r, $this->rolesArray());
     }
 
+    /** Slug peran (mis. "gitaris,vokalis") -> label bersih tanpa emoji, buang 'penikmat'.
+        Dipakai untuk seed roles profil musisi dari onboarding. */
+    public static function rolesToCleanLabels(?string $slugs): string
+    {
+        $opt = self::roleOptions();
+        return collect(explode(',', (string) $slugs))
+            ->map(fn ($r) => trim($r))
+            ->filter(fn ($r) => $r !== '' && $r !== 'penikmat')
+            ->map(fn ($r) => trim(preg_replace('/^\S+\s*/u', '', $opt[$r] ?? $r)))
+            ->filter()
+            ->unique()
+            ->implode(', ');
+    }
+
     protected $casts = [
         'last_seen' => 'datetime',
         'is_online' => 'boolean',

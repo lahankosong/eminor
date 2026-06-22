@@ -21,6 +21,16 @@ class OnboardingController extends Controller
             $u = Auth::user();
             $u->roles = $roles !== '' ? $roles : 'penikmat';
             $u->save();
+
+            // Sinkron ke profil musisi (direktori/matchmaking) bila profil ada & roles masih kosong
+            $labels = User::rolesToCleanLabels($u->roles);
+            if ($labels !== '') {
+                $profile = \App\Models\MusicianProfile::where('user_id', $u->id)->first();
+                if ($profile && empty($profile->roles)) {
+                    $profile->roles = $labels;
+                    $profile->save();
+                }
+            }
         } catch (\Throwable $e) {
             return response()->json(['ok' => false], 200);
         }
