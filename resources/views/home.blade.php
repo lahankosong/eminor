@@ -1060,11 +1060,27 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
     .ms-join-t { font-weight:700; font-size:13.5px; margin-top:.55rem; }
     .ms-join-s { font-size:11px; opacity:.92; margin-top:2px; }
     .ms-land-pitch { max-width:520px; margin:.6rem auto 0; color:var(--text-2); font-size:14px; line-height:1.6; }
+    .ms-land { position:relative; }
+    .ms-land::before { content:''; position:absolute; top:4%; left:50%; transform:translateX(-50%); width:min(640px,92%); height:280px; background:radial-gradient(ellipse at center, rgba(56,168,204,.20), transparent 70%); filter:blur(38px); z-index:0; pointer-events:none; }
+    .ms-land > * { position:relative; z-index:1; }
+    .ms-land-perks { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:1.1rem auto 0; max-width:580px; }
+    .ms-land-perk { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--text-2); background:var(--card-bg); border:1px solid var(--border); border-radius:20px; padding:6px 13px; }
+    .ms-land-perk b { color:var(--accent); font-weight:700; }
+    @keyframes msJoinPulse { 0%{ box-shadow:0 0 0 0 rgba(56,168,204,.5); } 70%{ box-shadow:0 0 0 12px rgba(56,168,204,0); } 100%{ box-shadow:0 0 0 0 rgba(56,168,204,0); } }
+    .ms-land-join { animation:msJoinPulse 2.6s ease-out infinite; }
+    .ms-join-plus { transition:transform .3s ease; }
+    .ms-land-join:hover .ms-join-plus { transform:rotate(90deg) scale(1.12); }
+    @media (prefers-reduced-motion: reduce) { .ms-land-join { animation:none; } }
 </style>
 <div class="section ms-land">
     <p class="section-eyebrow">Dari kamarmu ke panggung</p>
     <p class="section-heading">Komunitas musisi yang sedang tumbuh</p>
     <p class="ms-land-pitch">Masih tahap awal &mdash; jadilah salah satu musisi pertama. Buat <b>profil portofolio</b> (kartu + QR), lalu <b>temukan personil &amp; gig</b> lewat matchmaking otomatis.</p>
+    <div class="ms-land-perks">
+        <span class="ms-land-perk">🎴 Kartu portofolio <b>+ QR</b></span>
+        <span class="ms-land-perk">🤝 Matchmaking <b>personil &amp; gig</b></span>
+        <span class="ms-land-perk">☕ <b>Tip Jar</b> dukungan</span>
+    </div>
     <div class="ms-land-grid">
         @foreach($musicians as $m)
         <button type="button" class="ms-land-card" data-m='@json($m, JSON_HEX_APOS|JSON_HEX_QUOT)' onclick="openMsLand(this)">
