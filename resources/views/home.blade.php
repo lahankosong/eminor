@@ -1103,20 +1103,33 @@ function openMsLand(btn){
 }
 function closeMsLand(){ document.getElementById('msLandOv').classList.remove('open'); }
 
-/* Efek 3D tilt: kartu "menghadap" kursor */
+/* Efek 3D tilt: kartu "menghadap" kursor (mouse) + ikut gerak HP (giroskop) */
 (function(){
-    if (window.matchMedia && window.matchMedia('(hover: none)').matches) return; // lewati layar sentuh
-    document.querySelectorAll('.ms-land-card').forEach(function(card){
+    var cards = document.querySelectorAll('.ms-land-card');
+    if (!cards.length) return;
+
+    function tilt(card, rx, ry, lift){
+        card.style.transform = 'perspective(620px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg)' + (lift ? ' translateY(-5px) scale(1.04)' : '');
+    }
+
+    // Desktop: ikut kursor
+    cards.forEach(function(card){
         card.addEventListener('mousemove', function(e){
             var r = card.getBoundingClientRect();
-            var px = (e.clientX - r.left) / r.width;
-            var py = (e.clientY - r.top) / r.height;
-            var ry = (px - 0.5) * 18;
-            var rx = (0.5 - py) * 18;
-            card.style.transform = 'perspective(620px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg) translateY(-5px) scale(1.04)';
+            tilt(card, (0.5 - (e.clientY - r.top) / r.height) * 18, ((e.clientX - r.left) / r.width - 0.5) * 18, true);
         });
         card.addEventListener('mouseleave', function(){ card.style.transform = ''; });
     });
+
+    // HP: ikut kemiringan perangkat (giroskop)
+    if (window.DeviceOrientationEvent) {
+        window.addEventListener('deviceorientation', function(e){
+            if (e.gamma == null && e.beta == null) return;
+            var ry = Math.max(-14, Math.min(14, (e.gamma || 0) * 0.5));  // kiri-kanan
+            var rx = Math.max(-14, Math.min(14, ((e.beta || 0) - 45) * 0.4)); // depan-belakang
+            cards.forEach(function(card){ tilt(card, rx, ry, false); });
+        }, true);
+    }
 })();
 </script>
 @endif
