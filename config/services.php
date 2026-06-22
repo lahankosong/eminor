@@ -41,6 +41,9 @@ return [
     'redirect' => env('GOOGLE_REDIRECT_URI'),
 ],
 
+    // Verifikasi Google Search Console (metode HTML tag). Token bukan rahasia (tampil di HTML).
+    'google_site_verification' => env('GOOGLE_SITE_VERIFICATION', '1Am36PqGZi0MBcVRaPtvoRjvwa_5qAX0AgRz_0-a8k4'),
+
     'vapid' => [
         'public'          => env('VAPID_PUBLIC_KEY'),
         'private_pem_b64' => env('VAPID_PRIVATE_PEM_B64'),
