@@ -75,10 +75,26 @@ class MusicianController extends Controller
             ->with('success', 'Profil musisimu tersimpan.');
     }
 
-    // Detail musisi
+    // Detail musisi — guest lihat TEASER publik (untuk link share), member lihat lengkap
     public function show($id)
     {
         $profile = MusicianProfile::with('user')->findOrFail($id);
+
+        if (!Auth::check()) {
+            $u     = $profile->user;
+            $roles = $profile->rolesArray();
+            $desc  = \Illuminate\Support\Str::limit(strip_tags((string) $profile->bio), 150)
+                  ?: ('Musisi' . ($roles ? ' — ' . implode(', ', array_slice($roles, 0, 3)) : '') . ' di komunitas Margonoandi.');
+            $seo = [
+                'title'       => ($u->name ?? 'Musisi') . ' — Musisi di Margonoandi',
+                'description' => $desc,
+                'image'       => $u->avatar ?? asset('images/Margonoandi.jpeg'),
+                'url'         => route('musisi.show', $profile->id),
+                'type'        => 'profile',
+            ];
+            return view('fanbase.musisi.public', compact('profile', 'seo'));
+        }
+
         return view('fanbase.musisi.show', compact('profile'));
     }
 

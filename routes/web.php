@@ -57,6 +57,9 @@ Route::get('/lagu/{slug}', [SongController::class, 'show'])->name('song.show');
 // Catat pemutaran lagu (publik, fire-and-forget) — dibatasi throttle agar tak diabuse
 Route::post('/lagu/{id}/play', [SongController::class, 'play'])
      ->whereNumber('id')->middleware('throttle:120,1')->name('song.play');
+
+// Profil musisi PUBLIK (untuk link yang dibagikan) — guest lihat teaser, member lihat lengkap
+Route::get('/musisi/{id}', [MusicianController::class, 'show'])->whereNumber('id')->name('musisi.show');
 Route::post('/lagu/{slug}/comment', [SongController::class, 'comment'])
      ->name('song.comment')->middleware('auth');
 
@@ -125,7 +128,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/musisi/profil', [MusicianController::class, 'save'])->name('musisi.save');
     Route::get('/musisi/card/{userId}', [MusicianController::class, 'card'])->whereNumber('userId')->name('musisi.card');
     Route::post('/follow/{userId}', [MusicianController::class, 'toggleFollow'])->whereNumber('userId')->name('follow.toggle');
-    Route::get('/musisi/{id}', [MusicianController::class, 'show'])->whereNumber('id')->name('musisi.show');
 
     // Cari Personil (band posts)
     Route::get('/band', [BandPostController::class, 'index'])->name('band.index');
