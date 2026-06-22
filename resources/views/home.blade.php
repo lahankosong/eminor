@@ -1,7 +1,11 @@
 @extends('layouts.app')
 
+@push('preload')
+<link rel="preload" as="image" href="{{ asset('images/Margonoandi.jpeg') }}">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+@endpush
+
 @push('styles')
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
     /* HERO */
@@ -493,7 +497,7 @@
                 <span>{{ $settings['artist_role'] ?? 'Songwriter' }}</span> ·
                 Project <span>{{ $settings['artist_project'] ?? 'Margonoandi' }}</span>
             </p>
-            <button class="hero-collapse" id="heroCollapse" onclick="toggleHero()" aria-expanded="false">Tampilkan intro &#9662;</button>
+            <button class="hero-collapse" id="heroCollapse" onclick="toggleHero()" aria-expanded="false">Show &#9662;</button>
         </div>
         <div class="hero-body hidden" id="heroBody">
         <h1 class="hero-title">
@@ -572,10 +576,10 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
 <div class="section fb-promo">
     <div class="fb-movement">
         <p class="section-eyebrow"><span class="eq"><i></i><i></i><i></i><i></i><i></i></span>Sebuah gerakan, bukan sekadar aplikasi</p>
-        <h2>Ekosistem musik Indonesia,<br><b>dimulai dari kamar tidur.</b></h2>
-        <p class="fb-promo-intro">Bukan soal kamu sudah terkenal atau belum. Budaya baru ini lahir dari siapa saja yang cinta musik &mdash; dari kamar tidurmu, malam ini. Tempat para musisi rumahan saling kenal, saling bantu, dan tumbuh bareng.</p>
+        <h2>Ekosistem Musik Indonesia,<br><b>Ayo kita mulai dari kamar kamu.</b></h2>
+        <p class="fb-promo-intro">Bukan soal kamu sudah terkenal atau belum. Budaya baru ini lahir dari siapa saja yang cinta musik &mdash; dari kamar kecilmu, hari ini. Tempat para musisi rumahan membangun interaksi, saling terhubung, dan mari tumbuh bersama.</p>
 
-        <p class="fb-roles-label">Apa pun latar musikmu, ada tempat di sini:</p>
+        <p class="fb-roles-label">Apa pun latar musikmu, ada tempat di sini untuk berkembang :</p>
         <div class="fb-roles">
             <span class="fb-role">&#127928; Gitaris</span>
             <span class="fb-role">&#127925; Basis</span>
@@ -592,8 +596,8 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
         </div>
     </div>
 
-    <p class="section-eyebrow">Gratis untuk semua</p>
-    <p class="section-heading">Yang sudah bisa kamu pakai sekarang.</p>
+    <p class="section-eyebrow">Fitur berikut ada di dalam Aplikasi</p>
+    <p class="section-heading">Bisa kamu temukan setelah Masuk dengan email terdaftar di Google</p>
     <div class="fb-promo-grid">
         <div class="fb-promo-card"><div class="ic">&#127928;</div><h4>Tuner Gitar</h4><p>Stem gitar akurat langsung dari HP.</p></div>
         <div class="fb-promo-card"><div class="ic">&#127932;</div><h4>Belajar Chord</h4><p>Kamus chord gitar &amp; piano, chord geser + suara.</p></div>
@@ -602,8 +606,8 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
         <div class="fb-promo-card"><div class="ic">&#127908;</div><h4>Cari Personil</h4><p>Direktori musisi &amp; lowongan band terdekat.</p></div>
         <div class="fb-promo-card"><div class="ic">&#128221;</div><h4>Catatan Pribadi</h4><p>Simpan lirik, ide lagu &amp; chord favoritmu.</p></div>
     </div>
-    <a href="{{ $fbEntry }}" class="btn-primary fb-promo-cta">&#128640; Mulai dari kamarmu &mdash; Gabung Gratis</a>
-    <p class="fb-promo-note">@auth Kamu sudah di dalam &mdash; ayo lanjut berkarya. @else Cukup login pakai Google, langsung bisa dipakai. @endauth</p>
+    <a href="{{ $fbEntry }}" class="btn-primary fb-promo-cta">&#128640; Mulai dari kamarmu &mdash; Ayoo Masuk</a>
+    <p class="fb-promo-note">@auth Kamu sudah di dalam &mdash; ayo lanjut berkarya. @else Cukup login pakai Google, Aman langsung bisa dipakai. @endauth</p>
 
     <div class="fb-beta">
         <span class="bic">&#128679;</span>

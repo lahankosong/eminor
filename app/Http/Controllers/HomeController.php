@@ -42,42 +42,88 @@ class HomeController extends Controller
             'url'         => url('/'),
             'type'        => 'music.musician',
             'schema'      => [
-                '@context'    => 'https://schema.org',
-                '@type'       => 'MusicGroup',
-                'name'        => $artistName,
-                'url'         => url('/'),
-                'image'       => asset('images/Margonoandi.jpeg'),
-                'genre'       => ['Indie', 'Pop Indonesia'],
-                'description' => \Illuminate\Support\Str::limit(strip_tags($settings['hero_story'] ?? ''), 250),
-                'sameAs'      => $sameAs,
+                '@context' => 'https://schema.org',
+                '@graph'   => [
+                    [
+                        '@type'       => 'WebSite',
+                        'name'        => $artistName,
+                        'url'         => url('/'),
+                        'description' => $heroDesc,
+                        'inLanguage'  => 'id',
+                    ],
+                    [
+                        '@type'       => 'MusicGroup',
+                        'name'        => $artistName,
+                        'url'         => url('/'),
+                        'image'       => asset('images/Margonoandi.jpeg'),
+                        'genre'       => ['Indie', 'Pop Indonesia'],
+                        'description' => \Illuminate\Support\Str::limit(strip_tags($settings['hero_story'] ?? ''), 250),
+                        'sameAs'      => $sameAs,
+                        'track'       => $songs->take(5)->map(fn($s) => [
+                            '@type' => 'MusicRecording',
+                            'name'  => $s->title,
+                            'url'   => route('song.show', $s->slug),
+                        ])->values()->toArray(),
+                    ],
+                    [
+                        '@type'           => 'ItemList',
+                        'name'            => 'Lagu-lagu Margonoandi',
+                        'url'             => url('/'),
+                        'itemListElement' => $songs->take(10)->values()->map(fn($s, $i) => [
+                            '@type'    => 'ListItem',
+                            'position' => $i + 1,
+                            'name'     => $s->title,
+                            'url'      => route('song.show', $s->slug),
+                        ])->toArray(),
+                    ],
+                ],
             ],
         ];
 
         return view('home', compact('songs', 'featuredSong', 'ctaSongs', 'settings', 'seo'));
     }
 
-    /** sitemap.xml dinamis: homepage + semua lagu aktif. */
+    /** sitemap.xml dinamis: homepage + semua lagu aktif, termasuk image:image untuk Google Image. */
     public function sitemap()
     {
         $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
-        $xml .= '  <url><loc>' . htmlspecialchars(url('/')) . '</loc><changefreq>daily</changefreq><priority>1.0</priority></url>' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"' . "\n";
+        $xml .= '        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n";
+
+        $homeImg = htmlspecialchars(asset('images/Margonoandi.jpeg'));
+        $xml .= '  <url>' . "\n";
+        $xml .= '    <loc>' . htmlspecialchars(url('/')) . '</loc>' . "\n";
+        $xml .= '    <lastmod>' . now()->toDateString() . '</lastmod>' . "\n";
+        $xml .= '    <changefreq>daily</changefreq><priority>1.0</priority>' . "\n";
+        $xml .= '    <image:image><image:loc>' . $homeImg . '</image:loc><image:title>Margonoandi</image:title></image:image>' . "\n";
+        $xml .= '  </url>' . "\n";
 
         try {
             $songs = Song::where('is_active', true)
                 ->whereNotNull('slug')->where('slug', '!=', '')
-                ->get(['slug', 'updated_at']);
+                ->get(['slug', 'title', 'youtube_id', 'updated_at']);
             foreach ($songs as $s) {
                 if (empty($s->slug)) continue;
                 try { $loc = route('song.show', $s->slug); } catch (\Throwable $e) { continue; }
-                $xml .= '  <url><loc>' . htmlspecialchars($loc) . '</loc>';
-                if ($s->updated_at) $xml .= '<lastmod>' . $s->updated_at->toAtomString() . '</lastmod>';
-                $xml .= '<changefreq>weekly</changefreq><priority>0.8</priority></url>' . "\n";
+                $xml .= '  <url>' . "\n";
+                $xml .= '    <loc>' . htmlspecialchars($loc) . '</loc>' . "\n";
+                if ($s->updated_at) $xml .= '    <lastmod>' . $s->updated_at->toDateString() . '</lastmod>' . "\n";
+                $xml .= '    <changefreq>weekly</changefreq><priority>0.8</priority>' . "\n";
+                if ($s->youtube_id) {
+                    $imgLoc   = 'https://img.youtube.com/vi/' . $s->youtube_id . '/maxresdefault.jpg';
+                    $imgTitle = htmlspecialchars($s->title . ' — Margonoandi');
+                    $xml .= '    <image:image><image:loc>' . $imgLoc . '</image:loc><image:title>' . $imgTitle . '</image:title></image:image>' . "\n";
+                }
+                $xml .= '  </url>' . "\n";
             }
         } catch (\Throwable $e) {}
 
         $xml .= '</urlset>';
 
-        return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+        return response($xml, 200, [
+            'Content-Type'           => 'application/xml; charset=UTF-8',
+            'Cache-Control'          => 'no-transform, public, max-age=3600',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 }

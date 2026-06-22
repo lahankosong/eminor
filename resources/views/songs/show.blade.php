@@ -1,5 +1,17 @@
 @extends('layouts.app')
 
+@push('preload')
+@if($song->youtube_id)
+<link rel="preload" as="image" href="https://img.youtube.com/vi/{{ $song->youtube_id }}/maxresdefault.jpg">
+@endif
+@if($prevSong)
+<link rel="prev" href="{{ route('song.show', $prevSong->slug) }}">
+@endif
+@if($nextSong)
+<link rel="next" href="{{ route('song.show', $nextSong->slug) }}">
+@endif
+@endpush
+
 @push('styles')
 <style>
     /* HERO */
@@ -103,6 +115,13 @@
     }
     .chord-mark   { color: var(--accent); font-weight: 700; }
     .section-mark { color: var(--text-3); font-size: 11px; }
+
+    /* LYRICS */
+    .lyrics-body {
+        font-size: 14px; color: var(--text-2); line-height: 2.2;
+        white-space: pre-wrap; font-style: italic;
+    }
+    .lyrics-body strong { color: var(--text); font-style: normal; font-weight: 500; }
 
     /* SHARE */
     .share-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -287,7 +306,15 @@
                 @endif
             </div>
             @endif
-            <div class="chord-body-inline" id="chordDisplay"></div>
+            <div class="chord-body-inline" id="chordDisplay">{{ $song->chords }}</div>
+        </div>
+        @endif
+
+        {{-- LIRIK --}}
+        @if($song->lyrics)
+        <div class="song-section">
+            <p class="song-section-title">Lirik lagu</p>
+            <div class="lyrics-body">{!! nl2br(e($song->lyrics)) !!}</div>
         </div>
         @endif
 

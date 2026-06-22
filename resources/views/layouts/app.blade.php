@@ -20,6 +20,8 @@
     <meta name="description" content="{{ $seoDesc }}">
     <link rel="canonical" href="{{ $seoUrl }}">
     <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#38A8CC">
+    <link rel="manifest" href="/manifest.json">
     <meta property="og:type" content="{{ $seoType }}">
     <meta property="og:site_name" content="Margonoandi">
     <meta property="og:title" content="{{ $seoTitle }}">
@@ -30,9 +32,15 @@
     <meta name="twitter:title" content="{{ $seoTitle }}">
     <meta name="twitter:description" content="{{ $seoDesc }}">
     <meta name="twitter:image" content="{{ $seoImage }}">
+    <meta property="og:locale" content="id_ID">
+    <meta name="author" content="Margonoandi">
+    <meta name="application-name" content="Margonoandi">
     @isset($seo['schema'])
     <script type="application/ld+json">{!! json_encode($seo['schema'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
     @endisset
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    @stack('preload')
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
     <style>
         /* ===== VARIABLES ===== */

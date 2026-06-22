@@ -39,22 +39,38 @@ class SongController extends Controller
             $song->youtube_id ? 'https://youtu.be/' . $song->youtube_id : null,
         ]));
 
+        $songUrl = route('song.show', $song->slug);
+        $genre   = $song->era ? [$song->era, 'Indie', 'Pop Indonesia'] : ['Indie', 'Pop Indonesia'];
+
         $seo = [
             'title'       => $song->title . ' — Margonoandi' . ($song->era ? ' (' . $song->era . ')' : ''),
             'description' => $desc,
             'image'       => $img,
-            'url'         => route('song.show', $song->slug),
+            'url'         => $songUrl,
             'type'        => 'music.song',
             'schema'      => [
-                '@context'    => 'https://schema.org',
-                '@type'       => 'MusicRecording',
-                'name'        => $song->title,
-                'url'         => route('song.show', $song->slug),
-                'image'       => $img,
-                'description' => $desc,
-                'byArtist'    => ['@type' => 'MusicGroup', 'name' => 'Margonoandi', 'url' => url('/')],
-                'inLanguage'  => 'id',
-                'sameAs'      => $sameAs,
+                '@context' => 'https://schema.org',
+                '@graph'   => [
+                    [
+                        '@type'         => 'MusicRecording',
+                        'name'          => $song->title,
+                        'url'           => $songUrl,
+                        'image'         => $img,
+                        'description'   => $desc,
+                        'byArtist'      => ['@type' => 'MusicGroup', 'name' => 'Margonoandi', 'url' => url('/')],
+                        'inLanguage'    => 'id',
+                        'genre'         => $genre,
+                        'datePublished' => $song->created_at?->toDateString(),
+                        'sameAs'        => $sameAs,
+                    ],
+                    [
+                        '@type'           => 'BreadcrumbList',
+                        'itemListElement' => [
+                            ['@type' => 'ListItem', 'position' => 1, 'name' => 'Beranda', 'item' => url('/')],
+                            ['@type' => 'ListItem', 'position' => 2, 'name' => $song->title, 'item' => $songUrl],
+                        ],
+                    ],
+                ],
             ],
         ];
 
