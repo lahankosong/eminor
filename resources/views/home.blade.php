@@ -1039,8 +1039,8 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
 <style>
     .ms-land { text-align:center; }
     .ms-land-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; max-width:760px; margin:1.5rem auto 0; }
-    .ms-land-card { background:var(--card-bg); border:1px solid var(--border); border-radius:16px; padding:1rem .75rem; cursor:pointer; text-align:center; transition:transform .2s, border-color .2s, box-shadow .25s; font-family:inherit; color:inherit; }
-    .ms-land-card:hover { transform:translateY(-4px); border-color:var(--accent); box-shadow:0 12px 28px -14px var(--accent); }
+    .ms-land-card { background:var(--card-bg); border:1px solid var(--border); border-radius:16px; padding:1rem .75rem; cursor:pointer; text-align:center; transition:transform .15s ease, border-color .2s, box-shadow .25s; font-family:inherit; color:inherit; transform-style:preserve-3d; will-change:transform; }
+    .ms-land-card:hover { border-color:var(--accent); box-shadow:0 18px 36px -16px var(--accent); }
     .ms-land-av { width:64px; height:64px; border-radius:50%; object-fit:cover; border:2px solid var(--border); }
     .ms-land-name { font-weight:600; font-size:14px; color:var(--text); margin-top:.6rem; }
     .ms-land-role { font-size:12px; color:var(--accent); margin-top:2px; }
@@ -1102,6 +1102,22 @@ function openMsLand(btn){
     document.getElementById('msLandOv').classList.add('open');
 }
 function closeMsLand(){ document.getElementById('msLandOv').classList.remove('open'); }
+
+/* Efek 3D tilt: kartu "menghadap" kursor */
+(function(){
+    if (window.matchMedia && window.matchMedia('(hover: none)').matches) return; // lewati layar sentuh
+    document.querySelectorAll('.ms-land-card').forEach(function(card){
+        card.addEventListener('mousemove', function(e){
+            var r = card.getBoundingClientRect();
+            var px = (e.clientX - r.left) / r.width;
+            var py = (e.clientY - r.top) / r.height;
+            var ry = (px - 0.5) * 18;
+            var rx = (0.5 - py) * 18;
+            card.style.transform = 'perspective(620px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg) translateY(-5px) scale(1.04)';
+        });
+        card.addEventListener('mouseleave', function(){ card.style.transform = ''; });
+    });
+})();
 </script>
 @endif
 
