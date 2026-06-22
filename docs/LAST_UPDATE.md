@@ -1,6 +1,35 @@
 # Catatan Pengembangan Terakhir — Margonoandi Fanbase
 
-> Diperbarui: **2026-06-22**. File ini ikut `git pull` (portabel antar-komputer). Urut: terbaru di atas.
+> Diperbarui: **2026-06-23**. File ini ikut `git pull` (portabel antar-komputer). Urut: terbaru di atas.
+
+## 🆕 Sesi 2026-06-23 — Ekosistem musisi, EPK, matchmaking, One Tap (8ded9a9 → eb618c0)
+
+**Profil musisi & EPK**
+- **8ded9a9** — `musisi.show` jadi **PUBLIK** (keluar grup `auth`): guest klik link share → **halaman teaser** (`fanbase/musisi/public.blade`, layout `app`, + OG/SEO untuk preview WA/medsos); member tetap lihat profil lengkap. **Portofolio/kontak/Tip Jar tetap wajib login** (anti-bypass). Route publik `GET /musisi/{id}`.
+- **d26f82b / 57fabb1** — **Kartu portofolio sebagai GAMBAR** (Canvas 1080×1350: foto/initials, nama, peran, genre, bio, **QR code** via api.qrserver.com, branding). Tombol "📸 Kartu Gambar". Logika diekstrak ke **`public/js/musician-card.js`** (dipakai profil member & publik; guest pun bisa sebar).
+- **6f30450** — **Upload + crop foto profil**: kolom **`musician_profiles.photo`** (fixdb **section 9u** + migration `2026_06_23_000001`), helper **`MusicianProfile::photoUrl()`** (foto manual override avatar Google), simpan ke `public_path('images/avatars')`. Cropper modal (geser + zoom, output 512×512 via canvas + DataTransfer). Foto kustom dipakai di SEMUA kartu musisi (show/public/landing/matchmaking/direktori).
+
+**Matchmaking 2 arah (pasar dua sisi)**
+- **4cb9ee0** — sisi A: **"Musisi yang cocok"** di detail Cari Personil (`BandPostController@show`, `band/show.blade`). Skor = peran×3 + genre×1 + lokasi×2. Tombol **"Ajak"** (pembuat lowongan, kirim pesan pembuka) / **"Lihat"**.
+- **4f7a0e6** — sisi B: **"Peluang untukmu"** di direktori (`MusicianController@index` hitung `$opportunities` dari band post cocok + `$cityGigs`). Kartu scroll horizontal di `musisi/index.blade`.
+- **6f30450** — **sinkron peran onboarding→direktori**: `User::rolesToCleanLabels()`; OnboardingController isi `profile.roles` bila kosong; form edit pre-fill peran.
+
+**Landing → mesin konversi cold-start**
+- **ec09cb8 / c6a7b30** — showcase musisi **SELALU tampil** (dulu hanya kalau sudah ada musisi). Reframe **"Komunitas musisi yang sedang tumbuh"** + pitch nilai + **perks chips** (kartu QR / matchmaking / Tip Jar) + kartu **"Jadi musisi di sini"** (pulse) + **glow aurora** + CTA primer. Ber-event GA.
+- **57fabb1** — ganti **"kamar tidur" → "kamarmu"** di seluruh web (SEO desc, bot, eyebrow, kartu).
+- **3d00005 → ba82c7d** — efek **3D tilt** kartu musisi (landing + profil publik): ikut kursor / jari (touch-drag) / giroskop HP.
+
+**🔑 Google One Tap (login sekali tap)**
+- **c9b3a7a / aa071f3** — popup "Lanjut sebagai…" → login tanpa redirect. `GoogleController@oneTap` verifikasi ID token **server-side** via endpoint resmi Google `tokeninfo` (cek `aud`=client_id kita + `iss` Google), lalu `updateOrCreate` + `Auth::login` (mirror callback: MemberLog + WelcomeBot). Route **`POST /auth/google/onetap`** (`google.onetap`). Skrip GSI di `layouts/app` (guest), dimuat **PASCA `window.load`** (cegah spinner). CSRF aktif via header.
+- ⚠️ **Server `.env` WAJIB pakai client `753501956819-…`** (yang punya **Authorized JavaScript origins** = `https://margonoandi.my.id`). Lihat checklist.
+
+**🐞 Fix penting**
+- **99c829f** — **`public/images/default-avatar.png` HILANG** (404) → tiap fallback `<img>` memicu `onerror` → set src ke file 404 lagi → **loop tak terhingga** (1399 request) → **tab "loading" abadi / favicon tak muncul**. Dibuat file-nya (GD) + **guard `this.onerror=null`** di 10 view (anti-loop permanen).
+- **eb618c0** — hapus preload `Margonoandi.jpeg` (tak dipakai di home, cuma OG meta) → bersihkan warning console.
+
+**✅ LOGIN GOOGLE SUDAH JALAN** — tak lagi gagal (user berhasil login & kelola profil sepanjang sesi). Item "login gagal" lama dianggap **selesai**.
+
+---
 
 ## 🆕 Lanjutan (commit kantor, di atas 6b5a79d)
 - **004b91a** — **Papan Gig / Manggung** (`GigPostController`, model `GigPost`, tabel `gig_posts`, view `fanbase/gig/create`) + "Cari Personil" auto-post ke Kita dengan popup "linked" (migration `add_linked_to_posts` di `posts`). ⚠️ **2 migration baru → butuh section fixdb / cek tabel di server.**
@@ -40,10 +69,11 @@
 
 ## ▶ LANJUTKAN DI SINI (urut prioritas)
 
-1. **Login Google masih gagal.** Buka `https://margonoandi.my.id/fixdb.php?key=<DEPLOY_KEY>` → bagian **"9. Log Error Laravel (50 baris terakhir)"** → cari error `GoogleController` / `Socialite` / nama exception → perbaiki akar masalahnya. (Kemungkinan: state OAuth / sesi / redirect URI / proxy HTTPS.)
-2. **Notifikasi Android belum muncul.** Pastikan 3 var `VAPID_*` ada di `.env` SERVER + sudah jalankan `fixdb.php` (tabel `push_subscriptions`). Tes lewat lonceng → tombol "Aktifkan" lalu "Tes". Kalau dialog izin tak muncul / tray kosong padahal "terkirim" → **rebuild APK** (Bubblewrap terbaru, izin `POST_NOTIFICATIONS` Android 13+).
-3. **Submit sitemap** di Search Console: menu "Peta Situs" → `sitemap.xml` → Kirim. (Properti sudah terverifikasi.)
-4. **Backlog lama:** verifikasi fingering chord ukulele/bass, tuner untuk uke/bass, dark mode admin, AI pipeline Fase B.
+1. **Google One Tap — set `.env` SERVER ke client `753501956819-…`** (`GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` dari JSON OAuth yang punya **Authorized JS origin** `margonoandi.my.id`) → `php artisan config:clear`. Tes One Tap di **browser bersih** (FedCM masuk cooldown kalau popup sering di-dismiss). Tombol "Masuk" tetap fallback. (Login redirect biasa **sudah jalan**.)
+2. **fixdb section 9u** di server — tambah kolom `musician_profiles.photo` (WAJIB untuk fitur upload/crop foto). Jalankan `fixdb.php?key=<DEPLOY_KEY>`. Pastikan folder `public/images/avatars/` bisa ditulis (upload foto).
+3. **Notifikasi Android belum muncul.** Pastikan 3 var `VAPID_*` ada di `.env` SERVER + sudah jalankan `fixdb.php` (tabel `push_subscriptions`). Tes lewat lonceng → "Aktifkan" lalu "Tes". Kalau dialog izin tak muncul / tray kosong padahal "terkirim" → **rebuild APK** (Bubblewrap, izin `POST_NOTIFICATIONS` Android 13+).
+4. **Submit sitemap** di Search Console: menu "Peta Situs" → `sitemap.xml` → Kirim. (Properti sudah terverifikasi.)
+5. **Backlog lama:** fingering chord ukulele/bass, tuner uke/bass, dark mode admin, AI pipeline Fase B.
 
 ## Operasional penting
 - **Deploy:** `deploy.php?key=<DEPLOY_KEY>&run=1` lalu (bila ada perubahan DB) `fixdb.php?key=<DEPLOY_KEY>`. Kunci ada di `.env` (`DEPLOY_KEY`) — **tidak di git**.
