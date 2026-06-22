@@ -15,7 +15,7 @@
         position: relative; overflow: hidden;
         transition: min-height 0.5s ease, padding 0.5s ease;
     }
-    .hero.collapsed { min-height: auto; padding-top: 6rem; padding-bottom: 2rem; justify-content: flex-start; }
+    .hero.collapsed { min-height: auto; padding-top: 1.25rem; padding-bottom: 1.25rem; justify-content: flex-start; }
     .hero.collapsed .scroll-hint { display: none; }
     .hero-bg {
         position: absolute; inset: 0; z-index: 0;
@@ -450,6 +450,8 @@
     .fb-promo-card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 12px 28px -14px var(--accent); }
     .fb-role { transition: transform 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
     .fb-role:hover { transform: translateY(-2px); border-color: var(--accent); color: var(--text); }
+    a.fb-role.you { text-decoration: none; cursor: pointer; }
+    a.fb-role.you:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 8px 20px -8px var(--accent); }
 
     /* movement banner sedikit glassy */
     .fb-movement { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
@@ -734,51 +736,8 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
 
 @php $fbEntry = auth()->check() ? route('aku') : route('google.login'); @endphp
 
-{{-- FANBASE TICKER --}}
-<a href="{{ $fbEntry }}" class="fb-ticker" aria-label="Masuk fanbase"
-   @guest onclick="gtag && gtag('event', 'cta_click', {event_category:'engagement', button:'ticker_top'})" @endguest>
-    <div class="fb-ticker-track">
-        @php
-            $ticks = [
-                '&#127925; <b>'.e($settings['tagline_1'] ?? 'Tiga chord.').'</b>',
-                '<b>'.e($settings['tagline_2'] ?? 'Tenggelam oleh waktu').'</b>',
-                '<b>'.e($settings['tagline_3'] ?? 'Bangkit dengan nafas Ai').'</b>',
-                e($settings['artist_name'] ?? 'Rakhman Andi').' &middot; '.e($settings['artist_role'] ?? 'Songwriter').' &middot; Project '.e($settings['artist_project'] ?? 'Margonoandi'),
-                '&#128719;&#65039; Budaya baru, <b>dimulai dari kamar tidur</b>',
-                '&#128640; <b>Mulai gerakannya &rarr;</b>',
-            ];
-        @endphp
-        @for ($i = 0; $i < 2; $i++)
-            @foreach ($ticks as $t)<span>{!! $t !!}</span>@endforeach
-        @endfor
-    </div>
-</a>
-
-<hr class="divider">
-
 {{-- FANBASE MOVEMENT / PROMO CTA --}}
 <div class="section fb-promo" id="fbPromoSection">
-    <div class="fb-movement">
-        <p class="section-eyebrow"><span class="eq"><i></i><i></i><i></i><i></i><i></i></span>Sebuah gerakan, bukan sekadar aplikasi</p>
-        <h2>Ekosistem Musik Indonesia,<br><b>Ayo kita mulai dari kamar kamu.</b></h2>
-        <p class="fb-promo-intro">Bukan soal kamu sudah terkenal atau belum. Budaya baru ini lahir dari siapa saja yang cinta musik &mdash; dari kamar kecilmu, hari ini. Tempat para musisi rumahan membangun interaksi, saling terhubung, dan mari tumbuh bersama.</p>
-
-        <p class="fb-roles-label">Apa pun latar musikmu, ada tempat di sini untuk berkembang :</p>
-        <div class="fb-roles">
-            <span class="fb-role">&#127928; Gitaris</span>
-            <span class="fb-role">&#127925; Basis</span>
-            <span class="fb-role">&#129345; Drummer</span>
-            <span class="fb-role">&#127908; Vokalis</span>
-            <span class="fb-role">&#127929; Keyboardis</span>
-            <span class="fb-role">&#9997;&#65039; Songwriter</span>
-            <span class="fb-role">&#127898;&#65039; Arranger</span>
-            <span class="fb-role">&#127915; Event Organizer</span>
-            <span class="fb-role">&#128141; Wedding Organizer</span>
-            <span class="fb-role">&#128227; Promotor</span>
-            <span class="fb-role">&#127911; Penikmat Musik</span>
-            <span class="fb-role you">&hellip;dan kamu?</span>
-        </div>
-    </div>
 
     <p class="section-eyebrow">Fitur berikut ada di dalam Aplikasi</p>
     <p class="section-heading">Bisa kamu temukan setelah Masuk dengan email terdaftar di Google</p>
@@ -1026,15 +985,53 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
             <div class="feat-desc-item" data-feat="5"><strong>Posting</strong> &mdash; Bagikan cerita, progress, dan ide musikmu. Dapatkan sambutan dari komunitas musisi.</div>
         </div>
     </div>
+    {{-- CTA 1: Coba Sekarang --}}
+    <a href="{{ $fbEntry }}" class="btn-primary fb-promo-cta"
+       @guest onclick="gtag && gtag('event', 'cta_click', {event_category:'engagement', button:'coba_sekarang'})" @endguest
+    >&#10024; Coba Sekarang</a>
+    <p class="fb-promo-note">@auth Kamu sudah di dalam &mdash; ayo lanjut berkarya. @else Cukup login pakai Google &mdash; gratis &amp; aman. @endauth</p>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:2.5rem 0;">
+
+    {{-- Gerakan / fb-movement --}}
+    <div class="fb-movement">
+        <p class="section-eyebrow"><span class="eq"><i></i><i></i><i></i><i></i><i></i></span>Sebuah gerakan, bukan sekadar aplikasi</p>
+        <h2>Ekosistem Musik Indonesia,<br><b>Ayo kita mulai dari kamar kamu.</b></h2>
+        <p class="fb-promo-intro">Bukan soal kamu sudah terkenal atau belum. Budaya baru ini lahir dari siapa saja yang cinta musik &mdash; dari kamar kecilmu, hari ini. Tempat para musisi rumahan membangun interaksi, saling terhubung, dan mari tumbuh bersama.</p>
+    </div>
+
+    {{-- CTA 2: Mulai dari kamarmu --}}
     <a href="{{ $fbEntry }}" class="btn-primary fb-promo-cta"
        @guest onclick="gtag && gtag('event', 'cta_click', {event_category:'engagement', button:'promo_gabung'})" @endguest
     >&#128640; Mulai dari kamarmu &mdash; Ayoo Masuk</a>
-    <p class="fb-promo-note">@auth Kamu sudah di dalam &mdash; ayo lanjut berkarya. @else Cukup login pakai Google, Aman langsung bisa dipakai. @endauth</p>
 
-    <div class="fb-beta">
+    {{-- Role cards --}}
+    <p class="fb-roles-label" style="margin-top:2.5rem;">Apa pun latar musikmu, ada tempat di sini untuk berkembang :</p>
+    <div class="fb-roles">
+        <span class="fb-role">&#127928; Gitaris</span>
+        <span class="fb-role">&#127925; Basis</span>
+        <span class="fb-role">&#129345; Drummer</span>
+        <span class="fb-role">&#127908; Vokalis</span>
+        <span class="fb-role">&#127929; Keyboardis</span>
+        <span class="fb-role">&#9997;&#65039; Songwriter</span>
+        <span class="fb-role">&#127898;&#65039; Arranger</span>
+        <span class="fb-role">&#127915; Event Organizer</span>
+        <span class="fb-role">&#128141; Wedding Organizer</span>
+        <span class="fb-role">&#128227; Promotor</span>
+        <span class="fb-role">&#127911; Penikmat Musik</span>
+        <a href="{{ $fbEntry }}" class="fb-role you"
+           @guest onclick="gtag && gtag('event', 'cta_click', {event_category:'engagement', button:'dan_kamu'})" @endguest
+        >&hellip;dan kamu? &#128075;</a>
+    </div>
+
+    {{-- Jujur ya — beta + CTA 3: Berani --}}
+    <div class="fb-beta" style="margin-top:2.5rem;">
         <span class="bic">&#128679;</span>
         <span>Jujur ya &mdash; ini <b>masih tahap beta</b>, dan untuk sekarang masih <b>menumpang di web pribadi</b> saya. Tapi kalau dukungan kalian besar, kita serius bangun <b>rumah baru</b> yang layak buat ekosistem ini. Langkah besar ini dimulai dari kamu yang berani gabung lebih dulu. &#128293;</span>
     </div>
+    <a href="{{ $fbEntry }}" class="btn-primary fb-promo-cta" style="margin-top:1rem;background:linear-gradient(135deg,#f59e0b,#ef4444);border:none;"
+       @guest onclick="gtag && gtag('event', 'cta_click', {event_category:'engagement', button:'berani'})" @endguest
+    >&#128293; Berani</a>
 </div>
 
 <hr class="divider">
