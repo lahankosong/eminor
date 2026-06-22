@@ -45,7 +45,8 @@ return [
     'google_site_verification' => env('GOOGLE_SITE_VERIFICATION', '1Am36PqGZi0MBcVRaPtvoRjvwa_5qAX0AgRz_0-a8k4'),
 
     // Google Analytics 4 Measurement ID (G-XXXXXXXXXX). Kosongkan untuk nonaktifkan tracking.
-    'google_analytics_id' => env('GOOGLE_ANALYTICS_ID'),
+    'google_analytics_id'          => env('GOOGLE_ANALYTICS_ID'),
+    'google_analytics_property_id' => env('GOOGLE_ANALYTICS_PROPERTY_ID', '542523144'),
 
     'vapid' => [
         'public'          => env('VAPID_PUBLIC_KEY'),
