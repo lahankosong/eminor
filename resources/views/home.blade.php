@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @push('preload')
-<link rel="preload" as="image" href="{{ asset('images/Margonoandi.jpeg') }}">
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
 @endpush
 
