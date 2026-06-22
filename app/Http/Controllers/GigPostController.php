@@ -28,21 +28,28 @@ class GigPostController extends Controller
         $data['user_id'] = Auth::id();
         $data['status']  = 'open';
 
-        $gig = GigPost::create($data);
+        try {
+            $gig = GigPost::create($data);
 
-        // Auto-post ke Kita
-        $label = GigPost::typeLabel($gig->type);
-        $body  = "{$label}: {$gig->title}";
-        if ($gig->location)   $body .= "\n📍 {$gig->location}";
-        if ($gig->date_event) $body .= "  🗓 " . $gig->date_event->format('d M Y');
-        if ($gig->description) $body .= "\n\n" . Str::limit($gig->description, 250);
+            // Auto-post ke Kita
+            $label = GigPost::typeLabel($gig->type);
+            $body  = "{$label}: {$gig->title}";
+            if ($gig->location)   $body .= "\n📍 {$gig->location}";
+            if ($gig->date_event) $body .= "  🗓 " . $gig->date_event->format('d M Y');
+            if ($gig->description) $body .= "\n\n" . Str::limit($gig->description, 250);
 
-        Post::create([
-            'user_id'     => Auth::id(),
-            'body'        => $body,
-            'linked_type' => 'gig',
-            'linked_id'   => $gig->id,
-        ]);
+            // linked_* hanya dipakai jika kolomnya ada (hindari 500 bila skema belum di-fixdb)
+            $postData = ['user_id' => Auth::id(), 'body' => $body];
+            if (\Illuminate\Support\Facades\Schema::hasColumn('posts', 'linked_type')) {
+                $postData['linked_type'] = 'gig';
+                $postData['linked_id']   = $gig->id;
+            }
+            Post::create($postData);
+        } catch (\Throwable $e) {
+            report($e);
+            return back()->withInput()
+                ->with('error', 'Gagal memasang Gig: ' . $e->getMessage());
+        }
 
         return redirect()->route('musisi.index', ['tab' => 'gig'])
             ->with('success', 'Pengumuman dipasang dan otomatis dibagikan ke Kita.');
