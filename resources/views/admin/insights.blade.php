@@ -85,4 +85,36 @@
     </div>
 </div>
 
+{{-- SARAN SEO (Fase 3) --}}
+<div class="dash-card" style="margin-top:1.25rem;">
+    <div class="dash-card-head">
+        <div class="dash-card-title">🔎 Saran SEO</div>
+        @if($seoTips)
+            <span style="font-size:11px;color:var(--text-4);">{{ $seoTips['at'] }}</span>
+        @endif
+    </div>
+    <div style="padding:1rem 1.25rem;">
+        <p style="font-size:12px;color:var(--text-3);margin-bottom:0.75rem;">Dari kata kunci komunitas + lagu terpopuler &rarr; AI menyarankan meta description, ide konten, lagu yang layak didorong &amp; frasa kunci. <b>Saran saja</b> (terapkan manual di Pengaturan/konten).</p>
+        @if($seoTips)
+            <div style="font-size:13.5px;color:var(--text-1);line-height:1.75;white-space:pre-wrap;">{!! nl2br(e($seoTips['text'])) !!}</div>
+        @endif
+        @if($hasAi)
+        <form method="POST" action="{{ route('admin.insights.seo') }}" style="margin-top:1rem;"
+              onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='⏳ Membuat saran (10-30 dtk)...';">
+            @csrf
+            <button type="submit"
+                    style="background:linear-gradient(135deg,var(--orange),var(--orange-dk));color:#fff;border:none;border-radius:10px;padding:11px 22px;font-size:13px;font-weight:600;cursor:pointer;">
+                {{ $seoTips ? '🔄 Buat Ulang Saran SEO' : '✨ Buat Saran SEO' }}
+            </button>
+            <span style="font-size:11px;color:var(--text-4);margin-left:10px;">hasil tersimpan 7 hari</span>
+        </form>
+        @else
+        <div style="font-size:12px;color:var(--text-3);background:var(--surface);border:1px dashed var(--border);border-radius:10px;padding:12px 14px;margin-top:1rem;">
+            Butuh provider AI (DeepSeek) aktif — pasang di
+            <a href="{{ route('admin.ai-settings') }}" style="color:var(--sky-dk);">Pengaturan AI</a>.
+        </div>
+        @endif
+    </div>
+</div>
+
 @endsection

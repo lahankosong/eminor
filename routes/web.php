@@ -76,6 +76,7 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::post('/blast-welcome', [AdminController::class, 'blastWelcome'])->name('blast-welcome');
     Route::get('/insights', [AdminController::class, 'insights'])->name('insights');
     Route::post('/insights/analyze', [AdminController::class, 'analyzeInsights'])->name('insights.analyze');
+    Route::post('/insights/seo', [AdminController::class, 'seoSuggest'])->name('insights.seo');
     Route::get('/settings', [SiteSettingController::class, 'index'])->name('settings');
     Route::post('/settings', [SiteSettingController::class, 'update'])->name('settings.update');
     Route::get('/promo', [PromoTemplateController::class, 'index'])->name('promo');

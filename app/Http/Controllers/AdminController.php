@@ -120,16 +120,18 @@ class AdminController extends Controller
     {
         $src  = $this->gatherCommunityText(200);
         $freq = $this->topKeywords($src['texts'], 30);
-        $ai   = null;
+        $ai = null; $seoTips = null;
         try { $ai = cache('insights_ai'); } catch (\Throwable $e) {}
+        try { $seoTips = cache('insights_seo'); } catch (\Throwable $e) {}
 
         return view('admin.insights', [
-            'freq'   => $freq,
-            'counts' => $src['counts'],
-            'total'  => count($src['texts']),
-            'ai'     => $ai,
-            'hasAi'  => AiProvider::where('enabled', true)->whereNotNull('api_key')->where('kind', 'text')->exists()
-                     || AiProvider::where('enabled', true)->whereNotNull('api_key')->where('base_url', 'like', '%deepseek%')->exists(),
+            'freq'    => $freq,
+            'counts'  => $src['counts'],
+            'total'   => count($src['texts']),
+            'ai'      => $ai,
+            'seoTips' => $seoTips,
+            'hasAi'   => AiProvider::where('enabled', true)->whereNotNull('api_key')->where('kind', 'text')->exists()
+                      || AiProvider::where('enabled', true)->whereNotNull('api_key')->where('base_url', 'like', '%deepseek%')->exists(),
         ]);
     }
 
@@ -192,6 +194,72 @@ class AdminController extends Controller
         } catch (\Throwable $e) {}
 
         return back()->with('success', 'Analisis AI selesai.');
+    }
+
+    /** Saran SEO (Fase 3): dari kata kunci komunitas + lagu terpopuler -> AI bikin saran siap pakai. */
+    public function seoSuggest()
+    {
+        $src = $this->gatherCommunityText(150);
+        $kw  = $this->topKeywords($src['texts'], 25);
+        $topSongs  = Song::where('is_active', true)->orderByDesc('play_count')->take(10)->get(['title', 'era', 'play_count']);
+        $allTitles = Song::where('is_active', true)->orderBy('track_number')->pluck('title')->implode(', ');
+
+        if (empty($kw) && $topSongs->isEmpty()) {
+            return back()->with('error', 'Belum ada data (komentar/lagu) sebagai dasar saran.');
+        }
+
+        $data = 'KATA KUNCI KOMUNITAS (sering muncul): ' . (implode(', ', array_keys($kw)) ?: '-') . "\n\n"
+              . "LAGU PALING DIPUTAR:\n" . ($topSongs->map(fn ($s) => '- ' . $s->title . ($s->era ? ' (' . $s->era . ')' : '') . ' - ' . (int) $s->play_count . 'x')->implode("\n") ?: '-') . "\n\n"
+              . 'SEMUA JUDUL LAGU: ' . $allTitles;
+
+        $system = implode("\n", [
+            'Kamu SEO specialist untuk situs fanbase musik Margonoandi (margonoandi.my.id): lagu, lirik, chord, komunitas musisi Indonesia.',
+            'Dari DATA INTERNAL di bawah, buat SARAN SEO PRAKTIS (Bahasa Indonesia) yang siap pakai. Struktur:',
+            '1) META DESCRIPTION HOMEPAGE - 3 variasi (maks ~155 karakter, menarik).',
+            '2) IDE KONTEN/HALAMAN - 5 ide (judul + 1 kalimat) yang menargetkan apa yang DICARI/DIBICARAKAN audiens.',
+            '3) LAGU LAYAK DIDORONG - pilih dari lagu populer, beri angle/judul SEO-nya.',
+            '4) FRASA KUNCI ALAMI - 8-12 frasa untuk disisipkan natural di judul/teks (bukan meta keyword).',
+            'Pakai DATA saja, JANGAN mengarang judul lagu di luar daftar. Padat, tanpa tabel.',
+        ]);
+
+        $text = trim($this->aiTextComplete($system, $data, 1000));
+        if ($text === '') {
+            return back()->with('error', 'Belum ada provider AI aktif atau gagal memanggil AI. Pasang DeepSeek di Pengaturan AI.');
+        }
+
+        try {
+            cache(['insights_seo' => ['text' => $text, 'at' => now()->format('d M Y H:i')]], now()->addDays(7));
+        } catch (\Throwable $e) {}
+
+        return back()->with('success', 'Saran SEO dibuat.');
+    }
+
+    /** Panggil provider AI teks (DeepSeek/OpenAI-compatible/Anthropic). Return '' jika gagal. */
+    private function aiTextComplete(string $system, string $user, int $max = 900): string
+    {
+        $p = AiProvider::where('enabled', true)->whereNotNull('api_key')->where('base_url', 'like', '%deepseek%')->orderBy('id')->first()
+           ?: AiProvider::where('enabled', true)->whereNotNull('api_key')->where('kind', 'text')->orderBy('id')->first();
+        if (!$p || !$p->api_key) return '';
+
+        try {
+            if ($p->format === 'anthropic') {
+                $resp = Http::timeout(60)->withHeaders([
+                    'x-api-key' => $p->api_key, 'anthropic-version' => '2023-06-01', 'content-type' => 'application/json',
+                ])->post(rtrim($p->base_url, '/') . '/messages', [
+                    'model' => $p->model, 'max_tokens' => $max, 'system' => $system,
+                    'messages' => [['role' => 'user', 'content' => $user]],
+                ]);
+                return $resp->successful() ? (string) $resp->json('content.0.text', '') : '';
+            }
+            $resp = Http::timeout(60)->withToken($p->api_key)->post(rtrim($p->base_url, '/') . '/chat/completions', [
+                'model' => $p->model ?: 'deepseek-chat',
+                'messages' => [['role' => 'system', 'content' => $system], ['role' => 'user', 'content' => $user]],
+                'temperature' => 0.6, 'max_tokens' => $max,
+            ]);
+            return $resp->successful() ? (string) $resp->json('choices.0.message.content', '') : '';
+        } catch (\Throwable $e) {
+            return '';
+        }
     }
 
     /** Kumpulkan teks publik komunitas (Aku/Kita post + komentar). Chat & catatan privat DIKECUALIKAN. */
