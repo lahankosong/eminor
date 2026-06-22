@@ -206,15 +206,23 @@
                 @if($gp->location)<span>📍 {{ $gp->location }}</span>@endif
                 @if($gp->date_event)<span>🗓 {{ $gp->date_event->format('d M Y') }}</span>@endif
             </div>
-            @if($gp->description)<div class="bp-desc">{{ \Illuminate\Support\Str::limit($gp->description, 200) }}</div>@endif
+            @if($gp->description)
+            <div class="bp-desc" style="white-space:pre-wrap;max-height:7.5em;overflow:hidden;">{{ $gp->description }}</div>
+            @if(mb_strlen($gp->description) > 180)
+            <button type="button" style="background:none;border:none;color:var(--sky-dk);font-size:12px;font-weight:600;cursor:pointer;padding:3px 0;font-family:inherit;"
+                onclick="var d=this.previousElementSibling;var open=!d.style.maxHeight;d.style.maxHeight=open?'':'7.5em';this.textContent=open?'Tutup ▲':'Selengkapnya ▼';">Selengkapnya ▼</button>
+            @endif
+            @endif
             <div class="bp-actions">
                 @auth
                     @if(Auth::id() !== $gp->user_id)
                     <form method="POST" action="{{ route('dia.start', $gp->user_id) }}" style="display:inline;">
                         @csrf
-                        <button type="submit" class="bp-btn primary">💬 Daftar / Hubungi</button>
+                        <input type="hidden" name="intro" value="Halo! 👋 Saya tertarik dengan {{ \App\Models\GigPost::typeLabel($gp->type) }} '{{ $gp->title }}' yang kamu posting. Boleh info lebih lanjut?">
+                        <button type="submit" class="bp-btn primary">💬 Saya Minat — Hubungi</button>
                     </form>
                     @else
+                    <a href="{{ route('gig.edit', $gp->id) }}" class="bp-btn" style="text-decoration:none;">✏️ Edit</a>
                     <form method="POST" action="{{ route('gig.status', $gp->id) }}" style="display:inline;">
                         @csrf @method('PUT')
                         <button class="bp-btn">{{ $gp->status === 'open' ? 'Tutup' : 'Buka Lagi' }}</button>

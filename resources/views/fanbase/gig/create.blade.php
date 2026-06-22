@@ -27,7 +27,7 @@
 
 <div class="bc-head">
     <a href="{{ route('musisi.index', ['tab' => 'gig']) }}" class="bc-back">← Papan Gig</a>
-    <h2>Pasang Pengumuman</h2>
+    <h2>{{ isset($gig) ? 'Edit Pengumuman' : 'Pasang Pengumuman' }}</h2>
 </div>
 
 @if($errors->any())
@@ -36,43 +36,44 @@
 </div>
 @endif
 
-<form method="POST" action="{{ route('gig.store') }}">
+<form method="POST" action="{{ isset($gig) ? route('gig.update', $gig->id) : route('gig.store') }}">
     @csrf
+    @isset($gig) @method('PUT') @endisset
     <div class="bc-card">
         <div class="bc-fg">
             <label>Kategori *</label>
             <select name="type" class="bc-select" required>
                 @foreach($types as $key => $label)
-                <option value="{{ $key }}" {{ old('type') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                <option value="{{ $key }}" {{ old('type', $gig->type ?? '') === $key ? 'selected' : '' }}>{{ $label }}</option>
                 @endforeach
             </select>
         </div>
         <div class="bc-fg">
             <label>Judul *</label>
-            <input type="text" name="title" class="bc-input" value="{{ old('title') }}"
+            <input type="text" name="title" class="bc-input" value="{{ old('title', $gig->title ?? '') }}"
                    placeholder="Contoh: Open Mic Sabtu Malam di Kota Tua" required>
         </div>
         <div class="bc-fg">
             <label>Deskripsi</label>
             <textarea name="description" class="bc-textarea"
-                      placeholder="Jelaskan detail gig, genre yang diinginkan, bayaran, dll...">{{ old('description') }}</textarea>
+                      placeholder="Jelaskan detail gig, genre yang diinginkan, bayaran, dll...">{{ old('description', $gig->description ?? '') }}</textarea>
         </div>
         <div class="bc-row">
             <div class="bc-fg">
                 <label>Lokasi</label>
-                <input type="text" name="location" class="bc-input" value="{{ old('location') }}" placeholder="Jakarta Barat">
+                <input type="text" name="location" class="bc-input" value="{{ old('location', $gig->location ?? '') }}" placeholder="Jakarta Barat">
             </div>
             <div class="bc-fg">
                 <label>Tanggal Acara</label>
-                <input type="date" name="date_event" class="bc-input" value="{{ old('date_event') }}">
+                <input type="date" name="date_event" class="bc-input" value="{{ old('date_event', isset($gig) && $gig->date_event ? $gig->date_event->format('Y-m-d') : '') }}">
             </div>
         </div>
         <div class="bc-fg">
             <label>Syarat / Persyaratan</label>
             <textarea name="requirements" class="bc-textarea" style="min-height:70px;"
-                      placeholder="Pengalaman minimal, peralatan yang harus dibawa, dll...">{{ old('requirements') }}</textarea>
+                      placeholder="Pengalaman minimal, peralatan yang harus dibawa, dll...">{{ old('requirements', $gig->requirements ?? '') }}</textarea>
         </div>
-        <button type="submit" class="bc-save">📢 Pasang Pengumuman</button>
+        <button type="submit" class="bc-save">{{ isset($gig) ? '💾 Simpan Perubahan' : '📢 Pasang Pengumuman' }}</button>
     </div>
 </form>
 

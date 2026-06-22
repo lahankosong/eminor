@@ -15,6 +15,46 @@ class GigPostController extends Controller
         return view('fanbase.gig.create', ['types' => GigPost::types()]);
     }
 
+    public function edit($id)
+    {
+        $gig = GigPost::findOrFail($id);
+        if ($gig->user_id !== Auth::id()) abort(403);
+        return view('fanbase.gig.create', ['types' => GigPost::types(), 'gig' => $gig]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $gig = GigPost::findOrFail($id);
+        if ($gig->user_id !== Auth::id()) abort(403);
+
+        $data = $request->validate([
+            'title'        => 'required|string|max:120',
+            'type'         => 'required|string|max:50',
+            'description'  => 'nullable|string|max:2000',
+            'location'     => 'nullable|string|max:120',
+            'date_event'   => 'nullable|date',
+            'requirements' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            $gig->update($data);
+
+            // Sinkronkan body postingan Kita yang ter-link
+            $label = GigPost::typeLabel($gig->type);
+            $body  = "{$label}: {$gig->title}";
+            if ($gig->location)   $body .= "\n📍 {$gig->location}";
+            if ($gig->date_event) $body .= "  🗓 " . $gig->date_event->format('d M Y');
+            if ($gig->description) $body .= "\n\n" . Str::limit($gig->description, 250);
+            Post::where('linked_type', 'gig')->where('linked_id', $gig->id)->update(['body' => $body]);
+        } catch (\Throwable $e) {
+            report($e);
+            return back()->withInput()->with('error', 'Gagal menyimpan: ' . $e->getMessage());
+        }
+
+        return redirect()->route('musisi.index', ['tab' => 'gig'])
+            ->with('success', 'Pengumuman diperbarui.');
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([

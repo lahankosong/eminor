@@ -432,6 +432,7 @@
             $gp = $gigPosts[$post->linked_id];
             $linkedData = [
                 'kind'         => 'gig',
+                'id'           => $gp->id,
                 'type_label'   => \App\Models\GigPost::typeLabel($gp->type),
                 'title'        => $gp->title,
                 'creator_id'   => $gp->user_id,
@@ -647,6 +648,7 @@
 {{-- POPUP LINKED (GIG / BAND) --}}
 <div class="lp-overlay" id="lpOverlay" onclick="closeLpIfBg(event)">
     <div class="lp-modal" onclick="event.stopPropagation()">
+        <button class="lp-close" onclick="closeLinkedPost()">&#10005;</button>
         <div id="lpTypeBadge" class="lp-type-badge"></div>
         <span id="lpStatusBadge" class="lp-status-badge"></span>
         <div id="lpTitle" class="lp-title"></div>
@@ -742,13 +744,16 @@ function openLinkedPost(d) {
         btn.innerHTML = '&#128172; Saya Minat &mdash; Hubungi';
         form.appendChild(btn);
         cta.appendChild(form);
+    } else if (d.creator_id == authId && d.kind === 'gig' && d.id) {
+        // Pembuat Gig: tombol Edit
+        var edit = document.createElement('a');
+        edit.href = BASE_URL + '/gig/' + d.id + '/edit';
+        edit.className = 'lp-daftar';
+        edit.style.textDecoration = 'none';
+        edit.innerHTML = '&#9999;&#65039; Edit Pengumuman';
+        cta.appendChild(edit);
     }
     @endauth
-    var cancelBtn = document.createElement('button');
-    cancelBtn.className = 'lp-cancel';
-    cancelBtn.textContent = 'Tutup';
-    cancelBtn.onclick = closeLinkedPost;
-    cta.appendChild(cancelBtn);
     document.getElementById('lpOverlay').classList.add('open');
 }
 function closeLinkedPost() { document.getElementById('lpOverlay').classList.remove('open'); }

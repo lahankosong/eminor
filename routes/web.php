@@ -137,6 +137,8 @@ Route::middleware(['auth'])->group(function () {
     // Papan Gig
     Route::get('/gig/create', [GigPostController::class, 'create'])->name('gig.create');
     Route::post('/gig', [GigPostController::class, 'store'])->name('gig.store');
+    Route::get('/gig/{id}/edit', [GigPostController::class, 'edit'])->whereNumber('id')->name('gig.edit');
+    Route::put('/gig/{id}', [GigPostController::class, 'update'])->whereNumber('id')->name('gig.update');
     Route::put('/gig/{id}/status', [GigPostController::class, 'toggleStatus'])->whereNumber('id')->name('gig.status');
     Route::delete('/gig/{id}', [GigPostController::class, 'destroy'])->whereNumber('id')->name('gig.destroy');
 
