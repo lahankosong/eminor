@@ -39,7 +39,9 @@ pre{background:#0f1e2e;border:1px solid rgba(56,168,204,.2);padding:.6rem .8rem;
 </style></head><body>
 <h1>&#128295; FixDB — Margonoandi</h1>';
 
-// Koneksi mysqli
+// Koneksi mysqli — matikan mode exception mysqli (default sejak PHP 8.1) supaya
+// runSQL bisa memeriksa return value & 1 query gagal tak mematikan seluruh script.
+mysqli_report(MYSQLI_REPORT_OFF);
 $conn = @mysqli_connect($host, $user, $pass, $dbname, (int)$port);
 if (!$conn) {
     echo '<pre class="err">&#10060; Gagal koneksi: ' . htmlspecialchars(mysqli_connect_error()) . '</pre>';
@@ -531,10 +533,10 @@ runSQL($conn, 'CREATE TABLE gig_posts',
         `user_id` bigint(20) UNSIGNED NOT NULL,
         `title` varchar(120) NOT NULL,
         `type` varchar(50) NOT NULL DEFAULT 'lainnya',
-        `description` text DEFAULT NULL,
+        `description` text,
         `location` varchar(120) DEFAULT NULL,
         `date_event` date DEFAULT NULL,
-        `requirements` text DEFAULT NULL,
+        `requirements` text,
         `status` varchar(20) NOT NULL DEFAULT 'open',
         `created_at` timestamp NULL DEFAULT NULL,
         `updated_at` timestamp NULL DEFAULT NULL,
