@@ -60,6 +60,26 @@
     .bp-btn.primary { background: var(--sky); color: #fff; border-color: var(--sky); font-weight: 600; }
     .bp-new-btn { display: flex; align-items: center; gap: 6px; background: var(--orange); color: #fff; border: none; border-radius: 12px; padding: 9px 18px; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none; margin-bottom: 1.1rem; }
     .bp-new-btn:hover { opacity: .9; }
+
+    /* Peluang untukmu (matchmaking 2 arah) */
+    .opp-wrap { background: linear-gradient(135deg, var(--sky-dim, rgba(56,168,204,.12)), var(--card)); border: 1px solid var(--sky); border-radius: 16px; padding: 1rem 1.1rem; margin-bottom: 1.25rem; box-shadow: 0 8px 24px -16px var(--sky); }
+    .opp-head { display: flex; align-items: center; gap: 8px; font-family: 'Sora',sans-serif; font-weight: 700; color: var(--text-1); font-size: 15px; }
+    .opp-count { background: var(--sky); color: #fff; font-size: 11px; font-weight: 700; min-width: 20px; height: 20px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; padding: 0 6px; }
+    .opp-sub { font-size: 12px; color: var(--text-3); margin: 3px 0 .85rem; }
+    .opp-list { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+    .opp-list::-webkit-scrollbar { height: 5px; }
+    .opp-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .opp-item { flex: 0 0 200px; scroll-snap-align: start; background: var(--surface); border: 1px solid var(--border); border-radius: 13px; padding: 11px 12px; text-decoration: none; transition: .15s; }
+    .opp-item:hover { border-color: var(--sky); transform: translateY(-2px); }
+    .opp-item-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .opp-badge { font-size: 10px; font-weight: 700; color: var(--sky-dk); background: var(--card); border: 1px solid var(--border); padding: 2px 7px; border-radius: 20px; }
+    .opp-urgent { font-size: 9px; font-weight: 800; color: #fff; background: var(--orange); padding: 2px 6px; border-radius: 20px; letter-spacing: .03em; }
+    .opp-score { font-size: 10px; color: var(--text-3); margin-left: auto; }
+    .opp-title { font-weight: 600; font-size: 13.5px; color: var(--text-1); margin: 7px 0 4px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .opp-meta { font-size: 11px; color: var(--text-3); line-height: 1.4; }
+    .opp-meta b { color: var(--sky-dk); }
+    .opp-gig { display: inline-block; margin-top: .85rem; font-size: 12px; font-weight: 600; color: var(--sky-dk); text-decoration: none; }
+    .opp-gig:hover { text-decoration: underline; }
 </style>
 @endpush
 
@@ -80,6 +100,36 @@
 
 @if(session('success'))
 <div style="background:#0d2e1a;color:#4ade80;border:1px solid #166534;padding:10px 14px;border-radius:10px;margin-bottom:1rem;font-size:13px;">{{ session('success') }}</div>
+@endif
+
+@if($myProfile && ($opportunities ?? collect())->count() > 0)
+<div class="opp-wrap">
+    <div class="opp-head">
+        <span>✨ Peluang untukmu</span>
+        <span class="opp-count">{{ $opportunities->count() }}</span>
+    </div>
+    <p class="opp-sub">Lowongan yang cocok dengan peranmu{{ $myProfile->location ? ' & kotamu' : '' }} — disodorkan otomatis.</p>
+    <div class="opp-list">
+        @foreach($opportunities as $o)
+        <a href="{{ route('band.show', $o->id) }}" class="opp-item">
+            <div class="opp-item-top">
+                <span class="opp-badge">🎯 Cari Personil</span>
+                @if($o->urgent)<span class="opp-urgent">URGENT</span>@endif
+                <span class="opp-score">cocok {{ $o->match_score }}</span>
+            </div>
+            <div class="opp-title">{{ $o->title }}</div>
+            <div class="opp-meta">
+                Butuh:
+                @foreach($o->match_roles as $r)<b>{{ ucfirst($r) }}</b>@if(!$loop->last), @endif @endforeach
+                @if($o->match_loc)<span class="opp-loc"> · 📍 sekota</span>@endif
+            </div>
+        </a>
+        @endforeach
+    </div>
+    @if(($cityGigs ?? collect())->count() > 0)
+    <a href="{{ route('musisi.index', ['tab' => 'gig']) }}" class="opp-gig">📢 + {{ $cityGigs->count() }} gig di {{ $myProfile->location }} →</a>
+    @endif
+</div>
 @endif
 
 {{-- Tab buttons --}}

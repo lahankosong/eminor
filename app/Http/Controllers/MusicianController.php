@@ -40,7 +40,42 @@ class MusicianController extends Controller
 
         $gigTypes = GigPost::types();
 
-        return view('fanbase.musisi.index', compact('profiles', 'myProfile', 'bandPosts', 'gigPosts', 'gigTypes'));
+        // Peluang untukmu (matchmaking 2 arah): lowongan band cocok dgn peran user + gig sekota
+        $opportunities = collect();
+        $cityGigs      = collect();
+        if ($myProfile && !empty($myProfile->roles)) {
+            try {
+                $myRoles  = array_map('mb_strtolower', $myProfile->rolesArray());
+                $myGenres = array_map('mb_strtolower', $myProfile->genresArray());
+                $myLoc    = mb_strtolower(trim((string) $myProfile->location));
+
+                $opportunities = $bandPosts
+                    ->where('status', 'open')
+                    ->where('user_id', '!=', Auth::id())
+                    ->map(function ($b) use ($myRoles, $myGenres, $myLoc) {
+                        $hits = array_values(array_intersect(array_map('mb_strtolower', $b->rolesArray()), $myRoles));
+                        if (count($hits) === 0) return null;
+                        $genreHit = count(array_intersect($myGenres, array_map('mb_strtolower', $b->genresArray())));
+                        $locHit   = ($myLoc !== '' && mb_strtolower(trim((string) $b->location)) === $myLoc) ? 1 : 0;
+                        $b->setAttribute('match_score', count($hits) * 3 + $genreHit + $locHit * 2);
+                        $b->setAttribute('match_roles', $hits);
+                        $b->setAttribute('match_loc', $locHit);
+                        return $b;
+                    })
+                    ->filter()
+                    ->sortByDesc('match_score')
+                    ->take(6)->values();
+
+                if ($myLoc !== '') {
+                    $cityGigs = $gigPosts
+                        ->where('user_id', '!=', Auth::id())
+                        ->filter(fn ($g) => (($g->status ?? 'open') === 'open') && mb_strtolower(trim((string) $g->location)) === $myLoc)
+                        ->values();
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        return view('fanbase.musisi.index', compact('profiles', 'myProfile', 'bandPosts', 'gigPosts', 'gigTypes', 'opportunities', 'cityGigs'));
     }
 
     // Form profil sendiri
