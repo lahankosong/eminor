@@ -574,7 +574,7 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
 <hr class="divider">
 
 {{-- FANBASE MOVEMENT / PROMO CTA --}}
-<div class="section fb-promo">
+<div class="section fb-promo" id="fbPromoSection">
     <div class="fb-movement">
         <p class="section-eyebrow"><span class="eq"><i></i><i></i><i></i><i></i><i></i></span>Sebuah gerakan, bukan sekadar aplikasi</p>
         <h2>Ekosistem Musik Indonesia,<br><b>Ayo kita mulai dari kamar kamu.</b></h2>
