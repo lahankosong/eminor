@@ -1034,8 +1034,8 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
 
 <hr class="divider">
 
-{{-- MUSISI SHOWCASE (teaser publik; detail wajib login) --}}
-@if(($musicians ?? collect())->count() > 0)
+{{-- MUSISI SHOWCASE (teaser publik; detail wajib login) — selalu tampil sbg mesin konversi --}}
+@php $musicians = $musicians ?? collect(); @endphp
 <style>
     .ms-land { text-align:center; }
     .ms-land-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; max-width:760px; margin:1.5rem auto 0; }
@@ -1054,10 +1054,17 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
     .ms-land-modal-tags { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:.75rem 0; }
     .ms-land-modal-tags span { font-size:11px; padding:3px 10px; border-radius:20px; background:var(--accent-dim); color:var(--accent); }
     .ms-land-modal-bio { font-size:13px; color:var(--text-2); line-height:1.6; }
+    .ms-land-join { display:flex; flex-direction:column; align-items:center; justify-content:center; background:linear-gradient(150deg,var(--accent),#F07040); border:none; color:#fff; text-decoration:none; min-height:140px; }
+    .ms-land-join:hover { box-shadow:0 18px 36px -16px var(--accent); border-color:transparent; }
+    .ms-join-plus { font-size:28px; line-height:1; font-weight:300; width:46px; height:46px; border-radius:50%; border:2px dashed rgba(255,255,255,.75); display:flex; align-items:center; justify-content:center; }
+    .ms-join-t { font-weight:700; font-size:13.5px; margin-top:.55rem; }
+    .ms-join-s { font-size:11px; opacity:.92; margin-top:2px; }
+    .ms-land-pitch { max-width:520px; margin:.6rem auto 0; color:var(--text-2); font-size:14px; line-height:1.6; }
 </style>
 <div class="section ms-land">
     <p class="section-eyebrow">Dari kamarmu ke panggung</p>
-    <p class="section-heading">Musisi yang sudah gabung</p>
+    <p class="section-heading">Komunitas musisi yang sedang tumbuh</p>
+    <p class="ms-land-pitch">Masih tahap awal &mdash; jadilah salah satu musisi pertama. Buat <b>profil portofolio</b> (kartu + QR), lalu <b>temukan personil &amp; gig</b> lewat matchmaking otomatis.</p>
     <div class="ms-land-grid">
         @foreach($musicians as $m)
         <button type="button" class="ms-land-card" data-m='@json($m, JSON_HEX_APOS|JSON_HEX_QUOT)' onclick="openMsLand(this)">
@@ -1067,10 +1074,16 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
             @if($m['location'])<div class="ms-land-loc">📍 {{ $m['location'] }}</div>@endif
         </button>
         @endforeach
+        <a href="{{ route('google.login') }}" class="ms-land-card ms-land-join"
+           @guest onclick="gtag && gtag('event','cta_click',{event_category:'engagement',button:'jadi_musisi_card'})" @endguest>
+            <div class="ms-join-plus">+</div>
+            <div class="ms-join-t">Jadi musisi di sini</div>
+            <div class="ms-join-s">Gratis &middot; 2 menit</div>
+        </a>
     </div>
-    <a href="{{ $fbEntry }}" class="btn-ghost" style="text-decoration:none;display:inline-block;margin-top:1.25rem;"
-       @guest onclick="gtag && gtag('event','cta_click',{event_category:'engagement',button:'lihat_musisi'})" @endguest
-    >Lihat semua musisi &mdash; Masuk</a>
+    <a href="{{ route('google.login') }}" class="btn-primary" style="text-decoration:none;display:inline-block;margin-top:1.4rem;"
+       @guest onclick="gtag && gtag('event','cta_click',{event_category:'engagement',button:'mulai_jadi_musisi'})" @endguest
+    >🎸 Mulai &mdash; buat profil musisimu</a>
 </div>
 
 <div class="ms-land-ov" id="msLandOv" onclick="if(event.target===this)closeMsLand()">
@@ -1144,7 +1157,6 @@ function closeMsLand(){ document.getElementById('msLandOv').classList.remove('op
     }
 })();
 </script>
-@endif
 
 <hr class="divider">
 
