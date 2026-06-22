@@ -1112,13 +1112,25 @@ function closeMsLand(){ document.getElementById('msLandOv').classList.remove('op
         card.style.transform = 'perspective(620px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg)' + (lift ? ' translateY(-5px) scale(1.04)' : '');
     }
 
-    // Desktop: ikut kursor
+    // Desktop: ikut kursor · HP: ikut jari (touch-drag)
     cards.forEach(function(card){
         card.addEventListener('mousemove', function(e){
             var r = card.getBoundingClientRect();
             tilt(card, (0.5 - (e.clientY - r.top) / r.height) * 18, ((e.clientX - r.left) / r.width - 0.5) * 18, true);
         });
         card.addEventListener('mouseleave', function(){ card.style.transform = ''; });
+        card.addEventListener('touchstart', function(e){
+            var t = e.touches[0]; if(!t) return;
+            var r = card.getBoundingClientRect();
+            tilt(card, (0.5 - (t.clientY - r.top) / r.height) * 16, ((t.clientX - r.left) / r.width - 0.5) * 16, true);
+        }, {passive:true});
+        card.addEventListener('touchmove', function(e){
+            var t = e.touches[0]; if(!t) return;
+            var r = card.getBoundingClientRect();
+            tilt(card, (0.5 - (t.clientY - r.top) / r.height) * 16, ((t.clientX - r.left) / r.width - 0.5) * 16, true);
+        }, {passive:true});
+        card.addEventListener('touchend', function(){ card.style.transform = ''; });
+        card.addEventListener('touchcancel', function(){ card.style.transform = ''; });
     });
 
     // HP: ikut kemiringan perangkat (giroskop)
