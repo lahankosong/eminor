@@ -2,6 +2,21 @@
 
 > Diperbarui: **2026-06-23**. File ini ikut `git pull` (portabel antar-komputer). Urut: terbaru di atas.
 
+## 🆕 Audio Tools + Karaoke (lanjutan 2026-06-23 · kantor + rumah)
+
+**Tools audio (commit kantor 02b0e62 → e4b4eb0)**
+- **02b0e62** — **Pemotong Lagu Online** publik tanpa login (`ToolController@audioCutter`, route `/tools/potong-lagu`, view `tools/audio-cutter.blade`) — client-side, SEO (schema WebApplication). Masuk **sitemap** (d0fc783).
+- **f1651dd / 9523d83** — popup waveform: drag handle, zoom, play/pause, fix mobile + fix 500.
+- **3f93fd7 / cf1c6ce** — audio cutter "flat" di `/kamu` + output **MP3** (lamejs) + tab **Konversi Audio**.
+- **run_patch.php** (kembaran deploy.php, ZIP-GitHub + `migrate --force`) buatan sesi kantor → **DIHAPUS** (publik + overwrite + shell = bahaya; pakai `deploy.php` saja). Catatan: AI kantor juga keliru bikin `project_last_update.md` (tak ter-push) → changelog itu hilang, kini direkam di sini.
+
+**Hapus Vokal / Karaoke (commit rumah e6cc76d → f0fca10)**
+- "Split Instrumen 4 stem" via **Demucs ONNX di browser** = model **289 MB** → OOM/lambat di HP, **tak pernah jalan** → dibuang.
+- **e6cc76d** — diganti **phase-cancellation** (Instrumen L-R + Vokal) — instan, jalan di HP (bukan 4 stem AI).
+- **f0fca10** — ditingkatkan ke **STFT bertingkat** (`public/js/vocal-remover.js`, dipakai home/kamu/admin): FFT 4096 + Hann WOLA + center-extraction koherensi L/R + **gate frekuensi** (bass <170Hz dipertahankan, vokal 320-7kHz dibuang, highs ditaper). Bass/drum tak drop, vokal lebih bersih. Butuh lagu **stereo**. Parameter mudah disetel di file modul.
+
+---
+
 ## 🆕 Sesi 2026-06-23 — Ekosistem musisi, EPK, matchmaking, One Tap (8ded9a9 → eb618c0)
 
 **Profil musisi & EPK**
