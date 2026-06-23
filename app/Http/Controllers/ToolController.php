@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+
 class ToolController extends Controller
 {
     public function audioCutter()
@@ -90,5 +93,40 @@ class ToolController extends Controller
                 ],
             ],
         ]);
+    }
+
+    public function countdown(Request $request)
+    {
+        $canonical = url('/tools/countdown');
+        $j = Str::limit(trim((string) $request->query('j', '')), 60, '');
+        $a = Str::limit(trim((string) $request->query('a', '')), 40, '');
+        $d = trim((string) $request->query('d', ''));
+        $hasParams = $d !== '';
+
+        if ($hasParams) {
+            // Mode display (link dibagikan) — OG dinamis untuk preview cantik di WA/medsos
+            $title = ($j !== '' ? $j : 'Rilis Baru') . ($a !== '' ? ' — ' . $a : '') . ' · Hitung Mundur Rilis';
+            $desc  = 'Hitung mundur rilis ' . ($j !== '' ? '“' . $j . '”' : 'lagu') . ($a !== '' ? ' oleh ' . $a : '')
+                   . '. Buka untuk lihat countdown langsung & dengarkan saat rilis.';
+            $seo = ['title' => $title, 'description' => $desc, 'url' => $canonical, 'type' => 'website'];
+        } else {
+            $seo = [
+                'title'       => 'Buat Countdown Rilis Lagu — Link Hitung Mundur untuk Bio & Story',
+                'description' => 'Bikin link hitung mundur rilis lagu yang berdetak real-time untuk bio Instagram / link-in-bio / WhatsApp. Saat rilis otomatis jadi "Out Now". Gratis, tanpa daftar.',
+                'url'         => $canonical,
+                'schema'      => [
+                    '@context'            => 'https://schema.org',
+                    '@type'               => 'WebApplication',
+                    'name'                => 'Countdown Rilis Lagu (Generator Link Hitung Mundur)',
+                    'url'                 => $canonical,
+                    'description'         => 'Buat link hitung mundur rilis lagu real-time untuk media sosial, gratis tanpa daftar.',
+                    'applicationCategory' => 'UtilitiesApplication',
+                    'operatingSystem'     => 'Any',
+                    'offers'              => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'IDR'],
+                ],
+            ];
+        }
+
+        return view('tools.countdown', compact('seo', 'hasParams'));
     }
 }

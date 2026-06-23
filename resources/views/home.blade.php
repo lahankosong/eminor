@@ -1032,7 +1032,12 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
             <a href="{{ route('tools.kartu-rilis') }}" class="fb-studio-card">
                 <div class="fb-studio-ic">🚀</div>
                 <div class="fb-studio-t">Kartu Promo Rilis</div>
-                <div class="fb-studio-d">Countdown + QR untuk story</div>
+                <div class="fb-studio-d">Kartu promo + QR untuk story</div>
+            </a>
+            <a href="{{ route('tools.countdown') }}" class="fb-studio-card">
+                <div class="fb-studio-ic">⏳</div>
+                <div class="fb-studio-t">Countdown Rilis</div>
+                <div class="fb-studio-d">Link hitung mundur real-time</div>
             </a>
         </div>
     </div>

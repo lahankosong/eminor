@@ -142,6 +142,7 @@
 
     <p style="text-align:center;margin-top:2.5rem;font-size:11px;color:var(--text-3,#94a3b8);">
         Bagian dari <a href="{{ route('home') }}" style="color:var(--ac);">Margonoandi Fanbase</a> 🎸 ·
+        <a href="{{ route('tools.countdown') }}" style="color:var(--ac);">Countdown Live</a> ·
         <a href="{{ route('tools.cover-art') }}" style="color:var(--ac);">Buat Cover</a> ·
         <a href="{{ route('tools.hapus-vokal') }}" style="color:var(--ac);">Hapus Vokal</a>
     </p>
