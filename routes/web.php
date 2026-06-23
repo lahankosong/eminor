@@ -24,6 +24,7 @@ use App\Http\Controllers\KamuNoteController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\GeocodeController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\ToolController;
 
 
 
@@ -32,6 +33,9 @@ Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('tra
 
 // SEO: sitemap.xml dinamis
 Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
+
+// Tools publik — tanpa login
+Route::get('/tools/potong-lagu', [ToolController::class, 'audioCutter'])->name('tools.potong-lagu');
 
 // Google Auth
 Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.login');

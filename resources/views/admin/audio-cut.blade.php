@@ -29,10 +29,10 @@
     .src-grid .or { font-size:11px; color:var(--text-3); }
     @media(max-width:600px){ .src-grid{ grid-template-columns:1fr; } .src-grid .or{ text-align:center; } }
 
-    /* Region selector */
-    .region-track { position:relative; height:52px; background:linear-gradient(var(--bg-3),var(--bg-3)); border:1px solid var(--border); border-radius:8px; margin:12px 0 4px; overflow:hidden; cursor:pointer; }
-    .region-sel { position:absolute; top:0; bottom:0; background:rgba(99,102,241,0.22); border-left:2px solid var(--accent); border-right:2px solid var(--accent); }
-    .region-play { position:absolute; top:0; bottom:0; width:2px; background:var(--text); opacity:0.7; left:0; }
+    /* Waveform + region */
+    .region-wave-wrap { position:relative; border-radius:8px; overflow:hidden; background:#0a0e1a; margin:12px 0 4px; cursor:crosshair; }
+    #adminWave { display:block; width:100%; height:80px; }
+    .region-play { position:absolute; top:0; bottom:0; width:2px; background:#fff; opacity:.7; left:0; pointer-events:none; }
     .region-time { display:flex; justify-content:space-between; font-size:11px; color:var(--text-3); font-variant-numeric:tabular-nums; }
     .range-pair { margin-top:8px; }
     .range-pair input[type=range] { width:100%; accent-color:var(--accent); margin:2px 0; }
@@ -89,9 +89,9 @@
         <div id="editArea" style="display:none;margin-top:14px;">
             <audio id="player" controls preload="metadata"></audio>
 
-            <div class="region-track" id="regionTrack">
-                <div class="region-sel" id="regionSel"></div>
-                <div class="region-play" id="regionPlay"></div>
+            <div class="region-wave-wrap" id="regionTrack">
+                <canvas id="adminWave"></canvas>
+                <div class="region-play" id="regionPlay" style="display:none;"></div>
             </div>
             <div class="region-time"><span>0:00</span><span id="durLabel">0:00</span></div>
 
@@ -140,205 +140,223 @@
     </div>
 </div>
 
-<script src="{{ asset('ffmpeg/ffmpeg.js') }}"></script>
 <script>
-var FFMPEG_BASE = '{{ asset('ffmpeg') }}';   // file ffmpeg di-host sendiri (same-origin)
-async function fetchFile(input){
-    var data;
-    if (typeof input === 'string') data = await (await fetch(input)).arrayBuffer();
-    else if (input instanceof Blob) data = await input.arrayBuffer();
-    else data = input;
-    return new Uint8Array(data);
-}
-</script>
-<script>
-// ====== State ======
-var player = document.getElementById('player');
-var srcUrl = null, srcExt = 'mp3', srcName = 'lagu', duration = 0;
-var ffmpeg = null, ffmpegLoaded = false, ffmpegBusy = false;
+// ── Admin Audio Cutter — Web Audio API (no ffmpeg needed) ──
+var player    = document.getElementById('player');
+var _ctx = null, _buf = null, _src = null;
+var srcUrl = null, srcName = 'lagu', duration = 0;
+var _startT = 0, _endT = 0, _playing = false, _prevStop = null, _raf = null;
 var lastClipBlob = null, lastClipUrl = null;
 
-function fmt(s){ s = Math.max(0, s||0); var m = Math.floor(s/60), x = Math.floor(s%60); return m + ':' + (x<10?'0':'') + x; }
-function getExt(name){ var m = (name||'').match(/\.([a-z0-9]+)(?:\?|$)/i); return m ? m[1].toLowerCase() : 'mp3'; }
-function setStatus(html){ document.getElementById('status').innerHTML = html || ''; }
+function fmt(s){ s=Math.max(0,s||0); var m=Math.floor(s/60),x=Math.floor(s%60); return m+':'+(x<10?'0':'')+x; }
+function getExt(n){ var m=(n||'').match(/\.([a-z0-9]+)(?:\?|$)/i); return m?m[1].toLowerCase():'mp3'; }
+function setStatus(html){ document.getElementById('status').innerHTML = html||''; }
 
-// ====== Muat sumber ======
+// ── Load from song library ──
 document.getElementById('songSelect').addEventListener('change', function(){
     if (!this.value) return;
     var opt = this.options[this.selectedIndex];
     document.getElementById('fileInput').value = '';
-    loadSource(this.value, opt.getAttribute('data-title') || 'lagu', getExt(this.value));
+    fetchAndLoad(this.value, opt.getAttribute('data-title')||'lagu');
 });
 document.getElementById('fileInput').addEventListener('change', function(){
-    var f = this.files[0]; if (!f) return;
-    document.getElementById('songSelect').value = '';
-    loadSource(URL.createObjectURL(f), f.name.replace(/\.[^.]+$/, ''), getExt(f.name));
+    var f=this.files[0]; if(!f) return;
+    document.getElementById('songSelect').value='';
+    readFileAndLoad(f);
 });
 
-function loadSource(url, name, ext){
-    srcUrl = url; srcName = name; srcExt = ext || 'mp3';
-    player.src = url;
-    document.getElementById('srcInfo').textContent = '🎵 ' + name + ' — memuat…';
-    document.getElementById('editArea').style.display = 'block';
-    document.getElementById('resultWrap').style.display = 'none';   // reset hasil saat ganti lagu
-    setStatus('');
+function readFileAndLoad(file){
+    srcName = file.name.replace(/\.[^.]+$/,'');
+    setStatus('<span class="spinner"></span> Membaca file…');
+    var reader=new FileReader();
+    reader.onload=function(e){ decodeBuffer(e.target.result); };
+    reader.readAsArrayBuffer(file);
+}
+async function fetchAndLoad(url, name){
+    srcUrl=url; srcName=name;
+    setStatus('<span class="spinner"></span> Mengambil file dari server…');
+    try {
+        var res = await fetch(url);
+        var ab  = await res.arrayBuffer();
+        decodeBuffer(ab);
+    } catch(e){ setStatus('⚠️ Gagal mengambil file: '+e.message); }
 }
 
-player.addEventListener('loadedmetadata', function(){
-    duration = player.duration || 0;
-    document.getElementById('durLabel').textContent = fmt(duration);
-    document.getElementById('srcInfo').textContent = '🎵 ' + srcName + ' · ' + fmt(duration);
-    var sr = document.getElementById('startRange'), er = document.getElementById('endRange');
-    sr.max = er.max = duration.toFixed(1);
-    sr.value = 0; er.value = duration.toFixed(1);
-    updateRegion();
-});
+function decodeBuffer(ab){
+    if(_ctx){ try{_ctx.close();}catch(e){} }
+    _ctx = new (window.AudioContext||window.webkitAudioContext)();
+    setStatus('<span class="spinner"></span> Mendekode audio…');
+    _ctx.decodeAudioData(ab, function(buf){
+        _buf=buf; duration=buf.duration;
+        _startT=0; _endT=duration;
+        player.src=''; // clear native player
+        document.getElementById('srcInfo').textContent = '🎵 '+srcName+' · '+fmt(duration);
+        document.getElementById('durLabel').textContent = fmt(duration);
+        var sr=document.getElementById('startRange'), er=document.getElementById('endRange');
+        sr.max=er.max=duration.toFixed(1); sr.step=er.step=(duration/1000).toFixed(4);
+        sr.value=0; er.value=duration.toFixed(1);
+        updateRegion(); drawAdminWave();
+        document.getElementById('editArea').style.display='block';
+        document.getElementById('resultWrap').style.display='none';
+        setStatus('');
+    }, function(){ setStatus('⚠️ Gagal mendekode — coba format lain.'); });
+}
 
-// ====== Region ======
-var startRange = document.getElementById('startRange'), endRange = document.getElementById('endRange');
+// ── Waveform ──
+function drawAdminWave(){
+    var canvas=document.getElementById('adminWave');
+    var wrap=document.getElementById('regionTrack');
+    var W=wrap.clientWidth||560, H=80;
+    canvas.width=W; canvas.height=H;
+    var ctx=canvas.getContext('2d');
+    ctx.fillStyle='#0a0e1a'; ctx.fillRect(0,0,W,H);
+    if(!_buf) return;
+    var data=_buf.getChannelData(0), step=Math.ceil(data.length/W);
+    var sx=(_startT/_endT||0)*0, ex2=(_endT/duration)*W, sx2=(_startT/duration)*W;
+    ctx.fillStyle='rgba(99,102,241,.1)'; ctx.fillRect(sx2,0,ex2-sx2,H);
+    for(var i=0;i<W;i++){
+        var max=0;
+        for(var j=0;j<step;j++){ var v=Math.abs(data[i*step+j]||0); if(v>max)max=v; }
+        var bH=Math.max(1,max*H*.9), y=(H-bH)/2;
+        ctx.fillStyle=(i>=sx2&&i<=ex2)?'#6366f1':'#1e293b';
+        ctx.fillRect(i,y,1,bH);
+    }
+    ctx.fillStyle='#818cf8'; ctx.fillRect(sx2,0,2,H);
+    ctx.fillStyle='#f59e0b'; ctx.fillRect(ex2-2,0,2,H);
+}
+
+// ── Sliders ──
+var startRange=document.getElementById('startRange'), endRange=document.getElementById('endRange');
 startRange.addEventListener('input', function(){
-    if (parseFloat(startRange.value) > parseFloat(endRange.value) - 0.2) startRange.value = (parseFloat(endRange.value) - 0.2).toFixed(1);
-    updateRegion();
+    _startT=parseFloat(this.value);
+    if(_startT>=_endT-0.1){_startT=_endT-0.1;this.value=_startT.toFixed(4);}
+    updateRegion(); drawAdminWave();
 });
 endRange.addEventListener('input', function(){
-    if (parseFloat(endRange.value) < parseFloat(startRange.value) + 0.2) endRange.value = (parseFloat(startRange.value) + 0.2).toFixed(1);
-    updateRegion();
+    _endT=parseFloat(this.value);
+    if(_endT<=_startT+0.1){_endT=_startT+0.1;this.value=_endT.toFixed(4);}
+    updateRegion(); drawAdminWave();
 });
-function getStart(){ return parseFloat(startRange.value) || 0; }
-function getEnd(){ return parseFloat(endRange.value) || 0; }
-
+function getStart(){ return _startT; }
+function getEnd(){ return _endT; }
 function updateRegion(){
-    var s = getStart(), e = getEnd();
-    document.getElementById('segLabel').textContent = '🟦 ' + fmt(s) + ' – ' + fmt(e) + ' · durasi ' + fmt(e - s);
-    var sel = document.getElementById('regionSel');
-    if (duration > 0){ sel.style.left = (s/duration*100) + '%'; sel.style.width = ((e-s)/duration*100) + '%'; }
+    document.getElementById('segLabel').textContent='🟦 '+fmt(_startT)+' – '+fmt(_endT)+' · durasi '+fmt(_endT-_startT);
 }
 function setEdge(which){
-    if (!duration) return;
-    var t = player.currentTime || 0;
-    if (which === 'start') startRange.value = Math.min(t, getEnd()-0.2).toFixed(1);
-    else endRange.value = Math.max(t, getStart()+0.2).toFixed(1);
-    updateRegion();
+    if(!duration) return;
+    var t = _ctx ? (_ctx.currentTime - (_playCtxTime||0) + (_startT||0)) : 0;
+    if(which==='start'){ _startT=Math.max(0,Math.min(t,_endT-0.1)); startRange.value=_startT.toFixed(4); }
+    else { _endT=Math.max(_startT+0.1,Math.min(t,duration)); endRange.value=_endT.toFixed(4); }
+    updateRegion(); drawAdminWave();
 }
+
 document.getElementById('regionTrack').addEventListener('click', function(ev){
-    if (!duration) return;
-    var rect = this.getBoundingClientRect();
-    player.currentTime = (ev.clientX - rect.left) / rect.width * duration;
-});
-player.addEventListener('timeupdate', function(){
-    if (duration > 0) document.getElementById('regionPlay').style.left = (player.currentTime/duration*100) + '%';
+    if(!duration) return;
+    var rect=this.getBoundingClientRect();
+    var t=(ev.clientX-rect.left)/rect.width*duration;
+    var ds=Math.abs(t-_startT), de=Math.abs(t-_endT);
+    if(ds<de){ _startT=Math.max(0,Math.min(t,_endT-0.1)); startRange.value=_startT.toFixed(4); }
+    else { _endT=Math.max(_startT+0.1,Math.min(t,duration)); endRange.value=_endT.toFixed(4); }
+    updateRegion(); drawAdminWave();
 });
 
-// ====== Preview region ======
-var previewStop = null;
+// ── Playback ──
+var _playCtxTime=0, _playOffset=0;
 function previewRegion(){
-    if (!duration) return;
-    var e = getEnd();
-    player.currentTime = getStart();
-    player.play();
-    if (previewStop) player.removeEventListener('timeupdate', previewStop);
-    previewStop = function(){ if (player.currentTime >= e){ player.pause(); player.removeEventListener('timeupdate', previewStop); previewStop = null; } };
-    player.addEventListener('timeupdate', previewStop);
+    if(!_buf) return;
+    _stopSrc();
+    _ctx.resume();
+    _src=_ctx.createBufferSource(); _src.buffer=_buf; _src.connect(_ctx.destination);
+    _playOffset=_startT; _playCtxTime=_ctx.currentTime;
+    _src.start(0,_startT,_endT-_startT);
+    _playing=true; _rafTick();
+    _prevStop=setTimeout(_stopSrc, (_endT-_startT)*1000+300);
+}
+function _stopSrc(){
+    if(_prevStop){clearTimeout(_prevStop);_prevStop=null;}
+    if(_raf){cancelAnimationFrame(_raf);_raf=null;}
+    if(_src){try{_src.stop();}catch(e){}_src=null;}
+    _playing=false;
+    document.getElementById('regionPlay').style.display='none';
+}
+function _rafTick(){
+    if(!_playing) return;
+    var elapsed=_ctx.currentTime-_playCtxTime;
+    var pos=(_playOffset+elapsed)/duration;
+    if(pos>1){_stopSrc();return;}
+    var canvas=document.getElementById('adminWave');
+    var ph=document.getElementById('regionPlay');
+    ph.style.display='block'; ph.style.left=(pos*canvas.width)+'px';
+    _raf=requestAnimationFrame(_rafTick);
 }
 
-// ====== ffmpeg (auto-muat saat potong pertama) ======
-async function ensureFfmpeg(){
-    if (ffmpegLoaded) return true;
-    var FF = (window.FFmpegWASM || window.FFmpeg);
-    if (!FF || !FF.FFmpeg) throw new Error('Library ffmpeg tidak termuat (cek koneksi).');
-    ffmpeg = new FF.FFmpeg();
-    ffmpeg.on('progress', function(p){
-        if (p && p.progress >= 0 && p.progress <= 1) setStatus('<span class="spinner"></span> Memproses… ' + Math.round(p.progress*100) + '%');
-    });
-    setStatus('<span class="spinner"></span> Menyiapkan mesin pemotong (sekali saja, lalu di-cache)…');
-    await ffmpeg.load({ coreURL: FFMPEG_BASE + '/ffmpeg-core.js', wasmURL: FFMPEG_BASE + '/ffmpeg-core.wasm' });
-    ffmpegLoaded = true;
-    return true;
+// ── Cut ──
+function doCut(){
+    if(!_buf){alert('Pilih lagu dulu.');return;}
+    var s=_startT, dur=_endT-s;
+    if(dur<0.1){alert('Bagian terlalu pendek.');return;}
+    var cut=document.getElementById('cutBtn');
+    cut.disabled=true; setStatus('<span class="spinner"></span> Memotong…');
+    setTimeout(function(){
+        try{
+            var blob=_wavEncode(_buf,s,_endT);
+            if(lastClipUrl) URL.revokeObjectURL(lastClipUrl);
+            lastClipBlob=blob; lastClipUrl=URL.createObjectURL(blob);
+            document.getElementById('clipPlayer').src=lastClipUrl;
+            var dl=document.getElementById('downloadBtn');
+            dl.href=lastClipUrl; dl.download=srcName+'_'+fmt(s).replace(':','m')+'-'+fmt(_endT).replace(':','m')+'.wav';
+            document.getElementById('clipName').value=srcName+' ('+fmt(s)+'–'+fmt(_endT)+')';
+            document.getElementById('resultWrap').style.display='block';
+            setStatus('✓ Potongan jadi ('+fmt(dur)+'). Simpan/unduh, atau geser slider & potong part lain.');
+        }catch(e){ setStatus('⚠️ Gagal: '+(e.message||e)); }
+        finally{ cut.disabled=false; }
+    },50);
 }
 
-async function doCut(){
-    if (!srcUrl){ alert('Pilih lagu dulu.'); return; }
-    if (ffmpegBusy) return;
-    var s = getStart(), dur = getEnd() - s;
-    if (dur < 0.2){ alert('Bagian terlalu pendek.'); return; }
-
-    var cut = document.getElementById('cutBtn');
-    ffmpegBusy = true; cut.disabled = true;
-    try {
-        await ensureFfmpeg();
-        setStatus('<span class="spinner"></span> Memotong bagian…');
-        var inName = 'in.' + srcExt, outName = 'out.' + srcExt;
-        await ffmpeg.writeFile(inName, await fetchFile(srcUrl));
-        await ffmpeg.exec(['-ss', s.toFixed(2), '-i', inName, '-t', dur.toFixed(2), '-c', 'copy', outName]);
-        var data = await ffmpeg.readFile(outName);
-        try { ffmpeg.deleteFile(inName); ffmpeg.deleteFile(outName); } catch(e){}
-
-        if (lastClipUrl) URL.revokeObjectURL(lastClipUrl);  // hindari kebocoran memori
-        lastClipBlob = new Blob([data.buffer], { type: srcExt === 'mp3' ? 'audio/mpeg' : 'audio/' + srcExt });
-        lastClipUrl = URL.createObjectURL(lastClipBlob);
-
-        document.getElementById('clipPlayer').src = lastClipUrl;
-        var dl = document.getElementById('downloadBtn');
-        dl.href = lastClipUrl;
-        dl.download = srcName + '_' + fmt(s).replace(':','m') + '-' + fmt(getEnd()).replace(':','m') + '.' + srcExt;
-        document.getElementById('clipName').value = srcName + ' (' + fmt(s) + '–' + fmt(getEnd()) + ')';
-        document.getElementById('resultWrap').style.display = 'block';
-        setStatus('✓ Potongan jadi (' + fmt(dur) + '). Simpan/unduh, atau geser slider & potong part lain.');
-    } catch(e){
-        console.error('cut error:', e);
-        setStatus('⚠️ Gagal: ' + ((e && e.message) || e) + (srcExt !== 'mp3' ? ' (coba file MP3)' : ''));
-    } finally {
-        ffmpegBusy = false; cut.disabled = false;
+function _wavEncode(buffer,s,e){
+    var sr=buffer.sampleRate, nCh=buffer.numberOfChannels;
+    var ss=Math.floor(s*sr), es=Math.min(Math.ceil(e*sr),buffer.length), n=es-ss;
+    var ab=new ArrayBuffer(44+n*nCh*2), v=new DataView(ab);
+    function ws(off,str){for(var i=0;i<str.length;i++)v.setUint8(off+i,str.charCodeAt(i));}
+    ws(0,'RIFF');v.setUint32(4,36+n*nCh*2,true);ws(8,'WAVE');ws(12,'fmt ');
+    v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nCh,true);
+    v.setUint32(24,sr,true);v.setUint32(28,sr*nCh*2,true);v.setUint16(32,nCh*2,true);v.setUint16(34,16,true);
+    ws(36,'data');v.setUint32(40,n*nCh*2,true);
+    var off=44;
+    for(var i=0;i<n;i++) for(var ch=0;ch<nCh;ch++){
+        var x=Math.max(-1,Math.min(1,buffer.getChannelData(ch)[ss+i]));
+        v.setInt16(off,x<0?x*0x8000:x*0x7FFF,true); off+=2;
     }
+    return new Blob([ab],{type:'audio/wav'});
 }
 
-// ====== IndexedDB potongan ======
-function idbOpen(){
-    return new Promise(function(res, rej){
-        var r = indexedDB.open('mafAudioClips', 1);
-        r.onupgradeneeded = function(){ r.result.createObjectStore('clips', { keyPath:'id', autoIncrement:true }); };
-        r.onsuccess = function(){ res(r.result); };
-        r.onerror = function(){ rej(r.error); };
-    });
-}
-async function idbAll(){ var db = await idbOpen(); return new Promise(function(res){ var t = db.transaction('clips').objectStore('clips').getAll(); t.onsuccess = function(){ res(t.result || []); }; t.onerror = function(){ res([]); }; }); }
-async function idbAdd(rec){ var db = await idbOpen(); return new Promise(function(res){ var t = db.transaction('clips','readwrite').objectStore('clips').add(rec); t.onsuccess = function(){ res(t.result); }; }); }
-async function idbDel(id){ var db = await idbOpen(); return new Promise(function(res){ db.transaction('clips','readwrite').objectStore('clips').delete(id).onsuccess = function(){ res(); }; }); }
+// ── IndexedDB ──
+function idbOpen(){return new Promise(function(res,rej){var r=indexedDB.open('mafAudioClips',1);r.onupgradeneeded=function(){r.result.createObjectStore('clips',{keyPath:'id',autoIncrement:true});};r.onsuccess=function(){res(r.result);};r.onerror=function(){rej(r.error);};});}
+async function idbAll(){var db=await idbOpen();return new Promise(function(res){var t=db.transaction('clips').objectStore('clips').getAll();t.onsuccess=function(){res(t.result||[]);};t.onerror=function(){res([]);};});}
+async function idbAdd(rec){var db=await idbOpen();return new Promise(function(res){var t=db.transaction('clips','readwrite').objectStore('clips').add(rec);t.onsuccess=function(){res(t.result);};});}
+async function idbDel(id){var db=await idbOpen();return new Promise(function(res){db.transaction('clips','readwrite').objectStore('clips').delete(id).onsuccess=function(){res();};});}
 
 async function saveClip(){
-    if (!lastClipBlob){ alert('Belum ada potongan.'); return; }
-    var name = (document.getElementById('clipName').value || 'Potongan').trim();
-    await idbAdd({ name: name, ext: srcExt, blob: lastClipBlob, size: lastClipBlob.size, createdAt: Date.now() });
-    setStatus('✓ Tersimpan: ' + name + '. Bisa langsung potong part lain.');
+    if(!lastClipBlob){alert('Belum ada potongan.');return;}
+    var name=(document.getElementById('clipName').value||'Potongan').trim();
+    await idbAdd({name:name,ext:'wav',blob:lastClipBlob,size:lastClipBlob.size,createdAt:Date.now()});
+    setStatus('✓ Tersimpan: '+name+'. Bisa langsung potong part lain.');
     renderClips();
 }
-
 async function renderClips(){
-    var list = document.getElementById('clipList');
-    var all = await idbAll();
-    if (!all.length){ list.innerHTML = '<p class="muted">Belum ada potongan tersimpan.</p>'; return; }
-    list.innerHTML = '';
-    all.sort(function(a,b){ return b.createdAt - a.createdAt; }).forEach(function(c){
-        var url = URL.createObjectURL(c.blob);
-        var kb = Math.round(c.size/1024);
-        var div = document.createElement('div');
-        div.className = 'clip-item';
-        div.innerHTML =
-            '<div style="flex:1;min-width:160px;">' +
-                '<div class="clip-name">' + (c.name||'Potongan').replace(/</g,'&lt;') + '</div>' +
-                '<div class="clip-meta">.' + c.ext + ' · ' + kb + ' KB</div>' +
-                '<audio class="mini" controls src="' + url + '"></audio>' +
-            '</div>' +
-            '<a class="btn btn-accent btn-sm" href="' + url + '" download="' + (c.name||'potongan') + '.' + c.ext + '">⬇️</a>' +
-            '<button class="btn-del" data-id="' + c.id + '">Hapus</button>';
-        div.querySelector('.btn-del').addEventListener('click', async function(){
-            if (!confirm('Hapus potongan ini?')) return;
-            await idbDel(c.id); renderClips();
-        });
+    var list=document.getElementById('clipList'), all=await idbAll();
+    if(!all.length){list.innerHTML='<p class="muted">Belum ada potongan tersimpan.</p>';return;}
+    list.innerHTML='';
+    all.sort(function(a,b){return b.createdAt-a.createdAt;}).forEach(function(c){
+        var url=URL.createObjectURL(c.blob), kb=Math.round(c.size/1024);
+        var div=document.createElement('div'); div.className='clip-item';
+        div.innerHTML='<div style="flex:1;min-width:160px;"><div class="clip-name">'+(c.name||'Potongan').replace(/</g,'&lt;')+'</div><div class="clip-meta">.'+(c.ext||'wav')+' · '+kb+' KB</div><audio class="mini" controls src="'+url+'"></audio></div><a class="btn btn-accent btn-sm" href="'+url+'" download="'+(c.name||'potongan')+'.'+(c.ext||'wav')+'">⬇️</a><button class="btn-del" data-id="'+c.id+'">Hapus</button>';
+        div.querySelector('.btn-del').addEventListener('click',async function(){if(!confirm('Hapus?'))return;await idbDel(c.id);renderClips();});
         list.appendChild(div);
     });
 }
 renderClips();
+window.addEventListener('resize',function(){if(_buf)drawAdminWave();});
 </script>
 
 @endsection

@@ -1000,6 +1000,18 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
     >Coba Sekarang</a>
     <p class="fb-promo-note">@auth Kamu sudah di dalam &mdash; ayo lanjut berkarya. @else Cukup login pakai Google &mdash; Gratis &amp; Aman. @endauth</p>
 
+    {{-- TOOLS GRATIS --}}
+    <a href="{{ route('tools.potong-lagu') }}"
+       onclick="gtag && gtag('event', 'cta_click', {event_category:'tools', button:'potong_lagu_landing'})"
+       style="display:flex;align-items:center;gap:14px;background:var(--card-bg,rgba(15,23,42,0.6));border:1px solid var(--border);border-radius:16px;padding:1rem 1.25rem;text-decoration:none;margin-top:1.25rem;transition:.2s;">
+        <div style="font-size:2rem;flex-shrink:0;">✂️</div>
+        <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:14px;color:var(--text,#f0f0f0);">Pemotong Lagu Online — Gratis</div>
+            <div style="font-size:12px;color:var(--text-3,#94a3b8);margin-top:2px;">Potong MP3, WAV, OGG langsung di browser. Tanpa install, tanpa upload ke server.</div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:var(--accent,#38bdf8);white-space:nowrap;">Coba →</div>
+    </a>
+
     <hr style="border:none;border-top:1px solid var(--border);margin:2.5rem 0;">
     
     {{-- Role cards --}}
