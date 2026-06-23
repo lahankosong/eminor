@@ -47,4 +47,26 @@ class ToolController extends Controller
             ],
         ]);
     }
+
+    public function coverMaker()
+    {
+        $canonical = url('/tools/cover-art');
+        return view('tools.cover-maker', [
+            'seo' => [
+                'title'       => 'Buat Cover Lagu / Album Online Gratis — Cover Art Maker 1:1 (3000px)',
+                'description' => 'Bikin cover art lagu/album persegi 1:1 untuk Spotify, Apple Music, YouTube — resolusi 1600/2000/3000 px. Tambah judul & nama artis, atur foto, unduh PNG/JPG. Gratis, tanpa upload.',
+                'url'         => $canonical,
+                'schema'      => [
+                    '@context'            => 'https://schema.org',
+                    '@type'               => 'WebApplication',
+                    'name'                => 'Cover Art Maker (Buat Cover Lagu)',
+                    'url'                 => $canonical,
+                    'description'         => 'Buat cover art lagu/album 1:1 (3000px) untuk platform streaming, gratis di browser tanpa upload.',
+                    'applicationCategory' => 'DesignApplication',
+                    'operatingSystem'     => 'Any',
+                    'offers'              => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'IDR'],
+                ],
+            ],
+        ]);
+    }
 }
