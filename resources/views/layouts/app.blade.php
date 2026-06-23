@@ -392,6 +392,10 @@
             <a href="https://music.apple.com/us/artist/margonoandi/1850375782"
                target="_blank" rel="noopener" class="footer-link apple">&#9835; Apple Music</a>
         </div>
+        <div class="footer-links" style="margin-top:8px;">
+            <a href="{{ route('tools.potong-lagu') }}" class="footer-link">&#9986; Potong Lagu</a>
+            <a href="{{ route('tools.hapus-vokal') }}" class="footer-link">&#127908; Hapus Vokal / Karaoke</a>
+        </div>
         <div class="footer-copy">© 2026 Margonoandi · Semua lagu dilindungi hak cipta</div>
     </div>
 </footer>

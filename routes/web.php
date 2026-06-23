@@ -36,6 +36,7 @@ Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
 
 // Tools publik — tanpa login
 Route::get('/tools/potong-lagu', [ToolController::class, 'audioCutter'])->name('tools.potong-lagu');
+Route::get('/tools/hapus-vokal', [ToolController::class, 'vocalRemover'])->name('tools.hapus-vokal');
 
 // Google Auth
 Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.login');

@@ -1126,6 +1126,9 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
             </div>
         </div>
         <div style="padding:1rem;max-height:80vh;overflow-y:auto;">
+            @if(Route::has('tools.hapus-vokal'))
+            <a href="{{ route('tools.hapus-vokal') }}" style="display:block;text-align:center;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;padding:8px;border-radius:9px;font-weight:700;font-size:12px;text-decoration:none;margin-bottom:.6rem;">🔓 Buka di halaman penuh (bisa dibagikan)</a>
+            @endif
             <div id="siDrop" style="border:2px dashed #312e81;border-radius:12px;padding:1.5rem 1rem;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:.75rem;">
                 <div style="font-size:2rem;margin-bottom:.4rem;">🎛️</div>
                 <div style="font-size:13px;color:#94a3b8;margin-bottom:.5rem;">Seret file audio ke sini atau</div>
