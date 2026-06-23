@@ -79,8 +79,14 @@
                 <div class="md-fg"><label>Tahun</label><input type="number" id="mdYear" class="md-input" min="1900" max="2099" placeholder="2026"></div>
                 <div class="md-fg"><label>Genre</label><input type="text" id="mdGenre" class="md-input" maxlength="40" placeholder="Pop, Indie…"></div>
                 <div class="md-fg"><label>No. Track</label><input type="text" id="mdTrack" class="md-input" maxlength="7" placeholder="1 atau 1/12"></div>
+                <div class="md-fg"><label>Album Artist</label><input type="text" id="mdAlbumArtist" class="md-input" maxlength="80"></div>
+                <div class="md-fg"><label>Composer</label><input type="text" id="mdComposer" class="md-input" maxlength="80"></div>
+                <div class="md-fg"><label>Label / Publisher</label><input type="text" id="mdPublisher" class="md-input" maxlength="80"></div>
+                <div class="md-fg"><label>Copyright</label><input type="text" id="mdCopyright" class="md-input" maxlength="120" placeholder="© 2026 Nama"></div>
+                <div class="md-fg full"><label>Komentar</label><input type="text" id="mdComment" class="md-input" maxlength="200"></div>
             </div>
         </div>
+        <div id="mdTech" style="font-size:11.5px;color:var(--text-3,#94a3b8);background:var(--bg-2,#0f1e2e);border:1px solid var(--border,#334155);border-radius:9px;padding:.55rem .75rem;margin-bottom:1rem;display:none;"></div>
 
         <div class="md-out">
             <label style="font-size:11px;font-weight:700;color:var(--text-2,#cbd5e1);text-transform:uppercase;letter-spacing:.03em;">Format Unduhan</label>
@@ -101,7 +107,7 @@
     </div>
 
     <div class="md-info-grid">
-        <div class="md-info-card"><div class="i">🏷️</div><div class="t">Tag Lengkap</div><div class="b">Judul, artis, album, tahun, genre, track — biar nama lagumu tampil benar di semua pemutar.</div></div>
+        <div class="md-info-card"><div class="i">🏷️</div><div class="t">Tag Lengkap</div><div class="b">Judul, artis, album artist, composer, tahun, genre, track, label, copyright + baca bitrate/sample-rate.</div></div>
         <div class="md-info-card"><div class="i">🖼️</div><div class="t">Cover Tertanam</div><div class="b">Sematkan cover art langsung ke MP3 (APIC). Pakai gambar dari <a href="{{ route('tools.cover-art') }}" style="color:var(--ac);">Cover Maker</a>.</div></div>
         <div class="md-info-card"><div class="i">🎚️</div><div class="t">WAV untuk Agregator</div><div class="b">DistroKid/TuneCore minta audio lossless — konversi ke WAV langsung di sini.</div></div>
         <div class="md-info-card"><div class="i">🔒</div><div class="t">Tanpa Upload</div><div class="b">File diproses di browser, tidak dikirim ke server.</div></div>
@@ -152,8 +158,9 @@ function load(file){
         g('mdInfo').innerHTML='🎵 <b>'+file.name+'</b> · '+(file.size/1024/1024).toFixed(1)+' MB'+(S.isMp3?'':' <span style="color:#f59e0b">[bukan MP3 — output MP3 akan di-encode ulang]</span>');
         g('mdEditor').classList.add('show');st('');
         // 1) BACA metadata LAMA dulu → 2) isi form untuk diedit
-        ['mdTitle','mdArtist','mdAlbum','mdYear','mdGenre','mdTrack'].forEach(function(id){g(id).value='';});
+        ['mdTitle','mdArtist','mdAlbum','mdYear','mdGenre','mdTrack','mdAlbumArtist','mdComposer','mdPublisher','mdCopyright','mdComment'].forEach(function(id){g(id).value='';});
         g('mdTitle').value=S.name;
+        showTech();
         var noteEl=document.createElement('div');noteEl.style.cssText='margin-top:5px;font-size:11px;';g('mdInfo').appendChild(noteEl);
         function readNote(html,col){noteEl.innerHTML=html;noteEl.style.color=col||'#94a3b8';}
         if(!window.jsmediatags){ readNote('⚠️ Pembaca tag belum termuat — coba muat ulang halaman.','#f59e0b'); }
@@ -167,6 +174,12 @@ function load(file){
                 if(t.year){g('mdYear').value=(''+t.year).replace(/\D/g,'').slice(0,4);found.push('tahun');}
                 if(t.genre){g('mdGenre').value=t.genre;found.push('genre');}
                 if(t.track){g('mdTrack').value=(''+t.track);found.push('track');}
+                var rt=function(id){var f=t[id];if(!f)return '';var d=f.data;if(typeof d==='string')return d;if(d&&typeof d.text==='string')return d.text;return '';};
+                var aa=rt('TPE2');if(aa){g('mdAlbumArtist').value=aa;found.push('album artist');}
+                var cm=rt('TCOM');if(cm){g('mdComposer').value=cm;found.push('composer');}
+                var pb=rt('TPUB');if(pb){g('mdPublisher').value=pb;found.push('publisher');}
+                var cp=rt('TCOP');if(cp){g('mdCopyright').value=cp;found.push('copyright');}
+                var co=(t.comment&&t.comment.text)?t.comment.text:rt('COMM');if(co){g('mdComment').value=co;found.push('komentar');}
                 if(t.picture&&t.picture.data&&t.picture.data.length){
                     var u8=new Uint8Array(t.picture.data);S.coverBuf=u8.buffer.slice(0);
                     try{g('mdCover').src=URL.createObjectURL(new Blob([u8],{type:t.picture.format||'image/jpeg'}));}catch(e){}
@@ -206,6 +219,11 @@ function tagMp3(buf){
     var yr=parseInt(v('mdYear'),10);if(!isNaN(yr))try{w.setFrame('TYER',yr);}catch(e){}
     if(v('mdGenre'))try{w.setFrame('TCON',[v('mdGenre')]);}catch(e){}
     setF('TRCK',v('mdTrack'));
+    if(v('mdAlbumArtist'))try{w.setFrame('TPE2',[v('mdAlbumArtist')]);}catch(e){}
+    if(v('mdComposer'))try{w.setFrame('TCOM',[v('mdComposer')]);}catch(e){}
+    setF('TPUB',v('mdPublisher'));
+    setF('TCOP',v('mdCopyright'));
+    if(v('mdComment'))try{w.setFrame('COMM',{description:'',text:v('mdComment'),language:'ind'});}catch(e){}
     if(S.coverBuf)try{w.setFrame('APIC',{type:3,data:S.coverBuf,description:'cover'});}catch(e){}
     w.addTag();return w.getBlob();
 }
@@ -231,6 +249,42 @@ function encodeMp3(buf){
     var e=enc.flush();if(e.length)out.push(new Uint8Array(e));
     var len=0;out.forEach(function(u){len+=u.length;});var all=new Uint8Array(len),p=0;out.forEach(function(u){all.set(u,p);p+=u.length;});
     return all.buffer;
+}
+
+function parseMp3Header(u8){
+    var i=0;
+    if(u8.length>10&&u8[0]===0x49&&u8[1]===0x44&&u8[2]===0x33){var sz=((u8[6]&0x7f)<<21)|((u8[7]&0x7f)<<14)|((u8[8]&0x7f)<<7)|(u8[9]&0x7f);i=10+sz;}
+    for(;i<u8.length-4;i++){
+        if(u8[i]===0xFF&&(u8[i+1]&0xE0)===0xE0){
+            var b1=u8[i+1],b2=u8[i+2],verB=(b1>>3)&3,layB=(b1>>1)&3;
+            if(verB===1||layB===0)continue;
+            var brI=(b2>>4)&0x0F,srI=(b2>>2)&3,ch=(u8[i+3]>>6)&3;
+            if(brI===0||brI===15||srI===3)continue;
+            var ver=verB===3?'1':(verB===2?'2':'2.5'),lay=layB===3?1:(layB===2?2:3),brTab,srTab;
+            if(ver==='1')brTab=lay===1?[0,32,64,96,128,160,192,224,256,288,320,352,384,416,448]:lay===2?[0,32,48,56,64,80,96,112,128,160,192,224,256,320,384]:[0,32,40,48,56,64,80,96,112,128,160,192,224,256,320];
+            else brTab=lay===1?[0,32,48,56,64,80,96,112,128,144,160,176,192,224,256]:[0,8,16,24,32,40,48,56,64,80,96,112,128,144,160];
+            srTab=ver==='1'?[44100,48000,32000]:(ver==='2'?[22050,24000,16000]:[11025,12000,8000]);
+            return {bitrate:brTab[brI],sampleRate:srTab[srI],channels:ch===3?1:2};
+        }
+    }
+    return null;
+}
+function showTech(){
+    var el=g('mdTech');el.style.display='block';el.innerHTML='🎚️ Membaca info teknis…';
+    var hdr=null;try{hdr=S.isMp3?parseMp3Header(new Uint8Array(S.origBuf)):null;}catch(e){}
+    var base=[((S.file.name.split('.').pop()||'audio').toUpperCase())];
+    var au=new Audio();au.preload='metadata';var url=URL.createObjectURL(S.file);
+    function render(dur){
+        var p=base.slice();
+        if(dur&&isFinite(dur)&&dur>0)p.push('~'+Math.round(S.file.size*8/dur/1000)+' kbps');
+        else if(hdr)p.push(hdr.bitrate+' kbps');
+        if(hdr){p.push((hdr.sampleRate/1000)+' kHz');p.push(hdr.channels===1?'Mono':'Stereo');}
+        if(dur&&isFinite(dur)&&dur>0){var m=Math.floor(dur/60),s=Math.floor(dur%60);p.push(m+':'+(s<10?'0':'')+s);}
+        el.innerHTML='🎚️ <b>Info teknis</b> (audio, tak diedit): '+p.join(' · ');
+    }
+    au.onloadedmetadata=function(){var d=au.duration;URL.revokeObjectURL(url);render(d);};
+    au.onerror=function(){URL.revokeObjectURL(url);render(0);};
+    au.src=url;
 }
 
 window.mdExport=function(){
