@@ -1838,6 +1838,7 @@ console.log('Home loaded:', songs.length, 'songs');
 @endpush
 
 @push('scripts')
+<script src="{{ asset('js/vocal-remover.js') }}?v={{ @filemtime(public_path('js/vocal-remover.js')) ?: 1 }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script>
@@ -2333,20 +2334,14 @@ function siLoad(file){
 window.siProcess=function(){
     if(!_buf){siSt('Pilih file dulu.');return;}
     if(_buf.numberOfChannels<2){siSt('⚠️ Butuh lagu STEREO untuk hapus vokal (file ini mono).');return;}
+    if(!window.VocalRemover){siSt('⚠️ Modul belum termuat, muat ulang halaman.');return;}
     var btn=gs('siBtn');btn.disabled=true;
     gs('siProgress').style.display='block';gs('siResult').style.display='none';
-    siProg(8,'Memproses…');siSt('');
-    setTimeout(function(){
-        try{
-            var L=_buf.getChannelData(0),R=_buf.getChannelData(1),n=L.length,i;
-            var inst=new Float32Array(n),voc=new Float32Array(n);
-            for(i=0;i<n;i++){var l=L[i],r=R[i];inst[i]=l-r;voc[i]=(l+r)*0.5;}
-            function norm(a){var mx=0,j;for(j=0;j<a.length;j++){var v=a[j]<0?-a[j]:a[j];if(v>mx)mx=v;}if(mx>1e-4){var g=0.95/mx;for(j=0;j<a.length;j++)a[j]*=g;}}
-            norm(inst);norm(voc);
-            _stems={instL:inst,instR:inst,vocL:voc,vocR:voc};
-            siProg(100,'Selesai!');siRenderResult(_buf.sampleRate);btn.disabled=false;
-        }catch(e){siSt('⚠️ '+e.message);btn.disabled=false;gs('siProgress').style.display='none';}
-    },50);
+    siProg(5,'Memproses…');siSt('');
+    window.VocalRemover.process(_buf,function(v,l){siProg(v,l);},function(out){
+        _stems={instL:out.instL,instR:out.instR,vocL:out.vocL,vocR:out.vocR};
+        siRenderResult(out.sr);btn.disabled=false;
+    },function(e){siSt('⚠️ '+(e&&e.message||e));btn.disabled=false;gs('siProgress').style.display='none';});
 };
 
 var _STEMS_DEF=[
