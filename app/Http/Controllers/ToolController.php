@@ -119,6 +119,18 @@ class ToolController extends Controller
         return view('tools.countdown', compact('seo', 'hasParams'));
     }
 
+    public function editMetadata()
+    {
+        $url = url('/tools/edit-metadata');
+        $seo = $this->toolSeo(
+            'Edit Metadata Lagu (Tag MP3) & Konversi ke WAV — Gratis untuk Agregator',
+            'Edit metadata MP3 (judul, artis, album, tahun, genre, track) + tanam cover art, atau konversi lagu ke WAV lossless untuk kirim ke agregator (DistroKid, dll). Gratis, di browser, tanpa upload.',
+            'edit-metadata', 'Edit Metadata & WAV',
+            $this->appNode('Edit Metadata MP3 & Konversi WAV', $url, 'Edit tag ID3 MP3 + tanam cover, atau konversi ke WAV lossless untuk agregator, gratis tanpa upload.', 'MultimediaApplication')
+        );
+        return view('tools.edit-metadata', compact('seo'));
+    }
+
     public function hub()
     {
         $tools = [
@@ -127,6 +139,7 @@ class ToolController extends Controller
             ['icon' => '🎨', 'name' => 'Buat Cover Lagu / Album',      'desc' => 'Cover art 1:1 hingga 3000px untuk Spotify, Apple, YouTube.',     'route' => 'tools.cover-art'],
             ['icon' => '🚀', 'name' => 'Kartu Promo Rilis',           'desc' => '3 fase (pra/rilis/pasca) + QR/platform, feed 1:1 & story 9:16.', 'route' => 'tools.kartu-rilis'],
             ['icon' => '⏳', 'name' => 'Countdown Rilis',             'desc' => 'Link hitung mundur real-time untuk bio Instagram / story.',      'route' => 'tools.countdown'],
+            ['icon' => '🏷️', 'name' => 'Edit Metadata & WAV',        'desc' => 'Tag MP3 (judul/artis/cover) atau konversi WAV untuk agregator.', 'route' => 'tools.edit-metadata'],
         ];
         $items = [];
         foreach ($tools as $i => $t) {

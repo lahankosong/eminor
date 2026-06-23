@@ -1039,6 +1039,11 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
                 <div class="fb-studio-t">Countdown Rilis</div>
                 <div class="fb-studio-d">Link hitung mundur real-time</div>
             </a>
+            <a href="{{ route('tools.edit-metadata') }}" class="fb-studio-card">
+                <div class="fb-studio-ic">🏷️</div>
+                <div class="fb-studio-t">Edit Metadata &amp; WAV</div>
+                <div class="fb-studio-d">Tag MP3 + cover / konversi WAV</div>
+            </a>
         </div>
     </div>
 

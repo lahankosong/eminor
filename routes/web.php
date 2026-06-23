@@ -41,6 +41,7 @@ Route::get('/tools/hapus-vokal', [ToolController::class, 'vocalRemover'])->name(
 Route::get('/tools/cover-art', [ToolController::class, 'coverMaker'])->name('tools.cover-art');
 Route::get('/tools/kartu-rilis', [ToolController::class, 'releaseCard'])->name('tools.kartu-rilis');
 Route::get('/tools/countdown', [ToolController::class, 'countdown'])->name('tools.countdown');
+Route::get('/tools/edit-metadata', [ToolController::class, 'editMetadata'])->name('tools.edit-metadata');
 
 // Google Auth
 Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.login');
