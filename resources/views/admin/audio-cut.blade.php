@@ -392,10 +392,10 @@ function doCut(){
             lastClipBlob=blob;lastClipUrl=URL.createObjectURL(blob);
             document.getElementById('clipPlayer').src=lastClipUrl;
             var dl=document.getElementById('downloadBtn');
-            dl.href=lastClipUrl;dl.download=srcName+'_'+fmt(s).replace(':','m')+'-'+fmt(_endT).replace(':','m')+'.'+ext;
-            document.getElementById('clipName').value=srcName+' ('+fmt(s)+'–'+fmt(_endT)+')';
+            dl.href=lastClipUrl;dl.download=srcName+'_'+fmtA(s).replace(':','m')+'-'+fmtA(_endT).replace(':','m')+'.'+ext;
+            document.getElementById('clipName').value=srcName+' ('+fmtA(s)+'–'+fmtA(_endT)+')';
             document.getElementById('resultWrap').style.display='block';
-            setStatus('✓ Potongan jadi ('+fmt(dur)+'). Simpan/unduh, atau geser handle & potong part lain.');
+            setStatus('✓ Potongan jadi ('+fmtA(dur)+'). Simpan/unduh, atau geser handle & potong part lain.');
         }catch(e){setStatus('⚠️ Gagal: '+(e.message||e));}
         finally{cut.disabled=false;}
     },50);
