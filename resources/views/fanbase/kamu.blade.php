@@ -2069,31 +2069,36 @@ window.kcvReset=function(){
 (function(){
 'use strict';
 var KSI_W=[
-'function bqLP(s,sr,fc){var w=2*Math.PI*fc/sr,cw=Math.cos(w),sw=Math.sin(w),al=sw/1.414;',
-'var b0=(1-cw)/2,b1=1-cw,b2=(1-cw)/2,a0=1+al,a1=-2*cw,a2=1-al;',
-'var o=new Float32Array(s.length),x1=0,x2=0,y1=0,y2=0;',
-'for(var i=0;i<s.length;i++){var x=s[i],y=(b0/a0)*x+(b1/a0)*x1+(b2/a0)*x2-(a1/a0)*y1-(a2/a0)*y2;o[i]=y;x2=x1;x1=x;y2=y1;y1=y;}return o;}',
-'function bqHP(s,sr,fc){var w=2*Math.PI*fc/sr,cw=Math.cos(w),sw=Math.sin(w),al=sw/1.414;',
-'var b0=(1+cw)/2,b1=-(1+cw),b2=(1+cw)/2,a0=1+al,a1=-2*cw,a2=1-al;',
-'var o=new Float32Array(s.length),x1=0,x2=0,y1=0,y2=0;',
-'for(var i=0;i<s.length;i++){var x=s[i],y=(b0/a0)*x+(b1/a0)*x1+(b2/a0)*x2-(a1/a0)*y1-(a2/a0)*y2;o[i]=y;x2=x1;x1=x;y2=y1;y1=y;}return o;}',
-'function nx(fn,s,sr,fc,n){var o=s;for(var i=0;i<n;i++)o=fn(o,sr,fc);return o;}',
-'function pk(s){var mx=0;for(var i=0;i<s.length;i++){var a=Math.abs(s[i]);if(a>mx)mx=a;}if(mx<0.001)return s;',
-'var k=0.95/mx,o=new Float32Array(s.length);for(var i=0;i<s.length;i++)o[i]=s[i]*k;return o;}',
-'self.onmessage=function(e){',
-'var L=e.data.L,R=e.data.R,sr=e.data.sr,n=L.length;',
-'var voc=new Float32Array(n),mix=new Float32Array(n);',
-'for(var i=0;i<n;i++){voc[i]=(L[i]+R[i])*.5;mix[i]=voc[i];}',
-'self.postMessage({t:"p",v:20,lbl:"Memisahkan vokal…"});',
-'var iL=new Float32Array(n),iR=new Float32Array(n);',
-'for(var i=0;i<n;i++){iL[i]=(L[i]-R[i])*.5;iR[i]=-iL[i];}',
-'self.postMessage({t:"p",v:45,lbl:"Mengekstrak bass…"});',
-'var bass=nx(bqLP,mix,sr,180,4);',
-'self.postMessage({t:"p",v:70,lbl:"Mengekstrak melodi…"});',
-'var mel=nx(bqHP,mix,sr,2500,3);',
-'self.postMessage({t:"p",v:88,lbl:"Normalisasi…"});',
-'voc=pk(voc);iL=pk(iL);iR=pk(iR);bass=pk(bass);mel=pk(mel);',
-'self.postMessage({t:"done",voc:voc,iL:iL,iR:iR,bass:bass,mel:mel},[voc.buffer,iL.buffer,iR.buffer,bass.buffer,mel.buffer]);};'
+'importScripts("https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.3/dist/ort.min.js");',
+'ort.env.wasm.wasmPaths="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.3/dist/";',
+'var MODEL_URL="https://huggingface.co/MrCitron/demucs-v4-onnx/resolve/main/htdemucs.onnx";',
+'var SEG=343980,_sess=null;',
+'async function loadModel(){',
+'var resp=await fetch(MODEL_URL);if(!resp.ok)throw new Error("HTTP "+resp.status);',
+'var total=parseInt(resp.headers.get("Content-Length")||"0");',
+'var reader=resp.body.getReader(),recv=0,chunks=[];',
+'while(true){var rr=await reader.read();if(rr.done)break;chunks.push(rr.value);recv+=rr.value.length;',
+'if(total>0){self.postMessage({t:"p",v:3+Math.round(recv/total*14),lbl:"Unduh model AI "+Math.round(recv/1024/1024)+"/"+Math.round(total/1024/1024)+" MB..."});}',
+'else{self.postMessage({t:"p",v:10,lbl:"Unduh model AI "+Math.round(recv/1024/1024)+" MB..."});}}',
+'var ab=new Uint8Array(recv),pos=0;',
+'for(var ci=0;ci<chunks.length;ci++){ab.set(chunks[ci],pos);pos+=chunks[ci].length;}',
+'self.postMessage({t:"p",v:18,lbl:"Memuat model ke memori..."});',
+'_sess=await ort.InferenceSession.create(ab.buffer,{executionProviders:["wasm"]});',
+'self.postMessage({t:"p",v:20,lbl:"Model siap!"});}',
+'self.onmessage=async function(ev){',
+'try{var L=ev.data.L,R=ev.data.R,n=L.length;',
+'if(!_sess)await loadModel();',
+'var nC=Math.ceil(n/SEG);',
+'var oL=[new Float32Array(n),new Float32Array(n),new Float32Array(n),new Float32Array(n)];',
+'var oR=[new Float32Array(n),new Float32Array(n),new Float32Array(n),new Float32Array(n)];',
+'for(var c=0;c<nC;c++){var cs=c*SEG,ce=Math.min(cs+SEG,n),cl=ce-cs;',
+'var inp=new Float32Array(2*SEG);inp.set(L.subarray(cs,ce),0);inp.set(R.subarray(cs,ce),SEG);',
+'var t=new ort.Tensor("float32",inp,[1,2,SEG]);',
+'var res=await _sess.run({"mix":t});var sd=res["stems"].data;',
+'for(var st=0;st<4;st++){for(var i=0;i<cl;i++){oL[st][cs+i]=sd[st*2*SEG+i];oR[st][cs+i]=sd[st*2*SEG+SEG+i];}}',
+'self.postMessage({t:"p",v:20+Math.round(77*(c+1)/nC),lbl:"Proses chunk "+(c+1)+"/"+nC+"..."});}',
+'self.postMessage({t:"done",vocL:oL[3],vocR:oR[3],drumsL:oL[0],drumsR:oR[0],bassL:oL[1],bassR:oR[1],otherL:oL[2],otherR:oR[2]},[oL[0].buffer,oR[0].buffer,oL[1].buffer,oR[1].buffer,oL[2].buffer,oR[2].buffer,oL[3].buffer,oR[3].buffer]);',
+'}catch(err){self.postMessage({t:"err",msg:String(err)});}};'
 ].join('\n');
 
 var _ctx=null,_buf=null,_name='lagu',_stems=null,_worker=null,_urls=[];
@@ -2130,29 +2135,37 @@ window.ksiProcess=function(){
     if(!_buf){ksiSt('Pilih file dulu.');return;}
     var btn=gk('ksiBtn');btn.disabled=true;
     gk('ksiProgress').style.display='block';gk('ksiResult').style.display='none';
-    ksiProg(5,'Menyiapkan…');ksiSt('');
-    var L=_buf.getChannelData(0),R=_buf.numberOfChannels>1?_buf.getChannelData(1):L;
-    var lC=new Float32Array(L),rC=new Float32Array(R);
-    if(_worker){_worker.terminate();_worker=null;}
-    var blob=new Blob([KSI_W],{type:'application/javascript'});
-    var burl=URL.createObjectURL(blob);_worker=new Worker(burl);URL.revokeObjectURL(burl);
-    _worker.onmessage=function(ev){
-        var d=ev.data;
-        if(d.t==='p')ksiProg(d.v,d.lbl);
-        else if(d.t==='done'){
-            _stems={voc:d.voc,iL:d.iL,iR:d.iR,bass:d.bass,mel:d.mel};
-            ksiProg(100,'Selesai!');ksiRenderResult(_buf.sampleRate);btn.disabled=false;_worker=null;
-        }
-    };
-    _worker.onerror=function(e){ksiSt('Error: '+e.message);btn.disabled=false;gk('ksiProgress').style.display='none';};
-    _worker.postMessage({L:lC,R:rC,sr:_buf.sampleRate},[lC.buffer,rC.buffer]);
+    ksiProg(1,'Menyiapkan audio…');ksiSt('');
+    function doProcess(buf){
+        var L=buf.getChannelData(0),R=buf.numberOfChannels>1?buf.getChannelData(1):L;
+        var lC=new Float32Array(L),rC=new Float32Array(R);
+        if(_worker){_worker.terminate();_worker=null;}
+        _worker=new Worker(URL.createObjectURL(new Blob([KSI_W],{type:'application/javascript'})));
+        _worker.onmessage=function(ev){
+            var d=ev.data;
+            if(d.t==='p')ksiProg(d.v,d.lbl);
+            else if(d.t==='done'){
+                _stems={vocL:d.vocL,vocR:d.vocR,drumsL:d.drumsL,drumsR:d.drumsR,bassL:d.bassL,bassR:d.bassR,otherL:d.otherL,otherR:d.otherR};
+                ksiProg(100,'Selesai!');ksiRenderResult(44100);btn.disabled=false;_worker=null;
+            }else if(d.t==='err'){ksiSt('⚠️ '+d.msg);btn.disabled=false;gk('ksiProgress').style.display='none';}
+        };
+        _worker.onerror=function(e){ksiSt('⚠️ '+e.message);btn.disabled=false;gk('ksiProgress').style.display='none';};
+        _worker.postMessage({L:lC,R:rC},[lC.buffer,rC.buffer]);
+    }
+    if(_buf.sampleRate!==44100){
+        ksiProg(1,'Resample ke 44100 Hz…');
+        var offLen=Math.ceil(_buf.duration*44100);
+        var offCtx=new OfflineAudioContext(_buf.numberOfChannels,offLen,44100);
+        var src=offCtx.createBufferSource();src.buffer=_buf;src.connect(offCtx.destination);src.start(0);
+        offCtx.startRendering().then(doProcess).catch(function(e){ksiSt('⚠️ Resample gagal: '+e.message);btn.disabled=false;});
+    }else{doProcess(_buf);}
 };
 
 var _KD=[
-    {key:'voc', icon:'🎤',label:'Vokal',        color:'#38bdf8'},
-    {key:'inst',icon:'🎸',label:'Instrumental', color:'#818cf8'},
-    {key:'bass',icon:'🎵',label:'Bass',         color:'#f59e0b'},
-    {key:'mel', icon:'🎹',label:'Melodi',       color:'#22c55e'}
+    {key:'voc',  lk:'vocL',   rk:'vocR',   icon:'🎤',label:'Vokal',        color:'#38bdf8'},
+    {key:'drums',lk:'drumsL', rk:'drumsR', icon:'🥁',label:'Drum',         color:'#f87171'},
+    {key:'bass', lk:'bassL',  rk:'bassR',  icon:'🎸',label:'Bass',         color:'#f59e0b'},
+    {key:'other',lk:'otherL', rk:'otherR', icon:'🎵',label:'Other/Melodi', color:'#22c55e'}
 ];
 
 function ksiRenderResult(sr){
@@ -2161,11 +2174,7 @@ function ksiRenderResult(sr){
     var isWav=fv==='wav',kbps=isWav?0:parseInt(fv.split('-')[1])||128,ext=isWav?'wav':'mp3';
     var wrap=gk('ksiStemWrap');wrap.innerHTML='';
     _KD.forEach(function(st){
-        var c0,c1=null;
-        if(st.key==='voc')c0=_stems.voc;
-        else if(st.key==='inst'){c0=_stems.iL;c1=_stems.iR;}
-        else if(st.key==='bass')c0=_stems.bass;
-        else c0=_stems.mel;
+        var c0=_stems[st.lk],c1=_stems[st.rk];
         var bl=isWav?ksiEW(c0,c1,sr):ksiEM(c0,c1,sr,kbps);
         var u=URL.createObjectURL(bl);_urls.push(u);
         var row=document.createElement('div');
@@ -2203,8 +2212,13 @@ window.ksiDownloadAll=function(){
     ksiSt('Membuat ZIP…');
     var fv=gk('ksiFmt')?gk('ksiFmt').value:'mp3-128';
     var isWav=fv==='wav',kbps=isWav?0:parseInt(fv.split('-')[1])||128,ext=isWav?'wav':'mp3';
-    var zip=new JSZip(),sr=_buf.sampleRate;
-    var pairs=[{c0:_stems.voc,c1:null,nm:'01_vokal'},{c0:_stems.iL,c1:_stems.iR,nm:'02_instrumental'},{c0:_stems.bass,c1:null,nm:'03_bass'},{c0:_stems.mel,c1:null,nm:'04_melodi'}];
+    var zip=new JSZip(),sr=44100;
+    var pairs=[
+        {c0:_stems.vocL,  c1:_stems.vocR,   nm:'01_vokal'},
+        {c0:_stems.drumsL,c1:_stems.drumsR, nm:'02_drum'},
+        {c0:_stems.bassL, c1:_stems.bassR,  nm:'03_bass'},
+        {c0:_stems.otherL,c1:_stems.otherR, nm:'04_other'}
+    ];
     pairs.forEach(function(p){zip.file(_name+'_'+p.nm+'.'+ext,isWav?ksiEW(p.c0,p.c1,sr):ksiEM(p.c0,p.c1,sr,kbps));});
     zip.generateAsync({type:'blob'}).then(function(z){var a=document.createElement('a');a.href=URL.createObjectURL(z);a.download=_name+'_split.zip';a.click();ksiSt('');});
 };
