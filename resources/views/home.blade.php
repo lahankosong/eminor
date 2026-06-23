@@ -1074,6 +1074,12 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
                     <button id="acpBtnPause" onclick="acpPause()"   style="display:none;padding:9px 12px;background:#1e293b;border:1px solid #facc1560;color:#facc15;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;min-height:40px;">⏸ Pause</button>
                     <button                  onclick="acpPreview()" style="padding:9px 12px;background:rgba(14,165,233,.12);border:1px solid rgba(14,165,233,.3);color:#38bdf8;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;min-height:40px;">▶ Preview</button>
                     <button                  onclick="acpStop()"    style="padding:9px 10px;background:#1e293b;border:1px solid #334155;color:#64748b;border-radius:8px;font-size:12px;cursor:pointer;min-height:40px;">⏹</button>
+                    <select id="acpFmt" style="padding:6px 8px;border-radius:7px;border:1px solid #334155;background:#0f172a;color:#94a3b8;font-size:11px;cursor:pointer;min-height:40px;">
+                        <option value="mp3-128">MP3 128k</option>
+                        <option value="mp3-192">MP3 192k</option>
+                        <option value="mp3-320">MP3 320k</option>
+                        <option value="wav">WAV</option>
+                    </select>
                     <button id="acpBtnCut"   onclick="acpCut()"    style="flex:1;padding:9px;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;min-height:40px;">✂️ Potong &amp; Unduh</button>
                 </div>
                 <div id="acpStatus" style="font-size:11px;color:#4a5568;margin-top:5px;min-height:14px;"></div>
@@ -1774,6 +1780,7 @@ console.log('Home loaded:', songs.length, 'songs');
 @endpush
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
 <script>
 // ══════════════════════════════════════════════════════════════════════════════
 //  ACP — Audio Cutter Popup v2 (drag handles on canvas + zoom + mobile touch)
@@ -2017,33 +2024,47 @@ function acpStop(){
 }
 window.acpStop=acpStop;
 
-// ── Cut & WAV encode ──────────────────────────────────────────────────────────
+// ── Encode helpers (shared) ───────────────────────────────────────────────────
+function _encodeWavA(buf,s,e){
+    var sr=buf.sampleRate,nCh=buf.numberOfChannels;
+    var ss=Math.floor(s*sr),es=Math.min(Math.ceil(e*sr),buf.length),n=es-ss;
+    var ab=new ArrayBuffer(44+n*nCh*2),v=new DataView(ab);
+    function ws(o,st){for(var i=0;i<st.length;i++)v.setUint8(o+i,st.charCodeAt(i));}
+    ws(0,'RIFF');v.setUint32(4,36+n*nCh*2,true);ws(8,'WAVE');ws(12,'fmt ');
+    v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nCh,true);
+    v.setUint32(24,sr,true);v.setUint32(28,sr*nCh*2,true);v.setUint16(32,nCh*2,true);v.setUint16(34,16,true);
+    ws(36,'data');v.setUint32(40,n*nCh*2,true);
+    var off=44;
+    for(var i=0;i<n;i++) for(var ch=0;ch<nCh;ch++){var x=Math.max(-1,Math.min(1,buf.getChannelData(ch)[ss+i]));v.setInt16(off,x<0?x*0x8000:x*0x7FFF,true);off+=2;}
+    return new Blob([ab],{type:'audio/wav'});
+}
+function _encodeMp3A(buf,s,e,kbps){
+    var sr=buf.sampleRate,nCh=buf.numberOfChannels;
+    var ss=Math.floor(s*sr),es=Math.min(Math.ceil(e*sr),buf.length),n=es-ss;
+    var enc=new lamejs.Mp3Encoder(nCh>1?2:1,sr,kbps||128),mp3=[],BLOCK=1152;
+    function f2i(f){var a=new Int16Array(f.length);for(var i=0;i<f.length;i++)a[i]=Math.max(-32768,Math.min(32767,f[i]*32767));return a;}
+    var l16=f2i(buf.getChannelData(0).subarray(ss,es));
+    var r16=nCh>1?f2i(buf.getChannelData(1).subarray(ss,es)):l16;
+    for(var i=0;i<n;i+=BLOCK){var d=enc.encodeBuffer(l16.subarray(i,i+BLOCK),r16.subarray(i,i+BLOCK));if(d.length)mp3.push(new Uint8Array(d));}
+    var end=enc.flush();if(end.length)mp3.push(new Uint8Array(end));
+    return new Blob(mp3,{type:'audio/mpeg'});
+}
+// ── Cut & encode ──────────────────────────────────────────────────────────────
 window.acpCut=function(){
     if(!_buf)return;
     if(_endT-_startT<.1){setSt('Pilihan terlalu pendek (min 0.1 dtk).');return;}
+    var fv=g('acpFmt')?g('acpFmt').value:'mp3-128';
+    var isWav=fv==='wav',kbps=isWav?0:parseInt(fv.split('-')[1])||128,ext=isWav?'wav':'mp3';
     g('acpBtnCut').disabled=true;setSt('Memotong…');
     setTimeout(function(){
         try{
-            var sr=_buf.sampleRate,nCh=_buf.numberOfChannels;
-            var ss=Math.floor(_startT*sr),es=Math.min(Math.ceil(_endT*sr),_buf.length),n=es-ss;
-            var ab=new ArrayBuffer(44+n*nCh*2),v=new DataView(ab);
-            function ws(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));}
-            ws(0,'RIFF');v.setUint32(4,36+n*nCh*2,true);ws(8,'WAVE');ws(12,'fmt ');
-            v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nCh,true);
-            v.setUint32(24,sr,true);v.setUint32(28,sr*nCh*2,true);v.setUint16(32,nCh*2,true);v.setUint16(34,16,true);
-            ws(36,'data');v.setUint32(40,n*nCh*2,true);
-            var off=44;
-            for(var i=0;i<n;i++) for(var ch=0;ch<nCh;ch++){
-                var x=Math.max(-1,Math.min(1,_buf.getChannelData(ch)[ss+i]));
-                v.setInt16(off,x<0?x*0x8000:x*0x7FFF,true);off+=2;
-            }
-            var blob=new Blob([ab],{type:'audio/wav'});
+            var blob=isWav?_encodeWavA(_buf,_startT,_endT):_encodeMp3A(_buf,_startT,_endT,kbps);
             if(_resultUrl)URL.revokeObjectURL(_resultUrl);
             _resultUrl=URL.createObjectURL(blob);
             g('acpClipPlayer').src=_resultUrl;
             var dl=g('acpDl');dl.href=_resultUrl;
             dl.download=(g('acpFileName').textContent||'lagu')+'_'
-                +fmtS(_startT).replace(':','m')+'s-'+fmtS(_endT).replace(':','m')+'s.wav';
+                +fmtS(_startT).replace(':','m')+'s-'+fmtS(_endT).replace(':','m')+'s.'+ext;
             g('acpResult').style.display='block';setSt('');
             _used++;localStorage.setItem('acpUses',_used);updCtr();
             if(_used>=ACP_MAX){

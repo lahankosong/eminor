@@ -122,6 +122,12 @@
                 <button class="btn btn-soft btn-sm" id="admBtnPause" onclick="admPause()" style="display:none;border-color:rgba(250,204,21,.3);color:#facc15;">⏸ Pause</button>
                 <button class="btn btn-soft btn-sm" id="previewBtn"  onclick="previewRegion()">▶ Preview</button>
                 <button class="btn btn-soft btn-sm"                  onclick="admStop()">⏹</button>
+                <select id="admFmt" class="btn btn-soft btn-sm" style="cursor:pointer;font-size:11px;">
+                    <option value="mp3-128">MP3 128k</option>
+                    <option value="mp3-192">MP3 192k</option>
+                    <option value="mp3-320">MP3 320k</option>
+                    <option value="wav">WAV</option>
+                </select>
                 <button class="btn btn-primary" id="cutBtn" style="margin-left:auto;" onclick="doCut()">✂️ Potong</button>
             </div>
             <div class="status" id="status"></div>
@@ -151,6 +157,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
 <script>
 // ── Admin Audio Cutter v2 — drag handles + zoom ─────────────────────────────
 var _ctx=null,_buf=null,_src=null,duration=0,srcName='lagu';
@@ -295,44 +302,55 @@ window.admPause=function(){if(!_playing||_paused)return;_pausedAt=_playOffset+(_
 function previewRegion(){if(!_buf)return;admStop();ctxGoA(function(){_src=_ctx.createBufferSource();_src.buffer=_buf;_src.connect(_ctx.destination);_playOffset=_startT;_playCtxTime=_ctx.currentTime;_src.start(0,_startT,_endT-_startT);_playing=true;_paused=false;_prevStop=setTimeout(admStop,(_endT-_startT)*1000+400);showPauseA(true);_rafTick();});}
 window.previewRegion=previewRegion;
 
-// ── Cut ──
-function doCut(){
-    if(!_buf){alert('Pilih lagu dulu.');return;}
-    var s=_startT, dur=_endT-s;
-    if(dur<0.1){alert('Bagian terlalu pendek.');return;}
-    var cut=document.getElementById('cutBtn');
-    cut.disabled=true; setStatus('<span class="spinner"></span> Memotong…');
-    setTimeout(function(){
-        try{
-            var blob=_wavEncode(_buf,s,_endT);
-            if(lastClipUrl) URL.revokeObjectURL(lastClipUrl);
-            lastClipBlob=blob; lastClipUrl=URL.createObjectURL(blob);
-            document.getElementById('clipPlayer').src=lastClipUrl;
-            var dl=document.getElementById('downloadBtn');
-            dl.href=lastClipUrl; dl.download=srcName+'_'+fmt(s).replace(':','m')+'-'+fmt(_endT).replace(':','m')+'.wav';
-            document.getElementById('clipName').value=srcName+' ('+fmt(s)+'–'+fmt(_endT)+')';
-            document.getElementById('resultWrap').style.display='block';
-            setStatus('✓ Potongan jadi ('+fmt(dur)+'). Simpan/unduh, atau geser slider & potong part lain.');
-        }catch(e){ setStatus('⚠️ Gagal: '+(e.message||e)); }
-        finally{ cut.disabled=false; }
-    },50);
-}
-
-function _wavEncode(buffer,s,e){
-    var sr=buffer.sampleRate, nCh=buffer.numberOfChannels;
-    var ss=Math.floor(s*sr), es=Math.min(Math.ceil(e*sr),buffer.length), n=es-ss;
-    var ab=new ArrayBuffer(44+n*nCh*2), v=new DataView(ab);
+// ── Encode helpers ────────────────────────────────────────────────────────────
+function _wavEncode(buf,s,e){
+    var sr=buf.sampleRate,nCh=buf.numberOfChannels;
+    var ss=Math.floor(s*sr),es=Math.min(Math.ceil(e*sr),buf.length),n=es-ss;
+    var ab=new ArrayBuffer(44+n*nCh*2),v=new DataView(ab);
     function ws(off,str){for(var i=0;i<str.length;i++)v.setUint8(off+i,str.charCodeAt(i));}
     ws(0,'RIFF');v.setUint32(4,36+n*nCh*2,true);ws(8,'WAVE');ws(12,'fmt ');
     v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nCh,true);
     v.setUint32(24,sr,true);v.setUint32(28,sr*nCh*2,true);v.setUint16(32,nCh*2,true);v.setUint16(34,16,true);
     ws(36,'data');v.setUint32(40,n*nCh*2,true);
     var off=44;
-    for(var i=0;i<n;i++) for(var ch=0;ch<nCh;ch++){
-        var x=Math.max(-1,Math.min(1,buffer.getChannelData(ch)[ss+i]));
-        v.setInt16(off,x<0?x*0x8000:x*0x7FFF,true); off+=2;
-    }
+    for(var i=0;i<n;i++) for(var ch=0;ch<nCh;ch++){var x=Math.max(-1,Math.min(1,buf.getChannelData(ch)[ss+i]));v.setInt16(off,x<0?x*0x8000:x*0x7FFF,true);off+=2;}
     return new Blob([ab],{type:'audio/wav'});
+}
+function _mp3Encode(buf,s,e,kbps){
+    var sr=buf.sampleRate,nCh=buf.numberOfChannels;
+    var ss=Math.floor(s*sr),es=Math.min(Math.ceil(e*sr),buf.length),n=es-ss;
+    var enc=new lamejs.Mp3Encoder(nCh>1?2:1,sr,kbps||128),mp3=[],BLOCK=1152;
+    function f2i(f){var a=new Int16Array(f.length);for(var i=0;i<f.length;i++)a[i]=Math.max(-32768,Math.min(32767,f[i]*32767));return a;}
+    var l16=f2i(buf.getChannelData(0).subarray(ss,es));
+    var r16=nCh>1?f2i(buf.getChannelData(1).subarray(ss,es)):l16;
+    for(var i=0;i<n;i+=BLOCK){var d=enc.encodeBuffer(l16.subarray(i,i+BLOCK),r16.subarray(i,i+BLOCK));if(d.length)mp3.push(new Uint8Array(d));}
+    var end=enc.flush();if(end.length)mp3.push(new Uint8Array(end));
+    return new Blob(mp3,{type:'audio/mpeg'});
+}
+
+// ── Cut ──────────────────────────────────────────────────────────────────────
+function doCut(){
+    if(!_buf){alert('Pilih lagu dulu.');return;}
+    var s=_startT,dur=_endT-s;
+    if(dur<0.1){alert('Bagian terlalu pendek.');return;}
+    var fv=ga('admFmt')?ga('admFmt').value:'mp3-128';
+    var isWav=fv==='wav',kbps=isWav?0:parseInt(fv.split('-')[1])||128,ext=isWav?'wav':'mp3';
+    var cut=document.getElementById('cutBtn');
+    cut.disabled=true;setStatus('<span class="spinner"></span> Memotong…');
+    setTimeout(function(){
+        try{
+            var blob=isWav?_wavEncode(_buf,s,_endT):_mp3Encode(_buf,s,_endT,kbps);
+            if(lastClipUrl)URL.revokeObjectURL(lastClipUrl);
+            lastClipBlob=blob;lastClipUrl=URL.createObjectURL(blob);
+            document.getElementById('clipPlayer').src=lastClipUrl;
+            var dl=document.getElementById('downloadBtn');
+            dl.href=lastClipUrl;dl.download=srcName+'_'+fmt(s).replace(':','m')+'-'+fmt(_endT).replace(':','m')+'.'+ext;
+            document.getElementById('clipName').value=srcName+' ('+fmt(s)+'–'+fmt(_endT)+')';
+            document.getElementById('resultWrap').style.display='block';
+            setStatus('✓ Potongan jadi ('+fmt(dur)+'). Simpan/unduh, atau geser handle & potong part lain.');
+        }catch(e){setStatus('⚠️ Gagal: '+(e.message||e));}
+        finally{cut.disabled=false;}
+    },50);
 }
 
 // ── IndexedDB ──
@@ -344,7 +362,8 @@ async function idbDel(id){var db=await idbOpen();return new Promise(function(res
 async function saveClip(){
     if(!lastClipBlob){alert('Belum ada potongan.');return;}
     var name=(document.getElementById('clipName').value||'Potongan').trim();
-    await idbAdd({name:name,ext:'wav',blob:lastClipBlob,size:lastClipBlob.size,createdAt:Date.now()});
+    var extSaved=lastClipBlob.type.includes('mpeg')?'mp3':'wav';
+    await idbAdd({name:name,ext:extSaved,blob:lastClipBlob,size:lastClipBlob.size,createdAt:Date.now()});
     setStatus('✓ Tersimpan: '+name+'. Bisa langsung potong part lain.');
     renderClips();
 }
@@ -361,7 +380,7 @@ async function renderClips(){
     });
 }
 renderClips();
-window.addEventListener('resize',function(){if(_buf)drawAdminWave();});
+window.addEventListener('resize',function(){if(_buf)admDraw();});
 </script>
 
 @endsection

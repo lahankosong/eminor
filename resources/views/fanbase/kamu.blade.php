@@ -552,6 +552,9 @@
     <button class="kamu-tab" onclick="kamuTab('PotongLagu', this)">
         ✂️ Potong Lagu
     </button>
+    <button class="kamu-tab" onclick="kamuTab('Konversi', this)">
+        🔄 Konversi
+    </button>
 </div>
 
 {{-- TAB: NOTES --}}
@@ -934,6 +937,12 @@
                     <button id="kacBtnPause" onclick="kacPause()"   style="display:none;padding:9px 12px;background:rgba(250,204,21,.08);border:1px solid rgba(250,204,21,.3);color:#facc15;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;min-height:40px;">⏸ Pause</button>
                     <button                  onclick="kacPreview()" style="padding:9px 12px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);color:#38bdf8;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;min-height:40px;">▶ Preview</button>
                     <button                  onclick="kacStop()"    style="padding:9px 10px;background:var(--surface,#1e293b);border:1px solid var(--border);color:var(--text-3);border-radius:8px;font-size:12px;cursor:pointer;min-height:40px;">⏹</button>
+                    <select id="kacFmt" style="padding:6px 8px;border-radius:7px;border:1px solid var(--border);background:var(--surface,#1e293b);color:var(--text-3);font-size:11px;cursor:pointer;min-height:40px;">
+                        <option value="mp3-128">MP3 128k</option>
+                        <option value="mp3-192">MP3 192k</option>
+                        <option value="mp3-320">MP3 320k</option>
+                        <option value="wav">WAV</option>
+                    </select>
                     <button id="kacBtnCut"   onclick="kacCut()"    style="flex:1;padding:9px;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;min-height:40px;">✂️ Potong &amp; Unduh</button>
                 </div>
                 <div id="kacStatus" style="font-size:11px;color:var(--text-3);margin-top:5px;min-height:14px;"></div>
@@ -942,8 +951,52 @@
                 <div id="kacResult" style="display:none;margin-top:.65rem;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:.7rem;">
                     <div style="font-size:12px;font-weight:700;color:#22c55e;margin-bottom:.4rem;">✅ Siap diunduh</div>
                     <audio id="kacPlayer" controls style="width:100%;height:36px;margin-bottom:.4rem;"></audio>
-                    <a id="kacDl" download style="display:inline-flex;align-items:center;gap:5px;background:#22c55e;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">⬇️ Unduh WAV</a>
+                    <a id="kacDl" download style="display:inline-flex;align-items:center;gap:5px;background:#22c55e;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">⬇️ Unduh</a>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- TAB: KONVERSI AUDIO --}}
+<div class="kamu-tab-content" id="kamuTabKonversi" style="display:none;padding:1rem 0;">
+    <div style="margin-bottom:1rem;">
+        <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;">🔄 Konversi Audio</div>
+        <div style="font-size:12px;color:var(--text-3);">Ubah format audio langsung di browser — tanpa upload ke server. Input: MP3 · WAV · OGG · FLAC · AAC · M4A</div>
+    </div>
+
+    {{-- Drop zone --}}
+    <div id="kcvDrop" style="border:2px dashed var(--border);border-radius:12px;padding:2rem 1rem;text-align:center;cursor:pointer;transition:border-color .2s;">
+        <div style="font-size:2rem;margin-bottom:.5rem;">🎵</div>
+        <div style="font-size:13px;color:var(--text-3);margin-bottom:.6rem;">Seret file audio ke sini atau</div>
+        <label style="display:inline-block;padding:7px 18px;background:var(--accent,#6366f1);color:#fff;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">
+            Pilih File
+            <input type="file" id="kcvFile" accept="audio/*" style="display:none;">
+        </label>
+    </div>
+
+    {{-- Editor (hidden until file loaded) --}}
+    <div id="kcvEditor" style="display:none;margin-top:1rem;">
+        <div id="kcvInfo" style="font-size:12px;color:var(--text-3);margin-bottom:.75rem;font-variant-numeric:tabular-nums;"></div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:.75rem;">
+            <span style="font-size:12px;color:var(--text-3);">Konversi ke:</span>
+            <select id="kcvFmt" style="padding:7px 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface,#1e293b);color:var(--text);font-size:12px;cursor:pointer;">
+                <option value="mp3-128">🎵 MP3 128 kbps</option>
+                <option value="mp3-192">🎵 MP3 192 kbps</option>
+                <option value="mp3-320">🎵 MP3 320 kbps (HQ)</option>
+                <option value="wav">📦 WAV (lossless PCM)</option>
+            </select>
+            <button id="kcvBtn" onclick="kcvConvert()" style="padding:7px 18px;background:var(--accent,#6366f1);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">🔄 Konversi</button>
+            <button onclick="kcvReset()" style="padding:7px 12px;background:var(--surface,#1e293b);border:1px solid var(--border);color:var(--text-3);border-radius:8px;font-size:12px;cursor:pointer;">Ganti file</button>
+        </div>
+        <div id="kcvStatus" style="font-size:11px;color:var(--text-3);min-height:14px;margin-bottom:.5rem;"></div>
+
+        {{-- Result --}}
+        <div id="kcvResult" style="display:none;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:.75rem;">
+            <div style="font-size:12px;font-weight:700;color:#22c55e;margin-bottom:.4rem;">✅ Konversi selesai</div>
+            <audio id="kcvPlayer" controls style="width:100%;height:36px;margin-bottom:.5rem;"></audio>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <a id="kcvDl" download style="display:inline-flex;align-items:center;gap:5px;background:#22c55e;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">⬇️ Unduh</a>
             </div>
         </div>
     </div>
@@ -1687,6 +1740,10 @@ function tunerRenderUI(freq) {
     }
 }
 
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
+<script>
 // ══════════════════════════════════════════════════════════════════════════════
 //  KAC — Kamu Audio Cutter (tab Potong Lagu, flat, no limit)
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1838,29 +1895,47 @@ window.kacPause=function(){if(!_playing||_paused)return;_pausedAt=_playOffset+(_
 function kacStop(){stopSrcK();_playing=false;_paused=false;showPK(false);kacDraw();}
 window.kacStop=kacStop;
 
+// ── Encode helpers ────────────────────────────────────────────────────────────
+function encWav(buf,s,e){
+    var sr=buf.sampleRate,nCh=buf.numberOfChannels;
+    var ss=Math.floor(s*sr),es=Math.min(Math.ceil(e*sr),buf.length),n=es-ss;
+    var ab=new ArrayBuffer(44+n*nCh*2),v=new DataView(ab);
+    function ws(o,st){for(var i=0;i<st.length;i++)v.setUint8(o+i,st.charCodeAt(i));}
+    ws(0,'RIFF');v.setUint32(4,36+n*nCh*2,true);ws(8,'WAVE');ws(12,'fmt ');
+    v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nCh,true);
+    v.setUint32(24,sr,true);v.setUint32(28,sr*nCh*2,true);v.setUint16(32,nCh*2,true);v.setUint16(34,16,true);
+    ws(36,'data');v.setUint32(40,n*nCh*2,true);
+    var off=44;
+    for(var i=0;i<n;i++) for(var ch=0;ch<nCh;ch++){var x=Math.max(-1,Math.min(1,buf.getChannelData(ch)[ss+i]));v.setInt16(off,x<0?x*0x8000:x*0x7FFF,true);off+=2;}
+    return new Blob([ab],{type:'audio/wav'});
+}
+function encMp3(buf,s,e,kbps){
+    var sr=buf.sampleRate,nCh=buf.numberOfChannels;
+    var ss=Math.floor(s*sr),es=Math.min(Math.ceil(e*sr),buf.length),n=es-ss;
+    var enc=new lamejs.Mp3Encoder(nCh>1?2:1,sr,kbps||128),mp3=[],BLOCK=1152;
+    function f2i(f){var a=new Int16Array(f.length);for(var i=0;i<f.length;i++)a[i]=Math.max(-32768,Math.min(32767,f[i]*32767));return a;}
+    var l16=f2i(buf.getChannelData(0).subarray(ss,es));
+    var r16=nCh>1?f2i(buf.getChannelData(1).subarray(ss,es)):l16;
+    for(var i=0;i<n;i+=BLOCK){var d=enc.encodeBuffer(l16.subarray(i,i+BLOCK),r16.subarray(i,i+BLOCK));if(d.length)mp3.push(new Uint8Array(d));}
+    var end=enc.flush();if(end.length)mp3.push(new Uint8Array(end));
+    return new Blob(mp3,{type:'audio/mpeg'});
+}
+
 // ── Cut ───────────────────────────────────────────────────────────────────────
 window.kacCut=function(){
     if(!_buf)return;
     if(_endT-_startT<.1){setSt('Pilihan terlalu pendek (min 0.1 dtk).');return;}
+    var fv=g('kacFmt')?g('kacFmt').value:'mp3-128';
+    var isWav=fv==='wav',kbps=isWav?0:parseInt(fv.split('-')[1])||128,ext=isWav?'wav':'mp3';
     g('kacBtnCut').disabled=true;setSt('Memotong…');
     setTimeout(function(){
         try{
-            var sr=_buf.sampleRate,nCh=_buf.numberOfChannels;
-            var ss=Math.floor(_startT*sr),es=Math.min(Math.ceil(_endT*sr),_buf.length),n=es-ss;
-            var ab=new ArrayBuffer(44+n*nCh*2),v=new DataView(ab);
-            function ws(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));}
-            ws(0,'RIFF');v.setUint32(4,36+n*nCh*2,true);ws(8,'WAVE');ws(12,'fmt ');
-            v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nCh,true);
-            v.setUint32(24,sr,true);v.setUint32(28,sr*nCh*2,true);v.setUint16(32,nCh*2,true);v.setUint16(34,16,true);
-            ws(36,'data');v.setUint32(40,n*nCh*2,true);
-            var off=44;
-            for(var i=0;i<n;i++) for(var ch=0;ch<nCh;ch++){var x=Math.max(-1,Math.min(1,_buf.getChannelData(ch)[ss+i]));v.setInt16(off,x<0?x*0x8000:x*0x7FFF,true);off+=2;}
-            var blob=new Blob([ab],{type:'audio/wav'});
+            var blob=isWav?encWav(_buf,_startT,_endT):encMp3(_buf,_startT,_endT,kbps);
             if(_resultUrl)URL.revokeObjectURL(_resultUrl);
             _resultUrl=URL.createObjectURL(blob);
             g('kacPlayer').src=_resultUrl;
             var dl=g('kacDl');dl.href=_resultUrl;
-            dl.download=(g('kacName').textContent||'lagu')+'_'+fmtS(_startT).replace(':','m')+'s-'+fmtS(_endT).replace(':','m')+'s.wav';
+            dl.download=(g('kacName').textContent||'lagu')+'_'+fmtS(_startT).replace(':','m')+'s-'+fmtS(_endT).replace(':','m')+'s.'+ext;
             g('kacResult').style.display='block';setSt('');
         }catch(e){setSt('Gagal: '+(e.message||e));}
         finally{g('kacBtnCut').disabled=false;}
@@ -1869,5 +1944,75 @@ window.kacCut=function(){
 
 window.addEventListener('resize',function(){if(_buf)requestAnimationFrame(kacDraw);});
 })(); // end KAC
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  KCV — Konversi Audio (tab Konversi)
+// ══════════════════════════════════════════════════════════════════════════════
+(function(){
+'use strict';
+var _ctx=null,_buf=null,_resUrl=null,_name='audio';
+function gv(id){return document.getElementById(id);}
+function setSt(t){var e=gv('kcvStatus');if(e)e.textContent=t||'';}
+
+var dropEl=gv('kcvDrop');
+if(dropEl){
+    dropEl.addEventListener('dragover',function(e){e.preventDefault();dropEl.style.borderColor='var(--accent,#6366f1)';});
+    dropEl.addEventListener('dragleave',function(){dropEl.style.borderColor='';});
+    dropEl.addEventListener('drop',function(e){e.preventDefault();dropEl.style.borderColor='';if(e.dataTransfer.files[0])kcvLoad(e.dataTransfer.files[0]);});
+}
+gv('kcvFile')&&gv('kcvFile').addEventListener('change',function(){if(this.files[0])kcvLoad(this.files[0]);});
+
+function kcvLoad(file){
+    if(file.size>200*1024*1024){alert('Maks 200 MB');return;}
+    _name=file.name.replace(/\.[^.]+$/,'');
+    setSt('Memuat dan mendekode…');
+    if(_ctx){try{_ctx.close();}catch(e){}}_ctx=null;
+    _ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var r=new FileReader();
+    r.onload=function(ev){
+        _ctx.decodeAudioData(ev.target.result.slice(0),function(buf){
+            _buf=buf;_resUrl=null;
+            var dur=buf.duration,m=Math.floor(dur/60),x=Math.floor(dur%60);
+            gv('kcvInfo').textContent='🎵 '+_name+' · '+(file.size/1024/1024).toFixed(1)+' MB · '+m+':'+(x<10?'0':'')+x;
+            gv('kcvDrop').style.display='none';
+            gv('kcvEditor').style.display='block';
+            gv('kcvResult').style.display='none';
+            setSt('');
+        },function(){setSt('Gagal mendekode. Coba format lain.');});
+    };
+    r.readAsArrayBuffer(file);
+}
+
+window.kcvConvert=function(){
+    if(!_buf){setSt('Pilih file dulu.');return;}
+    var fv=gv('kcvFmt')?gv('kcvFmt').value:'mp3-128';
+    var isWav=fv==='wav',kbps=isWav?0:parseInt(fv.split('-')[1])||128,ext=isWav?'wav':'mp3';
+    var btn=gv('kcvBtn');btn.disabled=true;setSt('Mengonversi…');
+    setTimeout(function(){
+        try{
+            var blob=isWav
+                ?encWav(_buf,0,_buf.duration)
+                :encMp3(_buf,0,_buf.duration,kbps);
+            if(_resUrl)URL.revokeObjectURL(_resUrl);
+            _resUrl=URL.createObjectURL(blob);
+            gv('kcvPlayer').src=_resUrl;
+            var dl=gv('kcvDl');dl.href=_resUrl;
+            dl.download=_name+'.'+(isWav?'wav':'mp3');
+            dl.textContent='⬇️ Unduh '+(isWav?'WAV':'MP3')+' '+(isWav?'(lossless)':kbps+'kbps');
+            gv('kcvResult').style.display='block';setSt('');
+        }catch(e){setSt('Gagal: '+(e.message||e));}
+        finally{btn.disabled=false;}
+    },80);
+};
+
+window.kcvReset=function(){
+    _buf=null;_resUrl=null;
+    gv('kcvDrop').style.display='';
+    gv('kcvEditor').style.display='none';
+    gv('kcvResult').style.display='none';
+    setSt('');
+    var fi=gv('kcvFile');if(fi)fi.value='';
+};
+})(); // end KCV
 </script>
 @endpush
