@@ -2,6 +2,21 @@
 
 > Diperbarui: **2026-06-23**. File ini ikut `git pull` (portabel antar-komputer). Urut: terbaru di atas.
 
+## 🆕 Suite "Studio Gratis" (6 tool) + SEO + homepage ramping (2026-06-23 lanjutan)
+
+**Hapus Vokal ditingkatkan → STFT bertingkat** (`public/js/vocal-remover.js`, dipakai home/kamu/admin): FFT 4096 + Hann WOLA + center-extraction koherensi L/R + **gate frekuensi** (bass <170Hz dipertahankan, vokal 320-7kHz dibuang) — bass/drum tak drop, vokal lebih bersih.
+
+**6 tool publik gratis (client-side, SEO) — `ToolController`:**
+- `/tools` **hub** (`tools.index`) — index + ItemList schema.
+- `/tools/potong-lagu` (kantor), **`/tools/hapus-vokal`** (karaoke), **`/tools/cover-art`** (cover 1:1 s/d 3000px), **`/tools/kartu-rilis`** (kartu promo 3 fase + QR/platform, feed 1:1 & story 9:16), **`/tools/countdown`** (link hitung-mundur real-time, param URL self-contained, noindex+OG dinamis), **`/tools/edit-metadata`** (baca/tulis tag ID3: judul/artis/album/album-artist/composer/publisher/copyright/komentar/genre/track + cover APIC via jsmediatags + browser-id3-writer; **konversi WAV** untuk agregator; info teknis bitrate/SR/channel; tombol **Bersihkan semua metadata**).
+- Tiap tool: **OG image per-tool** (`public/images/og/*.png`, GD), **BreadcrumbList schema** (helper `ToolController::toolSeo()`), tombol **Bagikan** (`partials/tool-share`), CTA corong ke ekosistem, masuk **sitemap + footer + hub**.
+
+**Homepage diramping** (`home.blade` 2416→1366 baris): popup tool ACP+SI **dihapus** (markup + ~575 baris JS + lamejs/jszip/vocal-remover yang cuma dipakai popup) → diganti seksi **"Studio Gratis"** (kartu `<a>` ke page = internal-link SEO + bisa di-share).
+
+**SEO hygiene:** `layouts/app` meta `robots` override-able (`$seo['robots']`); countdown param-page `noindex,follow`; **custom 404** (`errors/404`) ramah + noindex; **`<noscript>`** banner site-wide.
+
+---
+
 ## 🆕 Audio Tools + Karaoke (lanjutan 2026-06-23 · kantor + rumah)
 
 **Tools audio (commit kantor 02b0e62 → e4b4eb0)**
