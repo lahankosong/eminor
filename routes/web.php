@@ -38,6 +38,7 @@ Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
 Route::get('/tools/potong-lagu', [ToolController::class, 'audioCutter'])->name('tools.potong-lagu');
 Route::get('/tools/hapus-vokal', [ToolController::class, 'vocalRemover'])->name('tools.hapus-vokal');
 Route::get('/tools/cover-art', [ToolController::class, 'coverMaker'])->name('tools.cover-art');
+Route::get('/tools/kartu-rilis', [ToolController::class, 'releaseCard'])->name('tools.kartu-rilis');
 
 // Google Auth
 Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.login');

@@ -69,4 +69,26 @@ class ToolController extends Controller
             ],
         ]);
     }
+
+    public function releaseCard()
+    {
+        $canonical = url('/tools/kartu-rilis');
+        return view('tools.release-card', [
+            'seo' => [
+                'title'       => 'Kartu Promo Rilis Lagu Online Gratis — Pra-Rilis, Rilis & Countdown',
+                'description' => 'Buat kartu promo rilis lagu untuk Instagram/WhatsApp: pra-rilis (countdown hari rilis), rilis (out now + link/QR platform), pasca-rilis. Feed 1:1 & Story 9:16. Gratis, tanpa upload.',
+                'url'         => $canonical,
+                'schema'      => [
+                    '@context'            => 'https://schema.org',
+                    '@type'               => 'WebApplication',
+                    'name'                => 'Kartu Promo Rilis Lagu (Countdown Maker)',
+                    'url'                 => $canonical,
+                    'description'         => 'Buat kartu promo rilis & countdown lagu untuk media sosial, gratis di browser tanpa upload.',
+                    'applicationCategory' => 'DesignApplication',
+                    'operatingSystem'     => 'Any',
+                    'offers'              => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'IDR'],
+                ],
+            ],
+        ]);
+    }
 }

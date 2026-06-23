@@ -1004,8 +1004,7 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
     <style>
         .fb-studio { margin-top:1.75rem; }
         .fb-studio-label { font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--text-3,#94a3b8);text-transform:uppercase;margin-bottom:.85rem;text-align:center; }
-        .fb-studio-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:10px; }
-        @@media(max-width:560px){ .fb-studio-grid{grid-template-columns:1fr;} }
+        .fb-studio-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px; }
         .fb-studio-card { display:block;background:var(--card-bg,rgba(15,23,42,.6));border:1px solid var(--border);border-radius:14px;padding:1.1rem .85rem;text-decoration:none;text-align:center;transition:.18s; }
         .fb-studio-card:hover { border-color:var(--accent,#38bdf8);transform:translateY(-3px);box-shadow:0 14px 30px -18px var(--accent,#38bdf8); }
         .fb-studio-ic { font-size:1.9rem;margin-bottom:.45rem; }
@@ -1029,6 +1028,11 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
                 <div class="fb-studio-ic">🎨</div>
                 <div class="fb-studio-t">Buat Cover</div>
                 <div class="fb-studio-d">Cover art 1:1 hingga 3000px</div>
+            </a>
+            <a href="{{ route('tools.kartu-rilis') }}" class="fb-studio-card">
+                <div class="fb-studio-ic">🚀</div>
+                <div class="fb-studio-t">Kartu Promo Rilis</div>
+                <div class="fb-studio-d">Countdown + QR untuk story</div>
             </a>
         </div>
     </div>

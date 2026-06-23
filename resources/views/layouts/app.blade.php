@@ -396,6 +396,7 @@
             <a href="{{ route('tools.potong-lagu') }}" class="footer-link">&#9986; Potong Lagu</a>
             <a href="{{ route('tools.hapus-vokal') }}" class="footer-link">&#127908; Hapus Vokal / Karaoke</a>
             <a href="{{ route('tools.cover-art') }}" class="footer-link">&#127912; Buat Cover Lagu</a>
+            <a href="{{ route('tools.kartu-rilis') }}" class="footer-link">&#128640; Kartu Promo Rilis</a>
         </div>
         <div class="footer-copy">© 2026 Margonoandi · Semua lagu dilindungi hak cipta</div>
     </div>
