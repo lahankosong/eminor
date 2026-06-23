@@ -89,6 +89,7 @@
         <div id="mdTech" style="font-size:11.5px;color:var(--text-3,#94a3b8);background:var(--bg-2,#0f1e2e);border:1px solid var(--border,#334155);border-radius:9px;padding:.55rem .75rem;margin-bottom:1rem;display:none;"></div>
 
         <div class="md-out">
+            <button type="button" onclick="mdClear()" style="width:100%;background:transparent;border:1px solid var(--border,#334155);color:var(--text-3,#94a3b8);border-radius:8px;padding:8px;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:.85rem;font-family:inherit;">🧹 Bersihkan semua metadata (hapus tag bawaan / reset)</button>
             <label style="font-size:11px;font-weight:700;color:var(--text-2,#cbd5e1);text-transform:uppercase;letter-spacing:.03em;">Format Unduhan</label>
             <div class="md-seg" id="mdFmtSeg">
                 <button data-v="mp3" class="on">MP3 (ber-tag + cover)</button>
@@ -286,6 +287,14 @@ function showTech(){
     au.onerror=function(){URL.revokeObjectURL(url);render(0);};
     au.src=url;
 }
+
+window.mdClear=function(){
+    if(!S.origBuf){st('Pilih file dulu.');return;}
+    ['mdTitle','mdArtist','mdAlbum','mdYear','mdGenre','mdTrack','mdAlbumArtist','mdComposer','mdPublisher','mdCopyright','mdComment'].forEach(function(id){g(id).value='';});
+    S.coverBuf=null;
+    g('mdCover').src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' fill='%230b1220'/%3E%3Ctext x='60' y='66' font-size='34' text-anchor='middle' fill='%23334155'%3E%E2%99%AA%3C/text%3E%3C/svg%3E";
+    st('🧹 Semua tag dikosongkan. Klik "Unduh Lagu" (format MP3) untuk file tanpa metadata bawaan.');
+};
 
 window.mdExport=function(){
     if(!S.origBuf){st('Pilih file dulu.');return;}
