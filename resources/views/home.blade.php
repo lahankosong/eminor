@@ -1010,6 +1010,16 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
         <div style="font-size:12px;font-weight:700;color:var(--accent,#38bdf8);white-space:nowrap;">Coba ✂️</div>
     </button>
 
+    {{-- SI trigger --}}
+    <button onclick="siOpen()" style="display:flex;align-items:center;gap:14px;background:var(--card-bg,rgba(15,23,42,0.6));border:1px solid var(--border);border-radius:16px;padding:1rem 1.25rem;margin-top:.75rem;transition:.2s;width:100%;cursor:pointer;text-align:left;" onmouseover="this.style.borderColor='#818cf8'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:2rem;flex-shrink:0;">🎛️</div>
+        <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:14px;color:var(--text,#f0f0f0);">Split Instrumen — Pisah Vokal &amp; Instrumen</div>
+            <div style="font-size:12px;color:var(--text-3,#94a3b8);margin-top:2px;">Hasilkan 4 stem: Vokal · Instrumental · Bass · Melodi — gratis, langsung di browser!</div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:#818cf8;white-space:nowrap;">Coba 🎛️</div>
+    </button>
+
     {{-- ACP Popup --}}
     <div id="acpOverlay" style="display:none;position:fixed;inset:0;z-index:9990;"></div>
     <div id="acpPopup" style="display:none;position:fixed;z-index:9999;width:min(500px,96vw);background:#0f172a;border:1px solid #1e3a5f;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.75);overflow:hidden;top:50%;left:50%;transform:translate(-50%,-50%);">
@@ -1105,8 +1115,56 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
         </div>
     </div>
 
+    {{-- SI Overlay + Popup --}}
+    <div id="siOverlay" style="display:none;position:fixed;inset:0;z-index:9990;" onclick="siClose()"></div>
+    <div id="siPopup" style="display:none;position:fixed;z-index:9999;width:min(520px,96vw);background:#0f172a;border:1px solid #312e81;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.75);overflow:hidden;top:50%;left:50%;transform:translate(-50%,-50%);">
+        <div id="siHead" style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1rem;background:linear-gradient(135deg,#6366f1,#4338ca);cursor:grab;user-select:none;-webkit-user-select:none;">
+            <span style="font-weight:700;font-size:13px;color:#fff;">🎛️ Split Instrumen</span>
+            <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:10px;color:rgba(255,255,255,.5);cursor:default;">⠿ geser</span>
+                <button onclick="siClose()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">✕</button>
+            </div>
+        </div>
+        <div style="padding:1rem;max-height:80vh;overflow-y:auto;">
+            <div id="siDrop" style="border:2px dashed #312e81;border-radius:12px;padding:1.5rem 1rem;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:.75rem;">
+                <div style="font-size:2rem;margin-bottom:.4rem;">🎛️</div>
+                <div style="font-size:13px;color:#94a3b8;margin-bottom:.5rem;">Seret file audio ke sini atau</div>
+                <label style="display:inline-block;padding:7px 18px;background:#6366f1;color:#fff;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Pilih File<input type="file" id="siFile" accept="audio/*" style="display:none;"></label>
+                <div style="font-size:10px;color:#475569;margin-top:.4rem;">MP3 · WAV · OGG · FLAC · AAC — maks 150 MB</div>
+            </div>
+            <div id="siEditor" style="display:none;">
+                <div id="siInfo" style="font-size:12px;color:#64748b;margin-bottom:.65rem;padding:.5rem .75rem;background:#0a0e1a;border-radius:8px;"></div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.65rem;align-items:center;">
+                    <select id="siFmt" style="padding:7px 10px;border-radius:7px;border:1px solid #312e81;background:#0f172a;color:#94a3b8;font-size:11px;cursor:pointer;">
+                        <option value="mp3-128">MP3 128 kbps</option>
+                        <option value="mp3-192">MP3 192 kbps</option>
+                        <option value="mp3-320">MP3 320 kbps (HQ)</option>
+                        <option value="wav">WAV (lossless)</option>
+                    </select>
+                    <button id="siBtn" onclick="siProcess()" style="flex:1;padding:8px 14px;background:linear-gradient(135deg,#6366f1,#4338ca);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🎛️ Proses Split</button>
+                    <button onclick="siReset()" style="padding:7px 10px;background:#1e293b;border:1px solid #334155;color:#94a3b8;border-radius:8px;font-size:11px;cursor:pointer;">🔄</button>
+                </div>
+                <div id="siProgress" style="display:none;margin-bottom:.65rem;">
+                    <div style="background:#1e293b;border-radius:6px;height:8px;overflow:hidden;margin-bottom:5px;">
+                        <div id="siPBar" style="height:100%;width:0%;background:linear-gradient(90deg,#6366f1,#818cf8);border-radius:6px;transition:width .4s ease;"></div>
+                    </div>
+                    <div id="siPLbl" style="font-size:11px;color:#64748b;text-align:center;"></div>
+                </div>
+                <div id="siResult" style="display:none;">
+                    <div style="font-size:12px;font-weight:700;color:#818cf8;margin-bottom:.65rem;">✅ 4 Stem siap — dengarkan &amp; unduh:</div>
+                    <div id="siStemWrap"></div>
+                    <div style="display:flex;gap:8px;margin-top:.75rem;flex-wrap:wrap;">
+                        <button onclick="siDownloadAll()" style="flex:1;padding:9px;background:linear-gradient(135deg,#6366f1,#4338ca);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;">📦 Download Semua (ZIP)</button>
+                        <button onclick="siReset()" style="padding:9px 14px;background:#1e293b;border:1px solid #334155;color:#94a3b8;border-radius:9px;font-size:12px;cursor:pointer;">🔄 Lagi</button>
+                    </div>
+                </div>
+            </div>
+            <div id="siStatus" style="font-size:11px;color:#4a5568;margin-top:5px;min-height:14px;"></div>
+        </div>
+    </div>
+
     <hr style="border:none;border-top:1px solid var(--border);margin:2.5rem 0;">
-    
+
     {{-- Role cards --}}
     <p class="fb-roles-label" style="margin-top:2.5rem;">Apa pun latar musikmu, ada tempat di sini untuk berkembang :</p>
     <div class="fb-roles">
@@ -1781,6 +1839,7 @@ console.log('Home loaded:', songs.length, 'songs');
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script>
 // ══════════════════════════════════════════════════════════════════════════════
 //  ACP — Audio Cutter Popup v2 (drag handles on canvas + zoom + mobile touch)
@@ -2218,5 +2277,182 @@ window.acpCut=function(){
 
 window.addEventListener('resize',function(){if(_buf)requestAnimationFrame(acpDraw);});
 })();
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  SI — Split Instrumen Popup
+// ══════════════════════════════════════════════════════════════════════════════
+(function(){
+'use strict';
+var SI_W=[
+'function bqLP(s,sr,fc){var w=2*Math.PI*fc/sr,cw=Math.cos(w),sw=Math.sin(w),al=sw/1.414;',
+'var b0=(1-cw)/2,b1=1-cw,b2=(1-cw)/2,a0=1+al,a1=-2*cw,a2=1-al;',
+'var o=new Float32Array(s.length),x1=0,x2=0,y1=0,y2=0;',
+'for(var i=0;i<s.length;i++){var x=s[i],y=(b0/a0)*x+(b1/a0)*x1+(b2/a0)*x2-(a1/a0)*y1-(a2/a0)*y2;o[i]=y;x2=x1;x1=x;y2=y1;y1=y;}return o;}',
+'function bqHP(s,sr,fc){var w=2*Math.PI*fc/sr,cw=Math.cos(w),sw=Math.sin(w),al=sw/1.414;',
+'var b0=(1+cw)/2,b1=-(1+cw),b2=(1+cw)/2,a0=1+al,a1=-2*cw,a2=1-al;',
+'var o=new Float32Array(s.length),x1=0,x2=0,y1=0,y2=0;',
+'for(var i=0;i<s.length;i++){var x=s[i],y=(b0/a0)*x+(b1/a0)*x1+(b2/a0)*x2-(a1/a0)*y1-(a2/a0)*y2;o[i]=y;x2=x1;x1=x;y2=y1;y1=y;}return o;}',
+'function nx(fn,s,sr,fc,n){var o=s;for(var i=0;i<n;i++)o=fn(o,sr,fc);return o;}',
+'function pk(s){var mx=0;for(var i=0;i<s.length;i++){var a=Math.abs(s[i]);if(a>mx)mx=a;}if(mx<0.001)return s;',
+'var k=0.95/mx,o=new Float32Array(s.length);for(var i=0;i<s.length;i++)o[i]=s[i]*k;return o;}',
+'self.onmessage=function(e){',
+'var L=e.data.L,R=e.data.R,sr=e.data.sr,n=L.length;',
+'var voc=new Float32Array(n),mix=new Float32Array(n);',
+'for(var i=0;i<n;i++){voc[i]=(L[i]+R[i])*.5;mix[i]=voc[i];}',
+'self.postMessage({t:"p",v:20,lbl:"Memisahkan vokal…"});',
+'var iL=new Float32Array(n),iR=new Float32Array(n);',
+'for(var i=0;i<n;i++){iL[i]=(L[i]-R[i])*.5;iR[i]=-iL[i];}',
+'self.postMessage({t:"p",v:45,lbl:"Mengekstrak bass…"});',
+'var bass=nx(bqLP,mix,sr,180,4);',
+'self.postMessage({t:"p",v:70,lbl:"Mengekstrak melodi…"});',
+'var mel=nx(bqHP,mix,sr,2500,3);',
+'self.postMessage({t:"p",v:88,lbl:"Normalisasi…"});',
+'voc=pk(voc);iL=pk(iL);iR=pk(iR);bass=pk(bass);mel=pk(mel);',
+'self.postMessage({t:"done",voc:voc,iL:iL,iR:iR,bass:bass,mel:mel},[voc.buffer,iL.buffer,iR.buffer,bass.buffer,mel.buffer]);',
+'};'
+].join('\n');
+
+var _ctx=null,_buf=null,_name='lagu',_stems=null,_worker=null,_stemUrls=[];
+var _siDrag=false,_siOX=0,_siOY=0;
+
+function gs(id){return document.getElementById(id);}
+function siSt(t){var e=gs('siStatus');if(e)e.textContent=t||'';}
+function siProg(v,lbl){var b=gs('siPBar'),l=gs('siPLbl');if(b)b.style.width=v+'%';if(l)l.textContent=lbl||'';}
+
+window.siOpen=function(){var p=gs('siPopup'),o=gs('siOverlay');if(!p)return;p.style.display='block';o.style.display='block';p.style.top='50%';p.style.left='50%';p.style.transform='translate(-50%,-50%)';};
+window.siClose=function(){var p=gs('siPopup'),o=gs('siOverlay');if(!p)return;p.style.display='none';o.style.display='none';if(_worker){_worker.terminate();_worker=null;}};
+
+var sh=gs('siHead');
+if(sh){
+    sh.addEventListener('mousedown',function(e){if(e.target.tagName==='BUTTON')return;var r=gs('siPopup').getBoundingClientRect();_siDrag=true;_siOX=e.clientX-r.left;_siOY=e.clientY-r.top;sh.style.cursor='grabbing';e.preventDefault();});
+    document.addEventListener('mousemove',function(e){if(!_siDrag)return;var p=gs('siPopup');p.style.transform='none';p.style.left=(e.clientX-_siOX)+'px';p.style.top=(e.clientY-_siOY)+'px';});
+    document.addEventListener('mouseup',function(){_siDrag=false;if(sh)sh.style.cursor='grab';});
+    sh.addEventListener('touchstart',function(e){if(e.touches.length===1){var r=gs('siPopup').getBoundingClientRect();_siDrag=true;_siOX=e.touches[0].clientX-r.left;_siOY=e.touches[0].clientY-r.top;}},{passive:true});
+    document.addEventListener('touchmove',function(e){if(!_siDrag||!e.touches.length)return;var p=gs('siPopup');p.style.transform='none';p.style.left=(e.touches[0].clientX-_siOX)+'px';p.style.top=(e.touches[0].clientY-_siOY)+'px';},{passive:true});
+    document.addEventListener('touchend',function(){_siDrag=false;});
+}
+
+var sd=gs('siDrop');
+if(sd){
+    sd.addEventListener('dragover',function(e){e.preventDefault();sd.style.borderColor='#818cf8';});
+    sd.addEventListener('dragleave',function(){sd.style.borderColor='#312e81';});
+    sd.addEventListener('drop',function(e){e.preventDefault();sd.style.borderColor='#312e81';if(e.dataTransfer.files[0])siLoad(e.dataTransfer.files[0]);});
+}
+gs('siFile')&&gs('siFile').addEventListener('change',function(){if(this.files[0])siLoad(this.files[0]);});
+
+function siLoad(file){
+    if(file.size>150*1024*1024){alert('Maks 150 MB');return;}
+    _name=file.name.replace(/\.[^.]+$/,'');siSt('Memuat…');_stems=null;
+    if(_ctx){try{_ctx.close();}catch(x){}}_ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var r=new FileReader();
+    r.onload=function(ev){
+        _ctx.decodeAudioData(ev.target.result.slice(0),function(buf){
+            _buf=buf;var d=buf.duration,m=Math.floor(d/60),x=Math.floor(d%60);
+            gs('siInfo').innerHTML='🎵 <b>'+_name+'</b> · '+(file.size/1024/1024).toFixed(1)+' MB · '+m+':'+(x<10?'0':'')+x
+                +(buf.numberOfChannels<2?' <span style="color:#f59e0b">[Mono — hasil vokal/instrumental terbatas]</span>':'');
+            gs('siDrop').style.display='none';gs('siEditor').style.display='block';
+            gs('siResult').style.display='none';gs('siProgress').style.display='none';siSt('');
+        },function(){siSt('Gagal mendekode. Coba format lain.');});
+    };
+    r.readAsArrayBuffer(file);
+}
+
+window.siProcess=function(){
+    if(!_buf){siSt('Pilih file dulu.');return;}
+    var btn=gs('siBtn');btn.disabled=true;
+    gs('siProgress').style.display='block';gs('siResult').style.display='none';
+    siProg(5,'Menyiapkan…');siSt('');
+    var L=_buf.getChannelData(0),R=_buf.numberOfChannels>1?_buf.getChannelData(1):L;
+    var lC=new Float32Array(L),rC=new Float32Array(R);
+    if(_worker){_worker.terminate();_worker=null;}
+    var blob=new Blob([SI_W.split('\n').join('\n')],{type:'application/javascript'});
+    var burl=URL.createObjectURL(blob);_worker=new Worker(burl);URL.revokeObjectURL(burl);
+    _worker.onmessage=function(ev){
+        var d=ev.data;
+        if(d.t==='p')siProg(d.v,d.lbl);
+        else if(d.t==='done'){
+            _stems={voc:d.voc,iL:d.iL,iR:d.iR,bass:d.bass,mel:d.mel};
+            siProg(100,'Selesai!');siRenderResult(_buf.sampleRate);btn.disabled=false;_worker=null;
+        }
+    };
+    _worker.onerror=function(e){siSt('Error: '+e.message);btn.disabled=false;gs('siProgress').style.display='none';};
+    _worker.postMessage({L:lC,R:rC,sr:_buf.sampleRate},[lC.buffer,rC.buffer]);
+};
+
+var _STEMS_DEF=[
+    {key:'voc', mono:true, icon:'🎤',label:'Vokal',        color:'#38bdf8'},
+    {key:'inst',mono:false,icon:'🎸',label:'Instrumental', color:'#818cf8'},
+    {key:'bass',mono:true, icon:'🎵',label:'Bass',         color:'#f59e0b'},
+    {key:'mel', mono:true, icon:'🎹',label:'Melodi',       color:'#22c55e'}
+];
+
+function siRenderResult(sr){
+    _stemUrls.forEach(function(u){URL.revokeObjectURL(u);});_stemUrls=[];
+    var fv=gs('siFmt')?gs('siFmt').value:'mp3-128';
+    var isWav=fv==='wav',kbps=isWav?0:parseInt(fv.split('-')[1])||128,ext=isWav?'wav':'mp3';
+    var wrap=gs('siStemWrap');wrap.innerHTML='';
+    _STEMS_DEF.forEach(function(st){
+        var c0=st.key==='inst'?_stems.iL:_stems[st.key]==='voc'?_stems.voc:_stems[st.key];
+        if(st.key==='voc')c0=_stems.voc;
+        else if(st.key==='bass')c0=_stems.bass;
+        else if(st.key==='mel')c0=_stems.mel;
+        var c1=st.key==='inst'?_stems.iR:null;
+        var b2=isWav?siEncWav(c0,c1,sr):siEncMp3(c0,c1,sr,kbps);
+        var u=URL.createObjectURL(b2);_stemUrls.push(u);
+        var row=document.createElement('div');
+        row.style.cssText='display:flex;align-items:center;gap:7px;margin-bottom:6px;background:#0a0e1a;border-radius:9px;padding:.45rem .6rem;';
+        row.innerHTML='<span style="font-size:1.1rem;width:22px;text-align:center;">'+st.icon+'</span>'
+            +'<span style="font-size:12px;font-weight:700;color:'+st.color+';min-width:85px;">'+st.label+'</span>'
+            +'<audio controls src="'+u+'" style="flex:1;height:28px;min-width:0;"></audio>'
+            +'<a href="'+u+'" download="'+_name+'_'+st.key+'.'+ext+'" style="padding:5px 9px;background:'+st.color+';color:'+(st.color==='#f59e0b'||st.color==='#22c55e'?'#000':'#fff')+';border-radius:7px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;">⬇ '+ext.toUpperCase()+'</a>';
+        wrap.appendChild(row);
+    });
+    gs('siProgress').style.display='none';gs('siResult').style.display='block';
+}
+
+function siEncWav(c0,c1,sr){
+    var nCh=c1?2:1,n=c0.length,ab=new ArrayBuffer(44+n*nCh*2),v=new DataView(ab);
+    function ws(o,st){for(var i=0;i<st.length;i++)v.setUint8(o+i,st.charCodeAt(i));}
+    ws(0,'RIFF');v.setUint32(4,36+n*nCh*2,true);ws(8,'WAVE');ws(12,'fmt ');
+    v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nCh,true);
+    v.setUint32(24,sr,true);v.setUint32(28,sr*nCh*2,true);v.setUint16(32,nCh*2,true);v.setUint16(34,16,true);
+    ws(36,'data');v.setUint32(40,n*nCh*2,true);
+    var off=44;
+    for(var i=0;i<n;i++){var x=Math.max(-1,Math.min(1,c0[i]));v.setInt16(off,x<0?x*0x8000:x*0x7FFF,true);off+=2;if(c1){var y=Math.max(-1,Math.min(1,c1[i]));v.setInt16(off,y<0?y*0x8000:y*0x7FFF,true);off+=2;}}
+    return new Blob([ab],{type:'audio/wav'});
+}
+function siEncMp3(c0,c1,sr,kbps){
+    var nCh=c1?2:1,n=c0.length,enc=new lamejs.Mp3Encoder(nCh,sr,kbps||128),mp3=[],BLK=1152;
+    function f2i(f){var a=new Int16Array(f.length);for(var i=0;i<f.length;i++)a[i]=Math.max(-32768,Math.min(32767,f[i]*32767));return a;}
+    var l16=f2i(c0),r16=c1?f2i(c1):l16;
+    for(var i=0;i<n;i+=BLK){var d=enc.encodeBuffer(l16.subarray(i,i+BLK),r16.subarray(i,i+BLK));if(d.length)mp3.push(new Uint8Array(d));}
+    var end=enc.flush();if(end.length)mp3.push(new Uint8Array(end));
+    return new Blob(mp3,{type:'audio/mpeg'});
+}
+
+window.siDownloadAll=function(){
+    if(!_stems){siSt('Belum ada stem.');return;}
+    siSt('Membuat ZIP…');
+    var fv=gs('siFmt')?gs('siFmt').value:'mp3-128';
+    var isWav=fv==='wav',kbps=isWav?0:parseInt(fv.split('-')[1])||128,ext=isWav?'wav':'mp3';
+    var zip=new JSZip();
+    var sr=_buf.sampleRate;
+    var pairs=[
+        {c0:_stems.voc, c1:null,      nm:'01_vokal'},
+        {c0:_stems.iL,  c1:_stems.iR, nm:'02_instrumental'},
+        {c0:_stems.bass,c1:null,      nm:'03_bass'},
+        {c0:_stems.mel, c1:null,      nm:'04_melodi'}
+    ];
+    pairs.forEach(function(p){zip.file(_name+'_'+p.nm+'.'+ext,isWav?siEncWav(p.c0,p.c1,sr):siEncMp3(p.c0,p.c1,sr,kbps));});
+    zip.generateAsync({type:'blob'}).then(function(z){var a=document.createElement('a');a.href=URL.createObjectURL(z);a.download=_name+'_split.zip';a.click();siSt('');});
+};
+
+window.siReset=function(){
+    _buf=null;_stems=null;_stemUrls.forEach(function(u){URL.revokeObjectURL(u);});_stemUrls=[];
+    var f=gs('siFile');if(f)f.value='';
+    gs('siDrop').style.display='';gs('siEditor').style.display='none';
+    gs('siResult').style.display='none';gs('siProgress').style.display='none';siSt('');
+};
+})(); // end SI popup
 </script>
 @endpush

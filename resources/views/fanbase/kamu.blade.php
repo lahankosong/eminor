@@ -555,6 +555,9 @@
     <button class="kamu-tab" onclick="kamuTab('Konversi', this)">
         🔄 Konversi
     </button>
+    <button class="kamu-tab" onclick="kamuTab('SplitInstrumen', this)">
+        🎛️ Split
+    </button>
 </div>
 
 {{-- TAB: NOTES --}}
@@ -999,6 +1002,50 @@
                 <a id="kcvDl" download style="display:inline-flex;align-items:center;gap:5px;background:#22c55e;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">⬇️ Unduh</a>
             </div>
         </div>
+    </div>
+</div>
+
+{{-- TAB: SPLIT INSTRUMEN --}}
+<div class="kamu-tab-content" id="kamuTabSplitInstrumen" style="display:none;padding:1rem 0;">
+    <div style="margin-bottom:1rem;">
+        <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;">🎛️ Split Instrumen</div>
+        <div style="font-size:12px;color:var(--text-3);">Pisah lagu menjadi 4 stem: Vokal · Instrumental · Bass · Melodi — langsung di browser, tanpa upload.</div>
+    </div>
+    <div id="ksiDrop" style="border:2px dashed var(--border);border-radius:12px;padding:2rem 1rem;text-align:center;cursor:pointer;transition:border-color .2s;">
+        <div style="font-size:2rem;margin-bottom:.5rem;">🎛️</div>
+        <div style="font-size:13px;color:var(--text-3);margin-bottom:.6rem;">Seret file audio ke sini atau</div>
+        <label style="display:inline-block;padding:7px 18px;background:var(--accent,#6366f1);color:#fff;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">
+            Pilih File<input type="file" id="ksiFile" accept="audio/*" style="display:none;">
+        </label>
+        <div style="font-size:10px;color:var(--text-3);margin-top:.4rem;">MP3 · WAV · OGG · FLAC · AAC — maks 150 MB</div>
+    </div>
+    <div id="ksiEditor" style="display:none;margin-top:1rem;">
+        <div id="ksiInfo" style="font-size:12px;color:var(--text-3);margin-bottom:.75rem;padding:.5rem .75rem;background:rgba(0,0,0,.2);border-radius:8px;"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:.75rem;">
+            <select id="ksiFmt" style="padding:7px 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface,#1e293b);color:var(--text);font-size:12px;cursor:pointer;">
+                <option value="mp3-128">MP3 128 kbps</option>
+                <option value="mp3-192">MP3 192 kbps</option>
+                <option value="mp3-320">MP3 320 kbps (HQ)</option>
+                <option value="wav">WAV (lossless)</option>
+            </select>
+            <button id="ksiBtn" onclick="ksiProcess()" style="flex:1;padding:8px 14px;background:linear-gradient(135deg,#6366f1,#4338ca);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🎛️ Proses Split</button>
+            <button onclick="ksiReset()" style="padding:7px 12px;background:var(--surface,#1e293b);border:1px solid var(--border);color:var(--text-3);border-radius:8px;font-size:12px;cursor:pointer;">🔄 Ganti</button>
+        </div>
+        <div id="ksiProgress" style="display:none;margin-bottom:.75rem;">
+            <div style="background:var(--border);border-radius:6px;height:8px;overflow:hidden;margin-bottom:5px;">
+                <div id="ksiPBar" style="height:100%;width:0%;background:linear-gradient(90deg,#6366f1,#818cf8);border-radius:6px;transition:width .4s ease;"></div>
+            </div>
+            <div id="ksiPLbl" style="font-size:11px;color:var(--text-3);text-align:center;"></div>
+        </div>
+        <div id="ksiResult" style="display:none;">
+            <div style="font-size:12px;font-weight:700;color:#818cf8;margin-bottom:.65rem;">✅ 4 Stem siap:</div>
+            <div id="ksiStemWrap"></div>
+            <div style="display:flex;gap:8px;margin-top:.75rem;flex-wrap:wrap;">
+                <button onclick="ksiDownloadAll()" style="flex:1;padding:9px;background:linear-gradient(135deg,#6366f1,#4338ca);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;">📦 Download Semua (ZIP)</button>
+                <button onclick="ksiReset()" style="padding:9px 14px;background:var(--surface,#1e293b);border:1px solid var(--border);color:var(--text-3);border-radius:9px;font-size:12px;cursor:pointer;">🔄 Split Lagi</button>
+            </div>
+        </div>
+        <div id="ksiStatus" style="font-size:11px;color:var(--text-3);min-height:14px;margin-top:.5rem;"></div>
     </div>
 </div>
 
@@ -1743,6 +1790,7 @@ function tunerRenderUI(freq) {
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script>
 // ══════════════════════════════════════════════════════════════════════════════
 //  KAC — Kamu Audio Cutter (tab Potong Lagu, flat, no limit)
@@ -2014,5 +2062,159 @@ window.kcvReset=function(){
     var fi=gv('kcvFile');if(fi)fi.value='';
 };
 })(); // end KCV
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  KSI — Kamu Split Instrumen
+// ══════════════════════════════════════════════════════════════════════════════
+(function(){
+'use strict';
+var KSI_W=[
+'function bqLP(s,sr,fc){var w=2*Math.PI*fc/sr,cw=Math.cos(w),sw=Math.sin(w),al=sw/1.414;',
+'var b0=(1-cw)/2,b1=1-cw,b2=(1-cw)/2,a0=1+al,a1=-2*cw,a2=1-al;',
+'var o=new Float32Array(s.length),x1=0,x2=0,y1=0,y2=0;',
+'for(var i=0;i<s.length;i++){var x=s[i],y=(b0/a0)*x+(b1/a0)*x1+(b2/a0)*x2-(a1/a0)*y1-(a2/a0)*y2;o[i]=y;x2=x1;x1=x;y2=y1;y1=y;}return o;}',
+'function bqHP(s,sr,fc){var w=2*Math.PI*fc/sr,cw=Math.cos(w),sw=Math.sin(w),al=sw/1.414;',
+'var b0=(1+cw)/2,b1=-(1+cw),b2=(1+cw)/2,a0=1+al,a1=-2*cw,a2=1-al;',
+'var o=new Float32Array(s.length),x1=0,x2=0,y1=0,y2=0;',
+'for(var i=0;i<s.length;i++){var x=s[i],y=(b0/a0)*x+(b1/a0)*x1+(b2/a0)*x2-(a1/a0)*y1-(a2/a0)*y2;o[i]=y;x2=x1;x1=x;y2=y1;y1=y;}return o;}',
+'function nx(fn,s,sr,fc,n){var o=s;for(var i=0;i<n;i++)o=fn(o,sr,fc);return o;}',
+'function pk(s){var mx=0;for(var i=0;i<s.length;i++){var a=Math.abs(s[i]);if(a>mx)mx=a;}if(mx<0.001)return s;',
+'var k=0.95/mx,o=new Float32Array(s.length);for(var i=0;i<s.length;i++)o[i]=s[i]*k;return o;}',
+'self.onmessage=function(e){',
+'var L=e.data.L,R=e.data.R,sr=e.data.sr,n=L.length;',
+'var voc=new Float32Array(n),mix=new Float32Array(n);',
+'for(var i=0;i<n;i++){voc[i]=(L[i]+R[i])*.5;mix[i]=voc[i];}',
+'self.postMessage({t:"p",v:20,lbl:"Memisahkan vokal…"});',
+'var iL=new Float32Array(n),iR=new Float32Array(n);',
+'for(var i=0;i<n;i++){iL[i]=(L[i]-R[i])*.5;iR[i]=-iL[i];}',
+'self.postMessage({t:"p",v:45,lbl:"Mengekstrak bass…"});',
+'var bass=nx(bqLP,mix,sr,180,4);',
+'self.postMessage({t:"p",v:70,lbl:"Mengekstrak melodi…"});',
+'var mel=nx(bqHP,mix,sr,2500,3);',
+'self.postMessage({t:"p",v:88,lbl:"Normalisasi…"});',
+'voc=pk(voc);iL=pk(iL);iR=pk(iR);bass=pk(bass);mel=pk(mel);',
+'self.postMessage({t:"done",voc:voc,iL:iL,iR:iR,bass:bass,mel:mel},[voc.buffer,iL.buffer,iR.buffer,bass.buffer,mel.buffer]);};'
+].join('\n');
+
+var _ctx=null,_buf=null,_name='lagu',_stems=null,_worker=null,_urls=[];
+function gk(id){return document.getElementById(id);}
+function ksiSt(t){var e=gk('ksiStatus');if(e)e.textContent=t||'';}
+function ksiProg(v,l){var b=gk('ksiPBar'),lb=gk('ksiPLbl');if(b)b.style.width=v+'%';if(lb)lb.textContent=l||'';}
+
+var kDrop=gk('ksiDrop');
+if(kDrop){
+    kDrop.addEventListener('dragover',function(e){e.preventDefault();kDrop.style.borderColor='#818cf8';});
+    kDrop.addEventListener('dragleave',function(){kDrop.style.borderColor='';});
+    kDrop.addEventListener('drop',function(e){e.preventDefault();kDrop.style.borderColor='';if(e.dataTransfer.files[0])ksiLoad(e.dataTransfer.files[0]);});
+}
+gk('ksiFile')&&gk('ksiFile').addEventListener('change',function(){if(this.files[0])ksiLoad(this.files[0]);});
+
+function ksiLoad(file){
+    if(file.size>150*1024*1024){alert('Maks 150 MB');return;}
+    _name=file.name.replace(/\.[^.]+$/,'');ksiSt('Memuat…');_stems=null;
+    if(_ctx){try{_ctx.close();}catch(e){}}_ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var r=new FileReader();
+    r.onload=function(ev){
+        _ctx.decodeAudioData(ev.target.result.slice(0),function(buf){
+            _buf=buf;var d=buf.duration,m=Math.floor(d/60),x=Math.floor(d%60);
+            gk('ksiInfo').innerHTML='🎵 <b>'+_name+'</b> · '+(file.size/1024/1024).toFixed(1)+' MB · '+m+':'+(x<10?'0':'')+x
+                +(buf.numberOfChannels<2?' <span style="color:#f59e0b">[Mono — hasil terbatas]</span>':'');
+            gk('ksiDrop').style.display='none';gk('ksiEditor').style.display='block';
+            gk('ksiResult').style.display='none';gk('ksiProgress').style.display='none';ksiSt('');
+        },function(){ksiSt('Gagal mendekode.');});
+    };
+    r.readAsArrayBuffer(file);
+}
+
+window.ksiProcess=function(){
+    if(!_buf){ksiSt('Pilih file dulu.');return;}
+    var btn=gk('ksiBtn');btn.disabled=true;
+    gk('ksiProgress').style.display='block';gk('ksiResult').style.display='none';
+    ksiProg(5,'Menyiapkan…');ksiSt('');
+    var L=_buf.getChannelData(0),R=_buf.numberOfChannels>1?_buf.getChannelData(1):L;
+    var lC=new Float32Array(L),rC=new Float32Array(R);
+    if(_worker){_worker.terminate();_worker=null;}
+    var blob=new Blob([KSI_W],{type:'application/javascript'});
+    var burl=URL.createObjectURL(blob);_worker=new Worker(burl);URL.revokeObjectURL(burl);
+    _worker.onmessage=function(ev){
+        var d=ev.data;
+        if(d.t==='p')ksiProg(d.v,d.lbl);
+        else if(d.t==='done'){
+            _stems={voc:d.voc,iL:d.iL,iR:d.iR,bass:d.bass,mel:d.mel};
+            ksiProg(100,'Selesai!');ksiRenderResult(_buf.sampleRate);btn.disabled=false;_worker=null;
+        }
+    };
+    _worker.onerror=function(e){ksiSt('Error: '+e.message);btn.disabled=false;gk('ksiProgress').style.display='none';};
+    _worker.postMessage({L:lC,R:rC,sr:_buf.sampleRate},[lC.buffer,rC.buffer]);
+};
+
+var _KD=[
+    {key:'voc', icon:'🎤',label:'Vokal',        color:'#38bdf8'},
+    {key:'inst',icon:'🎸',label:'Instrumental', color:'#818cf8'},
+    {key:'bass',icon:'🎵',label:'Bass',         color:'#f59e0b'},
+    {key:'mel', icon:'🎹',label:'Melodi',       color:'#22c55e'}
+];
+
+function ksiRenderResult(sr){
+    _urls.forEach(function(u){URL.revokeObjectURL(u);});_urls=[];
+    var fv=gk('ksiFmt')?gk('ksiFmt').value:'mp3-128';
+    var isWav=fv==='wav',kbps=isWav?0:parseInt(fv.split('-')[1])||128,ext=isWav?'wav':'mp3';
+    var wrap=gk('ksiStemWrap');wrap.innerHTML='';
+    _KD.forEach(function(st){
+        var c0,c1=null;
+        if(st.key==='voc')c0=_stems.voc;
+        else if(st.key==='inst'){c0=_stems.iL;c1=_stems.iR;}
+        else if(st.key==='bass')c0=_stems.bass;
+        else c0=_stems.mel;
+        var bl=isWav?ksiEW(c0,c1,sr):ksiEM(c0,c1,sr,kbps);
+        var u=URL.createObjectURL(bl);_urls.push(u);
+        var row=document.createElement('div');
+        row.style.cssText='display:flex;align-items:center;gap:7px;margin-bottom:6px;background:rgba(0,0,0,.25);border-radius:9px;padding:.45rem .6rem;';
+        row.innerHTML='<span style="font-size:1.1rem;width:22px;text-align:center;">'+st.icon+'</span>'
+            +'<span style="font-size:12px;font-weight:700;color:'+st.color+';min-width:85px;">'+st.label+'</span>'
+            +'<audio controls src="'+u+'" style="flex:1;height:28px;min-width:0;"></audio>'
+            +'<a href="'+u+'" download="'+_name+'_'+st.key+'.'+ext+'" style="padding:5px 9px;background:'+st.color+';color:'+(st.color==='#f59e0b'||st.color==='#22c55e'?'#000':'#fff')+';border-radius:7px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;">⬇ '+ext.toUpperCase()+'</a>';
+        wrap.appendChild(row);
+    });
+    gk('ksiProgress').style.display='none';gk('ksiResult').style.display='block';
+}
+
+function ksiEW(c0,c1,sr){
+    var nCh=c1?2:1,n=c0.length,ab=new ArrayBuffer(44+n*nCh*2),v=new DataView(ab);
+    function ws(o,st){for(var i=0;i<st.length;i++)v.setUint8(o+i,st.charCodeAt(i));}
+    ws(0,'RIFF');v.setUint32(4,36+n*nCh*2,true);ws(8,'WAVE');ws(12,'fmt ');
+    v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nCh,true);
+    v.setUint32(24,sr,true);v.setUint32(28,sr*nCh*2,true);v.setUint16(32,nCh*2,true);v.setUint16(34,16,true);
+    ws(36,'data');v.setUint32(40,n*nCh*2,true);var off=44;
+    for(var i=0;i<n;i++){var x=Math.max(-1,Math.min(1,c0[i]));v.setInt16(off,x<0?x*0x8000:x*0x7FFF,true);off+=2;if(c1){var y=Math.max(-1,Math.min(1,c1[i]));v.setInt16(off,y<0?y*0x8000:y*0x7FFF,true);off+=2;}}
+    return new Blob([ab],{type:'audio/wav'});
+}
+function ksiEM(c0,c1,sr,kbps){
+    var nCh=c1?2:1,n=c0.length,enc=new lamejs.Mp3Encoder(nCh,sr,kbps||128),mp3=[],BLK=1152;
+    function f2i(f){var a=new Int16Array(f.length);for(var i=0;i<f.length;i++)a[i]=Math.max(-32768,Math.min(32767,f[i]*32767));return a;}
+    var l16=f2i(c0),r16=c1?f2i(c1):l16;
+    for(var i=0;i<n;i+=BLK){var d=enc.encodeBuffer(l16.subarray(i,i+BLK),r16.subarray(i,i+BLK));if(d.length)mp3.push(new Uint8Array(d));}
+    var end=enc.flush();if(end.length)mp3.push(new Uint8Array(end));
+    return new Blob(mp3,{type:'audio/mpeg'});
+}
+
+window.ksiDownloadAll=function(){
+    if(!_stems){ksiSt('Belum ada stem.');return;}
+    ksiSt('Membuat ZIP…');
+    var fv=gk('ksiFmt')?gk('ksiFmt').value:'mp3-128';
+    var isWav=fv==='wav',kbps=isWav?0:parseInt(fv.split('-')[1])||128,ext=isWav?'wav':'mp3';
+    var zip=new JSZip(),sr=_buf.sampleRate;
+    var pairs=[{c0:_stems.voc,c1:null,nm:'01_vokal'},{c0:_stems.iL,c1:_stems.iR,nm:'02_instrumental'},{c0:_stems.bass,c1:null,nm:'03_bass'},{c0:_stems.mel,c1:null,nm:'04_melodi'}];
+    pairs.forEach(function(p){zip.file(_name+'_'+p.nm+'.'+ext,isWav?ksiEW(p.c0,p.c1,sr):ksiEM(p.c0,p.c1,sr,kbps));});
+    zip.generateAsync({type:'blob'}).then(function(z){var a=document.createElement('a');a.href=URL.createObjectURL(z);a.download=_name+'_split.zip';a.click();ksiSt('');});
+};
+
+window.ksiReset=function(){
+    _buf=null;_stems=null;_urls.forEach(function(u){URL.revokeObjectURL(u);});_urls=[];
+    var f=gk('ksiFile');if(f)f.value='';
+    gk('ksiDrop').style.display='';gk('ksiEditor').style.display='none';
+    gk('ksiResult').style.display='none';gk('ksiProgress').style.display='none';ksiSt('');
+};
+})(); // end KSI
 </script>
 @endpush
