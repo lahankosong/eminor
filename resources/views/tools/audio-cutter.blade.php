@@ -1,27 +1,5 @@
 @extends('layouts.app')
 
-@push('head')
-<meta name="description" content="{{ $seo['description'] }}">
-<link rel="canonical" href="{{ $seo['canonical'] }}">
-<meta property="og:title" content="{{ $seo['title'] }}">
-<meta property="og:description" content="{{ $seo['description'] }}">
-<meta property="og:url" content="{{ $seo['canonical'] }}">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Pemotong Lagu Online",
-  "url": "{{ $seo['canonical'] }}",
-  "description": "{{ $seo['description'] }}",
-  "applicationCategory": "MultimediaApplication",
-  "operatingSystem": "Any",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "IDR" }
-}
-</script>
-@endpush
-
-@section('title', $seo['title'])
-
 @push('styles')
 <style>
     :root {
@@ -101,7 +79,7 @@
     .ac-back:hover { color:var(--text); }
     .ac-drag-hint { font-size:10px;color:var(--text-3,#94a3b8);text-align:center;margin-top:3px;opacity:.75; }
 
-    @media(max-width:480px){ .ac-controls{flex-direction:column;} .ac-btn-cut{flex:none;} }
+    @@media(max-width:480px){ .ac-controls{flex-direction:column;} .ac-btn-cut{flex:none;} }
 </style>
 @endpush
 

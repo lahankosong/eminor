@@ -1012,81 +1012,89 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
 
     {{-- ACP Popup --}}
     <div id="acpOverlay" style="display:none;position:fixed;inset:0;z-index:9990;"></div>
-    <div id="acpPopup" style="display:none;position:fixed;z-index:9999;width:min(520px,96vw);background:#0f172a;border:1px solid #1e3a5f;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.7);overflow:hidden;top:50%;left:50%;transform:translate(-50%,-50%);">
-        {{-- Header / drag handle --}}
-        <div id="acpHead" style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.1rem;background:linear-gradient(135deg,#0ea5e9,#0369a1);cursor:grab;user-select:none;">
-            <div>
-                <span style="font-weight:700;font-size:14px;color:#fff;">✂️ Pemotong Lagu Online</span>
-                <span id="acpCounter" style="margin-left:10px;font-size:11px;background:rgba(255,255,255,.2);color:#fff;padding:2px 9px;border-radius:20px;font-weight:600;"></span>
+    <div id="acpPopup" style="display:none;position:fixed;z-index:9999;width:min(500px,96vw);background:#0f172a;border:1px solid #1e3a5f;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.75);overflow:hidden;top:50%;left:50%;transform:translate(-50%,-50%);">
+        {{-- Header drag --}}
+        <div id="acpHead" style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1rem;background:linear-gradient(135deg,#0ea5e9,#0369a1);cursor:grab;user-select:none;-webkit-user-select:none;">
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-weight:700;font-size:13px;color:#fff;">✂️ Pemotong Lagu Online</span>
+                <span id="acpCounter" style="font-size:10px;background:rgba(255,255,255,.22);color:#fff;padding:2px 8px;border-radius:20px;font-weight:700;"></span>
             </div>
-            <button onclick="acpClose()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;font-size:16px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">&times;</button>
+            <button onclick="acpClose()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:26px;height:26px;border-radius:50%;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">&times;</button>
         </div>
         {{-- Body --}}
-        <div style="padding:1rem;max-height:80vh;overflow-y:auto;">
+        <div style="padding:.85rem;max-height:82vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
 
             {{-- Drop zone --}}
-            <div id="acpDrop" onclick="document.getElementById('acpFileIn').click()" style="border:2px dashed #1e3a5f;border-radius:14px;padding:1.5rem 1rem;text-align:center;cursor:pointer;transition:.2s;background:#0a0e1a;margin-bottom:.75rem;">
-                <div style="font-size:1.75rem;margin-bottom:.4rem;">🎵</div>
-                <div style="font-size:13px;font-weight:600;color:#f0f0f0;margin-bottom:.2rem;">Seret file audio atau klik untuk pilih</div>
-                <div style="font-size:11px;color:#64748b;">MP3 · WAV · OGG · FLAC · Maks 100 MB · Tidak diunggah ke server</div>
+            <div id="acpDrop" onclick="document.getElementById('acpFileIn').click()" style="border:2px dashed #1e3a5f;border-radius:12px;padding:1.25rem .75rem;text-align:center;cursor:pointer;transition:.2s;background:#0a0e1a;">
+                <div style="font-size:1.6rem;margin-bottom:.35rem;">🎵</div>
+                <div style="font-size:13px;font-weight:600;color:#f0f0f0;margin-bottom:.2rem;">Ketuk atau seret file audio</div>
+                <div style="font-size:11px;color:#4a5568;">MP3 · WAV · OGG · FLAC · M4A &nbsp;·&nbsp; Maks 100 MB &nbsp;·&nbsp; Tidak diunggah ke server</div>
             </div>
             <input type="file" id="acpFileIn" accept="audio/*" style="display:none">
 
-            {{-- Editor (tersembunyi sebelum file dipilih) --}}
+            {{-- Editor --}}
             <div id="acpEditor" style="display:none;">
-                <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-bottom:.3rem;">
-                    <span id="acpFileName" style="font-weight:600;color:#94a3b8;"></span>
-                    <span id="acpDurInfo"></span>
+                {{-- File info --}}
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:.4rem;">
+                    <span id="acpFileName" style="font-weight:600;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%;"></span>
+                    <span id="acpDurInfo" style="color:#4a5568;flex-shrink:0;"></span>
                 </div>
 
-                {{-- Waveform --}}
-                <div style="position:relative;border-radius:10px;overflow:hidden;background:#0a0e1a;margin-bottom:.5rem;">
-                    <canvas id="acpWave" style="display:block;width:100%;height:80px;"></canvas>
-                    <div id="acpPh" style="position:absolute;top:0;bottom:0;width:2px;background:#fff;opacity:.7;pointer-events:none;display:none;"></div>
+                {{-- Waveform (drag handle langsung di sini) --}}
+                <div id="acpWaveWrap" style="position:relative;border-radius:10px;overflow:hidden;background:#070d18;touch-action:none;">
+                    <canvas id="acpWave" style="display:block;width:100%;height:130px;"></canvas>
+                    <div id="acpPh" style="position:absolute;top:0;bottom:0;width:2px;background:#fff;opacity:.8;pointer-events:none;display:none;"></div>
                 </div>
+                <div style="font-size:10px;color:#374151;text-align:center;margin:.2rem 0 .4rem;">Seret △ cyan(Mulai) / △ kuning(Akhir) · pinch/scroll untuk zoom</div>
 
-                {{-- Sliders --}}
-                <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:.75rem;">
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <span style="font-size:11px;font-weight:700;color:#22d3ee;width:32px;">Mulai</span>
-                        <input type="range" id="acpS" min="0" max="100" step="0.01" value="0" style="flex:1;accent-color:#22d3ee;">
-                        <span id="acpSVal" style="font-size:11px;color:#22d3ee;width:40px;text-align:right;font-variant-numeric:tabular-nums;">0:00</span>
+                {{-- Zoom row --}}
+                <div style="display:flex;align-items:center;gap:5px;margin-bottom:.5rem;">
+                    <button onclick="acpZoomIn()" style="padding:4px 9px;border-radius:6px;border:1px solid #1e3a5f;background:#0a0e1a;color:#64748b;font-size:12px;cursor:pointer;line-height:1;">🔍+</button>
+                    <button onclick="acpZoomOut()" style="padding:4px 9px;border-radius:6px;border:1px solid #1e3a5f;background:#0a0e1a;color:#64748b;font-size:12px;cursor:pointer;line-height:1;">🔍−</button>
+                    <button onclick="acpZoomReset()" style="padding:4px 9px;border-radius:6px;border:1px solid #1e3a5f;background:#0a0e1a;color:#64748b;font-size:12px;cursor:pointer;line-height:1;">↺</button>
+                    <div id="acpScrollWrap" style="flex:1;height:5px;background:#1e3a5f;border-radius:3px;position:relative;cursor:grab;">
+                        <div id="acpScrollBar" style="position:absolute;top:0;height:100%;background:rgba(56,189,248,.35);border:1px solid #38bdf8;border-radius:3px;left:0;width:100%;"></div>
                     </div>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <span style="font-size:11px;font-weight:700;color:#f59e0b;width:32px;">Akhir</span>
-                        <input type="range" id="acpE" min="0" max="100" step="0.01" value="100" style="flex:1;accent-color:#f59e0b;">
-                        <span id="acpEVal" style="font-size:11px;color:#f59e0b;width:40px;text-align:right;font-variant-numeric:tabular-nums;">0:00</span>
-                    </div>
+                    <span id="acpZoomLbl" style="font-size:10px;color:#4a5568;white-space:nowrap;min-width:50px;text-align:right;">Semua</span>
                 </div>
 
-                {{-- Durasi pilihan --}}
-                <div style="text-align:center;font-size:12px;color:#38bdf8;font-weight:700;margin-bottom:.75rem;">
-                    Pilihan: <span id="acpSelDur">0:00</span>
+                {{-- Sel info --}}
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:.5rem;flex-wrap:wrap;">
+                    <span style="font-size:11px;color:#22d3ee;font-weight:700;font-variant-numeric:tabular-nums;">▶ <span id="acpSelS">0:00.0</span></span>
+                    <span style="color:#374151;font-size:14px;">→</span>
+                    <span style="font-size:11px;color:#f59e0b;font-weight:700;font-variant-numeric:tabular-nums;"><span id="acpSelE">0:00.0</span> ◀</span>
+                    <span style="color:#374151;">|</span>
+                    <span style="font-size:11px;color:#22c55e;font-weight:700;font-variant-numeric:tabular-nums;"><span id="acpSelD">0:00.0</span></span>
+                    <span id="acpPosLbl" style="font-size:10px;color:#374151;font-variant-numeric:tabular-nums;margin-left:auto;"></span>
                 </div>
 
                 {{-- Controls --}}
-                <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                    <button id="acpBtnPrev" onclick="acpPreview()" style="flex:1;padding:8px;background:#0ea5e920;border:1px solid #0ea5e940;color:#38bdf8;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">▶ Preview</button>
-                    <button onclick="acpStop()" style="padding:8px 12px;background:#1e293b;border:1px solid #334155;color:#94a3b8;border-radius:8px;font-size:12px;cursor:pointer;">⏹</button>
-                    <button id="acpBtnCut" onclick="acpCut()" style="flex:2;padding:8px;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">✂️ Potong &amp; Unduh</button>
+                <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                    <button id="acpBtnPlay"  onclick="acpPlay()"    style="padding:9px 12px;background:#1e293b;border:1px solid #334155;color:#f0f0f0;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;min-height:40px;">▶ Play</button>
+                    <button id="acpBtnPause" onclick="acpPause()"   style="display:none;padding:9px 12px;background:#1e293b;border:1px solid #facc1560;color:#facc15;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;min-height:40px;">⏸ Pause</button>
+                    <button                  onclick="acpPreview()" style="padding:9px 12px;background:rgba(14,165,233,.12);border:1px solid rgba(14,165,233,.3);color:#38bdf8;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;min-height:40px;">▶ Preview</button>
+                    <button                  onclick="acpStop()"    style="padding:9px 10px;background:#1e293b;border:1px solid #334155;color:#64748b;border-radius:8px;font-size:12px;cursor:pointer;min-height:40px;">⏹</button>
+                    <button id="acpBtnCut"   onclick="acpCut()"    style="flex:1;padding:9px;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;min-height:40px;">✂️ Potong &amp; Unduh</button>
                 </div>
-                <div id="acpStatus" style="font-size:11px;color:#64748b;margin-top:6px;min-height:14px;"></div>
+                <div id="acpStatus" style="font-size:11px;color:#4a5568;margin-top:5px;min-height:14px;"></div>
 
                 {{-- Result --}}
-                <div id="acpResult" style="display:none;margin-top:.75rem;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:.75rem;">
-                    <div style="font-size:12px;font-weight:700;color:#22c55e;margin-bottom:.5rem;">✅ Siap diunduh</div>
-                    <audio id="acpClipPlayer" controls style="width:100%;height:32px;margin-bottom:.5rem;"></audio>
-                    <a id="acpDl" download style="display:inline-flex;align-items:center;gap:6px;background:#22c55e;color:#fff;padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">⬇️ Unduh WAV</a>
+                <div id="acpResult" style="display:none;margin-top:.65rem;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:.7rem;">
+                    <div style="font-size:12px;font-weight:700;color:#22c55e;margin-bottom:.4rem;">✅ Siap diunduh</div>
+                    <audio id="acpClipPlayer" controls style="width:100%;height:36px;margin-bottom:.4rem;"></audio>
+                    <a id="acpDl" download style="display:inline-flex;align-items:center;gap:5px;background:#22c55e;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">⬇️ Unduh WAV</a>
                 </div>
             </div>
 
-            {{-- Login prompt (muncul setelah 3x pakai) --}}
-            <div id="acpLimit" style="display:none;text-align:center;padding:1.5rem 1rem;">
-                <div style="font-size:2rem;margin-bottom:.75rem;">🔒</div>
-                <div style="font-weight:700;font-size:15px;color:#f0f0f0;margin-bottom:.4rem;">3 percobaan gratis habis</div>
-                <div style="font-size:12px;color:#64748b;margin-bottom:1.25rem;line-height:1.6;">Login dengan Google untuk akses <b style="color:#38bdf8;">unlimited</b> di halaman penuh — gratis.</div>
+            {{-- Login prompt --}}
+            <div id="acpLimit" style="display:none;text-align:center;padding:1.25rem .75rem;">
+                <div style="font-size:2rem;margin-bottom:.6rem;">🔒</div>
+                <div style="font-weight:700;font-size:14px;color:#f0f0f0;margin-bottom:.35rem;">3 percobaan gratis habis</div>
+                <div style="font-size:12px;color:#4a5568;margin-bottom:1rem;line-height:1.6;">Login dengan Google untuk akses <b style="color:#38bdf8;">unlimited</b> di halaman penuh — gratis.</div>
+                @if(Route::has('tools.potong-lagu'))
                 <a href="{{ route('tools.potong-lagu') }}" style="display:block;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;padding:10px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;margin-bottom:.5rem;">🔓 Buka Halaman Penuh</a>
-                <button onclick="acpClose()" style="background:transparent;border:none;color:#64748b;font-size:12px;cursor:pointer;text-decoration:underline;">Tutup</button>
+                @endif
+                <button onclick="acpClose()" style="background:transparent;border:none;color:#4a5568;font-size:12px;cursor:pointer;text-decoration:underline;">Tutup</button>
             </div>
         </div>
     </div>
@@ -1767,230 +1775,427 @@ console.log('Home loaded:', songs.length, 'songs');
 
 @push('scripts')
 <script>
-// ══════════════════════════════════════════════════════════
-//  ACP — Audio Cutter Popup (landing page, limit 3x)
-// ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+//  ACP — Audio Cutter Popup v2 (drag handles on canvas + zoom + mobile touch)
+// ══════════════════════════════════════════════════════════════════════════════
 (function(){
-var ACP_MAX = 3;
-var _ctx=null,_buf=null,_src=null,_startT=0,_endT=0,_dur=0,_playing=false,_prevStop=null,_raf=null,_playCtxTime=0,_playOffset=0,_resultUrl=null;
+'use strict';
+var ACP_MAX=3;
+// Core state
+var _ctx=null,_buf=null,_src=null,_dur=0;
+var _playing=false,_paused=false,_pausedAt=0,_playOffset=0,_playCtxTime=0;
+var _startT=0,_endT=0;
+// Zoom / view window (fraction 0..1 of total duration)
+var _vS=0,_vE=1;
+// Canvas drag: 'start'|'end'|'pinch'|null
+var _drag=null,_pinchD=null,_pinchMid=0,_vS0=0,_vE0=0;
+// Scrollbar pan drag
+var _sbDrag=false,_sbX0=0,_sbVS0=0,_sbVE0=0;
+// Popup window drag
 var _isDrag=false,_dragOX=0,_dragOY=0;
-var _used = parseInt(localStorage.getItem('acpUses')||'0');
+// Misc
+var _raf=null,_prevStop=null,_resultUrl=null;
+var _used=parseInt(localStorage.getItem('acpUses')||'0');
 
+function g(id){return document.getElementById(id);}
 function fmtS(s){s=Math.max(0,s||0);var m=Math.floor(s/60),x=Math.floor(s%60);return m+':'+(x<10?'0':'')+x;}
 function fmtP(s){s=Math.max(0,s||0);var m=Math.floor(s/60),x=s%60;return m+':'+(x<10?'0':'')+x.toFixed(1);}
-function setStatus(t){document.getElementById('acpStatus').textContent=t||'';}
-function updCounter(){
-    var rem=Math.max(0,ACP_MAX-_used);
-    document.getElementById('acpCounter').textContent=rem+'/'+ACP_MAX+' gratis';
-    document.getElementById('acpCounter').style.background=rem>0?'rgba(255,255,255,.2)':'rgba(239,68,68,.4)';
+function setSt(t){var e=g('acpStatus');if(e)e.textContent=t||'';}
+
+// ── Usage counter ─────────────────────────────────────────────────────────────
+function updCtr(){
+    var rem=Math.max(0,ACP_MAX-_used),e=g('acpCounter');
+    if(!e)return;
+    e.textContent=rem+'/'+ACP_MAX+' gratis';
+    e.style.background=rem>0?'rgba(255,255,255,.22)':'rgba(239,68,68,.4)';
 }
 
-// ── Open / Close ──
-window.acpOpen = function(){
-    updCounter();
-    if(_used>=ACP_MAX){
-        document.getElementById('acpEditor').style.display='none';
-        document.getElementById('acpDrop').style.display='none';
-        document.getElementById('acpLimit').style.display='block';
-    } else {
-        document.getElementById('acpEditor').style.display='none';
-        document.getElementById('acpDrop').style.display='block';
-        document.getElementById('acpLimit').style.display='none';
-    }
-    document.getElementById('acpResult').style.display='none';
-    var p=document.getElementById('acpPopup');
+// ── Open / Close ─────────────────────────────────────────────────────────────
+window.acpOpen=function(){
+    updCtr();
+    var showLimit=_used>=ACP_MAX;
+    g('acpDrop').style.display=showLimit?'none':'block';
+    g('acpEditor').style.display='none';
+    g('acpLimit').style.display=showLimit?'block':'none';
+    g('acpResult').style.display='none';
+    var p=g('acpPopup');
     p.style.display='block';
-    p.style.top='50%'; p.style.left='50%'; p.style.transform='translate(-50%,-50%)';
-    document.getElementById('acpOverlay').style.display='block';
-    gtag && gtag('event','acp_open',{event_category:'tools'});
+    p.style.top='50%';p.style.left='50%';p.style.transform='translate(-50%,-50%)';
+    g('acpOverlay').style.display='block';
+    if(_buf) requestAnimationFrame(acpDraw);
+    typeof gtag!=='undefined'&&gtag('event','acp_open',{event_category:'tools'});
 };
-window.acpClose = function(){
+window.acpClose=function(){
     acpStop();
-    document.getElementById('acpPopup').style.display='none';
-    document.getElementById('acpOverlay').style.display='none';
+    g('acpPopup').style.display='none';
+    g('acpOverlay').style.display='none';
 };
 
-// ── Drag ──
-document.addEventListener('DOMContentLoaded',function(){
-    var head=document.getElementById('acpHead');
-    if(!head) return;
-    head.addEventListener('mousedown',function(e){
-        _isDrag=true;
-        var p=document.getElementById('acpPopup'),r=p.getBoundingClientRect();
-        // Switch from transform positioning to absolute
-        p.style.transform='none';
-        p.style.left=r.left+'px'; p.style.top=r.top+'px';
-        _dragOX=e.clientX-r.left; _dragOY=e.clientY-r.top;
-        head.style.cursor='grabbing';
-        e.preventDefault();
-    });
-    head.addEventListener('touchstart',function(e){
-        _isDrag=true;
-        var t=e.touches[0],p=document.getElementById('acpPopup'),r=p.getBoundingClientRect();
-        p.style.transform='none';
-        p.style.left=r.left+'px'; p.style.top=r.top+'px';
-        _dragOX=t.clientX-r.left; _dragOY=t.clientY-r.top;
-    },{passive:false});
-    document.addEventListener('mousemove',function(e){
-        if(!_isDrag) return;
-        var p=document.getElementById('acpPopup');
-        var maxX=window.innerWidth-p.offsetWidth-8, maxY=window.innerHeight-p.offsetHeight-8;
-        p.style.left=Math.max(8,Math.min(e.clientX-_dragOX,maxX))+'px';
-        p.style.top =Math.max(8,Math.min(e.clientY-_dragOY,maxY))+'px';
-    });
-    document.addEventListener('touchmove',function(e){
-        if(!_isDrag) return;
-        var t=e.touches[0],p=document.getElementById('acpPopup');
-        var maxX=window.innerWidth-p.offsetWidth-8, maxY=window.innerHeight-p.offsetHeight-8;
-        p.style.left=Math.max(8,Math.min(t.clientX-_dragOX,maxX))+'px';
-        p.style.top =Math.max(8,Math.min(t.clientY-_dragOY,maxY))+'px';
-    },{passive:true});
-    document.addEventListener('mouseup',function(){ _isDrag=false; document.getElementById('acpHead').style.cursor='grab'; });
-    document.addEventListener('touchend',function(){ _isDrag=false; });
-});
+// ── Main draw ─────────────────────────────────────────────────────────────────
+function tToX(t,W){return ((t-_vS*_dur)/((_vE-_vS)*_dur))*W;}
+function xToT(x,W){return _vS*_dur+(x/W)*(_vE-_vS)*_dur;}
 
-// ── File load ──
-var drop=document.getElementById('acpDrop');
-if(drop){
-    drop.addEventListener('dragover',function(e){e.preventDefault();drop.style.borderColor='#38bdf8';});
-    drop.addEventListener('dragleave',function(){drop.style.borderColor='#1e3a5f';});
-    drop.addEventListener('drop',function(e){e.preventDefault();drop.style.borderColor='#1e3a5f';var f=e.dataTransfer.files[0];if(f)acpLoad(f);});
+function acpDraw(){
+    var c=g('acpWave'),wrap=g('acpWaveWrap');
+    if(!c||!wrap)return;
+    var rect=wrap.getBoundingClientRect();
+    var W=Math.round(rect.width||460),H=130;
+    if(W<10)W=460;
+    c.width=W;c.height=H;
+    var gc=c.getContext('2d');
+    gc.fillStyle='#070d18';gc.fillRect(0,0,W,H);
+    if(!_buf)return;
+
+    var data=_buf.getChannelData(0),sr=_buf.sampleRate;
+    var totS=_vS*_dur,totE=_vE*_dur;
+
+    // Waveform bars
+    for(var i=0;i<W;i++){
+        var t0=totS+(i/W)*(totE-totS),t1=totS+((i+1)/W)*(totE-totS);
+        var i0=Math.floor(t0*sr),i1=Math.ceil(t1*sr);
+        var max=0;
+        for(var j=i0;j<i1&&j<data.length;j++){var av=Math.abs(data[j]);if(av>max)max=av;}
+        var inSel=(t0+t1)/2>=_startT&&(t0+t1)/2<=_endT;
+        var bH=Math.max(2,max*(H-14)*.9),y=(H-14-bH)/2;
+        gc.fillStyle=inSel?'rgba(56,189,248,.88)':'rgba(56,189,248,.2)';
+        gc.fillRect(i,y,1,bH);
+    }
+    // Selection tint
+    var sx=tToX(_startT,W),ex=tToX(_endT,W);
+    gc.fillStyle='rgba(56,189,248,.07)';gc.fillRect(sx,0,ex-sx,H-14);
+
+    // Time ruler strip
+    var viewDur=totE-totS;
+    gc.fillStyle='rgba(10,14,26,.9)';gc.fillRect(0,H-14,W,14);
+    var tick=viewDur<=2?.2:viewDur<=5?.5:viewDur<=20?1:viewDur<=60?5:viewDur<=300?30:60;
+    var ft=Math.ceil(totS/tick)*tick;
+    gc.font='8px monospace';
+    for(var ts=ft;ts<=totE+.001;ts+=tick){
+        var tx=tToX(ts,W);if(tx<0||tx>W)continue;
+        gc.fillStyle='rgba(255,255,255,.2)';gc.fillRect(tx,H-14,1,14);
+        gc.fillStyle='rgba(255,255,255,.45)';gc.fillText(fmtP(ts),tx+2,H-3);
+    }
+
+    // Playhead
+    if(_playing||_paused){
+        var pp=_paused?_pausedAt:(_playOffset+(_ctx.currentTime-_playCtxTime));
+        if(pp>=0&&pp<=_dur){
+            var px=tToX(pp,W);
+            gc.fillStyle='rgba(255,255,255,.85)';gc.fillRect(px-.75,0,1.5,H-14);
+        }
+    }
+
+    // Drag handles (triangles at top, with stem line)
+    function drawH(hx,color){
+        if(hx<-12||hx>W+12)return;
+        gc.beginPath();gc.moveTo(hx-9,0);gc.lineTo(hx+9,0);gc.lineTo(hx,16);
+        gc.closePath();gc.fillStyle=color;gc.fill();
+        gc.globalAlpha=0.4;gc.fillRect(hx-.75,16,1.5,H-14-16);gc.globalAlpha=1;
+    }
+    drawH(sx,'#22d3ee');
+    drawH(ex,'#f59e0b');
+
+    acpUpdSel();
+    acpUpdScroll(W);
 }
-document.getElementById('acpFileIn') && document.getElementById('acpFileIn').addEventListener('change',function(){ if(this.files[0]) acpLoad(this.files[0]); });
 
-function acpLoad(file){
+function acpUpdSel(){
+    g('acpSelS')&&(g('acpSelS').textContent=fmtP(_startT));
+    g('acpSelE')&&(g('acpSelE').textContent=fmtP(_endT));
+    g('acpSelD')&&(g('acpSelD').textContent=fmtP(_endT-_startT));
+}
+function acpUpdScroll(W){
+    var sw=g('acpScrollWrap'),sb=g('acpScrollBar'),zl=g('acpZoomLbl');
+    if(!sw||!sb)return;
+    var spW=sw.getBoundingClientRect().width||200;
+    sb.style.left=(_vS*spW)+'px';
+    sb.style.width=Math.max(8,(_vE-_vS)*spW)+'px';
+    if(zl)zl.textContent=_vE-_vS>=.99?'Semua':Math.round(100*(_vE-_vS))+'%';
+}
+
+// ── Zoom ─────────────────────────────────────────────────────────────────────
+function zoomAround(pivot,factor){
+    if(!_buf)return;
+    var len=_vE-_vS,newLen=Math.min(1,Math.max(0.005,len*factor));
+    var s=_vS+pivot*len-pivot*newLen,e=s+newLen;
+    if(s<0){s=0;e=Math.min(1,newLen);}
+    if(e>1){e=1;s=Math.max(0,1-newLen);}
+    _vS=s;_vE=e;acpDraw();
+}
+window.acpZoomIn =function(){zoomAround(.5,.6);};
+window.acpZoomOut=function(){zoomAround(.5,1.7);};
+window.acpZoomReset=function(){if(!_buf)return;_vS=0;_vE=1;acpDraw();};
+
+// ── File loading ──────────────────────────────────────────────────────────────
+window.acpLoad=function acpLoad(file){
     if(file.size>100*1024*1024){alert('Maks 100 MB');return;}
-    setStatus('Memuat…');
-    document.getElementById('acpFileName').textContent=file.name.replace(/\.[^.]+$/,'');
-    if(_ctx){try{_ctx.close();}catch(e){}}
+    setSt('Memuat…');
+    g('acpFileName').textContent=file.name.replace(/\.[^.]+$/,'');
+    if(_ctx){try{_ctx.close();}catch(e){}_ctx=null;}
     _ctx=new(window.AudioContext||window.webkitAudioContext)();
     var r=new FileReader();
-    r.onload=function(e){
-        _ctx.decodeAudioData(e.target.result,function(buf){
-            _buf=buf; _dur=buf.duration; _startT=0; _endT=_dur;
-            document.getElementById('acpDurInfo').textContent=fmtS(_dur)+' · '+(file.size/1024/1024).toFixed(1)+' MB';
-            var s=document.getElementById('acpS'),en=document.getElementById('acpE');
-            s.max=en.max=_dur.toFixed(2); s.step=en.step=(_dur/1000).toFixed(4);
-            s.value=0; en.value=_dur.toFixed(2);
-            acpDrawWave(); acpUpdDisplay();
-            document.getElementById('acpDrop').style.display='none';
-            document.getElementById('acpEditor').style.display='block';
-            document.getElementById('acpResult').style.display='none';
-            setStatus('');
-        },function(){setStatus('Gagal membaca file.');});
+    r.onload=function(ev){
+        _ctx.decodeAudioData(ev.target.result.slice(0),function(buf){
+            _buf=buf;_dur=buf.duration;_startT=0;_endT=_dur;_vS=0;_vE=1;
+            g('acpDurInfo').textContent=fmtS(_dur)+' · '+(file.size/1024/1024).toFixed(1)+' MB';
+            g('acpDrop').style.display='none';
+            g('acpEditor').style.display='block';
+            g('acpResult').style.display='none';
+            setSt('');
+            requestAnimationFrame(acpDraw);
+        },function(e){setSt('Gagal decode. Coba format lain.');console.error(e);});
     };
+    r.onerror=function(){setSt('Gagal membaca file.');};
     r.readAsArrayBuffer(file);
-}
+};
 
-function acpDrawWave(){
-    var c=document.getElementById('acpWave');
-    var W=c.parentElement.clientWidth||460,H=80;
-    c.width=W; c.height=H;
-    var ctx=c.getContext('2d');
-    ctx.fillStyle='#0a0e1a'; ctx.fillRect(0,0,W,H);
-    if(!_buf) return;
-    var data=_buf.getChannelData(0),step=Math.ceil(data.length/W);
-    var sx=(_startT/_dur)*W, ex=(_endT/_dur)*W;
-    ctx.fillStyle='rgba(56,189,248,.1)'; ctx.fillRect(sx,0,ex-sx,H);
-    for(var i=0;i<W;i++){
-        var max=0; for(var j=0;j<step;j++){var v=Math.abs(data[i*step+j]||0);if(v>max)max=v;}
-        var bH=Math.max(1,max*H*.88),y=(H-bH)/2;
-        ctx.fillStyle=(i>=sx&&i<=ex)?'#38bdf8':'#1e3a4a';
-        ctx.fillRect(i,y,1,bH);
-    }
-    ctx.fillStyle='#22d3ee'; ctx.fillRect(sx,0,2,H);
-    ctx.fillStyle='#f59e0b'; ctx.fillRect(ex-2,0,2,H);
+// ── Playback ──────────────────────────────────────────────────────────────────
+function ctxGo(cb){
+    if(!_ctx)return;
+    (_ctx.state==='suspended'?_ctx.resume():Promise.resolve()).then(cb);
 }
-
-document.getElementById('acpS') && document.getElementById('acpS').addEventListener('input',function(){
-    _startT=parseFloat(this.value);if(_startT>=_endT-.1){_startT=_endT-.1;this.value=_startT.toFixed(4);}
-    acpDrawWave(); acpUpdDisplay();
-});
-document.getElementById('acpE') && document.getElementById('acpE').addEventListener('input',function(){
-    _endT=parseFloat(this.value);if(_endT<=_startT+.1){_endT=_startT+.1;this.value=_endT.toFixed(4);}
-    acpDrawWave(); acpUpdDisplay();
-});
-function acpUpdDisplay(){
-    document.getElementById('acpSVal').textContent=fmtS(_startT);
-    document.getElementById('acpEVal').textContent=fmtS(_endT);
-    document.getElementById('acpSelDur').textContent=fmtP(_endT-_startT);
-}
-
-// ── Playback ──
-function acpPreview(){
-    if(!_buf) return; acpStop();
-    _ctx.resume();
-    _src=_ctx.createBufferSource(); _src.buffer=_buf; _src.connect(_ctx.destination);
-    _playOffset=_startT; _playCtxTime=_ctx.currentTime;
-    _src.start(0,_startT,_endT-_startT);
-    _playing=true; _prevStop=setTimeout(acpStop,(_endT-_startT)*1000+300);
-    _acpRaf();
-}
-window.acpPreview=acpPreview;
-function _acpRaf(){
-    if(!_playing) return;
-    var el=_ctx.currentTime-_playCtxTime,pos=(_playOffset+el)/_dur;
-    if(pos>1){acpStop();return;}
-    var c=document.getElementById('acpWave'),ph=document.getElementById('acpPh');
-    ph.style.display='block'; ph.style.left=(pos*c.width)+'px';
-    _raf=requestAnimationFrame(_acpRaf);
-}
-function acpStop(){
+function stopSrc(){
     if(_prevStop){clearTimeout(_prevStop);_prevStop=null;}
     if(_raf){cancelAnimationFrame(_raf);_raf=null;}
-    if(_src){try{_src.stop();}catch(e){}_src=null;} _playing=false;
-    document.getElementById('acpPh').style.display='none';
+    if(_src){try{_src.stop();}catch(e){}_src=null;}
+}
+function rafLoop(){
+    if(!_playing)return;
+    acpDraw();
+    _raf=requestAnimationFrame(rafLoop);
+}
+function startPlay(from,dur){
+    _src=_ctx.createBufferSource();
+    _src.buffer=_buf;_src.connect(_ctx.destination);
+    _playOffset=from;_playCtxTime=_ctx.currentTime;
+    dur!=null?_src.start(0,from,dur):_src.start(0,from);
+    _playing=true;_paused=false;
+    _src.onended=function(){if(_playing&&!_paused)acpStop();};
+}
+function showPause(v){
+    var bp=g('acpBtnPlay'),pp=g('acpBtnPause');
+    if(bp)bp.style.display=v?'none':'';
+    if(pp)pp.style.display=v?'':'none';
+}
+
+// ▶ Play (full file, or resume from pause)
+window.acpPlay=function(){
+    if(!_buf)return;
+    if(_paused){
+        ctxGo(function(){
+            _src=_ctx.createBufferSource();_src.buffer=_buf;_src.connect(_ctx.destination);
+            _playOffset=_pausedAt;_playCtxTime=_ctx.currentTime;
+            _src.start(0,_pausedAt);_playing=true;_paused=false;
+            showPause(true);rafLoop();
+        });return;
+    }
+    acpStop();
+    ctxGo(function(){startPlay(0,null);showPause(true);rafLoop();});
+};
+// ▶ Preview (selection only)
+window.acpPreview=function(){
+    if(!_buf)return;
+    if(_endT-_startT<.05){setSt('Pilihan terlalu pendek.');return;}
+    acpStop();
+    ctxGo(function(){
+        startPlay(_startT,_endT-_startT);
+        _prevStop=setTimeout(acpStop,(_endT-_startT)*1000+500);
+        showPause(true);rafLoop();
+    });
+};
+// ⏸ Pause
+window.acpPause=function(){
+    if(!_playing||_paused)return;
+    _pausedAt=_playOffset+(_ctx.currentTime-_playCtxTime);
+    stopSrc();_paused=true;_playing=false;
+    showPause(false);acpDraw();
+};
+// ⏹ Stop
+function acpStop(){
+    stopSrc();_playing=false;_paused=false;
+    showPause(false);acpDraw();
 }
 window.acpStop=acpStop;
 
-// ── Cut & download ──
-function acpCut(){
-    if(!_buf) return;
-    if(_endT-_startT<.1){setStatus('Pilihan terlalu pendek.');return;}
-    document.getElementById('acpBtnCut').disabled=true;
-    setStatus('Memotong…');
+// ── Cut & WAV encode ──────────────────────────────────────────────────────────
+window.acpCut=function(){
+    if(!_buf)return;
+    if(_endT-_startT<.1){setSt('Pilihan terlalu pendek (min 0.1 dtk).');return;}
+    g('acpBtnCut').disabled=true;setSt('Memotong…');
     setTimeout(function(){
         try{
-            var blob=acpWav(_buf,_startT,_endT);
+            var sr=_buf.sampleRate,nCh=_buf.numberOfChannels;
+            var ss=Math.floor(_startT*sr),es=Math.min(Math.ceil(_endT*sr),_buf.length),n=es-ss;
+            var ab=new ArrayBuffer(44+n*nCh*2),v=new DataView(ab);
+            function ws(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));}
+            ws(0,'RIFF');v.setUint32(4,36+n*nCh*2,true);ws(8,'WAVE');ws(12,'fmt ');
+            v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nCh,true);
+            v.setUint32(24,sr,true);v.setUint32(28,sr*nCh*2,true);v.setUint16(32,nCh*2,true);v.setUint16(34,16,true);
+            ws(36,'data');v.setUint32(40,n*nCh*2,true);
+            var off=44;
+            for(var i=0;i<n;i++) for(var ch=0;ch<nCh;ch++){
+                var x=Math.max(-1,Math.min(1,_buf.getChannelData(ch)[ss+i]));
+                v.setInt16(off,x<0?x*0x8000:x*0x7FFF,true);off+=2;
+            }
+            var blob=new Blob([ab],{type:'audio/wav'});
             if(_resultUrl)URL.revokeObjectURL(_resultUrl);
             _resultUrl=URL.createObjectURL(blob);
-            document.getElementById('acpClipPlayer').src=_resultUrl;
-            var dl=document.getElementById('acpDl');
-            dl.href=_resultUrl;
-            dl.download=(document.getElementById('acpFileName').textContent||'lagu')
-                        +'_'+fmtS(_startT).replace(':','m')+'s-'+fmtS(_endT).replace(':','m')+'s.wav';
-            document.getElementById('acpResult').style.display='block';
-            setStatus('');
-            // increment usage
-            _used++;
-            localStorage.setItem('acpUses',_used);
-            updCounter();
+            g('acpClipPlayer').src=_resultUrl;
+            var dl=g('acpDl');dl.href=_resultUrl;
+            dl.download=(g('acpFileName').textContent||'lagu')+'_'
+                +fmtS(_startT).replace(':','m')+'s-'+fmtS(_endT).replace(':','m')+'s.wav';
+            g('acpResult').style.display='block';setSt('');
+            _used++;localStorage.setItem('acpUses',_used);updCtr();
             if(_used>=ACP_MAX){
                 setTimeout(function(){
-                    document.getElementById('acpEditor').style.display='none';
-                    document.getElementById('acpLimit').style.display='block';
+                    g('acpEditor').style.display='none';g('acpLimit').style.display='block';
                 },1800);
             }
-        }catch(e){setStatus('Gagal: '+(e.message||e));}
-        finally{document.getElementById('acpBtnCut').disabled=false;}
-    },50);
-}
-window.acpCut=acpCut;
+        }catch(e){setSt('Gagal: '+(e.message||e));}
+        finally{g('acpBtnCut').disabled=false;}
+    },60);
+};
 
-function acpWav(buffer,s,e){
-    var sr=buffer.sampleRate,nCh=buffer.numberOfChannels;
-    var ss=Math.floor(s*sr),es=Math.min(Math.ceil(e*sr),buffer.length),n=es-ss;
-    var ab=new ArrayBuffer(44+n*nCh*2),v=new DataView(ab);
-    function ws(o,str){for(var i=0;i<str.length;i++)v.setUint8(o+i,str.charCodeAt(i));}
-    ws(0,'RIFF');v.setUint32(4,36+n*nCh*2,true);ws(8,'WAVE');ws(12,'fmt ');
-    v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nCh,true);
-    v.setUint32(24,sr,true);v.setUint32(28,sr*nCh*2,true);v.setUint16(32,nCh*2,true);v.setUint16(34,16,true);
-    ws(36,'data');v.setUint32(40,n*nCh*2,true);
-    var off=44;
-    for(var i=0;i<n;i++) for(var ch=0;ch<nCh;ch++){var x=Math.max(-1,Math.min(1,buffer.getChannelData(ch)[ss+i]));v.setInt16(off,x<0?x*0x8000:x*0x7FFF,true);off+=2;}
-    return new Blob([ab],{type:'audio/wav'});
-}
-window.addEventListener('resize',function(){if(_buf)acpDrawWave();});
+// ── DOM setup (runs when page is ready) ──────────────────────────────────────
+(function setup(){
+    // File drop
+    var drop=g('acpDrop');
+    if(drop){
+        drop.addEventListener('dragover',function(e){e.preventDefault();drop.style.borderColor='#38bdf8';});
+        drop.addEventListener('dragleave',function(){drop.style.borderColor='#1e3a5f';});
+        drop.addEventListener('drop',function(e){
+            e.preventDefault();drop.style.borderColor='#1e3a5f';
+            if(e.dataTransfer.files[0])window.acpLoad(e.dataTransfer.files[0]);
+        });
+    }
+    var fi=g('acpFileIn');
+    fi&&fi.addEventListener('change',function(){if(this.files[0])window.acpLoad(this.files[0]);});
+
+    // ── Popup header drag ─────────────────────────────────────────────────────
+    var head=g('acpHead');
+    if(head){
+        function pdStart(cx,cy){
+            _isDrag=true;
+            var p=g('acpPopup'),r=p.getBoundingClientRect();
+            p.style.transform='none';p.style.left=r.left+'px';p.style.top=r.top+'px';
+            _dragOX=cx-r.left;_dragOY=cy-r.top;
+        }
+        function pdMove(cx,cy){
+            if(!_isDrag)return;
+            var p=g('acpPopup');
+            p.style.left=Math.max(0,Math.min(cx-_dragOX,window.innerWidth-p.offsetWidth))+'px';
+            p.style.top =Math.max(0,Math.min(cy-_dragOY,window.innerHeight-p.offsetHeight))+'px';
+        }
+        head.addEventListener('mousedown',function(e){pdStart(e.clientX,e.clientY);head.style.cursor='grabbing';e.preventDefault();});
+        head.addEventListener('touchstart',function(e){pdStart(e.touches[0].clientX,e.touches[0].clientY);},{passive:false});
+        document.addEventListener('mousemove',function(e){pdMove(e.clientX,e.clientY);});
+        document.addEventListener('touchmove',function(e){if(_isDrag)pdMove(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+        document.addEventListener('mouseup',function(){_isDrag=false;if(head)head.style.cursor='grab';});
+        document.addEventListener('touchend',function(){if(!_sbDrag&&!_drag)_isDrag=false;});
+    }
+
+    // ── Canvas drag handles ───────────────────────────────────────────────────
+    var c=g('acpWave');
+    if(c){
+        function cX(clientX){var r=c.getBoundingClientRect();return(clientX-r.left)*(c.width/Math.max(1,r.width));}
+        function nearH(px,tol){
+            if(!_buf)return null;
+            var W=c.width||460,sx=tToX(_startT,W),ex=tToX(_endT,W);
+            var ds=Math.abs(px-sx),de=Math.abs(px-ex);
+            if(ds<tol&&ds<=de)return 'start';
+            if(de<tol)return 'end';
+            return null;
+        }
+        // Mouse
+        c.addEventListener('mousedown',function(e){
+            var h=nearH(cX(e.clientX),22);
+            if(h){_drag=h;e.preventDefault();}
+        });
+        c.addEventListener('mousemove',function(e){
+            if(_drag&&_drag!=='pinch'&&_buf){
+                var t=xToT(cX(e.clientX),c.width);
+                if(_drag==='start')_startT=Math.max(0,Math.min(t,_endT-.05));
+                else _endT=Math.min(_dur,Math.max(t,_startT+.05));
+                acpDraw();
+            } else {
+                c.style.cursor=nearH(cX(e.clientX),22)?'ew-resize':'default';
+            }
+        });
+        document.addEventListener('mouseup',function(){_drag=null;});
+        // Wheel zoom
+        c.addEventListener('wheel',function(e){
+            if(!_buf)return;e.preventDefault();
+            var r=c.getBoundingClientRect();
+            zoomAround((e.clientX-r.left)/r.width,e.deltaY>0?1.4:0.7);
+        },{passive:false});
+        // Touch
+        c.addEventListener('touchstart',function(e){
+            if(e.touches.length===2){
+                var t0=e.touches[0],t1=e.touches[1];
+                _drag='pinch';
+                _pinchD=Math.hypot(t1.clientX-t0.clientX,t1.clientY-t0.clientY);
+                var r=c.getBoundingClientRect();
+                _pinchMid=((t0.clientX+t1.clientX)/2-r.left)/r.width;
+                _vS0=_vS;_vE0=_vE;e.preventDefault();return;
+            }
+            if(e.touches.length===1){
+                var h=nearH(cX(e.touches[0].clientX),36);
+                if(h){_drag=h;e.preventDefault();}
+            }
+        },{passive:false});
+        c.addEventListener('touchmove',function(e){
+            if(_drag==='pinch'&&e.touches.length===2){
+                var t0=e.touches[0],t1=e.touches[1];
+                var d=Math.hypot(t1.clientX-t0.clientX,t1.clientY-t0.clientY);
+                var factor=_pinchD/d,len=_vE0-_vS0;
+                var newLen=Math.min(1,Math.max(0.01,len*factor));
+                var s=_vS0+_pinchMid*len-_pinchMid*newLen,e2=s+newLen;
+                if(s<0){s=0;e2=Math.min(1,newLen);}if(e2>1){e2=1;s=Math.max(0,1-newLen);}
+                _vS=s;_vE=e2;acpDraw();e.preventDefault();
+            } else if(_drag&&_drag!=='pinch'&&e.touches.length===1&&_buf){
+                var t2=xToT(cX(e.touches[0].clientX),c.width);
+                if(_drag==='start')_startT=Math.max(0,Math.min(t2,_endT-.05));
+                else _endT=Math.min(_dur,Math.max(t2,_startT+.05));
+                acpDraw();e.preventDefault();
+            }
+        },{passive:false});
+        c.addEventListener('touchend',function(){_drag=null;_pinchD=null;});
+    }
+
+    // ── Scrollbar pan ─────────────────────────────────────────────────────────
+    var sw=g('acpScrollWrap');
+    if(sw){
+        function sbStart(cx){
+            var sb=g('acpScrollBar'),r=sw.getBoundingClientRect();
+            var barL=parseFloat(sb.style.left)||0,barW=parseFloat(sb.style.width)||r.width;
+            if(cx>=barL&&cx<=barL+barW){
+                _sbDrag=true;_sbX0=cx-barL;_sbVS0=_vS;_sbVE0=_vE;return true;
+            }return false;
+        }
+        function sbMove(cx){
+            if(!_sbDrag)return;
+            var r=sw.getBoundingClientRect(),span=_sbVE0-_sbVS0;
+            var s=Math.max(0,Math.min((cx-_sbX0)/r.width,1-span));
+            _vS=s;_vE=s+span;acpDraw();
+        }
+        sw.addEventListener('mousedown',function(e){
+            if(sbStart(e.clientX-sw.getBoundingClientRect().left))e.preventDefault();
+        });
+        document.addEventListener('mousemove',function(e){sbMove(e.clientX-sw.getBoundingClientRect().left);});
+        document.addEventListener('mouseup',function(){_sbDrag=false;});
+        sw.addEventListener('touchstart',function(e){
+            if(e.touches.length!==1)return;
+            var r=sw.getBoundingClientRect();
+            if(sbStart(e.touches[0].clientX-r.left))e.preventDefault();
+        },{passive:false});
+        document.addEventListener('touchmove',function(e){
+            if(_sbDrag&&e.touches.length===1)sbMove(e.touches[0].clientX-sw.getBoundingClientRect().left);
+        },{passive:true});
+        document.addEventListener('touchend',function(){_sbDrag=false;});
+    }
+})();
+
+window.addEventListener('resize',function(){if(_buf)requestAnimationFrame(acpDraw);});
 })();
 </script>
 @endpush
