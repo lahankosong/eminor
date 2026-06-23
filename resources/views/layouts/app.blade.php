@@ -346,6 +346,12 @@
 </head>
 <body>
 
+<noscript>
+    <div style="background:#7c2d12;color:#fed7aa;text-align:center;font-size:13px;padding:10px 14px;line-height:1.5;">
+        ⚠️ Beberapa fitur (pemutar, alat audio, chord) butuh <b>JavaScript</b>. Aktifkan JavaScript di browser untuk pengalaman penuh.
+    </div>
+</noscript>
+
 <div class="page-glow"></div>
 <div class="cursor-light" id="cursorLight"></div>
 

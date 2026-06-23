@@ -55,6 +55,7 @@
 @section('content')
 <div class="vr-page">
     <a href="{{ route('home') }}" class="vr-back">← Beranda</a>
+    @include('partials.tool-share')
 
     <div class="vr-hero">
         <div class="vr-badge">🎤 Tool Gratis</div>

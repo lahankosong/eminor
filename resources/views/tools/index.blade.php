@@ -27,6 +27,7 @@
 @section('content')
 <div class="th-page">
     <a href="{{ route('home') }}" class="th-back">← Beranda</a>
+    @include('partials.tool-share')
 
     <div class="th-hero">
         <div class="th-badge">🎛️ Studio Gratis</div>

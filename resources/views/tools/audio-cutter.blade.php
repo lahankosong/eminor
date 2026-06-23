@@ -87,6 +87,7 @@
 <div class="ac-page">
 
     <a href="{{ route('home') }}" class="ac-back">← Beranda</a>
+    @include('partials.tool-share')
 
     <div class="ac-hero">
         <div class="ac-hero-badge">✂️ Tool Gratis</div>

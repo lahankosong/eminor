@@ -55,6 +55,7 @@
 @section('content')
 <div class="cm-page">
     <a href="{{ route('home') }}" class="cm-back">← Beranda</a>
+    @include('partials.tool-share')
 
     <div class="cm-hero">
         <div class="cm-badge">🎨 Tool Gratis</div>

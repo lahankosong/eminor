@@ -54,6 +54,7 @@
 @section('content')
 <div class="rc-page">
     <a href="{{ route('home') }}" class="rc-back">← Beranda</a>
+    @include('partials.tool-share')
     <div class="rc-hero">
         <div class="rc-badge">🚀 Tool Gratis</div>
         <h1>Kartu Promo Rilis Lagu</h1>

@@ -70,6 +70,7 @@
 {{-- ═══ MODE GENERATOR ═══ --}}
 <div class="cd-page">
     <a href="{{ route('home') }}" class="cd-back">← Beranda</a>
+    @include('partials.tool-share')
     <div class="cd-hero">
         <div class="cd-badge2">⏳ Tool Gratis</div>
         <h1>Countdown Rilis Lagu</h1>
