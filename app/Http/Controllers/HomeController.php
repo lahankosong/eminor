@@ -117,6 +117,15 @@ class HomeController extends Controller
         $xml .= '    <image:image><image:loc>' . $homeImg . '</image:loc><image:title>Margonoandi</image:title></image:image>' . "\n";
         $xml .= '  </url>' . "\n";
 
+        // Tool publik (SEO): pemotong lagu online — gratis, client-side
+        try {
+            $xml .= '  <url>' . "\n";
+            $xml .= '    <loc>' . htmlspecialchars(route('tools.potong-lagu')) . '</loc>' . "\n";
+            $xml .= '    <lastmod>' . now()->toDateString() . '</lastmod>' . "\n";
+            $xml .= '    <changefreq>monthly</changefreq><priority>0.7</priority>' . "\n";
+            $xml .= '  </url>' . "\n";
+        } catch (\Throwable $e) {}
+
         try {
             $songs = Song::where('is_active', true)
                 ->whereNotNull('slug')->where('slug', '!=', '')
