@@ -108,7 +108,8 @@ class ToolController extends Controller
             $title = ($j !== '' ? $j : 'Rilis Baru') . ($a !== '' ? ' — ' . $a : '') . ' · Hitung Mundur Rilis';
             $desc  = 'Hitung mundur rilis ' . ($j !== '' ? '“' . $j . '”' : 'lagu') . ($a !== '' ? ' oleh ' . $a : '')
                    . '. Buka untuk lihat countdown langsung & dengarkan saat rilis.';
-            $seo = ['title' => $title, 'description' => $desc, 'url' => $canonical, 'type' => 'website'];
+            // Halaman ber-parameter = konten per-user; canonical ke halaman bersih + noindex (cegah indeks duplikat tak terhingga)
+            $seo = ['title' => $title, 'description' => $desc, 'url' => $canonical, 'type' => 'website', 'robots' => 'noindex, follow'];
         } else {
             $seo = [
                 'title'       => 'Buat Countdown Rilis Lagu — Link Hitung Mundur untuk Bio & Story',
@@ -128,5 +129,28 @@ class ToolController extends Controller
         }
 
         return view('tools.countdown', compact('seo', 'hasParams'));
+    }
+
+    public function hub()
+    {
+        $canonical = url('/tools');
+        $tools = [
+            ['icon' => '✂️', 'name' => 'Pemotong Lagu Online',       'desc' => 'Potong bagian lagu (MP3/WAV/OGG) langsung di browser.',       'route' => 'tools.potong-lagu'],
+            ['icon' => '🎤', 'name' => 'Penghapus Vokal (Karaoke)',   'desc' => 'Pisah instrumen & vokal untuk karaoke / minus one.',          'route' => 'tools.hapus-vokal'],
+            ['icon' => '🎨', 'name' => 'Buat Cover Lagu / Album',      'desc' => 'Cover art 1:1 hingga 3000px untuk Spotify, Apple, YouTube.',   'route' => 'tools.cover-art'],
+            ['icon' => '🚀', 'name' => 'Kartu Promo Rilis',           'desc' => '3 fase (pra/rilis/pasca) + QR/platform, feed 1:1 & story 9:16.', 'route' => 'tools.kartu-rilis'],
+            ['icon' => '⏳', 'name' => 'Countdown Rilis',             'desc' => 'Link hitung mundur real-time untuk bio Instagram / story.',     'route' => 'tools.countdown'],
+        ];
+        $items = [];
+        foreach ($tools as $i => $t) {
+            $items[] = ['@type' => 'ListItem', 'position' => $i + 1, 'name' => $t['name'], 'url' => route($t['route'])];
+        }
+        $seo = [
+            'title'       => 'Alat Gratis untuk Musisi — Potong Lagu, Karaoke, Cover & Promo Rilis',
+            'description' => 'Kumpulan alat gratis untuk musisi: pemotong lagu, penghapus vokal (karaoke), pembuat cover art 1:1, kartu promo rilis & countdown rilis. Semua di browser, tanpa upload, tanpa daftar.',
+            'url'         => $canonical,
+            'schema'      => ['@context' => 'https://schema.org', '@type' => 'ItemList', 'name' => 'Alat Gratis Musisi — Margonoandi', 'itemListElement' => $items],
+        ];
+        return view('tools.index', compact('seo', 'tools'));
     }
 }

@@ -19,7 +19,7 @@
     <title>{{ $seoTitle }}</title>
     <meta name="description" content="{{ $seoDesc }}">
     <link rel="canonical" href="{{ $seoUrl }}">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="{{ $seo['robots'] ?? 'index, follow' }}">
     <meta name="theme-color" content="#38A8CC">
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/svg+xml" href="/images/icon.svg">
@@ -393,6 +393,7 @@
                target="_blank" rel="noopener" class="footer-link apple">&#9835; Apple Music</a>
         </div>
         <div class="footer-links" style="margin-top:8px;">
+            <a href="{{ route('tools.index') }}" class="footer-link">&#127899; Semua Alat</a>
             <a href="{{ route('tools.potong-lagu') }}" class="footer-link">&#9986; Potong Lagu</a>
             <a href="{{ route('tools.hapus-vokal') }}" class="footer-link">&#127908; Hapus Vokal / Karaoke</a>
             <a href="{{ route('tools.cover-art') }}" class="footer-link">&#127912; Buat Cover Lagu</a>

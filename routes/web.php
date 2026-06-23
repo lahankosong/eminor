@@ -35,6 +35,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('tra
 Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
 
 // Tools publik — tanpa login
+Route::get('/tools', [ToolController::class, 'hub'])->name('tools.index');
 Route::get('/tools/potong-lagu', [ToolController::class, 'audioCutter'])->name('tools.potong-lagu');
 Route::get('/tools/hapus-vokal', [ToolController::class, 'vocalRemover'])->name('tools.hapus-vokal');
 Route::get('/tools/cover-art', [ToolController::class, 'coverMaker'])->name('tools.cover-art');

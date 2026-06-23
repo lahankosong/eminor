@@ -1012,7 +1012,7 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
         .fb-studio-d { font-size:11px;color:var(--text-3,#94a3b8);margin-top:3px;line-height:1.45; }
     </style>
     <div class="fb-studio">
-        <p class="fb-studio-label">🎛️ Studio Gratis — alat untuk musisi, tanpa daftar</p>
+        <a href="{{ route('tools.index') }}" class="fb-studio-label" style="display:block;text-decoration:none;">🎛️ Studio Gratis — alat untuk musisi · lihat semua →</a>
         <div class="fb-studio-grid">
             <a href="{{ route('tools.potong-lagu') }}" class="fb-studio-card">
                 <div class="fb-studio-ic">✂️</div>
