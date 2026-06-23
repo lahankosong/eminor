@@ -1000,17 +1000,96 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
     >Coba Sekarang</a>
     <p class="fb-promo-note">@auth Kamu sudah di dalam &mdash; ayo lanjut berkarya. @else Cukup login pakai Google &mdash; Gratis &amp; Aman. @endauth</p>
 
-    {{-- TOOLS GRATIS --}}
-    <a href="{{ route('tools.potong-lagu') }}"
-       onclick="gtag && gtag('event', 'cta_click', {event_category:'tools', button:'potong_lagu_landing'})"
-       style="display:flex;align-items:center;gap:14px;background:var(--card-bg,rgba(15,23,42,0.6));border:1px solid var(--border);border-radius:16px;padding:1rem 1.25rem;text-decoration:none;margin-top:1.25rem;transition:.2s;">
+    {{-- TOOLS GRATIS — popup draggable --}}
+    <button onclick="acpOpen()" style="display:flex;align-items:center;gap:14px;background:var(--card-bg,rgba(15,23,42,0.6));border:1px solid var(--border);border-radius:16px;padding:1rem 1.25rem;text-decoration:none;margin-top:1.25rem;transition:.2s;width:100%;cursor:pointer;text-align:left;" onmouseover="this.style.borderColor='var(--accent,#38bdf8)'" onmouseout="this.style.borderColor='var(--border)'">
         <div style="font-size:2rem;flex-shrink:0;">✂️</div>
         <div style="flex:1;min-width:0;">
             <div style="font-weight:700;font-size:14px;color:var(--text,#f0f0f0);">Pemotong Lagu Online — Gratis</div>
-            <div style="font-size:12px;color:var(--text-3,#94a3b8);margin-top:2px;">Potong MP3, WAV, OGG langsung di browser. Tanpa install, tanpa upload ke server.</div>
+            <div style="font-size:12px;color:var(--text-3,#94a3b8);margin-top:2px;">Potong MP3, WAV, OGG langsung di browser &mdash; coba 3x tanpa login!</div>
         </div>
-        <div style="font-size:12px;font-weight:700;color:var(--accent,#38bdf8);white-space:nowrap;">Coba →</div>
-    </a>
+        <div style="font-size:12px;font-weight:700;color:var(--accent,#38bdf8);white-space:nowrap;">Coba ✂️</div>
+    </button>
+
+    {{-- ACP Popup --}}
+    <div id="acpOverlay" style="display:none;position:fixed;inset:0;z-index:9990;"></div>
+    <div id="acpPopup" style="display:none;position:fixed;z-index:9999;width:min(520px,96vw);background:#0f172a;border:1px solid #1e3a5f;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.7);overflow:hidden;top:50%;left:50%;transform:translate(-50%,-50%);">
+        {{-- Header / drag handle --}}
+        <div id="acpHead" style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.1rem;background:linear-gradient(135deg,#0ea5e9,#0369a1);cursor:grab;user-select:none;">
+            <div>
+                <span style="font-weight:700;font-size:14px;color:#fff;">✂️ Pemotong Lagu Online</span>
+                <span id="acpCounter" style="margin-left:10px;font-size:11px;background:rgba(255,255,255,.2);color:#fff;padding:2px 9px;border-radius:20px;font-weight:600;"></span>
+            </div>
+            <button onclick="acpClose()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;font-size:16px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">&times;</button>
+        </div>
+        {{-- Body --}}
+        <div style="padding:1rem;max-height:80vh;overflow-y:auto;">
+
+            {{-- Drop zone --}}
+            <div id="acpDrop" onclick="document.getElementById('acpFileIn').click()" style="border:2px dashed #1e3a5f;border-radius:14px;padding:1.5rem 1rem;text-align:center;cursor:pointer;transition:.2s;background:#0a0e1a;margin-bottom:.75rem;">
+                <div style="font-size:1.75rem;margin-bottom:.4rem;">🎵</div>
+                <div style="font-size:13px;font-weight:600;color:#f0f0f0;margin-bottom:.2rem;">Seret file audio atau klik untuk pilih</div>
+                <div style="font-size:11px;color:#64748b;">MP3 · WAV · OGG · FLAC · Maks 100 MB · Tidak diunggah ke server</div>
+            </div>
+            <input type="file" id="acpFileIn" accept="audio/*" style="display:none">
+
+            {{-- Editor (tersembunyi sebelum file dipilih) --}}
+            <div id="acpEditor" style="display:none;">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-bottom:.3rem;">
+                    <span id="acpFileName" style="font-weight:600;color:#94a3b8;"></span>
+                    <span id="acpDurInfo"></span>
+                </div>
+
+                {{-- Waveform --}}
+                <div style="position:relative;border-radius:10px;overflow:hidden;background:#0a0e1a;margin-bottom:.5rem;">
+                    <canvas id="acpWave" style="display:block;width:100%;height:80px;"></canvas>
+                    <div id="acpPh" style="position:absolute;top:0;bottom:0;width:2px;background:#fff;opacity:.7;pointer-events:none;display:none;"></div>
+                </div>
+
+                {{-- Sliders --}}
+                <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:.75rem;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="font-size:11px;font-weight:700;color:#22d3ee;width:32px;">Mulai</span>
+                        <input type="range" id="acpS" min="0" max="100" step="0.01" value="0" style="flex:1;accent-color:#22d3ee;">
+                        <span id="acpSVal" style="font-size:11px;color:#22d3ee;width:40px;text-align:right;font-variant-numeric:tabular-nums;">0:00</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="font-size:11px;font-weight:700;color:#f59e0b;width:32px;">Akhir</span>
+                        <input type="range" id="acpE" min="0" max="100" step="0.01" value="100" style="flex:1;accent-color:#f59e0b;">
+                        <span id="acpEVal" style="font-size:11px;color:#f59e0b;width:40px;text-align:right;font-variant-numeric:tabular-nums;">0:00</span>
+                    </div>
+                </div>
+
+                {{-- Durasi pilihan --}}
+                <div style="text-align:center;font-size:12px;color:#38bdf8;font-weight:700;margin-bottom:.75rem;">
+                    Pilihan: <span id="acpSelDur">0:00</span>
+                </div>
+
+                {{-- Controls --}}
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button id="acpBtnPrev" onclick="acpPreview()" style="flex:1;padding:8px;background:#0ea5e920;border:1px solid #0ea5e940;color:#38bdf8;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">▶ Preview</button>
+                    <button onclick="acpStop()" style="padding:8px 12px;background:#1e293b;border:1px solid #334155;color:#94a3b8;border-radius:8px;font-size:12px;cursor:pointer;">⏹</button>
+                    <button id="acpBtnCut" onclick="acpCut()" style="flex:2;padding:8px;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">✂️ Potong &amp; Unduh</button>
+                </div>
+                <div id="acpStatus" style="font-size:11px;color:#64748b;margin-top:6px;min-height:14px;"></div>
+
+                {{-- Result --}}
+                <div id="acpResult" style="display:none;margin-top:.75rem;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:.75rem;">
+                    <div style="font-size:12px;font-weight:700;color:#22c55e;margin-bottom:.5rem;">✅ Siap diunduh</div>
+                    <audio id="acpClipPlayer" controls style="width:100%;height:32px;margin-bottom:.5rem;"></audio>
+                    <a id="acpDl" download style="display:inline-flex;align-items:center;gap:6px;background:#22c55e;color:#fff;padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">⬇️ Unduh WAV</a>
+                </div>
+            </div>
+
+            {{-- Login prompt (muncul setelah 3x pakai) --}}
+            <div id="acpLimit" style="display:none;text-align:center;padding:1.5rem 1rem;">
+                <div style="font-size:2rem;margin-bottom:.75rem;">🔒</div>
+                <div style="font-weight:700;font-size:15px;color:#f0f0f0;margin-bottom:.4rem;">3 percobaan gratis habis</div>
+                <div style="font-size:12px;color:#64748b;margin-bottom:1.25rem;line-height:1.6;">Login dengan Google untuk akses <b style="color:#38bdf8;">unlimited</b> di halaman penuh — gratis.</div>
+                <a href="{{ route('tools.potong-lagu') }}" style="display:block;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;padding:10px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;margin-bottom:.5rem;">🔓 Buka Halaman Penuh</a>
+                <button onclick="acpClose()" style="background:transparent;border:none;color:#64748b;font-size:12px;cursor:pointer;text-decoration:underline;">Tutup</button>
+            </div>
+        </div>
+    </div>
 
     <hr style="border:none;border-top:1px solid var(--border);margin:2.5rem 0;">
     
@@ -1682,6 +1761,236 @@ console.log('Home loaded:', songs.length, 'songs');
         showcase.addEventListener('touchend', function(){ setTimeout(featResetTimer, 2000); }, { passive:true });
         featResetTimer();
     });
+})();
+</script>
+@endpush
+
+@push('scripts')
+<script>
+// ══════════════════════════════════════════════════════════
+//  ACP — Audio Cutter Popup (landing page, limit 3x)
+// ══════════════════════════════════════════════════════════
+(function(){
+var ACP_MAX = 3;
+var _ctx=null,_buf=null,_src=null,_startT=0,_endT=0,_dur=0,_playing=false,_prevStop=null,_raf=null,_playCtxTime=0,_playOffset=0,_resultUrl=null;
+var _isDrag=false,_dragOX=0,_dragOY=0;
+var _used = parseInt(localStorage.getItem('acpUses')||'0');
+
+function fmtS(s){s=Math.max(0,s||0);var m=Math.floor(s/60),x=Math.floor(s%60);return m+':'+(x<10?'0':'')+x;}
+function fmtP(s){s=Math.max(0,s||0);var m=Math.floor(s/60),x=s%60;return m+':'+(x<10?'0':'')+x.toFixed(1);}
+function setStatus(t){document.getElementById('acpStatus').textContent=t||'';}
+function updCounter(){
+    var rem=Math.max(0,ACP_MAX-_used);
+    document.getElementById('acpCounter').textContent=rem+'/'+ACP_MAX+' gratis';
+    document.getElementById('acpCounter').style.background=rem>0?'rgba(255,255,255,.2)':'rgba(239,68,68,.4)';
+}
+
+// ── Open / Close ──
+window.acpOpen = function(){
+    updCounter();
+    if(_used>=ACP_MAX){
+        document.getElementById('acpEditor').style.display='none';
+        document.getElementById('acpDrop').style.display='none';
+        document.getElementById('acpLimit').style.display='block';
+    } else {
+        document.getElementById('acpEditor').style.display='none';
+        document.getElementById('acpDrop').style.display='block';
+        document.getElementById('acpLimit').style.display='none';
+    }
+    document.getElementById('acpResult').style.display='none';
+    var p=document.getElementById('acpPopup');
+    p.style.display='block';
+    p.style.top='50%'; p.style.left='50%'; p.style.transform='translate(-50%,-50%)';
+    document.getElementById('acpOverlay').style.display='block';
+    gtag && gtag('event','acp_open',{event_category:'tools'});
+};
+window.acpClose = function(){
+    acpStop();
+    document.getElementById('acpPopup').style.display='none';
+    document.getElementById('acpOverlay').style.display='none';
+};
+
+// ── Drag ──
+document.addEventListener('DOMContentLoaded',function(){
+    var head=document.getElementById('acpHead');
+    if(!head) return;
+    head.addEventListener('mousedown',function(e){
+        _isDrag=true;
+        var p=document.getElementById('acpPopup'),r=p.getBoundingClientRect();
+        // Switch from transform positioning to absolute
+        p.style.transform='none';
+        p.style.left=r.left+'px'; p.style.top=r.top+'px';
+        _dragOX=e.clientX-r.left; _dragOY=e.clientY-r.top;
+        head.style.cursor='grabbing';
+        e.preventDefault();
+    });
+    head.addEventListener('touchstart',function(e){
+        _isDrag=true;
+        var t=e.touches[0],p=document.getElementById('acpPopup'),r=p.getBoundingClientRect();
+        p.style.transform='none';
+        p.style.left=r.left+'px'; p.style.top=r.top+'px';
+        _dragOX=t.clientX-r.left; _dragOY=t.clientY-r.top;
+    },{passive:false});
+    document.addEventListener('mousemove',function(e){
+        if(!_isDrag) return;
+        var p=document.getElementById('acpPopup');
+        var maxX=window.innerWidth-p.offsetWidth-8, maxY=window.innerHeight-p.offsetHeight-8;
+        p.style.left=Math.max(8,Math.min(e.clientX-_dragOX,maxX))+'px';
+        p.style.top =Math.max(8,Math.min(e.clientY-_dragOY,maxY))+'px';
+    });
+    document.addEventListener('touchmove',function(e){
+        if(!_isDrag) return;
+        var t=e.touches[0],p=document.getElementById('acpPopup');
+        var maxX=window.innerWidth-p.offsetWidth-8, maxY=window.innerHeight-p.offsetHeight-8;
+        p.style.left=Math.max(8,Math.min(t.clientX-_dragOX,maxX))+'px';
+        p.style.top =Math.max(8,Math.min(t.clientY-_dragOY,maxY))+'px';
+    },{passive:true});
+    document.addEventListener('mouseup',function(){ _isDrag=false; document.getElementById('acpHead').style.cursor='grab'; });
+    document.addEventListener('touchend',function(){ _isDrag=false; });
+});
+
+// ── File load ──
+var drop=document.getElementById('acpDrop');
+if(drop){
+    drop.addEventListener('dragover',function(e){e.preventDefault();drop.style.borderColor='#38bdf8';});
+    drop.addEventListener('dragleave',function(){drop.style.borderColor='#1e3a5f';});
+    drop.addEventListener('drop',function(e){e.preventDefault();drop.style.borderColor='#1e3a5f';var f=e.dataTransfer.files[0];if(f)acpLoad(f);});
+}
+document.getElementById('acpFileIn') && document.getElementById('acpFileIn').addEventListener('change',function(){ if(this.files[0]) acpLoad(this.files[0]); });
+
+function acpLoad(file){
+    if(file.size>100*1024*1024){alert('Maks 100 MB');return;}
+    setStatus('Memuat…');
+    document.getElementById('acpFileName').textContent=file.name.replace(/\.[^.]+$/,'');
+    if(_ctx){try{_ctx.close();}catch(e){}}
+    _ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var r=new FileReader();
+    r.onload=function(e){
+        _ctx.decodeAudioData(e.target.result,function(buf){
+            _buf=buf; _dur=buf.duration; _startT=0; _endT=_dur;
+            document.getElementById('acpDurInfo').textContent=fmtS(_dur)+' · '+(file.size/1024/1024).toFixed(1)+' MB';
+            var s=document.getElementById('acpS'),en=document.getElementById('acpE');
+            s.max=en.max=_dur.toFixed(2); s.step=en.step=(_dur/1000).toFixed(4);
+            s.value=0; en.value=_dur.toFixed(2);
+            acpDrawWave(); acpUpdDisplay();
+            document.getElementById('acpDrop').style.display='none';
+            document.getElementById('acpEditor').style.display='block';
+            document.getElementById('acpResult').style.display='none';
+            setStatus('');
+        },function(){setStatus('Gagal membaca file.');});
+    };
+    r.readAsArrayBuffer(file);
+}
+
+function acpDrawWave(){
+    var c=document.getElementById('acpWave');
+    var W=c.parentElement.clientWidth||460,H=80;
+    c.width=W; c.height=H;
+    var ctx=c.getContext('2d');
+    ctx.fillStyle='#0a0e1a'; ctx.fillRect(0,0,W,H);
+    if(!_buf) return;
+    var data=_buf.getChannelData(0),step=Math.ceil(data.length/W);
+    var sx=(_startT/_dur)*W, ex=(_endT/_dur)*W;
+    ctx.fillStyle='rgba(56,189,248,.1)'; ctx.fillRect(sx,0,ex-sx,H);
+    for(var i=0;i<W;i++){
+        var max=0; for(var j=0;j<step;j++){var v=Math.abs(data[i*step+j]||0);if(v>max)max=v;}
+        var bH=Math.max(1,max*H*.88),y=(H-bH)/2;
+        ctx.fillStyle=(i>=sx&&i<=ex)?'#38bdf8':'#1e3a4a';
+        ctx.fillRect(i,y,1,bH);
+    }
+    ctx.fillStyle='#22d3ee'; ctx.fillRect(sx,0,2,H);
+    ctx.fillStyle='#f59e0b'; ctx.fillRect(ex-2,0,2,H);
+}
+
+document.getElementById('acpS') && document.getElementById('acpS').addEventListener('input',function(){
+    _startT=parseFloat(this.value);if(_startT>=_endT-.1){_startT=_endT-.1;this.value=_startT.toFixed(4);}
+    acpDrawWave(); acpUpdDisplay();
+});
+document.getElementById('acpE') && document.getElementById('acpE').addEventListener('input',function(){
+    _endT=parseFloat(this.value);if(_endT<=_startT+.1){_endT=_startT+.1;this.value=_endT.toFixed(4);}
+    acpDrawWave(); acpUpdDisplay();
+});
+function acpUpdDisplay(){
+    document.getElementById('acpSVal').textContent=fmtS(_startT);
+    document.getElementById('acpEVal').textContent=fmtS(_endT);
+    document.getElementById('acpSelDur').textContent=fmtP(_endT-_startT);
+}
+
+// ── Playback ──
+function acpPreview(){
+    if(!_buf) return; acpStop();
+    _ctx.resume();
+    _src=_ctx.createBufferSource(); _src.buffer=_buf; _src.connect(_ctx.destination);
+    _playOffset=_startT; _playCtxTime=_ctx.currentTime;
+    _src.start(0,_startT,_endT-_startT);
+    _playing=true; _prevStop=setTimeout(acpStop,(_endT-_startT)*1000+300);
+    _acpRaf();
+}
+window.acpPreview=acpPreview;
+function _acpRaf(){
+    if(!_playing) return;
+    var el=_ctx.currentTime-_playCtxTime,pos=(_playOffset+el)/_dur;
+    if(pos>1){acpStop();return;}
+    var c=document.getElementById('acpWave'),ph=document.getElementById('acpPh');
+    ph.style.display='block'; ph.style.left=(pos*c.width)+'px';
+    _raf=requestAnimationFrame(_acpRaf);
+}
+function acpStop(){
+    if(_prevStop){clearTimeout(_prevStop);_prevStop=null;}
+    if(_raf){cancelAnimationFrame(_raf);_raf=null;}
+    if(_src){try{_src.stop();}catch(e){}_src=null;} _playing=false;
+    document.getElementById('acpPh').style.display='none';
+}
+window.acpStop=acpStop;
+
+// ── Cut & download ──
+function acpCut(){
+    if(!_buf) return;
+    if(_endT-_startT<.1){setStatus('Pilihan terlalu pendek.');return;}
+    document.getElementById('acpBtnCut').disabled=true;
+    setStatus('Memotong…');
+    setTimeout(function(){
+        try{
+            var blob=acpWav(_buf,_startT,_endT);
+            if(_resultUrl)URL.revokeObjectURL(_resultUrl);
+            _resultUrl=URL.createObjectURL(blob);
+            document.getElementById('acpClipPlayer').src=_resultUrl;
+            var dl=document.getElementById('acpDl');
+            dl.href=_resultUrl;
+            dl.download=(document.getElementById('acpFileName').textContent||'lagu')
+                        +'_'+fmtS(_startT).replace(':','m')+'s-'+fmtS(_endT).replace(':','m')+'s.wav';
+            document.getElementById('acpResult').style.display='block';
+            setStatus('');
+            // increment usage
+            _used++;
+            localStorage.setItem('acpUses',_used);
+            updCounter();
+            if(_used>=ACP_MAX){
+                setTimeout(function(){
+                    document.getElementById('acpEditor').style.display='none';
+                    document.getElementById('acpLimit').style.display='block';
+                },1800);
+            }
+        }catch(e){setStatus('Gagal: '+(e.message||e));}
+        finally{document.getElementById('acpBtnCut').disabled=false;}
+    },50);
+}
+window.acpCut=acpCut;
+
+function acpWav(buffer,s,e){
+    var sr=buffer.sampleRate,nCh=buffer.numberOfChannels;
+    var ss=Math.floor(s*sr),es=Math.min(Math.ceil(e*sr),buffer.length),n=es-ss;
+    var ab=new ArrayBuffer(44+n*nCh*2),v=new DataView(ab);
+    function ws(o,str){for(var i=0;i<str.length;i++)v.setUint8(o+i,str.charCodeAt(i));}
+    ws(0,'RIFF');v.setUint32(4,36+n*nCh*2,true);ws(8,'WAVE');ws(12,'fmt ');
+    v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nCh,true);
+    v.setUint32(24,sr,true);v.setUint32(28,sr*nCh*2,true);v.setUint16(32,nCh*2,true);v.setUint16(34,16,true);
+    ws(36,'data');v.setUint32(40,n*nCh*2,true);
+    var off=44;
+    for(var i=0;i<n;i++) for(var ch=0;ch<nCh;ch++){var x=Math.max(-1,Math.min(1,buffer.getChannelData(ch)[ss+i]));v.setInt16(off,x<0?x*0x8000:x*0x7FFF,true);off+=2;}
+    return new Blob([ab],{type:'audio/wav'});
+}
+window.addEventListener('resize',function(){if(_buf)acpDrawWave();});
 })();
 </script>
 @endpush
