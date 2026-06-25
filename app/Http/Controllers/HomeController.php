@@ -128,6 +128,26 @@ class HomeController extends Controller
             } catch (\Throwable $e) {}
         }
 
+        // Materi musik: halaman index + tiap artikel
+        try {
+            $xml .= '  <url>' . "\n";
+            $xml .= '    <loc>' . htmlspecialchars(route('library.materi')) . '</loc>' . "\n";
+            $xml .= '    <lastmod>' . now()->toDateString() . '</lastmod>' . "\n";
+            $xml .= '    <changefreq>weekly</changefreq><priority>0.8</priority>' . "\n";
+            $xml .= '  </url>' . "\n";
+        } catch (\Throwable $e) {}
+
+        try {
+            foreach (\App\Models\Article::orderBy('batch')->orderBy('id')->get(['slug','updated_at']) as $art) {
+                try { $loc = route('library.materi.show', $art->slug); } catch (\Throwable $e) { continue; }
+                $xml .= '  <url>' . "\n";
+                $xml .= '    <loc>' . htmlspecialchars($loc) . '</loc>' . "\n";
+                if ($art->updated_at) $xml .= '    <lastmod>' . $art->updated_at->toDateString() . '</lastmod>' . "\n";
+                $xml .= '    <changefreq>monthly</changefreq><priority>0.7</priority>' . "\n";
+                $xml .= '  </url>' . "\n";
+            }
+        } catch (\Throwable $e) {}
+
         try {
             $songs = Song::where('is_active', true)
                 ->whereNotNull('slug')->where('slug', '!=', '')
