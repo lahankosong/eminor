@@ -50,7 +50,7 @@
     <div class="mat-hero">
         <div class="mat-badge">📚 Materi Gratis</div>
         <h1>Panduan Musik dari Teori sampai Rilis</h1>
-        <p>21 artikel lengkap dalam Bahasa Indonesia — dari belajar chord pertama sampai strategi rilis dan monetisasi.</p>
+        <p>31 artikel lengkap dalam Bahasa Indonesia — dari belajar chord pertama sampai strategi rilis, monetisasi, dan manifesto songwriter independen.</p>
         <div class="mat-stats">
             <span><b>{{ $articles->count() }}</b> artikel</span>
             <span><b>{{ $grouped->count() }}</b> kategori</span>
