@@ -15,6 +15,7 @@ class Article extends Model
             'produksi'   => 'Produksi',
             'kolaborasi' => 'Kolaborasi',
             'rilis'      => 'Rilis & Branding',
+            'karir'      => 'Karir & Bisnis',
             default      => ucfirst($this->category),
         };
     }
@@ -26,6 +27,7 @@ class Article extends Model
             'produksi'   => '#a855f7',
             'kolaborasi' => '#f59e0b',
             'rilis'      => '#22c55e',
+            'karir'      => '#f97316',
             default      => '#6b7280',
         };
     }

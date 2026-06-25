@@ -52,7 +52,7 @@
     <a href="{{ route('library.materi') }}" class="art-back">← Semua Materi</a>
 
     @php
-    $catColors = ['teori' => '#38A8CC', 'produksi' => '#a855f7', 'kolaborasi' => '#f59e0b', 'rilis' => '#22c55e'];
+    $catColors = ['teori' => '#38A8CC', 'produksi' => '#a855f7', 'kolaborasi' => '#f59e0b', 'rilis' => '#22c55e', 'karir' => '#f97316'];
     @endphp
 
     <div class="art-meta">

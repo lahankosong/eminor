@@ -53,7 +53,7 @@
         <p>21 artikel lengkap dalam Bahasa Indonesia — dari belajar chord pertama sampai strategi rilis dan monetisasi.</p>
         <div class="mat-stats">
             <span><b>{{ $articles->count() }}</b> artikel</span>
-            <span><b>4</b> kategori</span>
+            <span><b>{{ $grouped->count() }}</b> kategori</span>
             <span><b>~{{ $articles->sum('reading_time') }}</b> menit baca</span>
             <span>100% gratis</span>
         </div>
@@ -66,12 +66,13 @@
         <button class="mat-chip" onclick="matFilter('produksi', this)">🎛️ Produksi</button>
         <button class="mat-chip" onclick="matFilter('kolaborasi', this)">🤝 Kolaborasi</button>
         <button class="mat-chip" onclick="matFilter('rilis', this)">🚀 Rilis & Branding</button>
+        <button class="mat-chip" onclick="matFilter('karir', this)">💼 Karir & Bisnis</button>
     </div>
 
     @php
-    $catLabels = ['teori' => 'Teori Musik', 'produksi' => 'Produksi & Recording', 'kolaborasi' => 'Kolaborasi', 'rilis' => 'Rilis & Branding'];
-    $catColors = ['teori' => '#38A8CC', 'produksi' => '#a855f7', 'kolaborasi' => '#f59e0b', 'rilis' => '#22c55e'];
-    $catIcons  = ['teori' => '🎵', 'produksi' => '🎛️', 'kolaborasi' => '🤝', 'rilis' => '🚀'];
+    $catLabels = ['teori' => 'Teori Musik', 'produksi' => 'Produksi & Recording', 'kolaborasi' => 'Kolaborasi', 'rilis' => 'Rilis & Branding', 'karir' => 'Karir & Bisnis Musik'];
+    $catColors = ['teori' => '#38A8CC', 'produksi' => '#a855f7', 'kolaborasi' => '#f59e0b', 'rilis' => '#22c55e', 'karir' => '#f97316'];
+    $catIcons  = ['teori' => '🎵', 'produksi' => '🎛️', 'kolaborasi' => '🤝', 'rilis' => '🚀', 'karir' => '💼'];
     @endphp
 
     @foreach($catLabels as $cat => $label)

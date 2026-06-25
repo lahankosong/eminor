@@ -1781,6 +1781,501 @@ Musik sebagai karir adalah maraton, bukan sprint. Tapi dengan track yang jelas, 
 foreach ($articles as $a) {
     insertArticle($conn, $a);
 }
+
+// ── Batch 6: Karir & Bisnis Musik (10 artikel newcomer) ──
+$batch6 = [];
+
+$batch6[] = ['slug'=>'distribusi-musik-indonesia','title'=>'Distribusi Musik ke Spotify: Netrilis, DistroKid, atau TuneCore?','category'=>'karir','batch'=>6,'reading_time'=>12,
+'excerpt'=>'Platform mana yang paling cocok untuk musisi Indonesia? Perbandingan jujur biaya, royalti, dan fitur dari 4 distributor populer.',
+'content'=>'# Distribusi Musik ke Spotify: Netrilis, DistroKid, atau TuneCore?
+
+Lagu sudah selesai direkam dan dimaster. Langkah selanjutnya: upload ke Spotify, Apple Music, dan platform lainnya. Untuk itu kamu butuh **distributor musik digital**.
+
+## Pilihan Distributor untuk Musisi Indonesia
+
+### 1. Netrilis (Indonesia)
+
+**Biaya:** Paket Gratis (royalti 75%) atau Rp 99.000/tahun per lagu (royalti 100%)
+
+**Kelebihan:** Support Bahasa Indonesia, terintegrasi platform lokal (Joox, Langit Musik, Resso), pembayaran Rupiah ke rekening lokal, bisa bayar GoPay/transfer bank.
+
+**Kekurangan:** Interface kurang modern, distribusi 3-7 hari kerja, fitur lebih terbatas.
+
+**Cocok untuk:** Artis baru yang butuh support lokal atau target pasar utama Indonesia.
+
+### 2. DistroKid (AS)
+
+**Biaya:** USD 22.99/tahun (~Rp 370rb) — unlimited lagu, royalti 100%
+
+**Kelebihan:** Upload unlimited lagu dalam satu harga, distribusi 24-48 jam, fitur lengkap (Spotify for Artists auto-verify, TikTok monetization, YouTube Content ID), split payments otomatis.
+
+**Kekurangan:** Bayar USD, lagu bisa ditarik kalau tidak perpanjang langganan.
+
+**Cocok untuk:** Artis yang plan rilis banyak lagu dalam setahun.
+
+### 3. TuneCore
+
+**Biaya:** USD 9.99/tahun per single, USD 29.99/tahun per album. Royalti 100%.
+
+**Kelebihan:** Tidak ada langganan, laporan royalti sangat detail, ada fitur publishing administration.
+
+**Cocok untuk:** Artis yang rilis 1-2 lagu per tahun.
+
+### 4. CDBaby
+
+**Biaya:** USD 9.95 per single (sekali bayar selamanya). Royalti 91% (ada fee 9%).
+
+**Kelebihan:** Bayar sekali, tidak ada biaya tahunan, termasuk UPC gratis.
+
+**Cocok untuk:** Artis yang mau "set and forget."
+
+## Perbandingan Cepat
+
+| Distributor | Biaya | Royalti | Unlimited | Lokal |
+|---|---|---|---|---|
+| Netrilis | Gratis / Rp 99rb/lagu/tahun | 75-100% | Tidak | Ya |
+| DistroKid | ~Rp 370rb/tahun | 100% | Ya | Tidak |
+| TuneCore | ~Rp 160rb/lagu/tahun | 100% | Tidak | Tidak |
+| CDBaby | ~Rp 160rb/lagu (sekali) | 91% | Tidak | Tidak |
+
+## Rekomendasi
+
+- **Baru mulai, tidak punya kartu kredit:** Netrilis paket berbayar
+- **Rencana rilis 3+ lagu per tahun:** DistroKid — paling cost-effective
+- **Rilis 1-2 lagu setahun:** TuneCore atau CDBaby
+
+Yang terpenting: pilih satu dan mulai rilis. Jangan tunda hanya karena bingung pilih distributor.'];
+
+$batch6[] = ['slug'=>'isrc-upc-kode-lagu','title'=>'ISRC dan UPC: Kode Wajib yang Harus Kamu Tahu Sebelum Rilis','category'=>'karir','batch'=>6,'reading_time'=>7,
+'excerpt'=>'ISRC dan UPC adalah kode identitas lagu dan albummu. Tanpa ini, royaltimu bisa hilang. Pelajari apa itu dan cara mendapatkannya.',
+'content'=>'# ISRC dan UPC: Kode Wajib yang Harus Kamu Tahu Sebelum Rilis
+
+Banyak musisi pemula tidak tahu bahwa setiap lagu dan album di dunia punya kode identitas unik. Kode ini yang memastikan royalti streaming mengalir ke orang yang tepat.
+
+## ISRC: International Standard Recording Code
+
+ISRC adalah kode 12 karakter yang mengidentifikasi satu rekaman lagu secara unik di seluruh dunia.
+
+Format: CC-XXX-YY-NNNNN (CC = kode negara, XXX = registrant, YY = tahun, NNNNN = nomor urut)
+
+**Contoh:** IDABC2500001
+
+### Kenapa ISRC Penting?
+
+- Platform streaming pakai ISRC untuk mengidentifikasi rekaman
+- KCI dan WAMI pakai ISRC untuk menyalurkan royalti
+- Tanpa ISRC yang tepat, royaltimu bisa hilang atau salah salur
+
+### Cara Dapat ISRC
+
+**Via Distributor (paling mudah):** DistroKid, Netrilis, TuneCore otomatis assign ISRC gratis saat upload.
+
+**Apply sendiri:** Daftar ke IFPI Indonesia atau Irama Nusantara. Biaya Rp 200-500rb untuk blok 100 kode.
+
+**Tips:** Simpan ISRC tiap lagumu di spreadsheet. Kamu butuh ini saat daftar ke KCI/WAMI.
+
+## UPC: Universal Product Code
+
+UPC adalah barcode 12 digit yang mengidentifikasi satu rilisan (single/EP/album). Satu album = satu UPC, tapi tiap lagu di dalamnya punya ISRC sendiri.
+
+Distributor otomatis assign UPC gratis. Tidak perlu beli sendiri kecuali untuk distribusi fisik.
+
+## Checklist Sebelum Rilis
+
+- ISRC sudah di-assign untuk setiap track
+- UPC sudah di-assign untuk rilis keseluruhan
+- ISRC disimpan di spreadsheet pribadi
+- ISRC dilaporkan ke KCI/WAMI saat registrasi karya
+
+Kalau pakai distributor, semua ini diurus otomatis. Yang penting kamu paham artinya agar bisa verifikasi dan simpan datanya sendiri.'];
+
+$batch6[] = ['slug'=>'daftar-kci-wami','title'=>'Cara Daftar KCI dan WAMI untuk Dapat Royalti Radio dan Siaran','category'=>'karir','batch'=>6,'reading_time'=>10,
+'excerpt'=>'Setiap kali lagumu diputar di radio atau tempat umum, ada royalti yang seharusnya kamu terima. KCI dan WAMI yang mengumpulkan royalti itu — tapi hanya kalau kamu terdaftar.',
+'content'=>'# Cara Daftar KCI dan WAMI untuk Dapat Royalti Radio dan Siaran
+
+Ada royalti yang banyak musisi Indonesia tidak tahu mereka berhak terima: **performing rights royalti**.
+
+Setiap kali lagumu diputar di radio, kafe, mall, hotel, atau acara publik — ada biaya lisensi yang dibayarkan. Uang itu dikumpulkan oleh Lembaga Manajemen Kolektif (LMK). Di Indonesia ada dua LMK utama: **KCI** dan **WAMI**.
+
+## KCI: Karya Cipta Indonesia
+
+KCI (kci.or.id) fokus pada hak performing/broadcasting untuk **penulis lagu dan penerbit** (komposisi: melodi + lirik).
+
+### Cara Daftar KCI
+
+1. Buka kci.or.id → Pendaftaran Anggota
+2. Siapkan: KTP, daftar karya (judul + ISRC), bukti kepemilikan karya
+3. Isi formulir online atau kunjungi kantor KCI Jakarta
+4. Bayar biaya keanggotaan (sekitar Rp 100-300rb, cek website)
+5. Submit karya ke database KCI
+
+Royalti dikumpulkan dari pengguna musik (radio, restoran, dll), lalu didistribusikan ke anggota setahun sekali berdasarkan laporan pemutaran.
+
+## WAMI: Wahana Musik Indonesia
+
+WAMI (wami.id) fokus pada hak **master recording** — hak produser rekaman dan artis yang tampil dalam rekaman.
+
+Ini berbeda dari KCI: KCI untuk hak komposisi, WAMI untuk hak rekaman. Kalau kamu nulis dan rekam sendiri, kamu berhak collect dari keduanya.
+
+### Cara Daftar WAMI
+
+1. Buka wami.id → Pendaftaran
+2. Dokumen: KTP, NPWP, data rekaman (judul, ISRC, tahun, link streaming)
+3. Proses verifikasi 1-4 minggu
+4. Setelah terverifikasi, submit semua karya ke database WAMI
+
+## KCI vs WAMI: Daftar Keduanya
+
+Idealnya daftar keduanya karena sumber royaltinya berbeda:
+- KCI = royalti dari penggunaan komposisi (sebagai penulis)
+- WAMI = royalti dari penggunaan rekaman (sebagai artis/performer)
+
+**Penting:** Royalti sebelum kamu daftar tidak bisa di-claim retroaktif. Daftar sekarang, meski lagumu belum populer.'];
+
+$batch6[] = ['slug'=>'gig-pertama-musisi','title'=>'Cara Dapat Gig Pertama: Dari Open Mic ke Panggung Berbayar','category'=>'karir','batch'=>6,'reading_time'=>11,
+'excerpt'=>'Gig pertama selalu terasa mustahil sampai tiba-tiba terjadi. Ini roadmap realistis dari open mic gratis hingga dibayar untuk tampil.',
+'content'=>'# Cara Dapat Gig Pertama: Dari Open Mic ke Panggung Berbayar
+
+## Tahap 1: Open Mic (0 Pengalaman)
+
+Open mic adalah jalur masuk standar. Tidak perlu undangan atau booking fee — cukup daftar dan tampil.
+
+**Cara menemukan open mic:** Search hashtag #openmicJakarta (atau kotamu) di Instagram, grup Facebook komunitas musik lokal, atau datangi langsung kafe musik dan tanya jadwalnya.
+
+**Tujuan di open mic:** Bukan untuk mengesankan semua orang, tapi untuk berlatih tampil di depan orang asing, dapat video perform, dan bangun network sesama musisi.
+
+## Tahap 2: Gig Venue Kecil
+
+Setelah 2-5 open mic dengan video rekaman yang layak, mulai approach venue kecil.
+
+**Yang harus disiapkan:**
+- Setlist 30-45 menit (6-10 lagu)
+- Video rekaman live yang decent
+- Bio singkat 2-3 kalimat
+
+**Cara approach venue:** Datangi langsung di luar jam sibuk. Minta bicara dengan event organizer. Tunjukkan video dan tanya apakah ada slot available.
+
+Kirim via DM/email: perkenalan singkat + link video + tanggal available + tawaran fee yang fleksibel.
+
+**Fee realistis gig pertama:** Rp 150rb-500rb, atau kadang gratis dengan konsumsi ditanggung. Fokus pada pengalaman dan video dokumentasi dulu.
+
+## Tahap 3: Corporate dan Event (Setelah 10+ Gig)
+
+- **Wedding/acara keluarga:** Rp 1-5 juta per event (butuh repertoir luas)
+- **Corporate event:** Rp 3-15 juta (butuh press kit dan reputasi)
+- **Festival lokal:** Daftar via call for performer di sosmed organizer
+
+## Tips Dapat Gig Lebih Banyak
+
+- Dokumentasi setiap penampilan (foto, video)
+- Minta referral dari venue yang puas: "Ada venue lain yang cocok buat aku?"
+- Jadilah mudah diajak kerjasama: tepat waktu, tidak rewel, responsif
+
+**Red flags yang harus dihindari:** Diminta bayar untuk tampil ("exposure fee") — tidak pernah lakukan ini.'];
+
+$batch6[] = ['slug'=>'epk-musisi-pemula','title'=>'Buat EPK (Electronic Press Kit) yang Bikin Booker dan Media Tertarik','category'=>'karir','batch'=>6,'reading_time'=>10,
+'excerpt'=>'EPK adalah CV-nya musisi. Tanpa ini, peluangmu untuk dapat gig besar, liputan media, atau masuk festival nyaris nol.',
+'content'=>'# Buat EPK (Electronic Press Kit) yang Bikin Booker dan Media Tertarik
+
+EPK adalah paket informasi digital tentang dirimu sebagai artis — versi profesional dari "ini siapa aku dan kenapa kamu harus peduli."
+
+## Isi EPK yang Wajib Ada
+
+### 1. Bio Artis
+
+Dua versi:
+- **Short bio (50-100 kata):** Untuk caption, program acara, ringkasan cepat
+- **Long bio (200-400 kata):** Untuk feature media
+
+**Pembuka yang buruk:** "Nama saya X, musisi dari Y yang suka bermusik."
+**Pembuka yang kuat:** Langsung dengan nuansa musik dan apa yang membuatmu unik.
+
+### 2. Foto Artis
+
+Minimal 2-3 foto resolusi tinggi (2000px+): satu portrait bersih, satu foto aksi. Tidak perlu fotografer mahal — natural light dan HP kamera bagus sudah cukup.
+
+### 3. Musik
+
+Link ke 2-3 lagu terbaikmu di Spotify. Pilih yang paling representatif, bukan harus yang terbaru.
+
+### 4. Video Live
+
+Bukti bahwa kamu bisa perform. Kualitas audio decent lebih penting dari kualitas visual.
+
+### 5. Pencapaian
+
+Streaming milestones, media coverage, venue yang pernah diisi, kolaborasi notable. Kalau masih baru, jujur lebih baik dari mengada-ada.
+
+### 6. Kontak
+
+Email profesional, WhatsApp, link ke semua platform.
+
+## Format EPK
+
+- **PDF:** Buat di Canva, simpan sebagai PDF downloadable
+- **Link web:** Halaman khusus di website artismu (paling fleksibel)
+- **Google Drive:** Folder publik berisi semua aset
+
+## Cara Kirim EPK
+
+Jangan attach file di email pertama. Format email:
+
+> "Hei [nama], aku [artis], [genre] dari [kota]. Tertarik untuk [gig/feature]. EPK: [link]. Ada pertanyaan, senang diskusi."
+
+Update EPK setiap ada rilis baru, gig besar, atau pencapaian signifikan.'];
+
+$batch6[] = ['slug'=>'budget-rilis-pertama','title'=>'Berapa Budget untuk Rilis Lagu Pertama? Estimasi Lengkap','category'=>'karir','batch'=>6,'reading_time'=>9,
+'excerpt'=>'Rilis lagu tidak harus mahal — tapi kamu perlu tahu angka realistisnya. Dari rekaman hingga promosi, ini breakdown biaya yang jujur.',
+'content'=>'# Berapa Budget untuk Rilis Lagu Pertama? Estimasi Lengkap
+
+## Skenario 1: DIY Total (Rp 0 – 99rb)
+
+| Item | Biaya |
+|---|---|
+| Rekaman (rumah sendiri) | Rp 0 |
+| Mixing & Mastering (belajar sendiri) | Rp 0 |
+| Artwork (Canva gratis) | Rp 0 |
+| Distribusi (Netrilis gratis) | Rp 0 atau Rp 99rb |
+
+Kualitas mungkin belum optimal, tapi ini cara terbaik untuk belajar sekaligus rilis. Banyak artis mulai dari sini.
+
+## Skenario 2: Semi-Pro (Rp 700rb – 2,5 jt)
+
+| Item | Biaya Estimasi |
+|---|---|
+| Mixing profesional (freelancer lokal) | Rp 300rb – 1 jt |
+| Mastering (online service) | Rp 150rb – 500rb |
+| Cover art (desainer) | Rp 150rb – 500rb |
+| Distribusi (Netrilis/DistroKid) | Rp 99rb – 370rb |
+
+Sweet spot untuk musisi indie. Mixing profesional adalah investasi yang paling impactful.
+
+## Skenario 3: Studio Profesional (Rp 3 – 17 jt)
+
+| Item | Biaya Estimasi |
+|---|---|
+| Rekaman di studio | Rp 1 – 5 jt |
+| Mixing profesional | Rp 500rb – 2 jt |
+| Mastering profesional | Rp 300rb – 1 jt |
+| Foto artis | Rp 500rb – 2 jt |
+| Cover art | Rp 300rb – 1 jt |
+| Distribusi | Rp 99rb – 370rb |
+| Music video (opsional) | Rp 1 – 5 jt |
+
+## Biaya Promosi (Opsional)
+
+| Item | Biaya |
+|---|---|
+| Meta Ads (Instagram/Facebook) | Rp 100rb – 1 jt/bulan |
+| SubmitHub (pitch ke kurator playlist) | Rp 50rb – 300rb |
+
+## Prioritas Kalau Budget Terbatas
+
+Urutan investasi yang paling impactful:
+1. Mixing profesional
+2. Mastering
+3. Cover art yang bagus
+4. Distribusi berbayar (untuk 100% royalti)
+5. Promosi
+
+**Yang tidak perlu dibeli:** Label rekaman, "promotion packages" tidak jelas, atau playlist placement berbayar yang janji instant streams (99% scam).
+
+Rilis pertama tidak harus sempurna. Yang penting adalah rilis dan belajar dari prosesnya.'];
+
+$batch6[] = ['slug'=>'promosi-lagu-gratis','title'=>'9 Cara Promosi Lagu Gratis yang Benar-Benar Berhasil','category'=>'karir','batch'=>6,'reading_time'=>11,
+'excerpt'=>'Budget nol bukan alasan untuk tidak promosi. Ini 9 strategi gratis yang terbukti efektif untuk memperluas jangkauan musikmu.',
+'content'=>'# 9 Cara Promosi Lagu Gratis yang Benar-Benar Berhasil
+
+## 1. Optimasi Profil Spotify for Artists
+
+Sebelum promosi ke mana pun, pastikan basis rumahmu di Spotify solid: foto artis yang representatif, bio dalam dua bahasa, dan Canvas (video loop 3-8 detik saat lagu diputar). Canvas meningkatkan share rate — dan gratis.
+
+## 2. Pitch Playlist Editorial Spotify
+
+Cara paling impactful dan gratis. Lakukan lewat Spotify for Artists minimal 7 hari sebelum rilis. Tulis deskripsi lagu yang spesifik (bukan generik). Ditolak itu normal — coba lagi tiap rilis.
+
+## 3. Manfaatkan TikTok dengan Serius
+
+Algoritma TikTok paling demokratis saat ini — konten dari 0 followers bisa viral. Yang perform: behind the scenes rekaman, snippet hook lagu, POV + overlay lirik, storytelling di balik lagu. Konsistensi dan kecepatan publish lebih penting dari kesempurnaan produksi.
+
+## 4. Cover Lagu Populer dengan Twist-mu Sendiri
+
+Cover yang sedang trending mendatangkan listeners baru yang kemudian discover musik originalmu. Tambahkan sesuatu yang unik — versi akustik, genre switch, interpretasi berbeda.
+
+## 5. Submit ke Blog Musik dan Kurator Indie
+
+Banyak kurator playlist dan blog musik menerima submission gratis. Lihat deskripsi playlist Spotify — banyak yang cantumkan email submission. Selalu personalkan pesan, tidak pernah copy-paste ke semua.
+
+## 6. Bangun Komunitas, Bukan Sekadar Followers
+
+Balas setiap komentar di awal, buat polling tentang proses kreatif, share progress lagu yang belum jadi. Komunitas kecil yang engaged jauh lebih valuable dari following besar yang pasif.
+
+## 7. Cross-Promote dengan Sesama Artis
+
+Temukan artis di level yang sama dan saling support: share lagu masing-masing, kolaborasi konten, feature dalam playlist masing-masing. Win-win tanpa biaya.
+
+## 8. YouTube dengan SEO
+
+Upload lagu dengan judul yang orang cari: "[Judul Lagu] - [Artis] (Official Lyric Video)". Di deskripsi: lirik lengkap, link semua platform, kata kunci relevan. YouTube adalah mesin pencari nomor dua di dunia.
+
+## 9. Aktif di Komunitas Online
+
+Forum Reddit, grup Facebook musik Indonesia, Discord — jadilah anggota yang berkontribusi dulu sebelum share musik. Jangan langsung spam link lagumu.
+
+**Kunci:** Tidak ada satu strategi yang langsung viral. Yang berhasil adalah musisi yang melakukan 5-6 strategi di atas secara konsisten selama berbulan-bulan.'];
+
+$batch6[] = ['slug'=>'hak-cipta-lagu-indonesia','title'=>'Hak Cipta Lagu di Indonesia: Yang Wajib Diketahui Musisi Pemula','category'=>'karir','batch'=>6,'reading_time'=>10,
+'excerpt'=>'Lagumu dilindungi hak cipta sejak selesai dibuat — tapi banyak musisi tidak tahu cara melindungi dan menggunakannya dengan benar.',
+'content'=>'# Hak Cipta Lagu di Indonesia: Yang Wajib Diketahui Musisi Pemula
+
+Lagumu sudah dilindungi hak cipta sejak detik pertama selesai diciptakan. Tidak perlu mendaftar ke mana pun untuk perlindungan dasar. Tapi ada banyak hal yang perlu dipahami agar hakmu benar-benar aman.
+
+## Dasar Hukum
+
+Hak cipta di Indonesia diatur oleh UU No. 28 Tahun 2014 tentang Hak Cipta.
+
+Yang dilindungi dalam musik:
+- **Komposisi:** Melodi dan lirik lagu
+- **Rekaman:** Master recording (penampilan spesifik lagu tersebut)
+
+Keduanya adalah hak terpisah yang bisa dimiliki pihak berbeda.
+
+## Dua Jenis Hak
+
+**Hak Cipta Komposisi (Publishing Rights):** Melindungi melodi dan lirik. Pemilik: penulis lagu. Mencakup hak reproduksi, distribusi, pertunjukan, siaran, dan adaptasi.
+
+**Hak Cipta Rekaman (Master Rights):** Melindungi rekaman spesifik lagu. Pemilik: artis atau label yang membiayai produksi.
+
+Ini sumber konflik utama saat signing ke label — banyak label menuntut kepemilikan master.
+
+## Kapan Berlaku?
+
+Segera setelah karya diwujudkan dalam bentuk nyata (ditulis, direkam, dipublikasikan). Masa berlaku: seumur hidup pencipta + 70 tahun.
+
+## Pencatatan di DJKI (Direkomendasikan)
+
+Mendaftarkan karya ke DJKI (dgip.go.id) memberikan bukti hukum lebih kuat jika ada sengketa.
+
+1. Buka dgip.go.id → e-hakcipta
+2. Upload file audio/video
+3. Isi formulir: judul, jenis karya, tahun, identitas pencipta
+4. Bayar PNBP Rp 200-400rb
+5. Sertifikat hak cipta diterbitkan
+
+## Yang Sering Bikin Musisi Kena Masalah
+
+- **Sample tanpa izin:** Bahkan 2 detik pun bisa jadi pelanggaran
+- **Cover song tanpa keterangan di YouTube:** Bisa di-claim atau di-takedown
+- **Transfer hak tanpa kontrak tertulis:** Verbal agreement tidak cukup
+- **Tidak baca klausul kontrak label:** Beberapa kontrak mengambil hak master atau komposisi
+
+## Langkah Perlindungan Praktis
+
+1. Simpan semua draft dan rekaman awal (timestamp adalah bukti kepemilikan)
+2. Daftar ke DJKI untuk karya penting
+3. Daftar ke KCI/WAMI untuk collect royalti
+4. Buat kontrak tertulis untuk semua kolaborasi
+5. Pahami setiap klausul sebelum tanda tangan apapun
+
+Hak cipta adalah asetmu yang paling berharga. Lindungi dari awal.'];
+
+$batch6[] = ['slug'=>'cover-song-aturan','title'=>'Cover Song di Indonesia: Izin, Aturan, dan Cara Aman','category'=>'karir','batch'=>6,'reading_time'=>8,
+'excerpt'=>'Boleh tidak cover lagu orang? Boleh, tapi ada aturannya. Pelajari mana yang aman, mana yang bisa kena takedown, dan cara protect dirimu.',
+'content'=>'# Cover Song di Indonesia: Izin, Aturan, dan Cara Aman
+
+Cover lagu adalah strategi populer untuk menarik pendengar baru — dan juga salah satu area paling membingungkan soal hak cipta.
+
+## Dua Hak yang Terlibat
+
+Saat kamu cover sebuah lagu, ada dua hak yang terlibat:
+1. **Hak komposisi** (melodi + lirik) — milik penulis lagu/publisher
+2. **Hak master rekaman asli** — milik artis/label
+
+Saat kamu rekam cover versimu sendiri, hak master rekaman baru itu milikmu. Tapi kamu masih menggunakan komposisi orang lain, dan itu membutuhkan izin atau lisensi.
+
+## Cover di YouTube
+
+YouTube sudah punya perjanjian lisensi dengan sebagian besar publisher besar lewat Content ID.
+
+**Yang biasanya terjadi:** Content ID mendeteksi komposisi → publisher mengklaim video → monetisasi masuk ke mereka, bukan ke kamu → video tetap online.
+
+**Kapan bisa di-takedown:** Publisher memilih block alih-alih monetize, atau lagu tidak masuk database Content ID YouTube.
+
+**Yang harus dilakukan:** Cantumkan di deskripsi judul asli, penulis lagu, dan label/publisher.
+
+## Cover di Spotify
+
+Untuk memonetisasi cover song di Spotify, kamu perlu **lisensi mekanik**.
+
+**Cara paling mudah:** DistroKid punya fitur "Cover Song Licensing" — mereka bayar lisensi mekanik ke publisher, kamu upload, revenue dibagi. Biaya tambahan sekitar USD 12/tahun per lagu.
+
+**Lagu public domain** (hak cipta kadaluarsa, di Indonesia 70 tahun setelah pencipta meninggal): bebas di-cover tanpa lisensi.
+
+## Cover di TikTok dan Instagram
+
+Platform ini punya perjanjian lisensi dengan publisher — relatif aman dari takedown, tapi monetisasi mungkin ke publisher.
+
+**Yang selalu dihindari:** Pakai rekaman asli artis lain (bukan cover). Itu pelanggaran hak master.
+
+## Ringkasan
+
+| Platform | Boleh Cover? | Siapa Dapat Uang? |
+|---|---|---|
+| YouTube | Ya | Publisher bisa claim revenue |
+| Spotify | Ya (dengan lisensi) | Dibagi dengan publisher |
+| TikTok | Ya | Publisher dapat sebagian |
+
+Selalu cantumkan credit, jangan klaim sebagai karya original, dan pahami bahwa monetisasi mungkin tidak sepenuhnya milikmu.'];
+
+$batch6[] = ['slug'=>'tiktok-musisi-indonesia','title'=>'TikTok untuk Musisi Indonesia: Strategi yang Terbukti Berhasil','category'=>'karir','batch'=>6,'reading_time'=>12,
+'excerpt'=>'TikTok adalah platform discovery paling powerful untuk musisi saat ini. Tapi ada cara yang benar — dan cara yang langsung tenggelam di For You Page orang lain.',
+'content'=>'# TikTok untuk Musisi Indonesia: Strategi yang Terbukti Berhasil
+
+## Kenapa TikTok Berbeda
+
+Di Instagram atau YouTube, jangkauanmu sangat bergantung pada followers yang sudah ada. TikTok berbeda: algoritma For You Page mendistribusikan konten ke non-followers berdasarkan engagement. Video dari akun baru bisa mencapai ratusan ribu orang kalau kontennya resonan.
+
+## Yang Berhasil untuk Musisi di TikTok
+
+**Hook dalam 2-3 Detik Pertama:** Orang scroll sangat cepat. Langsung mulai dengan bagian lagu paling catchy, atau pertanyaan yang relatable.
+
+**Gunakan Lagumu sebagai Sound:** Upload lagu ke TikTok dan buat video yang menggunakan lagumu sebagai sound — ini membuat lagu bisa dipakai orang lain. Satu lagu yang viral sebagai sound bisa menghasilkan ribuan video organik.
+
+**Tipe Konten yang Perform:**
+
+- *Behind the scenes rekaman:* "Voice memo pertama lagu ini vs hasil akhirnya" — konsisten perform baik
+- *"Lagu ini tentang...":* Konteks personal di balik lagu. Kalau jujur dan spesifik, sangat resonan
+- *POV + Lirik:* Text overlay lirik paling emosional di atas video sederhana
+- *Proses nulis lagu live:* Momen menemukan melodi atau lirik yang pas
+
+**Waktu Posting Optimal untuk Indonesia:**
+- Pagi: 07.00-09.00
+- Siang: 12.00-13.00
+- Malam: 19.00-22.00
+
+## Hashtag untuk Musisi Indonesia
+
+`#musikindonesia #indiemusik #musikindie #laguindonesia #singersongwriter` + hashtag genre spesifik. Jangan lebih dari 5-7 hashtag.
+
+## Kesalahan Umum
+
+- **Hanya posting saat rilis lagu:** TikTok butuh konsistensi. Minimum 1-2x seminggu.
+- **Konten terlalu "artsy":** Yang raw dan authentic lebih perform dari produksi tinggi.
+- **Fokus pada follower count:** 1.000 fans yang benar-benar suka musikmu jauh lebih valuable dari 10.000 random followers.
+
+## Monetisasi yang Benar
+
+Pakai TikTok sebagai funnel — arahkan ke Spotify dan platform lain. Followers TikTok yang convert ke Spotify listener jauh lebih berharga dari TikTok coins.
+
+## Mindset
+
+TikTok adalah game jangka panjang. Yang berhasil adalah musisi yang konsisten posting minimal 3x seminggu, belajar dari analytics setiap video, dan tidak menyerah setelah 30 hari tanpa hasil besar.
+
+Satu video yang resonan bisa mengubah segalanya — tapi video itu biasanya datang setelah puluhan video yang tidak kemana-mana.'];
+
+foreach ($batch6 as $a) {
+    insertArticle($conn, $a);
+}
 } // end if tableExists articles
 
 // ── 10. Verifikasi akhir ──────────────────────────────────────────────────────
