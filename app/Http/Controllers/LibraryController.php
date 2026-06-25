@@ -2,41 +2,71 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Song;
+
 class LibraryController extends Controller
 {
-    private function songs(): array
-    {
-        return [
-            ['title' => 'Memang Begini',    'year' => 2026, 'genre' => 'Pop Rock',         'mood' => 'energetik',    'theme' => 'Penerimaan diri',             'spotify' => 'https://open.spotify.com/album/4UKrlbmAOePUkl5YAdwlDa'],
-            ['title' => 'Pantang Menyerah', 'year' => 2024, 'genre' => 'Rock Anthem',      'mood' => 'energetik',    'theme' => 'Kegigihan & perjuangan',      'spotify' => null],
-            ['title' => 'Cinta Sederhana',  'year' => 2023, 'genre' => 'Soft Rock',        'mood' => 'emosional',    'theme' => 'Cinta & kerentanan',          'spotify' => null],
-            ['title' => 'Musik & Doa',      'year' => 2023, 'genre' => 'Soul/Rock',        'mood' => 'spiritual',    'theme' => 'Iman, musik sebagai doa',     'spotify' => null],
-            ['title' => 'Bayangan Cahaya',  'year' => 2023, 'genre' => 'Electronic Pop',   'mood' => 'spiritual',    'theme' => 'Cahaya vs bayangan',          'spotify' => null],
-            ['title' => 'Langit Biru',      'year' => 2022, 'genre' => 'Pop Rock',         'mood' => 'energetik',    'theme' => 'Harapan & impian',            'spotify' => null],
-            ['title' => 'Tangan Tuhan',     'year' => 2022, 'genre' => 'Gospel Rock',      'mood' => 'spiritual',    'theme' => 'Intervensi ilahi',            'spotify' => null],
-            ['title' => 'Detak Jantung',    'year' => 2022, 'genre' => 'Alternative Rock', 'mood' => 'introspektif', 'theme' => 'Keaslian, denyut hidup',      'spotify' => null],
-            ['title' => 'Dua Hati',         'year' => 2021, 'genre' => 'Acoustic Pop',     'mood' => 'emosional',    'theme' => 'Dualitas perspektif',         'spotify' => null],
-            ['title' => 'Bulan Pagi',       'year' => 2021, 'genre' => 'Dream Pop',        'mood' => 'spiritual',    'theme' => 'Pagi & awal baru',            'spotify' => null],
-            ['title' => 'Kenangan Indah',   'year' => 2021, 'genre' => 'Indie Rock',       'mood' => 'introspektif', 'theme' => 'Memori & nostalgia',          'spotify' => null],
-            ['title' => 'Satu Langkah',     'year' => 2019, 'genre' => 'Acoustic Rock',    'mood' => 'energetik',    'theme' => 'Kemajuan & tekad',            'spotify' => null],
-            ['title' => 'Sepi Ramai',       'year' => 2019, 'genre' => 'Indie Pop',        'mood' => 'introspektif', 'theme' => 'Kontradiksi & keseimbangan',  'spotify' => null],
-            ['title' => 'Pulang',           'year' => 2020, 'genre' => 'Acoustic Ballad',  'mood' => 'emosional',    'theme' => 'Pulang & rasa memiliki',      'spotify' => null],
-            ['title' => 'Malam Gelap',      'year' => 2020, 'genre' => 'Indie Folk',       'mood' => 'introspektif', 'theme' => 'Kegelapan & introspeksi',     'spotify' => null],
-        ];
-    }
+    // Kurasi manual: genre, mood, theme per slug
+    // Update di sini kalau ada lagu baru atau ingin ubah mood/genre
+    private array $meta = [
+        'bersamamu'             => ['genre' => 'Acoustic Pop',   'mood' => 'emosional',    'theme' => 'Menemukan kebersamaan di tengah jarak'],
+        'peri-kecil'            => ['genre' => 'Indie Folk',     'mood' => 'emosional',    'theme' => 'Cerita cinta yang lembut dan tulus'],
+        'meski-tanpa-aku'       => ['genre' => 'Acoustic Ballad','mood' => 'emosional',    'theme' => 'Ikhlas melepas demi kebaikan orang lain'],
+        'sampai-lupa-mandi'     => ['genre' => 'Indie Pop',      'mood' => 'energetik',    'theme' => 'Jatuh cinta yang bikin lupa segalanya'],
+        'hanya-kau-satu'        => ['genre' => 'Pop Rock',       'mood' => 'emosional',    'theme' => 'Kesetiaan dan cinta yang tak tergantikan'],
+        'kawan-peri-kecil'      => ['genre' => 'Acoustic Pop',   'mood' => 'emosional',    'theme' => 'Persahabatan sejati yang menemani'],
+        'masihkah-ada'          => ['genre' => 'Indie Folk',     'mood' => 'introspektif', 'theme' => 'Kerinduan dan pertanyaan yang tersisa'],
+        'angan-tersisa'         => ['genre' => 'Acoustic Ballad','mood' => 'introspektif', 'theme' => 'Mimpi yang belum selesai, kenangan yang menggantung'],
+        'apa-kau-gila'          => ['genre' => 'Pop Rock',       'mood' => 'energetik',    'theme' => 'Kejutan dan keajaiban cinta'],
+        'dan-taklukan-duniamu'  => ['genre' => 'Rock Anthem',    'mood' => 'energetik',    'theme' => 'Semangat meraih mimpi dan menaklukkan dunia'],
+        'opo-kowe-ra-kroso'     => ['genre' => 'Jawa Pop',       'mood' => 'emosional',    'theme' => 'Rindu dan perasaan dalam bahasa Jawa'],
+        'selamat-ulang-tahun'   => ['genre' => 'Acoustic Pop',   'mood' => 'emosional',    'theme' => 'Ucapan penuh makna di hari yang berarti'],
+        'sadarkah-engkau'       => ['genre' => 'Indie Pop',      'mood' => 'introspektif', 'theme' => 'Permohonan untuk diperhatikan dan disadari'],
+        'renungkan-baiknya'     => ['genre' => 'Acoustic Folk',  'mood' => 'introspektif', 'theme' => 'Refleksi dan perenungan tentang kehidupan'],
+        'jiwaku'                => ['genre' => 'Pop Rock',       'mood' => 'emosional',    'theme' => 'Ungkapan terdalam dari dalam jiwa'],
+        'jiwaku-japanese-version' => ['genre' => 'J-Pop',        'mood' => 'emosional',    'theme' => 'Jiwaku dalam nuansa dan bahasa Jepang'],
+    ];
 
     public function index()
     {
-        $songs = $this->songs();
+        $dbSongs = Song::where('is_active', true)
+            ->orderBy('track_number')
+            ->orderBy('id')
+            ->get(['id', 'title', 'slug', 'spotify_url', 'story_hook', 'description', 'era']);
+
+        $songs = $dbSongs->map(function ($s) {
+            $meta = $this->meta[$s->slug] ?? ['genre' => 'Indie', 'mood' => 'emosional', 'theme' => ''];
+            $theme = $meta['theme'] ?: ($s->story_hook ?: $s->description ?: '');
+
+            // Tahun: ambil 4 digit dari era, fallback ke created_at
+            $year = '';
+            if ($s->era && preg_match('/\b(20\d{2})\b/', $s->era, $m)) {
+                $year = $m[1];
+            }
+
+            return [
+                'title'   => $s->title,
+                'slug'    => $s->slug,
+                'year'    => $year,
+                'genre'   => $meta['genre'],
+                'mood'    => $meta['mood'],
+                'theme'   => $theme,
+                'spotify' => $s->spotify_url ?: null,
+            ];
+        })->toArray();
+
         $moodLabels = [
             'energetik'    => 'Energetik',
             'emosional'    => 'Emosional',
             'introspektif' => 'Introspektif',
             'spiritual'    => 'Spiritual',
         ];
+
+        $genres = collect($songs)->pluck('genre')->unique()->count();
+
         $seo = [
             'title'       => 'Diskografi Margonoandi — Semua Lagu di Spotify & Apple Music',
-            'description' => 'Jelajahi semua lagu Margonoandi: pop rock, indie acoustic, gospel, electronic pop. Filter berdasarkan mood — energetik, emosional, introspektif, atau spiritual.',
+            'description' => 'Jelajahi semua lagu Margonoandi: pop rock, indie acoustic, Jawa pop, acoustic ballad. Filter berdasarkan mood — energetik, emosional, atau introspektif.',
             'url'         => url('/library'),
             'image'       => asset('images/Margonoandi.jpeg'),
             'schema'      => [
@@ -46,8 +76,8 @@ class LibraryController extends Controller
                         '@type'       => 'MusicGroup',
                         'name'        => 'Margonoandi',
                         'url'         => url('/library'),
-                        'description' => 'Musisi indie Indonesia dengan lagu pop rock, acoustic, gospel, dan electronic pop.',
-                        'genre'       => ['Pop Rock', 'Indie', 'Acoustic', 'Gospel Rock'],
+                        'description' => 'Musisi indie Indonesia dengan lagu pop rock, acoustic, Jawa pop, dan indie folk.',
+                        'genre'       => ['Pop Rock', 'Indie', 'Acoustic', 'Jawa Pop'],
                     ],
                     [
                         '@type'           => 'BreadcrumbList',
@@ -59,6 +89,7 @@ class LibraryController extends Controller
                 ],
             ],
         ];
-        return view('library.index', compact('songs', 'moodLabels', 'seo'));
+
+        return view('library.index', compact('songs', 'moodLabels', 'genres', 'seo'));
     }
 }
