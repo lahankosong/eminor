@@ -1800,6 +1800,7 @@ $check = [
     'band_posts'           => 'Cari Personil (band)',
     'gig_posts'            => 'Papan Gig / Manggung',
     'push_subscriptions'   => 'Web Push (notif Android)',
+    'articles'             => 'Materi Musik (21 artikel)',
 ];
 foreach ($check as $tbl => $label) {
     $exists = tableExists($conn, $dbname, $tbl);
