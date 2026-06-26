@@ -4,16 +4,19 @@
 @push('styles')
 <style>
     /* ===== LAYOUT ===== */
-    .mat-outer { max-width: 1160px; margin: 0 auto; padding: 1.5rem 1rem 5rem; }
+    /* Override lebar main agar 3-kolom tidak tercekik di 900px */
+    main:has(.mat-outer) { max-width: 1300px !important; }
+
+    .mat-outer { max-width: 1300px; margin: 0 auto; padding: 1.5rem 1.5rem 5rem; }
 
     .mat-layout {
         display: grid;
-        grid-template-columns: 200px 1fr 220px;
-        gap: 24px;
+        grid-template-columns: 185px minmax(0, 1fr) 210px;
+        gap: 28px;
         align-items: start;
     }
-    @media(max-width: 960px) { .mat-layout { grid-template-columns: 1fr 220px; } .mat-sidebar-left { display: none; } }
-    @media(max-width: 680px) { .mat-layout { grid-template-columns: 1fr; } .mat-sidebar-right { display: none; } }
+    @media(max-width: 1080px) { .mat-layout { grid-template-columns: 185px minmax(0, 1fr); } .mat-sidebar-right { display: none; } }
+    @media(max-width: 720px)  { .mat-layout { grid-template-columns: 1fr; } .mat-sidebar-left { display: none; } }
 
     .mat-back { display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--text-3);text-decoration:none;margin-bottom:1.25rem; }
     .mat-back:hover { color:var(--text); }

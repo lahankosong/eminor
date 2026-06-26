@@ -5,15 +5,17 @@
     :root { --ac:#38bdf8; --ac-dk:#0ea5e9; --ac-lt:rgba(56,189,248,.12); }
 
     /* ===== LAYOUT ===== */
-    .th-outer { max-width: 1000px; margin: 0 auto; padding: 1.75rem 1rem 4rem; }
+    main:has(.th-outer) { max-width: 1100px !important; }
+
+    .th-outer { max-width: 1100px; margin: 0 auto; padding: 1.75rem 1.5rem 4rem; }
 
     .th-layout {
         display: grid;
-        grid-template-columns: 1fr 220px;
+        grid-template-columns: minmax(0, 1fr) 210px;
         gap: 28px;
         align-items: start;
     }
-    @media(max-width: 768px) { .th-layout { grid-template-columns: 1fr; } .th-sidebar { display: none; } }
+    @media(max-width: 860px) { .th-layout { grid-template-columns: 1fr; } .th-sidebar { display: none; } }
 
     /* ===== HEADER ===== */
     .th-back { display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--text-3,#94a3b8);text-decoration:none;margin-bottom:1.25rem; }

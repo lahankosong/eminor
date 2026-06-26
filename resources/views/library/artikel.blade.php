@@ -4,15 +4,17 @@
 @push('styles')
 <style>
     /* ===== LAYOUT ===== */
-    .art-outer { max-width: 1000px; margin: 0 auto; padding: 1.5rem 1rem 5rem; }
+    main:has(.art-outer) { max-width: 1100px !important; }
+
+    .art-outer { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1.5rem 5rem; }
 
     .art-layout {
         display: grid;
-        grid-template-columns: 1fr 220px;
+        grid-template-columns: minmax(0, 1fr) 210px;
         gap: 32px;
         align-items: start;
     }
-    @media(max-width: 768px) { .art-layout { grid-template-columns: 1fr; } .art-sidebar { display: none; } }
+    @media(max-width: 860px) { .art-layout { grid-template-columns: 1fr; } .art-sidebar { display: none; } }
 
     .art-back { display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--text-3);text-decoration:none;margin-bottom:1.25rem; }
     .art-back:hover { color:var(--text); }
