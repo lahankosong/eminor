@@ -4,9 +4,7 @@
 @push('styles')
 <style>
     /* ===== LAYOUT ===== */
-    main:has(.art-outer) { max-width: 1100px !important; }
-
-    .art-outer { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1.5rem 5rem; }
+    .art-outer { max-width: 100%; padding: 1.5rem 0 5rem; }
 
     .art-layout {
         display: grid;

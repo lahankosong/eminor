@@ -225,7 +225,7 @@
 
         /* ===== MAIN ===== */
         main {
-            max-width: 900px; margin: 0 auto;
+            max-width: 1100px; margin: 0 auto;
             padding: 2rem 2rem 5rem;
             position: relative; z-index: 1;
         }
@@ -246,7 +246,7 @@
             padding: 2.5rem 2rem 2rem;
         }
         .footer-inner {
-            max-width: 900px; margin: 0 auto;
+            max-width: 1100px; margin: 0 auto;
             display: flex; flex-direction: column; align-items: center; gap: 1.25rem;
         }
         .footer-brand-label {

@@ -4,10 +4,10 @@
 @push('styles')
 <style>
     /* ===== LAYOUT ===== */
-    /* Override lebar main agar 3-kolom tidak tercekik di 900px */
-    main:has(.mat-outer) { max-width: 1300px !important; }
+    /* Override main hanya untuk halaman 3-kolom ini */
+    main:has(.mat-outer) { max-width: 1240px !important; }
 
-    .mat-outer { max-width: 1300px; margin: 0 auto; padding: 1.5rem 1.5rem 5rem; }
+    .mat-outer { max-width: 100%; padding: 1.5rem 0 5rem; }
 
     .mat-layout {
         display: grid;

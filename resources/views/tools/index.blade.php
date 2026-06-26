@@ -5,9 +5,7 @@
     :root { --ac:#38bdf8; --ac-dk:#0ea5e9; --ac-lt:rgba(56,189,248,.12); }
 
     /* ===== LAYOUT ===== */
-    main:has(.th-outer) { max-width: 1100px !important; }
-
-    .th-outer { max-width: 1100px; margin: 0 auto; padding: 1.75rem 1.5rem 4rem; }
+    .th-outer { max-width: 100%; padding: 1.75rem 0 4rem; }
 
     .th-layout {
         display: grid;
