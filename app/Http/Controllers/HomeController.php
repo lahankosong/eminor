@@ -127,7 +127,7 @@ class HomeController extends Controller
         $xml .= '  </url>' . "\n";
 
         // Tools publik (SEO): pemotong lagu + penghapus vokal — gratis, client-side
-        foreach (['tools.index', 'tools.potong-lagu', 'tools.hapus-vokal', 'tools.cover-art', 'tools.kartu-rilis', 'tools.countdown', 'tools.edit-metadata', 'tools.chord-builder', 'tools.bpm-kalkulator', 'tools.kalkulator-royalti', 'tools.rate-card', 'tools.transpose-kunci', 'tools.epk', 'tools.setlist', 'gig.board'] as $toolRoute) {
+        foreach (['tools.index', 'tools.potong-lagu', 'tools.hapus-vokal', 'tools.cover-art', 'tools.kartu-rilis', 'tools.countdown', 'tools.edit-metadata', 'tools.chord-builder', 'tools.bpm-kalkulator', 'tools.kalkulator-royalti', 'tools.rate-card', 'tools.transpose-kunci', 'tools.epk', 'tools.setlist', 'tools.release-planner', 'gig.board'] as $toolRoute) {
             try {
                 $xml .= '  <url>' . "\n";
                 $xml .= '    <loc>' . htmlspecialchars(route($toolRoute)) . '</loc>' . "\n";

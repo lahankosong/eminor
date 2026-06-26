@@ -1097,6 +1097,11 @@ try { if(localStorage.getItem('heroCollapsed')==='1') setHeroCollapsed(true, fal
                 <div class="fb-studio-t">Setlist Builder</div>
                 <div class="fb-studio-d">Susun setlist manggung, cetak PDF</div>
             </a>
+            <a href="{{ route('tools.release-planner') }}" class="fb-studio-card">
+                <div class="fb-studio-ic">📅</div>
+                <div class="fb-studio-t">Release Planner</div>
+                <div class="fb-studio-d">Jadwal promo rilis T-42 sampai T+28</div>
+            </a>
         </div>
     </div>
 

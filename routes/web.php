@@ -51,6 +51,7 @@ Route::get('/tools/rate-card', [ToolController::class, 'rateCard'])->name('tools
 Route::get('/tools/transpose-kunci', [ToolController::class, 'transposeKey'])->name('tools.transpose-kunci');
 Route::get('/tools/epk', [ToolController::class, 'epkGenerator'])->name('tools.epk');
 Route::get('/tools/setlist', [ToolController::class, 'setlistBuilder'])->name('tools.setlist');
+Route::get('/tools/release-planner', [ToolController::class, 'releasePlanner'])->name('tools.release-planner');
 
 // Gig Board publik — blur gate, apply wajib login
 Route::get('/gig', [GigPostController::class, 'publicBoard'])->name('gig.board');
