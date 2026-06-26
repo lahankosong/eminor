@@ -51,7 +51,8 @@ class ToolController extends Controller
             'potong-lagu', 'Pemotong Lagu',
             $this->appNode('Pemotong Lagu Online', $url, 'Potong bagian lagu favoritmu, gratis di browser tanpa upload.', 'MultimediaApplication')
         );
-        return view('tools.audio-cutter', compact('seo'));
+        $origin = 'Dulu saya mau potong bagian intro lagu untuk dikirim ke produser, tapi semua tool online minta upload file dulu — privacy risk. Jadi saya buat sendiri: potong langsung di browser, file tidak pernah keluar dari perangkatmu.';
+        return view('tools.audio-cutter', compact('seo', 'origin'));
     }
 
     public function vocalRemover()
@@ -63,7 +64,8 @@ class ToolController extends Controller
             'hapus-vokal', 'Hapus Vokal (Karaoke)',
             $this->appNode('Penghapus Vokal Online (Karaoke Maker)', $url, 'Hapus vokal lagu untuk karaoke/minus one, gratis di browser tanpa upload.', 'MultimediaApplication')
         );
-        return view('tools.vocal-remover', compact('seo'));
+        $origin = 'Saya butuh minus one lagu sendiri untuk latihan live, tapi tidak mau bayar $15/bulan hanya untuk satu fitur. Hasilnya: penghapus vokal berbasis AI langsung di browser, gratis, tanpa upload — dan ternyata banyak musisi lain yang butuh hal yang sama.';
+        return view('tools.vocal-remover', compact('seo', 'origin'));
     }
 
     public function coverMaker()
@@ -75,7 +77,8 @@ class ToolController extends Controller
             'cover-art', 'Buat Cover',
             $this->appNode('Cover Art Maker (Buat Cover Lagu)', $url, 'Buat cover art lagu/album 1:1 (3000px) untuk platform streaming, gratis tanpa upload.', 'DesignApplication')
         );
-        return view('tools.cover-maker', compact('seo'));
+        $origin = 'Lagu pertama yang saya upload ke Spotify ditolak karena cover art kurang dari 3000×3000px. Canva butuh langganan untuk export resolusi tinggi. Jadi saya buat tool ini: cover art 3000px, gratis, langsung di browser.';
+        return view('tools.cover-maker', compact('seo', 'origin'));
     }
 
     public function releaseCard()
@@ -87,7 +90,8 @@ class ToolController extends Controller
             'kartu-rilis', 'Kartu Promo Rilis',
             $this->appNode('Kartu Promo Rilis Lagu', $url, 'Buat kartu promo rilis & countdown lagu untuk media sosial, gratis tanpa upload.', 'DesignApplication')
         );
-        return view('tools.release-card', compact('seo'));
+        $origin = 'Waktu rilis single pertama saya, desainer grafis minta Rp 300rb hanya untuk bikin kartu "Out Now" di Instagram. Saya pikir: ini bisa dibuat sendiri. Tool ini lahir dari momen itu — sekarang kamu bisa buat kartu promo profesional dalam 2 menit, gratis.';
+        return view('tools.release-card', compact('seo', 'origin'));
     }
 
     public function countdown(Request $request)
@@ -116,7 +120,8 @@ class ToolController extends Controller
             );
         }
 
-        return view('tools.countdown', compact('seo', 'hasParams'));
+        $origin = 'Saya buat countdown untuk rilis single Bersamamu — link satu ini saya tempel di bio Instagram dan stories, jadi fans bisa hitung mundur bareng. Sekarang kamu bisa buat link serupa untuk rilismu sendiri, gratis, dalam hitungan detik.';
+        return view('tools.countdown', compact('seo', 'hasParams', 'origin'));
     }
 
     public function editMetadata()
@@ -128,7 +133,8 @@ class ToolController extends Controller
             'edit-metadata', 'Edit Metadata & WAV',
             $this->appNode('Edit Metadata MP3 & Konversi WAV', $url, 'Edit tag ID3 MP3 + tanam cover, atau konversi ke WAV lossless untuk agregator, gratis tanpa upload.', 'MultimediaApplication')
         );
-        return view('tools.edit-metadata', compact('seo'));
+        $origin = 'DistroKid menolak file saya karena metadata MP3-nya kosong. Saya tidak mau download software besar hanya untuk mengisi tag judul dan artis. Tool ini lahir dari frustrasi itu: edit metadata dan konversi ke WAV, langsung di browser, gratis.';
+        return view('tools.edit-metadata', compact('seo', 'origin'));
     }
 
     public function chordBuilder()
@@ -140,7 +146,8 @@ class ToolController extends Controller
             'chord-builder', 'Chord Builder',
             $this->appNode('Chord Progression Generator', $url, 'Generate 5 progresi chord berdasarkan key dan mood, gratis tanpa daftar.', 'EducationalApplication')
         );
-        return view('tools.chord-builder', compact('seo'));
+        $origin = 'Saya sering "stuck" saat nulis lagu — pakai I-IV-V terus terasa membosankan. Saya buat tool ini untuk eksplorasi progresi chord di luar zona nyaman. Sekarang saya minta progresi "key C, suasana melankolis" dan langsung dapat 5 pilihan siap dicoba.';
+        return view('tools.chord-builder', compact('seo', 'origin'));
     }
 
     public function bpmCalculator()
@@ -152,7 +159,8 @@ class ToolController extends Controller
             'bpm-kalkulator', 'BPM Calculator',
             $this->appNode('Kalkulator BPM & Tap Tempo', $url, 'Hitung BPM lagu dengan tap tempo, metronome visual, dan saran genre gratis.', 'MultimediaApplication')
         );
-        return view('tools.bpm-kalkulator', compact('seo'));
+        $origin = 'Saat kolaborasi dengan drummer, kami sering debat soal tempo. "Ini 90 atau 95 BPM?" — 15 menit diskusi, tidak produktif. Saya buat tap tempo ini agar semua orang bisa langsung ketuk dan tahu angka pastinya dalam 5 detik.';
+        return view('tools.bpm-kalkulator', compact('seo', 'origin'));
     }
 
     public function royaltyCalculator()
@@ -164,7 +172,8 @@ class ToolController extends Controller
             'kalkulator-royalti', 'Kalkulator Royalti',
             $this->appNode('Kalkulator Royalti Streaming Musik', $url, 'Estimasi pendapatan streaming dari berbagai platform musik, gratis tanpa daftar.', 'FinanceApplication')
         );
-        return view('tools.kalkulator-royalti', compact('seo'));
+        $origin = 'Saya penasaran: kalau lagu saya tembus 100K streams di Spotify, dapat berapa? Angka per-stream platform streaming memang kecil, tapi dengan tool ini kamu bisa hitung sendiri berapa target streams yang realistis untuk penghasilan tertentu.';
+        return view('tools.kalkulator-royalti', compact('seo', 'origin'));
     }
 
     public function hub()

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use App\Models\Song;
 use App\Models\SiteSetting;
 
@@ -99,7 +100,15 @@ class HomeController extends Controller
                 ])->values();
         } catch (\Throwable $e) {}
 
-        return view('home', compact('songs', 'featuredSong', 'ctaSongs', 'settings', 'seo', 'musicians'));
+        $previewPosts = collect();
+        try {
+            $previewPosts = Post::with('user')
+                ->latest()
+                ->take(3)
+                ->get();
+        } catch (\Throwable $e) {}
+
+        return view('home', compact('songs', 'featuredSong', 'ctaSongs', 'settings', 'seo', 'musicians', 'previewPosts'));
     }
 
     /** sitemap.xml dinamis: homepage + semua lagu aktif, termasuk image:image untuk Google Image. */

@@ -109,6 +109,15 @@
         margin-bottom: 2rem; line-height: 1.5;
     }
 
+    /* BRIDGE */
+    .bridge-section { padding: 2rem 2rem; }
+    .bridge-inner { max-width: 660px; margin: 0 auto; text-align: center; }
+    .bridge-text { font-size: 1rem; color: var(--text-2); line-height: 1.8; margin-bottom: 1.25rem; }
+    .bridge-text em { color: var(--text); font-style: normal; }
+    .bridge-text strong { color: var(--accent); font-weight: 700; }
+    .bridge-cta { display: inline-block; font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; border: 1px solid var(--accent-dim); border-radius: 24px; padding: 8px 20px; transition: .2s; }
+    .bridge-cta:hover { background: var(--accent-dim); }
+
     /* FEATURED */
     .featured-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; }
     .featured-player {
@@ -669,7 +678,7 @@
 <div class="aurora-bg" aria-hidden="true"><b class="a1"></b><b class="a2"></b><b class="a3"></b></div>
 
 {{-- HERO --}}
-<div class="hero collapsed" id="heroSection">
+<div class="hero" id="heroSection">
     <div class="hero-bg"></div>
     @if(file_exists(public_path('images/margonoandi.jpg')))
     <img src="{{ asset('images/margonoandi.jpg') }}" class="hero-photo" alt="Rakhman Andi">
@@ -681,9 +690,9 @@
                 <span>{{ $settings['artist_role'] ?? 'Songwriter' }}</span> ·
                 Project <span>{{ $settings['artist_project'] ?? 'Margonoandi' }}</span>
             </p>
-            <button class="hero-collapse" id="heroCollapse" onclick="toggleHero()" aria-expanded="false">Show &#9662;</button>
+            <button class="hero-collapse" id="heroCollapse" onclick="toggleHero()" aria-expanded="true">Sembunyikan &#9652;</button>
         </div>
-        <div class="hero-body hidden" id="heroBody">
+        <div class="hero-body" id="heroBody">
         <h1 class="hero-title">
             {{ $settings['tagline_1'] ?? 'Tiga chord.' }}<br>
             {{ $settings['tagline_2'] ?? 'Satu rindu.' }}<br>
@@ -730,10 +739,24 @@ function toggleHero(){
     setHeroCollapsed(collapsed, true);
     try { localStorage.setItem('heroCollapsed', collapsed ? '1' : '0'); } catch(e){}
 }
-try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, false); } catch(e){}
+try { if(localStorage.getItem('heroCollapsed')==='1') setHeroCollapsed(true, false); } catch(e){}
 </script>
 
 @php $fbEntry = auth()->check() ? route('aku') : route('google.login'); @endphp
+
+{{-- BRIDGE: Personal → Ecosystem --}}
+<div class="section bridge-section">
+    <div class="bridge-inner">
+        <p class="bridge-text">
+            Saya Rakhman Andi — musisi indie yang selama dua puluh tahun menulis lagu di kamar sendiri,
+            bingung bagaimana caranya <em>tumbuh</em> tanpa label, tanpa manajer, tanpa modal besar.
+            Dari kebingungan itu, saya bangun ini: sebuah ekosistem tempat musisi seperti kita
+            bisa saling menemukan, berbagi alat, dan membuktikan bahwa
+            <strong>kamar rekaman pun bisa melahirkan karir yang nyata.</strong>
+        </p>
+        <a href="{{ $fbEntry }}" class="bridge-cta">Bergabung sekarang — gratis selamanya</a>
+    </div>
+</div>
 
 {{-- FANBASE MOVEMENT / PROMO CTA --}}
 <div class="section fb-promo" id="fbPromoSection">
@@ -1076,6 +1099,84 @@ try { if(localStorage.getItem('heroCollapsed')==='0') setHeroCollapsed(false, fa
     <a href="{{ $fbEntry }}" class="btn-primary fb-promo-cta" style="margin-top:1rem;background:linear-gradient(135deg,#f59e0b,#ef4444);border:none;"
        @guest onclick="gtag && gtag('event', 'cta_click', {event_category:'engagement', button:'berani'})" @endguest
     >&#128293; Berani</a>
+</div>
+
+<hr class="divider">
+
+{{-- COMMUNITY PREVIEW (ghost mode — blur gate, konversi) --}}
+@php $previewPosts = $previewPosts ?? collect(); @endphp
+<style>
+    .cp-section { text-align:center; position:relative; }
+    .cp-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; max-width:860px; margin:1.5rem auto 0; position:relative; }
+    .cp-card { background:var(--card-bg); border:1px solid var(--border); border-radius:16px; padding:1.1rem 1.2rem; text-align:left; transition:border-color .2s; }
+    .cp-card-header { display:flex; align-items:center; gap:10px; margin-bottom:.75rem; }
+    .cp-av { width:38px; height:38px; border-radius:50%; object-fit:cover; border:1.5px solid var(--border); background:var(--accent-dim); }
+    .cp-av-placeholder { width:38px; height:38px; border-radius:50%; background:var(--accent-dim); display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; color:var(--accent); }
+    .cp-meta { flex:1; min-width:0; }
+    .cp-name { font-weight:600; font-size:13.5px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cp-time { font-size:11px; color:var(--text-3); margin-top:1px; }
+    .cp-body { font-size:13.5px; color:var(--text-2); line-height:1.6; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .cp-actions { display:flex; gap:14px; margin-top:.85rem; }
+    .cp-act { font-size:12px; color:var(--text-3); display:flex; align-items:center; gap:4px; }
+    /* blur gate overlay */
+    .cp-blur-overlay { position:absolute; bottom:0; left:0; right:0; height:220px; background:linear-gradient(to bottom, transparent, var(--bg) 75%); pointer-events:none; z-index:2; }
+    .cp-gate { position:relative; z-index:3; margin-top:-60px; padding-bottom:1.5rem; }
+    .cp-gate-cta { display:inline-flex; flex-direction:column; align-items:center; gap:.5rem; }
+    .cp-gate-label { font-size:13px; color:var(--text-3); }
+    .cp-ghost-card { filter:blur(4px); pointer-events:none; user-select:none; opacity:.6; }
+</style>
+<div class="section cp-section">
+    <p class="section-eyebrow">&#128172; Komunitas Aktif</p>
+    <p class="section-heading">Apa yang sedang dibahas</p>
+    <div class="cp-grid" id="cpGrid">
+        @forelse($previewPosts as $i => $post)
+        <div class="cp-card {{ $i >= 2 ? 'cp-ghost-card' : '' }}">
+            <div class="cp-card-header">
+                @if($post->user?->profile_photo_url ?? false)
+                    <img src="{{ $post->user->profile_photo_url }}" class="cp-av" alt="">
+                @else
+                    <div class="cp-av-placeholder">{{ strtoupper(substr($post->user?->name ?? '?', 0, 1)) }}</div>
+                @endif
+                <div class="cp-meta">
+                    <div class="cp-name">{{ $post->user?->name ?? 'Anggota' }}</div>
+                    <div class="cp-time">{{ $post->created_at->diffForHumans() }}</div>
+                </div>
+            </div>
+            <p class="cp-body">{{ $post->body }}</p>
+            <div class="cp-actions">
+                <span class="cp-act">&#10084;&#65039; {{ $post->likes_count ?? 0 }}</span>
+                <span class="cp-act">&#128172; {{ $post->comments_count ?? 0 }}</span>
+            </div>
+        </div>
+        @empty
+        {{-- Ghost placeholder cards if no posts yet --}}
+        @foreach([['Hei, ada yang udah coba chord builder-nya? Bagus banget buat nulis lagu di kamar', 4, 2], ['Lagi rekaman EP pertama nih, ada yang mau kolaborasi vokal? Genre indie pop.', 7, 5], ['Share dong tips mixing untuk home recording dengan budget minim!', 12, 8]] as $j => $ghost)
+        <div class="cp-card {{ $j >= 2 ? 'cp-ghost-card' : '' }}">
+            <div class="cp-card-header">
+                <div class="cp-av-placeholder">{{ ['M','R','A'][$j] }}</div>
+                <div class="cp-meta">
+                    <div class="cp-name">{{ ['Musisi Indie','Rocker Kamar','Andi R.'][$j] }}</div>
+                    <div class="cp-time">{{ [2,5,1][$j] }} jam lalu</div>
+                </div>
+            </div>
+            <p class="cp-body">{{ $ghost[0] }}</p>
+            <div class="cp-actions">
+                <span class="cp-act">&#10084;&#65039; {{ $ghost[1] }}</span>
+                <span class="cp-act">&#128172; {{ $ghost[2] }}</span>
+            </div>
+        </div>
+        @endforeach
+        @endforelse
+    </div>
+    @guest
+    <div class="cp-blur-overlay"></div>
+    <div class="cp-gate">
+        <div class="cp-gate-cta">
+            <span class="cp-gate-label">Masuk untuk ikut berdiskusi</span>
+            <a href="{{ route('google.login') }}" class="btn-primary" onclick="gtag && gtag('event','cta_click',{event_category:'engagement',button:'community_preview'})">Gabung — baca semua post</a>
+        </div>
+    </div>
+    @endguest
 </div>
 
 <hr class="divider">
