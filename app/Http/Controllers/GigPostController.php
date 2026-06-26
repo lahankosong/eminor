@@ -10,6 +10,41 @@ use Illuminate\Support\Str;
 
 class GigPostController extends Controller
 {
+    public function publicBoard(Request $request)
+    {
+        $type     = $request->query('type', '');
+        $location = trim((string) $request->query('kota', ''));
+
+        $query = GigPost::with('user')
+            ->where('status', 'open')
+            ->latest();
+
+        if ($type && array_key_exists($type, GigPost::types())) {
+            $query->where('type', $type);
+        }
+        if ($location !== '') {
+            $query->where('location', 'like', '%' . $location . '%');
+        }
+
+        $gigs = $query->take(20)->get();
+
+        $seo = [
+            'title'       => 'Papan Gig Musisi Indonesia — Audisi, Open Mic & Session Player',
+            'description' => 'Temukan gig, audisi band, open mic, dan peluang session player untuk musisi indie Indonesia. Gratis, diperbarui setiap hari.',
+            'url'         => url('/gig'),
+            'image'       => asset('images/Margonoandi.jpeg'),
+            'schema'      => [
+                '@context' => 'https://schema.org',
+                '@type'    => 'ItemList',
+                'name'     => 'Papan Gig Musisi Indonesia',
+                'url'      => url('/gig'),
+                'description' => 'Daftar peluang gig, audisi, dan session player untuk musisi indie Indonesia.',
+            ],
+        ];
+
+        return view('gig.board', compact('gigs', 'seo', 'type', 'location'));
+    }
+
     public function create()
     {
         return view('fanbase.gig.create', ['types' => GigPost::types()]);

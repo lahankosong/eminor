@@ -189,6 +189,32 @@ class ToolController extends Controller
         return view('tools.rate-card', compact('seo', 'origin'));
     }
 
+    public function transposeKey()
+    {
+        $url = url('/tools/transpose-kunci');
+        $seo = $this->toolSeo(
+            'Transpose Kunci Gitar Online Gratis — Pindah Kunci Chord Seketika',
+            'Pindah kunci chord gitar secara otomatis — tempel progresi chord, pilih kunci asal dan tujuan, langsung transposes. Gratis, di browser, tanpa daftar.',
+            'transpose-kunci', 'Transpose Kunci',
+            $this->appNode('Transpose Kunci Gitar Online', $url, 'Pindah kunci chord gitar otomatis, gratis di browser tanpa daftar.', 'EducationalApplication')
+        );
+        $origin = 'Saya sering dapat request lagu tapi kunci aslinya terlalu tinggi atau rendah untuk penyanyi. Daripada transpose manual satu per satu, saya buat tool ini — paste chord, pilih kunci tujuan, selesai dalam 3 detik.';
+        return view('tools.transpose-kunci', compact('seo', 'origin'));
+    }
+
+    public function epkGenerator()
+    {
+        $url = url('/tools/epk');
+        $seo = $this->toolSeo(
+            'EPK Generator Musisi — Buat Electronic Press Kit Gratis',
+            'Buat Electronic Press Kit (EPK) musisi yang profesional: bio, foto, link streaming, kontak. Download PDF atau share link langsung ke booker dan media. Gratis.',
+            'epk', 'EPK Generator',
+            $this->appNode('EPK Generator Musisi', $url, 'Buat press kit musisi profesional (bio, foto, streaming links, kontak) siap kirim ke booker & media, gratis.', 'UtilitiesApplication')
+        );
+        $origin = 'Pertama kali booker minta "kirim EPK kamu" — saya bingung apa itu. Setelah tahu, saya bingung lagi bagaimana bikinnya. Tool ini lahir dari momen itu: EPK musisi yang serius, selesai dalam 10 menit, tanpa bayar desainer.';
+        return view('tools.epk-generator', compact('seo', 'origin'));
+    }
+
     public function hub()
     {
         $tools = [
@@ -202,6 +228,8 @@ class ToolController extends Controller
             ['icon' => '🥁', 'name' => 'Kalkulator BPM & Tap Tempo', 'desc' => 'Ketuk ikuti ritme untuk tahu BPM + metronome visual.',           'route' => 'tools.bpm-kalkulator'],
             ['icon' => '💰', 'name' => 'Kalkulator Royalti Streaming','desc' => 'Estimasi pendapatan Spotify, Apple Music, YouTube, TikTok.',     'route' => 'tools.kalkulator-royalti'],
             ['icon' => '💼', 'name' => 'Rate Card Generator',         'desc' => 'Buat daftar harga jasa musik profesional siap share ke klien.',  'route' => 'tools.rate-card'],
+            ['icon' => '🔀', 'name' => 'Transpose Kunci Gitar',       'desc' => 'Pindah kunci chord otomatis — paste, pilih kunci, selesai.',        'route' => 'tools.transpose-kunci'],
+            ['icon' => '📄', 'name' => 'EPK Generator',               'desc' => 'Buat press kit musisi profesional siap kirim ke booker & media.',    'route' => 'tools.epk'],
         ];
         $items = [];
         foreach ($tools as $i => $t) {

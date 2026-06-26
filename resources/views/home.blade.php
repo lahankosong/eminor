@@ -1082,6 +1082,16 @@ try { if(localStorage.getItem('heroCollapsed')==='1') setHeroCollapsed(true, fal
                 <div class="fb-studio-t">Rate Card Generator</div>
                 <div class="fb-studio-d">Buat daftar harga jasa musik</div>
             </a>
+            <a href="{{ route('tools.transpose-kunci') }}" class="fb-studio-card">
+                <div class="fb-studio-ic">🔀</div>
+                <div class="fb-studio-t">Transpose Kunci</div>
+                <div class="fb-studio-d">Pindah kunci chord otomatis</div>
+            </a>
+            <a href="{{ route('tools.epk') }}" class="fb-studio-card">
+                <div class="fb-studio-ic">📄</div>
+                <div class="fb-studio-t">EPK Generator</div>
+                <div class="fb-studio-d">Buat press kit musisi profesional</div>
+            </a>
         </div>
     </div>
 

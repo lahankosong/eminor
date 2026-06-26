@@ -48,6 +48,11 @@ Route::get('/tools/chord-builder', [ToolController::class, 'chordBuilder'])->nam
 Route::get('/tools/bpm-kalkulator', [ToolController::class, 'bpmCalculator'])->name('tools.bpm-kalkulator');
 Route::get('/tools/kalkulator-royalti', [ToolController::class, 'royaltyCalculator'])->name('tools.kalkulator-royalti');
 Route::get('/tools/rate-card', [ToolController::class, 'rateCard'])->name('tools.rate-card');
+Route::get('/tools/transpose-kunci', [ToolController::class, 'transposeKey'])->name('tools.transpose-kunci');
+Route::get('/tools/epk', [ToolController::class, 'epkGenerator'])->name('tools.epk');
+
+// Gig Board publik — blur gate, apply wajib login
+Route::get('/gig', [GigPostController::class, 'publicBoard'])->name('gig.board');
 
 // Library (diskografi)
 Route::get('/library', [LibraryController::class, 'index'])->name('library');
