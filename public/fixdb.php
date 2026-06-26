@@ -2864,6 +2864,150 @@ foreach ($batch8 as $a) {
 }
 } // end if tableExists articles
 
+// ── 9w. Bot fields di users + tabel bot_activities ───────────────────────────
+echo '<h2>9w. Bot System (is_bot, bot_type, bot_activities)</h2>';
+
+// Kolom is_bot di users
+if (!columnExists($conn, $dbname, 'users', 'is_bot')) {
+    $q = "ALTER TABLE `users` ADD COLUMN `is_bot` TINYINT(1) NOT NULL DEFAULT 0 AFTER `remember_token`";
+    if (mysqli_query($conn, $q)) echo '<pre class="ok">✓ users.is_bot ditambahkan</pre>';
+    else echo '<pre class="err">✗ ' . mysqli_error($conn) . '</pre>';
+} else {
+    echo '<pre class="ok">✓ users.is_bot sudah ada</pre>';
+}
+
+// Kolom bot_type di users
+if (!columnExists($conn, $dbname, 'users', 'bot_type')) {
+    $q = "ALTER TABLE `users` ADD COLUMN `bot_type` VARCHAR(50) NULL AFTER `is_bot`";
+    if (mysqli_query($conn, $q)) echo '<pre class="ok">✓ users.bot_type ditambahkan</pre>';
+    else echo '<pre class="err">✗ ' . mysqli_error($conn) . '</pre>';
+} else {
+    echo '<pre class="ok">✓ users.bot_type sudah ada</pre>';
+}
+
+// Tabel bot_activities
+if (!tableExists($conn, $dbname, 'bot_activities')) {
+    $q = "CREATE TABLE `bot_activities` (
+        `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `user_id` BIGINT UNSIGNED NOT NULL,
+        `type` VARCHAR(100) NOT NULL,
+        `payload` JSON NULL,
+        `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT `bot_activities_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    if (mysqli_query($conn, $q)) echo '<pre class="ok">✓ Tabel bot_activities dibuat</pre>';
+    else echo '<pre class="err">✗ ' . mysqli_error($conn) . '</pre>';
+} else {
+    echo '<pre class="ok">✓ Tabel bot_activities sudah ada</pre>';
+}
+
+// Seed 5 bot musisi
+$bots = [
+    ['name'=>'Budi Prasetyo','email'=>'budi.drummer@margonoandi.bot','bot_type'=>'drummer',
+     'avatar'=>'https://ui-avatars.com/api/?name=Budi+Prasetyo&background=1e3a5f&color=38A8CC&size=128',
+     'roles'=>'Drummer,Perkusi','skill_level'=>'intermediate','location'=>'Yogyakarta','genres'=>'Rock,Pop,Indie',
+     'bio'=>'Drummer dengan 8 tahun pengalaman. Pernah manggung di berbagai event kampus dan kafe di Jogja. Bisa rekaman via Zoom/remote. Open kolaborasi!',
+     'post1'=>'Ada yang tau cara pitch lagu ke playlist Spotify editorial? Sudah 3 rilis tapi belum pernah masuk. Deadline-nya gimana?',
+     'post2'=>'Baru selesai rekaman EP pertama setelah setahun nulis lagu. Rasanya campur aduk antara senang dan takut. Ada yang mau dengerin dulu sebelum rilis? 🎵',
+     'gig_title'=>'Cari Drummer untuk Band Indie Pop Yogyakarta','gig_type'=>'audisi','gig_loc'=>'Yogyakarta',
+     'gig_desc'=>'Band indie pop asal Yogyakarta butuh drummer tetap. Sudah punya materi 8 lagu, rencana rekaman EP akhir tahun. Latihan rutin 1x seminggu di Sleman.'],
+    ['name'=>'Sari Dewi','email'=>'sari.vocalist@margonoandi.bot','bot_type'=>'vocalist',
+     'avatar'=>'https://ui-avatars.com/api/?name=Sari+Dewi&background=2d1b4e&color=a855f7&size=128',
+     'roles'=>'Vokalis,Penulis Lagu','skill_level'=>'advanced','location'=>'Jakarta Selatan','genres'=>'Pop,Soul,R&B',
+     'bio'=>'Penyanyi dan penulis lagu independen. Sudah rilis 2 EP di Spotify. Aktif mencari kolaborator untuk proyek akustik dan pop indie.',
+     'post1'=>'Tips untuk yang baru mau debut: jangan tunggu sempurna. Rilis dulu, perbaiki di rilis berikutnya. Perfectionism membunuh karya.',
+     'post2'=>'Siapa yang pakai DistroKid di sini? Gimana pengalamannya? Lagi banding-bandingan sama TuneCore sebelum rilis bulan depan.',
+     'gig_title'=>'Open Mic Kedai Musik — Jakarta Selatan','gig_type'=>'open_mic','gig_loc'=>'Jakarta Selatan',
+     'gig_desc'=>'Open mic rutin setiap Sabtu malam di Kedai Musik Kemang. Slot 10-15 menit, free entry untuk performer. Cocok untuk solo artist dan duo.'],
+    ['name'=>'Dimas Nugroho','email'=>'dimas.bassist@margonoandi.bot','bot_type'=>'bassist',
+     'avatar'=>'https://ui-avatars.com/api/?name=Dimas+Nugroho&background=1a3a2a&color=22c55e&size=128',
+     'roles'=>'Bassist,Gitaris','skill_level'=>'intermediate','location'=>'Bandung','genres'=>'Funk,Jazz,Indie',
+     'bio'=>'Bassist dan gitaris yang gemar eksperimen genre. Suka jam session dan rekaman bedroom. Sedang cari band untuk gig reguler di Bandung.',
+     'post1'=>'Open mic di Malioboro bulan depan — siapa yang mau gabung? Lagi nyari sesama musisi untuk kolaborasi sesi pendek.',
+     'post2'=>'Lagi nyari bassist untuk band indie pop di Yogyakarta. Kalau ada yang minat atau kenal siapa, tag di sini ya!',
+     'gig_title'=>'Session Bassist untuk Rekaman EP','gig_type'=>'session','gig_loc'=>'Bandung',
+     'gig_desc'=>'Butuh session bassist untuk rekaman EP 5 lagu genre folk-pop. Bisa remote (file exchange) atau langsung di studio Bandung. Budget ada.'],
+    ['name'=>'Reni Kusuma','email'=>'reni.keys@margonoandi.bot','bot_type'=>'keyboardist',
+     'avatar'=>'https://ui-avatars.com/api/?name=Reni+Kusuma&background=3a1a1a&color=f97316&size=128',
+     'roles'=>'Keyboardist,Pianis','skill_level'=>'advanced','location'=>'Solo','genres'=>'Classical,Pop,Jazz',
+     'bio'=>'Pianis klasik yang beralih ke pop dan jazz modern. Lulusan ISI Surakarta. Tersedia untuk session recording, wedding, dan event korporat.',
+     'post1'=>'Baru tahu ternyata ada alat transpose kunci gratis di sini. Game changer buat yang sering dapat request lagu tapi kuncinya beda 😅',
+     'post2'=>'Pertanyaan buat yang sudah pernah manggung berbayar: berapa rate kalian untuk wedding? Masih bingung nentuin harga.',
+     'gig_title'=>'Cari Vokalis Wanita untuk Duo Akustik','gig_type'=>'audisi','gig_loc'=>'Yogyakarta',
+     'gig_desc'=>'Gitaris/penulis lagu cari vokalis wanita untuk proyek duo akustik. Genre: indie folk, acoustic pop. Target: manggung di kafe dan event kecil di Jogja-Solo.'],
+    ['name'=>'Andi Wahyu','email'=>'andi.producer@margonoandi.bot','bot_type'=>'producer',
+     'avatar'=>'https://ui-avatars.com/api/?name=Andi+Wahyu&background=1a2a3a&color=f59e0b&size=128',
+     'roles'=>'Produser,Sound Engineer','skill_level'=>'advanced','location'=>'Surabaya','genres'=>'Electronic,Indie,Hip-Hop',
+     'bio'=>'Music producer dan sound engineer dengan home studio lengkap. Sudah handle produksi untuk 20+ artis indie. Terbuka untuk kolaborasi online maupun offline.',
+     'post1'=>'Ada yang tau cara pitch lagu ke playlist Spotify editorial? Sudah 3 rilis tapi belum pernah masuk.',
+     'post2'=>'Tips: investasi di acoustic treatment dulu sebelum beli mic mahal. Suara kamar > harga mic 90% of the time.',
+     'gig_title'=>null,'gig_type'=>null,'gig_loc'=>null,'gig_desc'=>null],
+];
+
+foreach ($bots as $bot) {
+    $n  = mysqli_real_escape_string($conn, $bot['name']);
+    $e  = mysqli_real_escape_string($conn, $bot['email']);
+    $bt = mysqli_real_escape_string($conn, $bot['bot_type']);
+    $av = mysqli_real_escape_string($conn, $bot['avatar']);
+    $pw = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
+    $pw = mysqli_real_escape_string($conn, $pw);
+
+    // Upsert user
+    $r = mysqli_query($conn, "SELECT id FROM `users` WHERE `email`='$e' LIMIT 1");
+    if ($r && mysqli_num_rows($r) > 0) {
+        $uid = (int) mysqli_fetch_assoc($r)['id'];
+        mysqli_query($conn, "UPDATE `users` SET `is_bot`=1,`bot_type`='$bt' WHERE `id`=$uid");
+        echo '<pre class="ok">✓ Bot sudah ada: ' . htmlspecialchars($bot['name']) . '</pre>';
+    } else {
+        mysqli_query($conn, "INSERT INTO `users` (`name`,`email`,`password`,`avatar`,`is_bot`,`bot_type`,`email_verified_at`,`created_at`,`updated_at`)
+            VALUES ('$n','$e','$pw','$av',1,'$bt',NOW(),NOW(),NOW())");
+        $uid = (int) mysqli_insert_id($conn);
+        echo '<pre class="ok">✓ Bot dibuat: ' . htmlspecialchars($bot['name']) . ' (id='.$uid.')</pre>';
+    }
+
+    if (!$uid) continue;
+
+    // Upsert musician profile
+    $roles = mysqli_real_escape_string($conn, $bot['roles']);
+    $sl    = mysqli_real_escape_string($conn, $bot['skill_level']);
+    $loc   = mysqli_real_escape_string($conn, $bot['location']);
+    $gen   = mysqli_real_escape_string($conn, $bot['genres']);
+    $bio   = mysqli_real_escape_string($conn, $bot['bio']);
+    $rmp = mysqli_query($conn, "SELECT id FROM `musician_profiles` WHERE `user_id`=$uid LIMIT 1");
+    if ($rmp && mysqli_num_rows($rmp) > 0) {
+        mysqli_query($conn, "UPDATE `musician_profiles` SET `roles`='$roles',`skill_level`='$sl',`location`='$loc',`genres`='$gen',`bio`='$bio',`is_active`=1 WHERE `user_id`=$uid");
+    } else {
+        mysqli_query($conn, "INSERT INTO `musician_profiles` (`user_id`,`roles`,`skill_level`,`location`,`genres`,`bio`,`is_active`,`created_at`,`updated_at`)
+            VALUES ($uid,'$roles','$sl','$loc','$gen','$bio',1,NOW(),NOW())");
+    }
+
+    // Posts
+    foreach ([$bot['post1'], $bot['post2']] as $postBody) {
+        if (!$postBody) continue;
+        $pb = mysqli_real_escape_string($conn, $postBody);
+        $rp = mysqli_query($conn, "SELECT id FROM `posts` WHERE `user_id`=$uid AND `body`='$pb' LIMIT 1");
+        if (!$rp || mysqli_num_rows($rp) === 0) {
+            mysqli_query($conn, "INSERT INTO `posts` (`user_id`,`body`,`created_at`,`updated_at`) VALUES ($uid,'$pb',NOW(),NOW())");
+        }
+    }
+
+    // Gig post
+    if ($bot['gig_title']) {
+        $gt  = mysqli_real_escape_string($conn, $bot['gig_title']);
+        $gtp = mysqli_real_escape_string($conn, $bot['gig_type']);
+        $gl  = mysqli_real_escape_string($conn, $bot['gig_loc']);
+        $gd  = mysqli_real_escape_string($conn, $bot['gig_desc']);
+        $rg = mysqli_query($conn, "SELECT id FROM `gig_posts` WHERE `user_id`=$uid AND `title`='$gt' LIMIT 1");
+        if (!$rg || mysqli_num_rows($rg) === 0) {
+            mysqli_query($conn, "INSERT INTO `gig_posts` (`user_id`,`title`,`type`,`description`,`location`,`status`,`created_at`,`updated_at`)
+                VALUES ($uid,'$gt','$gtp','$gd','$gl','open',NOW(),NOW())");
+        }
+    }
+}
+
+markMigration($conn, '2026_06_26_000001_add_bot_fields_to_users_table');
+markMigration($conn, '2026_06_26_000002_create_bot_activities_table');
+
 // ── 10. Verifikasi akhir ──────────────────────────────────────────────────────
 echo '<h2>10. Verifikasi Tabel Kritis</h2>';
 $check = [
@@ -2882,6 +3026,7 @@ $check = [
     'gig_posts'            => 'Papan Gig / Manggung',
     'push_subscriptions'   => 'Web Push (notif Android)',
     'articles'             => 'Materi Musik (31 artikel, 7 batch)',
+    'bot_activities'       => 'Bot activities log',
 ];
 foreach ($check as $tbl => $label) {
     $exists = tableExists($conn, $dbname, $tbl);
@@ -2897,6 +3042,9 @@ foreach ($check as $tbl => $label) {
 // Cek kolom users
 $hasCols = columnExists($conn, $dbname, 'users', 'last_seen') && columnExists($conn, $dbname, 'users', 'is_online');
 echo '<pre>' . ($hasCols ? '<span class="ok">&#10003;</span>' : '<span class="err">&#10060;</span>') . ' users.last_seen &amp; users.is_online — Status online</pre>';
+
+$hasBotCols = columnExists($conn, $dbname, 'users', 'is_bot') && columnExists($conn, $dbname, 'users', 'bot_type');
+echo '<pre>' . ($hasBotCols ? '<span class="ok">&#10003;</span>' : '<span class="err">&#10060;</span>') . ' users.is_bot &amp; users.bot_type — Bot system</pre>';
 
 mysqli_close($conn);
 
