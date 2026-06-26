@@ -64,7 +64,7 @@
     {{-- FILTER --}}
     <div class="gb-filter">
         <a href="{{ route('gig.board') }}" class="gb-filter-chip {{ $type === '' ? 'active' : '' }}">Semua</a>
-        @foreach(GigPost::types() as $key => $label)
+        @foreach(\App\Models\GigPost::types() as $key => $label)
         <a href="{{ route('gig.board', ['type' => $key]) }}" class="gb-filter-chip {{ $type === $key ? 'active' : '' }}">{{ $label }}</a>
         @endforeach
         <form method="GET" action="{{ route('gig.board') }}" style="display:flex;align-items:center;gap:6px;">
@@ -92,7 +92,7 @@
         @php $blurred = $isGuest && $i >= 3; @endphp
         <div class="gb-card {{ $blurred ? 'gb-blur' : '' }}">
             <div class="gb-card-top">
-                <span class="gb-type-badge">{{ GigPost::typeLabel($gig->type) }}</span>
+                <span class="gb-type-badge">{{ \App\Models\GigPost::typeLabel($gig->type) }}</span>
                 <div class="gb-card-title">{{ $gig->title }}</div>
             </div>
             <div class="gb-meta">
