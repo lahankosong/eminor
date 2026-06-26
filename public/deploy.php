@@ -1,20 +1,21 @@
 <?php
 /**
- * Deploy script — download ZIP dari GitHub dan update file project
- * Akses: https://margonoandi.my.id/deploy.php?key=<DEPLOY_KEY>&run=1
- * Kunci dibaca dari .env (DEPLOY_KEY), TIDAK di-hardcode di sini.
+ * Deploy script — tarik update terbaru dari GitHub via `git pull` + bersihkan & cache ulang Laravel.
+ * Akses: https://margonoandi.my.id/deploy.php?key=<DEPLOY_KEY>            (halaman konfirmasi)
+ *        https://margonoandi.my.id/deploy.php?key=<DEPLOY_KEY>&run=1      (jalankan deploy)
+ *        https://margonoandi.my.id/deploy.php?key=<DEPLOY_KEY>&diag=1     (diagnostik DB saja)
+ *
+ * Kunci dibaca dari .env (DEPLOY_KEY), TIDAK di-hardcode.
+ * Script ini TIDAK menjalankan migrasi DB — kalau ada tabel/kolom baru, jalankan fixdb.php sesudahnya.
  */
 
-$github  = 'https://github.com/lahankosong/margonoandi-fanbase/archive/refs/heads/main.zip';
-$base    = realpath(__DIR__ . '/../');
-$tmp_zip = sys_get_temp_dir() . '/fanbase_deploy.zip';
-$tmp_dir = sys_get_temp_dir() . '/fanbase_extracted';
+@set_time_limit(180);
 
-$preserve = ['vendor', '.env', 'storage', 'node_modules', '.git', 'public/deploy.php'];
+$base    = realpath(__DIR__ . '/../');
+$envFile = $base . '/.env';
 
 // Kunci deploy dibaca dari .env (DEPLOY_KEY) — tolak jika belum diset / salah
 $secret = '';
-$envFile = $base . '/.env';
 if (is_file($envFile)) {
     foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
         $line = trim($line);
@@ -27,6 +28,7 @@ if ($secret === '' || !hash_equals($secret, (string) ($_GET['key'] ?? ''))) {
     die('403 Forbidden — DEPLOY_KEY belum diset di .env atau kunci salah.');
 }
 
+header('Content-Type: text/html; charset=UTF-8');
 echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Deploy</title>
 <style>
 *{box-sizing:border-box}
@@ -34,7 +36,7 @@ body{font-family:monospace;background:#0b1520;color:#e8f4fa;padding:2rem;max-wid
 h1{color:#38A8CC;margin-bottom:.25rem}
 .subtitle{color:#7A9DB0;font-size:12px;margin-bottom:1.5rem}
 h2{color:#F07040;margin:1.5rem 0 .4rem;font-size:14px;border-bottom:1px solid rgba(240,112,64,.2);padding-bottom:4px}
-pre{background:#0f1e2e;border:1px solid rgba(56,168,204,.2);padding:.75rem;border-radius:8px;white-space:pre-wrap;word-break:break-all;margin:4px 0;font-size:12px}
+pre{background:#0f1e2e;border:1px solid rgba(56,168,204,.2);padding:.75rem;border-radius:8px;white-space:pre-wrap;word-break:break-word;margin:4px 0;font-size:12px}
 .ok{color:#4ade80}.err{color:#f87171}.info{color:#7A9DB0}.warn{color:#facc15}
 .badge-ok{display:inline-block;background:#14532d;color:#4ade80;padding:1px 8px;border-radius:4px;font-size:11px}
 .badge-err{display:inline-block;background:#450a0a;color:#f87171;padding:1px 8px;border-radius:4px;font-size:11px}
@@ -45,9 +47,12 @@ th{background:rgba(56,168,204,.1);color:#38A8CC}
 tr:nth-child(even) td{background:rgba(255,255,255,.02)}
 .alert{margin-top:1.5rem;border:1px solid #F07040;padding:.75rem 1rem;border-radius:8px;background:rgba(240,112,64,.05)}
 a.btn{color:#fff;background:#38A8CC;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:1rem;display:inline-block;margin-top:1rem}
+a{color:#38A8CC}
 </style></head><body>
 <h1>&#128640; Deploy — Margonoandi Fanbase</h1>
-<div class="subtitle">Server: ' . htmlspecialchars($base) . '</div>';
+<div class="subtitle">Server: ' . htmlspecialchars($base) . ' &nbsp;|&nbsp; Metode: git pull origin main</div>';
+
+$keyEnc = urlencode($secret);
 
 // ── Mode: Diagnostik saja ─────────────────────────────────────────────────────
 if (isset($_GET['diag'])) {
@@ -56,160 +61,78 @@ if (isset($_GET['diag'])) {
     echo '</body></html>'; exit;
 }
 
-// ── Halaman awal ──────────────────────────────────────────────────────────────
+// ── Halaman awal (konfirmasi) ─────────────────────────────────────────────────
 if (!isset($_GET['run'])) {
     echo '<h2>Info</h2>
-    <pre class="info">GitHub  : lahankosong/margonoandi-fanbase (branch: main)
-Preserve: ' . implode(', ', $preserve) . '</pre>
-    <br>
-    <a href="?key=' . $secret . '&run=1" class="btn">&#9654; Mulai Deploy</a>
+    <pre class="info">Repo    : lahankosong/margonoandi-fanbase (branch: main)
+Aksi    : git pull origin main, lalu clear &amp; cache ulang (config/route/view/cache)
+DB      : TIDAK disentuh — jalankan fixdb.php bila ada migrasi baru</pre>
+    <a href="?key=' . $keyEnc . '&run=1" class="btn">&#9654; Mulai Deploy</a>
     &nbsp;&nbsp;
-    <a href="?key=' . $secret . '&diag=1" style="color:#38A8CC;text-decoration:none;padding:10px 20px;border:1px solid #38A8CC;border-radius:8px;display:inline-block;margin-top:1rem">&#128203; Diagnostik Saja</a>';
-    echo '<div class="alert warn">&#9888;&#65039; Pastikan sudah push ke GitHub sebelum deploy.</div>';
+    <a href="?key=' . $keyEnc . '&diag=1" style="color:#38A8CC;text-decoration:none;padding:10px 20px;border:1px solid #38A8CC;border-radius:8px;display:inline-block;margin-top:1rem">&#128203; Diagnostik Saja</a>
+    <div class="alert warn">&#9888;&#65039; Pastikan perubahan sudah di-push ke GitHub sebelum deploy.</div>';
     echo '</body></html>'; exit;
 }
 
-// ── Step 1: Download ZIP ──────────────────────────────────────────────────────
-echo '<h2>1. Download dari GitHub</h2>'; flush();
-
-$ctx = stream_context_create(['http' => ['timeout' => 60, 'follow_location' => true, 'user_agent' => 'Mozilla/5.0']]);
-$zip_data = @file_get_contents($github, false, $ctx);
-
-if (!$zip_data) {
-    echo '<pre class="err">&#10060; Gagal download. Cek koneksi atau URL GitHub.</pre>';
+// ── Cek exec() tersedia ───────────────────────────────────────────────────────
+$disabled = array_map('trim', explode(',', (string) ini_get('disable_functions')));
+if (!function_exists('exec') || in_array('exec', $disabled, true)) {
+    echo '<pre class="err">&#10060; Fungsi exec() dinonaktifkan di hosting ini. '
+       . 'Aktifkan exec di pengaturan PHP cPanel, atau jalankan git pull manual via Terminal/SSH.</pre>';
     echo '</body></html>'; exit;
 }
-file_put_contents($tmp_zip, $zip_data);
-echo '<pre class="ok">&#10003; Download selesai (' . round(strlen($zip_data) / 1024) . ' KB)</pre>';
 
-// ── Step 2: Extract ZIP ───────────────────────────────────────────────────────
-echo '<h2>2. Extract ZIP</h2>'; flush();
-
-if (is_dir($tmp_dir)) {
-    $iter = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($tmp_dir, FilesystemIterator::SKIP_DOTS),
-        RecursiveIteratorIterator::CHILD_FIRST
-    );
-    foreach ($iter as $f) $f->isDir() ? rmdir($f) : unlink($f);
-    rmdir($tmp_dir);
+/** Jalankan perintah shell, tampilkan output + exit code. Return true bila exit 0. */
+function runCmd(string $label, string $cmd): bool {
+    echo '<h2>' . htmlspecialchars($label) . '</h2>'; flush();
+    $out = []; $code = 0;
+    exec($cmd . ' 2>&1', $out, $code);
+    $text = trim(implode("\n", $out));
+    if ($text === '') $text = '(tanpa output)';
+    $cls  = $code === 0 ? 'ok' : 'err';
+    $mark = $code === 0 ? '&#10003;' : '&#10060;';
+    echo '<pre class="' . $cls . '">' . $mark . ' exit=' . (int) $code . '</pre>';
+    echo '<pre class="info">' . htmlspecialchars($text) . '</pre>'; flush();
+    return $code === 0;
 }
 
-$zip = new ZipArchive();
-if ($zip->open($tmp_zip) !== true) {
-    echo '<pre class="err">&#10060; Gagal buka ZIP.</pre>';
-    echo '</body></html>'; exit;
-}
-$zip->extractTo($tmp_dir);
-$zip->close();
+$baseArg = escapeshellarg($base);
 
-$extracted = glob($tmp_dir . '/*/');
-$src = $extracted[0] ?? $tmp_dir;
-echo '<pre class="ok">&#10003; Extract ke: ' . $src . '</pre>';
-
-// ── Step 3: Copy files ────────────────────────────────────────────────────────
-echo '<h2>3. Copy File ke Project</h2>'; flush();
-
-$copied = 0; $skipped = 0;
-
-function shouldPreserve($relPath, $preserveList) {
-    foreach ($preserveList as $p) {
-        if ($relPath === $p || str_starts_with($relPath, $p . '/') || str_starts_with($relPath, $p . DIRECTORY_SEPARATOR))
-            return true;
-    }
-    return false;
+// ── Step 1: git pull ──────────────────────────────────────────────────────────
+// safe.directory='*' mencegah error "dubious ownership" yang umum di shared hosting.
+$gitOk = runCmd(
+    '1. git pull origin main',
+    'cd ' . $baseArg . ' && git -c safe.directory=' . escapeshellarg('*') . ' pull origin main'
+);
+if (!$gitOk) {
+    echo '<pre class="warn">&#9888; git pull gagal. Cek: folder ini hasil clone git? binari git tersedia? '
+       . 'ada perubahan lokal yang menghalangi (jalankan: git status)?</pre>';
 }
 
-function copyDir($src, $dst, $base_src, $preserve, &$copied, &$skipped) {
-    if (!is_dir($dst)) mkdir($dst, 0755, true);
-    foreach (scandir($src) as $item) {
-        if ($item === '.' || $item === '..') continue;
-        $rel  = ltrim(str_replace($base_src, '', $src . '/' . $item), '/');
-        $from = $src . '/' . $item;
-        $to   = $dst . '/' . $item;
-        if (shouldPreserve($rel, $preserve)) { $skipped++; continue; }
-        if (is_dir($from)) copyDir($from, $to, $base_src, $preserve, $copied, $skipped);
-        else { copy($from, $to); $copied++; }
-    }
-}
+// ── Step 2: Bersihkan & cache ulang (tanpa migrate) ──────────────────────────
+$php     = PHP_BINARY ?: 'php';
+if (!empty($_GET['php'])) $php = $_GET['php'];                  // override: ?php=/path/ke/php
+$artisan = escapeshellarg($php) . ' ' . escapeshellarg($base . '/artisan');
 
-copyDir(rtrim($src, '/'), $base, rtrim($src, '/'), $preserve, $copied, $skipped);
-echo '<pre class="ok">&#10003; File di-copy: ' . $copied . '   |   Dilewati (aman): ' . $skipped . ' (vendor, .env, storage)</pre>';
+runCmd('2a. config:clear', 'cd ' . $baseArg . ' && ' . $artisan . ' config:clear');
+runCmd('2b. cache:clear',  'cd ' . $baseArg . ' && ' . $artisan . ' cache:clear');
+runCmd('2c. view:clear',   'cd ' . $baseArg . ' && ' . $artisan . ' view:clear');
+runCmd('2d. route:clear',  'cd ' . $baseArg . ' && ' . $artisan . ' route:clear');
+runCmd('2e. config:cache', 'cd ' . $baseArg . ' && ' . $artisan . ' config:cache');
+runCmd('2f. route:cache',  'cd ' . $baseArg . ' && ' . $artisan . ' route:cache');
 
-// ── Step 4: Cleanup ───────────────────────────────────────────────────────────
-@unlink($tmp_zip);
-echo '<h2>4. Cleanup &#10003;</h2><pre class="ok">Temp files dihapus.</pre>'; flush();
-
-// ── Step 5: Artisan Commands ──────────────────────────────────────────────────
-echo '<h2>5. Artisan Commands</h2>'; flush();
-
-$php    = PHP_BINARY ?: 'php';
-$artisan = escapeshellarg($base . '/artisan');
-
-$commands = [
-    'migrate --force' => 'Jalankan semua migration baru',
-    'config:clear'    => 'Hapus config cache lama',
-    'config:cache'    => 'Buat config cache baru',
-    'route:clear'     => 'Hapus route cache lama',
-    'route:cache'     => 'Buat route cache baru',
-    'view:clear'      => 'Hapus compiled views',
-    'cache:clear'     => 'Hapus application cache',
-];
-
-$hasError = false;
-foreach ($commands as $cmd => $desc) {
-    $output  = shell_exec(escapeshellarg($php) . ' ' . $artisan . ' ' . $cmd . ' 2>&1');
-    $outTrim = trim($output ?? '');
-    $isError = ($output === null || stripos($output, 'error') !== false || stripos($output, 'failed') !== false);
-
-    // migrate: parse per-line untuk detail
-    if (str_starts_with($cmd, 'migrate')) {
-        $lines   = explode("\n", $outTrim);
-        $migrOk  = []; $migrSkip = []; $migrErr = [];
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if ($line === '') continue;
-            if (stripos($line, 'migrating') !== false || stripos($line, 'migrated') !== false) $migrOk[]  = $line;
-            elseif (stripos($line, 'nothing to migrate') !== false)                             $migrSkip[] = $line;
-            elseif (stripos($line, 'error') !== false || stripos($line, 'fail') !== false)     $migrErr[]  = $line;
-            else                                                                                $migrSkip[] = $line;
-        }
-
-        echo '<pre>';
-        echo '<span class="info">$ php artisan ' . htmlspecialchars($cmd) . '  ← ' . $desc . '</span>' . "\n";
-        if (!empty($migrOk)) {
-            foreach ($migrOk as $l) echo '<span class="ok">  &#10003; ' . htmlspecialchars($l) . '</span>' . "\n";
-        }
-        if (!empty($migrSkip)) {
-            foreach ($migrSkip as $l) echo '<span class="info">  ' . htmlspecialchars($l) . '</span>' . "\n";
-        }
-        if (!empty($migrErr)) {
-            $hasError = true;
-            foreach ($migrErr as $l) echo '<span class="err">  &#10060; ' . htmlspecialchars($l) . '</span>' . "\n";
-        }
-        if (empty($migrOk) && empty($migrErr)) echo '<span class="info">  (tidak ada migration baru)</span>' . "\n";
-        echo '</pre>';
-    } else {
-        $cls = $isError ? 'err' : 'ok';
-        $ico = $isError ? '&#10060;' : '&#10003;';
-        if ($isError) $hasError = true;
-        echo '<pre class="' . $cls . '">' . $ico . ' php artisan ' . htmlspecialchars($cmd)
-           . '  <span class="info">← ' . $desc . '</span>' . "\n"
-           . htmlspecialchars($outTrim ?: '(ok)') . '</pre>';
-    }
-    flush();
-}
-
-// ── Step 6: Diagnostik ───────────────────────────────────────────────────────
-echo '<h2>6. Diagnostik Pasca Deploy</h2>'; flush();
+// ── Step 3: Diagnostik pasca deploy ──────────────────────────────────────────
+echo '<h2>3. Diagnostik Pasca Deploy</h2>'; flush();
 echo runDiagnostics($base);
 
 // ── Selesai ───────────────────────────────────────────────────────────────────
-echo '<h2>7. Selesai</h2>';
-if ($hasError) {
-    echo '<pre class="warn">&#9888;&#65039;  Deploy selesai tapi ada warning/error di atas. Cek bagian migrate.</pre>';
+echo '<h2>4. Selesai</h2>';
+if ($gitOk) {
+    echo '<pre class="ok">&#10003; Kode terbaru sudah ditarik & cache diperbarui.</pre>';
 } else {
-    echo '<pre class="ok">&#10003; Deploy berhasil! Website sudah menggunakan kode terbaru.</pre>';
+    echo '<pre class="warn">&#9888;&#65039; Deploy selesai tapi git pull bermasalah — cek bagian 1 di atas.</pre>';
 }
+echo '<pre class="warn">&#9888; Ada migrasi/tabel baru? Jalankan <a href="/fixdb.php?key=' . htmlspecialchars($keyEnc) . '">/fixdb.php?key=…</a> untuk menyesuaikan database.</pre>';
 echo '</body></html>';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -261,6 +184,8 @@ function runDiagnostics(string $base): string
         'post_comments'          => 'Komentar Kita',
         'conversation_invites'   => 'Invite @mention',
         'member_logs'            => 'Log member baru bergabung',
+        'gig_posts'              => 'Papan Gig',
+        'articles'               => 'Library / Materi Musik',
     ];
 
     // Ambil daftar tabel dari DB
@@ -282,22 +207,21 @@ function runDiagnostics(string $base): string
             : '<span class="badge-err">&#10060; TIDAK ADA</span>';
         $out .= '<tr><td>' . htmlspecialchars($tbl) . '</td><td>' . $badge . '</td>'
              . '<td><span class="info">' . htmlspecialchars($func) . '</span></td>'
-             . '<td>' . ($exists ? $count . ' baris' : '—') . '</td></tr>';
+             . '<td>' . ($exists ? $count . ' baris' : '&#8212;') . '</td></tr>';
     }
     $out .= '</table>';
 
-    // Migration pending
+    // Migration pending (read-only)
     $out .= '<h2 style="margin-top:1rem">&#128203; Status Migration</h2>';
     $php    = PHP_BINARY ?: 'php';
-    $artisan = escapeshellarg($base . '/artisan');
-    $migOut = shell_exec(escapeshellarg($php) . ' ' . $artisan . ' migrate:status 2>&1');
+    $artisan = escapeshellarg($php) . ' ' . escapeshellarg($base . '/artisan');
+    $migOut = @shell_exec($artisan . ' migrate:status 2>&1');
     if ($migOut) {
         $lines = explode("\n", trim($migOut));
         $out .= '<table><tr><th>Migration</th><th>Status</th></tr>';
         foreach ($lines as $line) {
             $line = trim($line);
             if ($line === '' || str_starts_with($line, '+') || str_starts_with($line, '|  Migration')) continue;
-            // Parse baris: |  migration_name  |  Ran / Pending  |
             $parts = array_map('trim', explode('|', $line));
             $parts = array_values(array_filter($parts, fn($p) => $p !== ''));
             if (count($parts) < 2) continue;
@@ -307,43 +231,13 @@ function runDiagnostics(string $base): string
             $isPend = stripos($status, 'Pending') !== false;
             $badge  = $isRan
                 ? '<span class="badge-ok">&#10003; Ran</span>'
-                : ($isPend ? '<span class="badge-warn">&#9650; Pending</span>' : '<span class="info">'.$status.'</span>');
+                : ($isPend ? '<span class="badge-warn">&#9650; Pending</span>' : '<span class="info">'.htmlspecialchars($status).'</span>');
             $out .= '<tr><td>' . htmlspecialchars($name) . '</td><td>' . $badge . '</td></tr>';
         }
         $out .= '</table>';
+        $out .= '<pre class="info">Migration yang masih "Pending" → jalankan fixdb.php untuk membuat tabel/kolomnya.</pre>';
     } else {
-        $out .= '<pre class="warn">Tidak bisa jalankan migrate:status</pre>';
-    }
-
-    // Test notifikasi: cek kolom notifications
-    $out .= '<h2 style="margin-top:1rem">&#128276; Cek Tabel Notifications</h2>';
-    if (in_array('notifications', $existingTables)) {
-        $cols = $pdo->query("SHOW COLUMNS FROM `notifications`")->fetchAll(PDO::FETCH_ASSOC);
-        $colNames = array_column($cols, 'Field');
-        $required = ['id','user_id','from_user_id','type','title','body','url','icon','read_at'];
-        $out .= '<table><tr><th>Kolom</th><th>Status</th></tr>';
-        foreach ($required as $col) {
-            $ok = in_array($col, $colNames);
-            $out .= '<tr><td>' . $col . '</td><td>'
-                 . ($ok ? '<span class="badge-ok">&#10003; Ada</span>' : '<span class="badge-err">&#10060; TIDAK ADA</span>')
-                 . '</td></tr>';
-        }
-        $out .= '</table>';
-
-        // Notif terbaru
-        $recent = $pdo->query("SELECT id, user_id, type, title, read_at, created_at FROM `notifications` ORDER BY id DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
-        if ($recent) {
-            $out .= '<p style="color:#7A9DB0;font-size:12px;margin-top:.5rem">5 Notifikasi terbaru:</p>';
-            $out .= '<table><tr><th>ID</th><th>user_id</th><th>type</th><th>title</th><th>read_at</th><th>created_at</th></tr>';
-            foreach ($recent as $r) {
-                $out .= '<tr>' . implode('', array_map(fn($v) => '<td>' . htmlspecialchars((string)$v) . '</td>', $r)) . '</tr>';
-            }
-            $out .= '</table>';
-        } else {
-            $out .= '<pre class="warn">Tabel notifications kosong — belum ada notifikasi yang dibuat.</pre>';
-        }
-    } else {
-        $out .= '<pre class="err">&#10060; Tabel notifications TIDAK ADA. Migration belum jalan atau gagal!</pre>';
+        $out .= '<pre class="warn">Tidak bisa jalankan migrate:status (binari PHP CLI mungkin beda — coba tambah ?php=/path/ke/php).</pre>';
     }
 
     return $out;
