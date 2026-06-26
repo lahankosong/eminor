@@ -47,6 +47,7 @@ Route::get('/tools/edit-metadata', [ToolController::class, 'editMetadata'])->nam
 Route::get('/tools/chord-builder', [ToolController::class, 'chordBuilder'])->name('tools.chord-builder');
 Route::get('/tools/bpm-kalkulator', [ToolController::class, 'bpmCalculator'])->name('tools.bpm-kalkulator');
 Route::get('/tools/kalkulator-royalti', [ToolController::class, 'royaltyCalculator'])->name('tools.kalkulator-royalti');
+Route::get('/tools/rate-card', [ToolController::class, 'rateCard'])->name('tools.rate-card');
 
 // Library (diskografi)
 Route::get('/library', [LibraryController::class, 'index'])->name('library');

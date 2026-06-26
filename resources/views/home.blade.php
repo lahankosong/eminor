@@ -1067,6 +1067,21 @@ try { if(localStorage.getItem('heroCollapsed')==='1') setHeroCollapsed(true, fal
                 <div class="fb-studio-t">Edit Metadata &amp; WAV</div>
                 <div class="fb-studio-d">Tag MP3 + cover / konversi WAV</div>
             </a>
+            <a href="{{ route('tools.chord-builder') }}" class="fb-studio-card">
+                <div class="fb-studio-ic">🎸</div>
+                <div class="fb-studio-t">Chord Builder</div>
+                <div class="fb-studio-d">Generate progresi chord siap pakai</div>
+            </a>
+            <a href="{{ route('tools.kalkulator-royalti') }}" class="fb-studio-card">
+                <div class="fb-studio-ic">💰</div>
+                <div class="fb-studio-t">Kalkulator Royalti</div>
+                <div class="fb-studio-d">Estimasi pendapatan streaming</div>
+            </a>
+            <a href="{{ route('tools.rate-card') }}" class="fb-studio-card">
+                <div class="fb-studio-ic">💼</div>
+                <div class="fb-studio-t">Rate Card Generator</div>
+                <div class="fb-studio-d">Buat daftar harga jasa musik</div>
+            </a>
         </div>
     </div>
 

@@ -318,6 +318,33 @@
         </div>
         @endif
 
+        {{-- CTA: CHORD BUILDER --}}
+        @if($song->chords || $song->key_signature)
+        <div class="song-section">
+            <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.2rem;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                <span style="font-size:24px;">🎸</span>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:3px;">Eksplor chord {{ $song->title }} di Chord Builder</div>
+                    <div style="font-size:12px;color:var(--text-3);">Generate variasi progresi chord, transpose kunci, dan simpan favoritmu — gratis di fanbase.</div>
+                </div>
+                <a href="{{ route('tools.chord-builder') }}" style="flex-shrink:0;padding:8px 18px;border-radius:20px;background:var(--accent);color:#fff;font-size:12.5px;font-weight:600;text-decoration:none;white-space:nowrap;">Buka Chord Builder →</a>
+            </div>
+        </div>
+        @endif
+
+        {{-- CTA: DISKUSI KOMUNITAS --}}
+        <div class="song-section">
+            <div style="background:linear-gradient(135deg,rgba(56,168,204,.08),rgba(56,168,204,.03));border:1px solid rgba(56,168,204,.2);border-radius:14px;padding:1.1rem 1.2rem;">
+                <div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:.4rem;">💬 Komunitas Musisi</div>
+                <p style="font-size:13.5px;color:var(--text-2);margin-bottom:.85rem;line-height:1.6;">Punya cerita tentang lagu ini, pertanyaan chord, atau mau cover? Diskusikan di komunitas musisi Margonoandi — tempat musisi kamar Indonesia saling berbagi.</p>
+                @auth
+                <a href="{{ route('kita') }}" style="display:inline-block;padding:8px 20px;border-radius:20px;background:var(--accent);color:#fff;font-size:12.5px;font-weight:600;text-decoration:none;">Diskusikan di komunitas →</a>
+                @else
+                <a href="{{ route('google.login') }}" style="display:inline-block;padding:8px 20px;border-radius:20px;background:var(--accent);color:#fff;font-size:12.5px;font-weight:600;text-decoration:none;" onclick="gtag && gtag('event','cta_click',{event_category:'song_page',button:'diskusi_komunitas',song:'{{ addslashes($song->slug) }}'})">Gabung komunitas untuk diskusi →</a>
+                @endauth
+            </div>
+        </div>
+
         {{-- SHARE --}}
         <div class="song-section">
             <p class="song-section-title">Bagikan lagu ini</p>

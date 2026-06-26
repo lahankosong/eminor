@@ -176,6 +176,19 @@ class ToolController extends Controller
         return view('tools.kalkulator-royalti', compact('seo', 'origin'));
     }
 
+    public function rateCard()
+    {
+        $url = url('/tools/rate-card');
+        $seo = $this->toolSeo(
+            'Rate Card Generator Musisi — Buat Daftar Harga Jasa Musik Gratis',
+            'Buat rate card profesional untuk jasa musisi: wedding gig, studio session, teaching, mixing. Download sebagai gambar siap share ke klien. Gratis, tanpa daftar.',
+            'rate-card', 'Rate Card Generator',
+            $this->appNode('Rate Card Generator Musisi', $url, 'Buat daftar harga jasa musik profesional siap share, gratis tanpa daftar.', 'UtilitiesApplication')
+        );
+        $origin = 'Saya pernah ditanya EO "berapa harga main di wedding?" dan saya bingung jawabnya. Tidak ada patokan, tidak ada dokumen resmi. Dari situ saya buat tool ini — supaya musisi punya rate card profesional yang bisa langsung dikirim ke klien, tanpa malu dan tanpa under-pricing diri sendiri.';
+        return view('tools.rate-card', compact('seo', 'origin'));
+    }
+
     public function hub()
     {
         $tools = [
@@ -188,6 +201,7 @@ class ToolController extends Controller
             ['icon' => '🎸', 'name' => 'Chord Progression Generator', 'desc' => 'Pilih key & mood, generate 5 progresi chord siap pakai.',        'route' => 'tools.chord-builder'],
             ['icon' => '🥁', 'name' => 'Kalkulator BPM & Tap Tempo', 'desc' => 'Ketuk ikuti ritme untuk tahu BPM + metronome visual.',           'route' => 'tools.bpm-kalkulator'],
             ['icon' => '💰', 'name' => 'Kalkulator Royalti Streaming','desc' => 'Estimasi pendapatan Spotify, Apple Music, YouTube, TikTok.',     'route' => 'tools.kalkulator-royalti'],
+            ['icon' => '💼', 'name' => 'Rate Card Generator',         'desc' => 'Buat daftar harga jasa musik profesional siap share ke klien.',  'route' => 'tools.rate-card'],
         ];
         $items = [];
         foreach ($tools as $i => $t) {
