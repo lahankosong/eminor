@@ -33,6 +33,27 @@ a{text-decoration:none;color:inherit}
 /* ── INTRO ── */
 #intro{position:fixed;inset:0;background:#020307;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s}
 #intro.out{opacity:0;pointer-events:none}
+
+/* intro background */
+.ibg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.iaur{position:absolute;left:50%;top:50%;width:600px;height:600px;margin:-300px 0 0 -300px;
+  background:radial-gradient(circle,rgba(56,168,204,.07) 0%,rgba(91,110,245,.05) 40%,transparent 70%);
+  border-radius:50%;filter:blur(70px);
+  animation:iaur 7s ease-in-out infinite alternate}
+@keyframes iaur{0%{transform:scale(.85) translate(-25px,-15px)}100%{transform:scale(1.18) translate(20px,25px)}}
+.iaur2{position:absolute;left:30%;top:60%;width:350px;height:350px;margin:-175px 0 0 -175px;
+  background:radial-gradient(circle,rgba(139,92,246,.05),transparent 70%);
+  border-radius:50%;filter:blur(60px);
+  animation:iaur 9s ease-in-out infinite alternate-reverse}
+.iring{position:absolute;left:50%;top:50%;border-radius:50%;
+  border:1px solid rgba(56,168,204,.22);
+  animation:iring 3.6s ease-out infinite}
+.iring:nth-child(3){animation-delay:1.2s}
+.iring:nth-child(4){animation-delay:2.4s}
+@keyframes iring{
+  0%  {width:40px;height:40px;margin:-20px 0 0 -20px;opacity:.7;border-color:rgba(56,168,204,.45)}
+  100%{width:600px;height:600px;margin:-300px 0 0 -300px;opacity:0;border-color:rgba(91,110,245,.05)}
+}
 .iskip{position:absolute;top:1.25rem;right:1.25rem;font-size:11px;color:rgba(255,255,255,.3);letter-spacing:.1em;cursor:pointer;border:1px solid rgba(255,255,255,.1);padding:4px 12px;border-radius:20px;transition:.2s}
 .iskip:hover{color:#fff;border-color:rgba(255,255,255,.4)}
 .imetro{display:flex;gap:9px;margin-bottom:2.5rem;align-items:center;height:28px}
@@ -77,12 +98,13 @@ section{position:relative;overflow:hidden}
 .hs3{background:linear-gradient(160deg,#05131a,#041515,#06080f)}
 .hov{position:absolute;inset:0;background:linear-gradient(to top,rgba(6,8,15,.95) 25%,rgba(6,8,15,.45) 65%,rgba(6,8,15,.15) 100%);z-index:1}
 .hcont{position:relative;z-index:2;max-width:740px}
-.hftw{position:relative;min-height:130px;margin-bottom:1.75rem}
+.hftw{position:relative;min-height:160px;margin-bottom:1.75rem}
 .hf{font-size:clamp(1.2rem,3.2vw,1.8rem);font-weight:300;letter-spacing:.02em;opacity:0;position:absolute;transition:opacity .8s ease}
 .hf.s{opacity:1}
 .hf.dim{color:var(--t3);font-size:clamp(.9rem,2vw,1.15rem);letter-spacing:.12em;text-transform:uppercase}
 .hf.sm{font-size:clamp(1rem,2.2vw,1.35rem);color:var(--t2)}
-.hf.big{font-size:clamp(1.7rem,4.5vw,2.8rem);font-weight:700;color:#fff;line-height:1.25}
+.hf.big{font-size:clamp(1.5rem,3.8vw,2.5rem);font-weight:700;color:#fff;line-height:1.3}
+.hf.big span{color:#38A8CC}
 .htag{font-size:clamp(.88rem,1.8vw,1rem);color:var(--t2);line-height:1.85;max-width:460px;margin-bottom:2.25rem;opacity:0;transition:opacity .8s}
 .htag.s{opacity:1}
 .hact{display:flex;gap:12px;flex-wrap:wrap;opacity:0;transition:opacity .8s}
@@ -259,6 +281,13 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
 
 {{-- ════════ INTRO OVERLAY ════════ --}}
 <div id="intro">
+  <div class="ibg">
+    <div class="iaur"></div>
+    <div class="iaur2"></div>
+    <div class="iring"></div>
+    <div class="iring"></div>
+    <div class="iring"></div>
+  </div>
   <button class="iskip" onclick="skipIntro()">SKIP ↗</button>
   <div class="imetro">
     <div class="idot" id="d1"></div>
@@ -307,11 +336,10 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
       <div class="hf sm"   id="hf5">Tidak semua musisi punya studio.</div>
       <div class="hf sm"   id="hf6">Tidak semua musisi punya koneksi.</div>
       <div class="hf big"  id="hf7">Tetapi semua musisi<br>pantas didengar.</div>
+      <div class="hf big"  id="hf8">E<span>MINOR</span> adalah rumah pertama bagi musisi Indonesia<br>
+      yang sedang tumbuh sendirian.</div>
     </div>
-    <p class="htag" id="htag">
-      EMINOR adalah rumah pertama bagi musisi Indonesia<br>
-      yang sedang tumbuh sendirian.
-    </p>
+
     <div class="hact" id="hact">
       <a href="{{ route('google.login') }}" class="btn btn-p">🎵 Mulai Perjalanan Musik</a>
       <a href="#s-mid" class="btn btn-g">▶ Kisah Kami</a>
@@ -612,7 +640,8 @@ function startHero(){
     {id:'hf4', hold:1600},   // Tidak semua ... kota besar
     {id:'hf5', hold:1600},   // Tidak semua ... studio
     {id:'hf6', hold:1600},   // Tidak semua ... koneksi
-    {id:'hf7', hold:2800},   // Tetapi semua musisi pantas didengar
+    {id:'hf7', hold:2400},   // Tetapi semua musisi pantas didengar
+    {id:'hf8', hold:3200},   // EMINOR adalah rumah pertama...
   ];
 
   var idx = 0;
@@ -628,11 +657,11 @@ function startHero(){
     setTimeout(function(){
       el.classList.remove('s');                    // fade out
       setTimeout(function(){
-        // show tagline + CTA once after first full cycle
+        // show CTA once after first full cycle (hf8 = last item)
         if(!ctaShown && idx === items.length - 1){
           ctaShown = true;
-          document.getElementById('htag').classList.add('s');
-          document.getElementById('hact').classList.add('s');
+          var ha = document.getElementById('hact');
+          if(ha) ha.classList.add('s');
         }
         next();
       }, FADE + GAP);                              // wait fade-out + gap
