@@ -102,13 +102,29 @@ class HomeController extends Controller
 
         $previewPosts = collect();
         try {
-            $previewPosts = Post::with('user')
-                ->latest()
-                ->take(3)
-                ->get();
+            $previewPosts = Post::with('user')->latest()->take(3)->get();
         } catch (\Throwable $e) {}
 
-        return view('home', compact('songs', 'featuredSong', 'ctaSongs', 'settings', 'seo', 'musicians', 'previewPosts'));
+        // Live Community feed untuk landing page
+        $liveActivity = collect();
+        try {
+            $acts = collect();
+            Post::with('user')->latest()->take(4)->get()->each(fn($p) => $acts->push([
+                'icon' => '🎵', 'user' => $p->user->name ?? 'Musisi',
+                'text' => \Illuminate\Support\Str::limit($p->body, 55),
+                'time' => $p->created_at->diffForHumans(),
+                'ts'   => $p->created_at->timestamp,
+            ]));
+            \App\Models\GigPost::with('user')->where('status','open')->latest()->take(3)->get()->each(fn($g) => $acts->push([
+                'icon' => '🥁', 'user' => $g->user->name ?? 'Musisi',
+                'text' => \Illuminate\Support\Str::limit($g->title, 55),
+                'time' => $g->created_at->diffForHumans(),
+                'ts'   => $g->created_at->timestamp,
+            ]));
+            $liveActivity = $acts->sortByDesc('ts')->take(5)->values();
+        } catch (\Throwable $e) {}
+
+        return view('home', compact('songs', 'featuredSong', 'ctaSongs', 'settings', 'seo', 'musicians', 'previewPosts', 'liveActivity'));
     }
 
     /** sitemap.xml dinamis: homepage + semua lagu aktif, termasuk image:image untuk Google Image. */
