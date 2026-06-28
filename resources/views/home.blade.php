@@ -266,6 +266,88 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
 .flinks a{font-size:11.5px;color:var(--t3);letter-spacing:.05em;transition:.2s}.flinks a:hover{color:#38A8CC}
 .fcopy{font-size:10.5px;color:var(--t3)}
 
+/* ── FILM GRAIN ── */
+#grain{position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:.032;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat:repeat;background-size:200px;animation:gr .5s steps(2) infinite}
+@keyframes gr{0%,100%{background-position:0 0}25%{background-position:-5% -10%}50%{background-position:-15% 5%}75%{background-position:7% -25%}}
+
+/* ── CURSOR GLOW ── */
+#cglow{position:fixed;width:380px;height:380px;border-radius:50%;
+  background:radial-gradient(circle,rgba(56,168,204,.065),transparent 70%);
+  pointer-events:none;z-index:1;transform:translate(-50%,-50%);
+  mix-blend-mode:screen;will-change:left,top}
+
+/* ── VINYL (intro) ── */
+.vinyl{width:90px;height:90px;border-radius:50%;position:relative;
+  background:conic-gradient(#0f0f0f 0deg,#1c1c1c 22deg,#090909 44deg,#151515 66deg,
+    #0f0f0f 88deg,#090909 110deg,#1c1c1c 132deg,#0f0f0f 154deg,#111 176deg,
+    #090909 198deg,#151515 220deg,#1c1c1c 242deg,#0f0f0f 264deg,#111 286deg,
+    #090909 308deg,#1c1c1c 330deg,#0f0f0f 352deg,#111 360deg);
+  animation:vspin 4s linear infinite;margin-bottom:1.5rem;
+  box-shadow:0 0 30px rgba(56,168,204,.22),0 0 70px rgba(56,168,204,.08),0 0 120px rgba(56,168,204,.04)}
+.vinyl::before{content:'';position:absolute;inset:37%;border-radius:50%;
+  background:radial-gradient(circle,#38A8CC 30%,#2186a8);
+  box-shadow:0 0 14px rgba(56,168,204,.7)}
+@keyframes vspin{to{transform:rotate(360deg)}}
+
+/* ── FLOATING NOTES (hero) ── */
+.hnotes{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.hn{position:absolute;color:rgba(56,168,204,.13);animation:hnf 8s ease-in-out infinite}
+@keyframes hnf{
+  0%,100%{transform:translateY(0) rotate(-15deg);opacity:.06}
+  40%{transform:translateY(-55px) rotate(12deg);opacity:.22}
+  70%{transform:translateY(-30px) rotate(-5deg);opacity:.13}
+}
+
+/* ── EQ BARS (hero) ── */
+.heq{display:flex;align-items:flex-end;gap:3px;height:20px;margin-bottom:1.5rem;opacity:.65}
+.heqb{width:3px;border-radius:2px 2px 0 0;
+  background:linear-gradient(to top,#38A8CC,#5B6EF5);
+  animation:heqbar 1s ease-in-out infinite alternate}
+.heqb:nth-child(1){animation-duration:.78s}
+.heqb:nth-child(2){animation-duration:1.12s;animation-delay:.1s}
+.heqb:nth-child(3){animation-duration:.68s;animation-delay:.22s}
+.heqb:nth-child(4){animation-duration:1.25s;animation-delay:.08s}
+.heqb:nth-child(5){animation-duration:.9s;animation-delay:.35s}
+.heqb:nth-child(6){animation-duration:1.05s;animation-delay:.15s}
+.heqb:nth-child(7){animation-duration:.72s;animation-delay:.45s}
+.heqb:nth-child(8){animation-duration:1.18s;animation-delay:.05s}
+@keyframes heqbar{from{height:3px}to{height:18px}}
+
+/* ── S-HOW — CARA KERJA ── */
+#s-how{padding:4.5rem 2rem;background:#020307}
+.how-wrap{max-width:860px;margin:0 auto;text-align:center}
+.how-ey{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#38A8CC;margin-bottom:.6rem;
+  display:flex;align-items:center;justify-content:center;gap:14px}
+.how-ey::before{content:'';flex:0 0 50px;height:1px;background:linear-gradient(90deg,transparent,#38A8CC)}
+.how-ey::after{content:'';flex:0 0 50px;height:1px;background:linear-gradient(90deg,#38A8CC,transparent)}
+.how-h{font-size:clamp(1.2rem,2.8vw,1.7rem);font-weight:700;color:#fff;margin-bottom:2.5rem}
+.how-grid{display:flex;align-items:stretch;gap:.85rem;justify-content:center}
+.how-conn{display:flex;align-items:center;padding-top:1.25rem;color:var(--t3);flex-shrink:0;font-size:.8rem}
+.how-step{flex:1;max-width:235px;background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:1.4rem 1.1rem;position:relative;text-align:left;
+  transition:.22s}
+.how-step:hover{border-color:rgba(56,168,204,.35);transform:translateY(-4px);box-shadow:0 14px 36px rgba(56,168,204,.09)}
+.how-num{font-size:9px;font-weight:800;letter-spacing:.1em;color:#38A8CC;margin-bottom:.65rem}
+.how-ic{font-size:1.8rem;margin-bottom:.55rem;display:block}
+.how-t{font-size:13.5px;font-weight:700;color:#fff;margin-bottom:.35rem}
+.how-d{font-size:11.5px;color:var(--t2);line-height:1.75}
+
+/* ── MARQUEE STRIP ── */
+.mq-wrap{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:10px 0;background:rgba(56,168,204,.025)}
+.mq-track{display:flex;gap:0;width:max-content;animation:mq 40s linear infinite}
+.mq-track:hover{animation-play-state:paused}
+.mq-item{display:inline-flex;align-items:center;gap:1.5rem;padding:0 1.5rem;white-space:nowrap}
+.mq-item>span{font-size:10.5px;color:var(--t2);letter-spacing:.07em;text-transform:uppercase}
+.mq-item>.sep{color:var(--t3);font-size:7px}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── WAVEFORM FOOTER ── */
+.fwave{overflow:hidden;height:48px;margin-bottom:1.75rem;opacity:.7}
+.fwave svg{width:100%;height:48px;display:block}
+
 /* ── REVEAL ── */
 .rv{opacity:0;transform:translateY(20px);transition:.65s ease}.rv.on{opacity:1;transform:none}
 
@@ -274,6 +356,7 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
   .mid-wrap{grid-template-columns:1fr;gap:2.5rem}
   .fgrid{grid-template-columns:1fr 1fr}
   .cgrid{grid-template-columns:repeat(3,1fr)}
+  .how-grid{gap:.6rem}.how-step{max-width:none}
 }
 @media(max-width:640px){
   #hero{padding:0 1.5rem 4rem}
@@ -284,6 +367,10 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
   .ss-item:last-child{border-bottom:none}
   .cta-inner{padding:16px 24px;font-size:13px}
   .mid-wrap{gap:2rem}
+  .how-grid{flex-direction:column;align-items:center}
+  .how-conn{display:none}
+  .how-step{max-width:100%;width:100%}
+  #cglow{display:none}
 }
 @media(max-width:420px){
   .cgrid{grid-template-columns:1fr}
@@ -293,6 +380,8 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
 </style>
 </head>
 <body>
+<div id="grain"></div>
+<div id="cglow"></div>
 
 {{-- ════════ INTRO OVERLAY ════════ --}}
 <div id="intro">
@@ -309,6 +398,7 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
     <div class="idot" id="d2"></div>
     <div class="idot" id="d3"></div>
   </div>
+  <div class="vinyl"></div>
   <div class="itext">
     <div class="iline" id="l1">Dulu...</div>
     <div class="iline" id="l2" style="color:var(--t2);font-size:.95rem">musisi membutuhkan label untuk didengar.</div>
@@ -340,6 +430,16 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
     <div class="hslide hs2"></div>
     <div class="hslide hs3"></div>
   </div>
+  <div class="hnotes">
+    <span class="hn" style="left:58%;top:22%;font-size:1.5rem">♫</span>
+    <span class="hn" style="left:72%;top:58%;font-size:1.1rem;animation-delay:1.2s">♪</span>
+    <span class="hn" style="left:83%;top:38%;font-size:.9rem;animation-delay:2.5s">♩</span>
+    <span class="hn" style="left:66%;top:78%;font-size:1.3rem;animation-delay:.7s">♬</span>
+    <span class="hn" style="left:91%;top:52%;font-size:1.2rem;animation-delay:3.2s">♫</span>
+    <span class="hn" style="left:76%;top:18%;font-size:.85rem;animation-delay:1.8s">♪</span>
+    <span class="hn" style="left:62%;top:68%;font-size:1.4rem;animation-delay:4s">♩</span>
+    <span class="hn" style="left:86%;top:73%;font-size:1rem;animation-delay:.35s">♬</span>
+  </div>
   <div class="hov"></div>
   <div class="hcont">
     <div class="hftw">
@@ -347,14 +447,20 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
       <div class="hf sm"   id="hf1">musisi membutuhkan label untuk didengar.</div>
       <div class="hf dim"  id="hf2">Sekarang...</div>
       <div class="hf sm"   id="hf3">yang dibutuhkan hanya tempat yang tepat.</div>
-      <div class="hf sm"   id="hf4">Tidak semua musisi lahir di kota besar.</div>
-      <div class="hf sm"   id="hf5">Tidak semua musisi punya studio.</div>
-      <div class="hf sm"   id="hf6">Tidak semua musisi punya koneksi.</div>
-      <div class="hf big"  id="hf7">Tetapi semua musisi<br>pantas didengar.</div>
-      <div class="hf big"  id="hf8">E<span>MINOR</span> adalah rumah pertama bagi musisi Indonesia<br>
+      <div class="hf big"  id="hf4">E<span>MINOR</span></div>
+      <div class="hf sm"   id="hf5">Tidak semua musisi lahir di kota besar.</div>
+      <div class="hf sm"   id="hf6">Tidak semua musisi punya studio.</div>
+      <div class="hf sm"   id="hf7">Tidak semua musisi punya koneksi.</div>
+      <div class="hf big"  id="hf8">Tetapi semua musisi<br>pantas didengar.</div>
+      <div class="hf big"  id="hf9">E<span>MINOR</span> adalah Ekosistem Musisi Indie Indonesia<br>
       yang sedang tumbuh sendirian.</div>
     </div>
 
+    <div class="heq" aria-hidden="true">
+      <div class="heqb"></div><div class="heqb"></div><div class="heqb"></div>
+      <div class="heqb"></div><div class="heqb"></div><div class="heqb"></div>
+      <div class="heqb"></div><div class="heqb"></div>
+    </div>
     <div class="hact" id="hact">
       <a href="{{ route('google.login') }}" class="btn btn-p">🎵 Mulai Perjalanan Musik</a>
       <a href="#s-mid" class="btn btn-g">▶ Kisah Kami</a>
@@ -426,6 +532,48 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
     </div>
   </div>
 </section>
+
+{{-- ════════ S-HOW — CARA KERJA ════════ --}}
+<section id="s-how">
+  <div class="how-wrap rv">
+    <div class="how-ey">Cara Kerja</div>
+    <h2 class="how-h">Tiga langkah. Tanpa hambatan.</h2>
+    <div class="how-grid">
+      <div class="how-step">
+        <div class="how-num">01 / MULAI</div>
+        <span class="how-ic">👤</span>
+        <div class="how-t">Buat Profil</div>
+        <div class="how-d">Login dengan Google dalam 10 detik. Isi profil musisimu — genre, instrumen, kota, dan karya.</div>
+      </div>
+      <div class="how-conn">→</div>
+      <div class="how-step">
+        <div class="how-num">02 / JELAJAHI</div>
+        <span class="how-ic">🔍</span>
+        <div class="how-t">Temukan</div>
+        <div class="how-d">Cari personil band, gig, materi belajar, atau sesama musisi di kotamu dan seluruh Indonesia.</div>
+      </div>
+      <div class="how-conn">→</div>
+      <div class="how-step">
+        <div class="how-num">03 / TUMBUH</div>
+        <span class="how-ic">🎵</span>
+        <div class="how-t">Berkarya</div>
+        <div class="how-d">Upload lagu, bagikan ke komunitas, dan dapatkan feedback nyata dari sesama musisi indie.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{-- ════════ MARQUEE STRIP ════════ --}}
+@php
+$mqItems = ['Jakarta','Gitar','Indie Pop','Bandung','Piano','Folk','Yogyakarta','Ukulele','Jazz','Surabaya','Bass','Metal','Bali','Drum','R&B','Medan','Biola','Reggae','Semarang','Flute','Electronic','Makassar','Saksofon','Blues','Vokal','Alternative','Ambient','Post-Rock'];
+@endphp
+<div class="mq-wrap" aria-hidden="true">
+  <div class="mq-track">
+    @foreach(array_merge($mqItems,$mqItems) as $mq)
+    <div class="mq-item"><span>{{ $mq }}</span><span class="sep">◆</span></div>
+    @endforeach
+  </div>
+</div>
 
 {{-- ════════ S3 — MANIFESTO + LIVE ════════ --}}
 <section id="s-mid">
@@ -558,6 +706,13 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
 
 {{-- ════════ FOOTER ════════ --}}
 <footer>
+  <div class="fwave" aria-hidden="true">
+    <svg viewBox="0 0 1440 48" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,24 C240,6 480,42 720,24 C960,6 1200,42 1440,24" stroke="rgba(56,168,204,.18)" stroke-width="1.5"/>
+      <path d="M0,28 C180,48 360,8 540,28 C720,48 900,8 1080,28 C1260,48 1380,12 1440,28" stroke="rgba(91,110,245,.1)" stroke-width="1"/>
+      <path d="M0,20 C120,4 240,38 360,20 C480,4 600,38 720,20 C840,4 960,38 1080,20 C1200,4 1320,38 1440,20" stroke="rgba(139,92,246,.07)" stroke-width="1"/>
+    </svg>
+  </div>
   <div class="flogo">E<span>MINOR</span></div>
   <p class="ftag">Ekosistem Musik Indie Indonesia<br>Rumah pertama bagi musisi yang sedang tumbuh sendirian.</p>
   <div class="fdiv"></div>
@@ -653,11 +808,12 @@ function startHero(){
     {id:'hf1', hold:1600},   // musisi membutuhkan label...
     {id:'hf2', hold: 700},   // Sekarang...
     {id:'hf3', hold:1600},   // yang dibutuhkan...
-    {id:'hf4', hold:1600},   // Tidak semua ... kota besar
-    {id:'hf5', hold:1600},   // Tidak semua ... studio
-    {id:'hf6', hold:1600},   // Tidak semua ... koneksi
-    {id:'hf7', hold:2400},   // Tetapi semua musisi pantas didengar
-    {id:'hf8', hold:3200},   // EMINOR adalah rumah pertama...
+    {id:'hf4', hold:1600},   // Em
+    {id:'hf5', hold:1600},   // Tidak semua ... kota besar
+    {id:'hf6', hold:1600},   // Tidak semua ... studio
+    {id:'hf7', hold:2400},   // Tidak semua ... koneksi
+    {id:'hf8', hold:3200},   // Tetapi semua musisi pantas didengar
+    {id:'hf9', hold:3200},   // EMINOR adalah rumah pertama...
   ];
 
   var idx = 0;
@@ -761,6 +917,33 @@ function openModal(){document.getElementById('mbg').classList.add('on');document
 function closeModal(){document.getElementById('mbg').classList.remove('on');document.body.style.overflow='';}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
 
+// ── CURSOR GLOW ──
+(function(){
+  var g=document.getElementById('cglow'),rx=0,ry=0,cx=window.innerWidth/2,cy=window.innerHeight/2;
+  document.addEventListener('mousemove',function(e){cx=e.clientX;cy=e.clientY;});
+  function loop(){
+    rx+=(cx-rx)*.08; ry+=(cy-ry)*.08;
+    if(g){g.style.left=rx+'px';g.style.top=ry+'px';}
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+// ── 3D CARD TILT (feature grid) ──
+document.querySelectorAll('.fcard').forEach(function(c){
+  c.addEventListener('mousemove',function(e){
+    var r=c.getBoundingClientRect();
+    var x=(e.clientX-r.left)/r.width-.5;
+    var y=(e.clientY-r.top)/r.height-.5;
+    c.style.transform='perspective(700px) rotateY('+(x*10)+'deg) rotateX('+(-y*10)+'deg) translateY(-4px)';
+    c.style.transition='transform .05s';
+  });
+  c.addEventListener('mouseleave',function(){
+    c.style.transform='';
+    c.style.transition='transform .35s ease';
+  });
+});
+
 // ── MOBILE NAV ──
 function toggleNav(){
   var l=document.querySelector('.nlinks'),c=document.querySelector('.ncta');
@@ -772,3 +955,4 @@ function toggleNav(){
 </script>
 </body>
 </html>
+
