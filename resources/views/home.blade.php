@@ -66,9 +66,10 @@ section{position:relative;overflow:hidden}
 .hs3{background:linear-gradient(160deg,#05131a,#041515,#06080f)}
 .hov{position:absolute;inset:0;background:linear-gradient(to top,rgba(6,8,15,.95) 25%,rgba(6,8,15,.45) 65%,rgba(6,8,15,.15) 100%);z-index:1}
 .hcont{position:relative;z-index:2;max-width:740px}
-.hftw{position:relative;min-height:105px;margin-bottom:1.75rem}
-.hf{font-size:clamp(1.2rem,3.2vw,1.8rem);font-weight:300;letter-spacing:.02em;opacity:0;position:absolute;transition:opacity .8s}
+.hftw{position:relative;min-height:130px;margin-bottom:1.75rem}
+.hf{font-size:clamp(1.2rem,3.2vw,1.8rem);font-weight:300;letter-spacing:.02em;opacity:0;position:absolute;transition:opacity .8s ease}
 .hf.s{opacity:1}
+.hf.dim{color:var(--t3);font-size:clamp(.9rem,2vw,1.15rem);letter-spacing:.12em;text-transform:uppercase}
 .hf.sm{font-size:clamp(1rem,2.2vw,1.35rem);color:var(--t2)}
 .hf.big{font-size:clamp(1.7rem,4.5vw,2.8rem);font-weight:700;color:#fff;line-height:1.25}
 .htag{font-size:clamp(.88rem,1.8vw,1rem);color:var(--t2);line-height:1.85;max-width:460px;margin-bottom:2.25rem;opacity:0;transition:opacity .8s}
@@ -263,10 +264,14 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
   <div class="hov"></div>
   <div class="hcont">
     <div class="hftw">
-      <div class="hf sm" id="hf1">Tidak semua musisi lahir di kota besar.</div>
-      <div class="hf sm" id="hf2">Tidak semua musisi punya studio.</div>
-      <div class="hf sm" id="hf3">Tidak semua musisi punya koneksi.</div>
-      <div class="hf big" id="hf4">Tetapi semua musisi<br>pantas didengar.</div>
+      <div class="hf dim"  id="hf0">Dulu...</div>
+      <div class="hf sm"   id="hf1">musisi membutuhkan label untuk didengar.</div>
+      <div class="hf dim"  id="hf2">Sekarang...</div>
+      <div class="hf sm"   id="hf3">yang dibutuhkan hanya tempat yang tepat.</div>
+      <div class="hf sm"   id="hf4">Tidak semua musisi lahir di kota besar.</div>
+      <div class="hf sm"   id="hf5">Tidak semua musisi punya studio.</div>
+      <div class="hf sm"   id="hf6">Tidak semua musisi punya koneksi.</div>
+      <div class="hf big"  id="hf7">Tetapi semua musisi<br>pantas didengar.</div>
     </div>
     <p class="htag" id="htag">
       EMINOR adalah rumah pertama bagi musisi Indonesia<br>
@@ -556,22 +561,61 @@ function skipIntro(){
   setTimeout(function(){el.style.display='none';startHero();},500);
 }
 
-// ── HERO TEXT SEQUENCE ──
+// ── HERO TEXT LOOP (infinite) ──
 function startHero(){
-  var seq=[
-    [150, function(){hfs('hf1');}],
-    [1700,function(){hfh('hf1');hfs('hf2');}],
-    [3200,function(){hfh('hf2');hfs('hf3');}],
-    [4700,function(){hfh('hf3');hfs('hf4');}],
-    [6000,function(){document.getElementById('htag').classList.add('s');}],
-    [6500,function(){document.getElementById('hact').classList.add('s');}],
+  // hold = ms the text stays visible AFTER fade-in
+  var FADE = 800;   // matches CSS transition duration
+  var GAP  = 280;   // silent gap between items
+  var items = [
+    {id:'hf0', hold: 700},   // Dulu...
+    {id:'hf1', hold:1600},   // musisi membutuhkan label...
+    {id:'hf2', hold: 700},   // Sekarang...
+    {id:'hf3', hold:1600},   // yang dibutuhkan...
+    {id:'hf4', hold:1600},   // Tidak semua ... kota besar
+    {id:'hf5', hold:1600},   // Tidak semua ... studio
+    {id:'hf6', hold:1600},   // Tidak semua ... koneksi
+    {id:'hf7', hold:2800},   // Tetapi semua musisi pantas didengar
   ];
-  seq.forEach(function(s){setTimeout(s[1],s[0]);});
-  var sl=document.querySelectorAll('.hslide'),si=0;
-  setInterval(function(){sl[si].classList.remove('on');si=(si+1)%sl.length;sl[si].classList.add('on');},4500);
+
+  var idx = 0;
+  var ctaShown = false;
+
+  function showItem(){
+    var item = items[idx];
+    var el   = document.getElementById(item.id);
+    if(!el) return next();
+
+    el.classList.add('s');                         // fade in
+
+    setTimeout(function(){
+      el.classList.remove('s');                    // fade out
+      setTimeout(function(){
+        // show tagline + CTA once after first full cycle
+        if(!ctaShown && idx === items.length - 1){
+          ctaShown = true;
+          document.getElementById('htag').classList.add('s');
+          document.getElementById('hact').classList.add('s');
+        }
+        next();
+      }, FADE + GAP);                              // wait fade-out + gap
+    }, FADE + item.hold);                          // wait fade-in + hold
+  }
+
+  function next(){
+    idx = (idx + 1) % items.length;
+    showItem();
+  }
+
+  setTimeout(showItem, 200);
+
+  // background slides
+  var sl=document.querySelectorAll('.hslide'), si=0;
+  setInterval(function(){
+    sl[si].classList.remove('on');
+    si = (si+1) % sl.length;
+    sl[si].classList.add('on');
+  }, 4500);
 }
-function hfs(id){document.getElementById(id).classList.add('s');}
-function hfh(id){document.getElementById(id).classList.remove('s');}
 
 // ── NAVBAR ──
 window.addEventListener('scroll',function(){document.getElementById('nav').classList.toggle('on',scrollY>60);});
