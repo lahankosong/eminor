@@ -241,6 +241,47 @@ footer{background:#020307;padding:5rem 2rem 3rem;text-align:center;border-top:1p
 .reveal{opacity:0;transform:translateY(24px);transition:.7s ease}
 .reveal.visible{opacity:1;transform:none}
 
+/* ── S-VISI: VISION & MISSION ── */
+#s-visi{background:#030510;padding:9rem 2rem;position:relative;overflow:hidden}
+#visi-canvas{position:absolute;inset:0;pointer-events:none;z-index:0}
+.visi-inner{position:relative;z-index:1;max-width:900px;margin:0 auto;text-align:center}
+.visi-eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#38A8CC;margin-bottom:1rem;opacity:0;transform:translateY(16px);transition:.6s ease}
+.visi-eyebrow.in{opacity:1;transform:none}
+.visi-headline{font-size:clamp(1.5rem,4vw,2.6rem);font-weight:700;color:#fff;min-height:1.4em;margin-bottom:3.5rem}
+.visi-cursor{display:inline-block;width:3px;height:1em;background:#38A8CC;vertical-align:middle;margin-left:4px;animation:blink .7s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* three pillars */
+.visi-pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:4rem}
+.visi-pillar{background:rgba(14,20,40,.6);border:1px solid rgba(56,168,204,.1);border-radius:24px;padding:2.2rem 1.5rem 1.75rem;opacity:0;transition:.7s cubic-bezier(.22,1,.36,1);position:relative;overflow:hidden}
+.visi-pillar::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(56,168,204,.06),transparent 65%);pointer-events:none}
+.visi-pillar.from-left{transform:translateX(-70px)}
+.visi-pillar.from-bottom{transform:translateY(50px)}
+.visi-pillar.from-right{transform:translateX(70px)}
+.visi-pillar.in{opacity:1;transform:none}
+.visi-pillar:hover{border-color:rgba(56,168,204,.35);transform:translateY(-5px) !important;box-shadow:0 24px 60px rgba(56,168,204,.1)}
+.visi-p-icon{font-size:2.4rem;margin-bottom:1rem}
+.visi-p-title{font-size:13px;font-weight:800;letter-spacing:.2em;color:#38A8CC;margin-bottom:.75rem;text-transform:uppercase}
+.visi-p-bar{height:2px;background:rgba(56,168,204,.15);border-radius:2px;margin-bottom:1rem;position:relative;overflow:hidden}
+.visi-p-bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#38A8CC,#5B6EF5);transform:scaleX(0);transform-origin:left;transition:transform .9s .3s cubic-bezier(.22,1,.36,1)}
+.visi-pillar.in .visi-p-bar::after{transform:scaleX(1)}
+.visi-p-desc{font-size:13px;color:var(--text2);line-height:1.75}
+
+/* stat counters */
+.visi-stats{display:flex;justify-content:center;gap:0;margin-bottom:4rem;background:rgba(14,20,40,.5);border:1px solid rgba(56,168,204,.1);border-radius:20px;overflow:hidden;flex-wrap:wrap}
+.visi-stat{flex:1;min-width:120px;padding:1.75rem 1rem;border-right:1px solid rgba(56,168,204,.08);position:relative;opacity:0;transform:translateY(20px);transition:.5s ease}
+.visi-stat:last-child{border-right:none}
+.visi-stat.in{opacity:1;transform:none}
+.visi-num{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;color:#fff;line-height:1;font-variant-numeric:tabular-nums}
+.visi-num-suffix{font-size:1rem;color:#38A8CC;font-weight:700}
+.visi-stat-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-top:.4rem}
+
+/* word-split vision statement */
+.visi-statement{max-width:680px;margin:0 auto;font-size:clamp(1rem,2.5vw,1.3rem);font-weight:300;color:rgba(255,255,255,.75);line-height:2;text-align:center}
+.visi-word{display:inline-block;opacity:0;transform:translateY(22px);transition:.5s ease;margin:0 .18em}
+.visi-word.in{opacity:1;transform:none}
+.visi-word.accent{color:#38A8CC;font-weight:600}
+
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
   #s-hero{padding:0 1.5rem 4rem}
@@ -256,6 +297,9 @@ footer{background:#020307;padding:5rem 2rem 3rem;text-align:center;border-top:1p
   .btn-cta-inner{padding:18px 28px;font-size:13px}
   .manifesto-line{font-size:1rem}
   .manifesto-line.accent{font-size:1.2rem}
+  .visi-pillars{grid-template-columns:1fr}
+  .visi-stats{border-radius:16px}
+  .visi-stat{min-width:50%}
 }
 @media(max-width:480px){
   .cards-grid{grid-template-columns:1fr}
@@ -440,6 +484,49 @@ footer{background:#020307;padding:5rem 2rem 3rem;text-align:center;border-top:1p
     <p class="manifesto-line reveal" style="color:var(--text2)">tempat untuk bertemu.</p>
     <div class="manifesto-spacer"></div>
     <p class="manifesto-line accent reveal">Dan EMINOR ingin menjadi tempat itu.</p>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────
+     S4.5 — VISI & MISI
+───────────────────────────────────────────── -->
+<section id="s-visi">
+  <canvas id="visi-canvas"></canvas>
+  <div class="visi-inner">
+
+    <div class="visi-eyebrow" id="visi-ey">MENGAPA EMINOR</div>
+    <h2 class="visi-headline"><span id="visi-typed"></span><span class="visi-cursor" id="visi-cur"></span></h2>
+
+    <div class="visi-pillars">
+      <div class="visi-pillar from-left" id="vp1">
+        <div class="visi-p-icon">🎸</div>
+        <div class="visi-p-title">Belajar</div>
+        <div class="visi-p-bar"></div>
+        <div class="visi-p-desc">Dari chord pertama hingga teknik lanjutan — materi, tuner, dan 14 alat musik semuanya gratis, langsung di browser.</div>
+      </div>
+      <div class="visi-pillar from-bottom" id="vp2">
+        <div class="visi-p-icon">🌍</div>
+        <div class="visi-p-title">Berkarya</div>
+        <div class="visi-p-bar"></div>
+        <div class="visi-p-desc">Upload lagu, bagikan perjalanan, dan dapatkan feedback jujur dari musisi lain yang mengerti rasanya berkarya sendirian.</div>
+      </div>
+      <div class="visi-pillar from-right" id="vp3">
+        <div class="visi-p-icon">👥</div>
+        <div class="visi-p-title">Bertemu</div>
+        <div class="visi-p-bar"></div>
+        <div class="visi-p-desc">Temukan kolaborator, personil band, dan peluang gig — matchmaking by peran, genre, dan kota.</div>
+      </div>
+    </div>
+
+    <div class="visi-stats" id="visi-stats">
+      <div class="visi-stat" id="vs1"><div class="visi-num"><span class="visi-counter" data-target="50">0</span><span class="visi-num-suffix">+</span></div><div class="visi-stat-label">Musisi Aktif</div></div>
+      <div class="visi-stat" id="vs2"><div class="visi-num"><span class="visi-counter" data-target="14">0</span></div><div class="visi-stat-label">Alat Gratis</div></div>
+      <div class="visi-stat" id="vs3"><div class="visi-num"><span class="visi-counter" data-target="31">0</span></div><div class="visi-stat-label">Materi Musik</div></div>
+      <div class="visi-stat" id="vs4"><div class="visi-num">24<span class="visi-num-suffix">/7</span></div><div class="visi-stat-label">Komunitas</div></div>
+    </div>
+
+    <div class="visi-statement" id="visi-stmt"></div>
+
   </div>
 </section>
 
@@ -765,6 +852,186 @@ function toggleMobileNav(){
   links.style.cssText = shown ? '' : 'display:flex;flex-direction:column;position:fixed;top:64px;left:0;right:0;background:rgba(6,8,15,.96);backdrop-filter:blur(14px);padding:1.5rem 2rem;gap:1.25rem;border-bottom:1px solid var(--border)';
   if(cta) cta.style.display = shown ? '' : 'block';
 }
+
+// ─────────────────────────────────────────────────────
+//  VISI & MISI ANIMATIONS
+// ─────────────────────────────────────────────────────
+
+// ── 1. CANVAS PARTICLE (music notes floating up) ──
+(function(){
+  var canvas = document.getElementById('visi-canvas');
+  if(!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var notes = ['♩','♪','♫','♬','♭','♮'];
+  var particles = [];
+  var W, H;
+
+  function resize(){
+    W = canvas.width  = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for(var i = 0; i < 28; i++){
+    particles.push({
+      x: Math.random() * (W||1000),
+      y: Math.random() * (H||600),
+      note: notes[Math.floor(Math.random()*notes.length)],
+      speed: .25 + Math.random() * .5,
+      size: 10 + Math.random() * 14,
+      alpha: .04 + Math.random() * .1,
+      drift: (Math.random() - .5) * .4,
+      phase: Math.random() * Math.PI * 2,
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0, 0, W, H);
+    var t = Date.now() * .001;
+    particles.forEach(function(p){
+      p.y -= p.speed;
+      p.x += Math.sin(t * .4 + p.phase) * p.drift;
+      if(p.y < -20){ p.y = H + 20; p.x = Math.random() * W; }
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle = '#38A8CC';
+      ctx.font = p.size + 'px serif';
+      ctx.fillText(p.note, p.x, p.y);
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── 2. TYPEWRITER ──
+(function(){
+  var el = document.getElementById('visi-typed');
+  var cur = document.getElementById('visi-cur');
+  if(!el) return;
+  var text = 'Kami hadir untuk satu tujuan.';
+  var i = 0; var started = false;
+
+  function type(){
+    if(i < text.length){
+      el.textContent += text[i++];
+      setTimeout(type, 45 + Math.random()*30);
+    } else {
+      if(cur) setTimeout(function(){ cur.style.display='none'; }, 1200);
+    }
+  }
+
+  // start when section enters viewport
+  var visiObs = new IntersectionObserver(function(entries){
+    if(entries[0].isIntersecting && !started){
+      started = true;
+      // eyebrow
+      var ey = document.getElementById('visi-ey');
+      if(ey){ setTimeout(function(){ ey.classList.add('in'); }, 100); }
+      setTimeout(type, 500);
+      visiObs.disconnect();
+    }
+  }, {threshold:.25});
+  var sec = document.getElementById('s-visi');
+  if(sec) visiObs.observe(sec);
+})();
+
+// ── 3. PILLAR ENTRANCE ──
+(function(){
+  var pillars = [
+    {id:'vp1', delay:0},
+    {id:'vp2', delay:180},
+    {id:'vp3', delay:360},
+  ];
+  var done = false;
+  var obs = new IntersectionObserver(function(entries){
+    if(entries[0].isIntersecting && !done){
+      done = true;
+      pillars.forEach(function(p){
+        setTimeout(function(){
+          var el = document.getElementById(p.id);
+          if(el) el.classList.add('in');
+        }, p.delay);
+      });
+      obs.disconnect();
+    }
+  }, {threshold:.2});
+  var wrap = document.querySelector('.visi-pillars');
+  if(wrap) obs.observe(wrap);
+})();
+
+// ── 4. STAT COUNTERS ──
+(function(){
+  var stats = [
+    {id:'vs1', delay:0},
+    {id:'vs2', delay:120},
+    {id:'vs3', delay:240},
+    {id:'vs4', delay:360},
+  ];
+  var done = false;
+
+  function countUp(el, target, duration){
+    var start = 0; var startTime = null;
+    function step(ts){
+      if(!startTime) startTime = ts;
+      var progress = Math.min((ts - startTime) / duration, 1);
+      var ease = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.floor(ease * target);
+      if(progress < 1) requestAnimationFrame(step);
+      else el.textContent = target;
+    }
+    requestAnimationFrame(step);
+  }
+
+  var obs = new IntersectionObserver(function(entries){
+    if(entries[0].isIntersecting && !done){
+      done = true;
+      stats.forEach(function(s){
+        setTimeout(function(){
+          var el = document.getElementById(s.id);
+          if(!el) return;
+          el.classList.add('in');
+          var counter = el.querySelector('.visi-counter');
+          if(counter){
+            var target = parseInt(counter.dataset.target);
+            countUp(counter, target, 1400);
+          }
+        }, s.delay);
+      });
+      obs.disconnect();
+    }
+  }, {threshold:.3});
+  var statsEl = document.getElementById('visi-stats');
+  if(statsEl) obs.observe(statsEl);
+})();
+
+// ── 5. WORD-SPLIT VISION STATEMENT ──
+(function(){
+  var container = document.getElementById('visi-stmt');
+  if(!container) return;
+
+  var text = 'EMINOR hadir untuk menjadi ekosistem musik indie Indonesia yang paling inklusif — di mana setiap musisi, dari kota manapun, bisa belajar, berkarya, dan berkembang bersama.';
+  var accents = ['ekosistem','inklusif','belajar,','berkarya,','berkembang'];
+
+  text.split(' ').forEach(function(word, i){
+    var span = document.createElement('span');
+    span.className = 'visi-word' + (accents.some(function(a){ return word.toLowerCase().startsWith(a); }) ? ' accent' : '');
+    span.textContent = word;
+    span.style.transitionDelay = (i * 40) + 'ms';
+    container.appendChild(span);
+    container.appendChild(document.createTextNode(' '));
+  });
+
+  var done = false;
+  var obs = new IntersectionObserver(function(entries){
+    if(entries[0].isIntersecting && !done){
+      done = true;
+      container.querySelectorAll('.visi-word').forEach(function(w){ w.classList.add('in'); });
+      obs.disconnect();
+    }
+  }, {threshold:.3});
+  obs.observe(container);
+})();
 </script>
 </body>
 </html>
