@@ -147,7 +147,7 @@ section{position:relative;overflow:hidden}
 .mid-wrap{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
 
 /* left: manifesto */
-.mf-ey{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#38A8CC;margin-bottom:1.5rem}
+.mf-ey{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#38A8CC;margin-bottom:1.5rem;padding-left:1.6rem}
 .mf-line{font-size:clamp(1rem,2.4vw,1.4rem);font-weight:300;color:rgba(255,255,255,.8);line-height:1.9;margin-bottom:.3rem}
 .mf-line.ac{font-size:clamp(1.1rem,2.7vw,1.55rem);font-weight:600;color:#fff}
 .mf-line.hl{color:#38A8CC}
@@ -175,18 +175,33 @@ section{position:relative;overflow:hidden}
 /* EMINOR brand mark inline */
 .brand-em{font-weight:800;letter-spacing:.06em;color:#fff}
 .brand-em span{color:#38A8CC}
+
+/* manifesto card — spinning border glow */
+.mf-card{position:relative;border-radius:20px;padding:1.75rem 1.75rem 1.75rem 0;overflow:hidden;background:rgba(8,14,30,.92);isolation:isolate}
+.mf-card-glow{position:absolute;inset:0;pointer-events:none;z-index:0}
+.mf-card-glow::before{content:'';position:absolute;inset:-160%;
+  background:conic-gradient(from 0deg at 50% 50%,
+    transparent 328deg,
+    rgba(56,168,204,.75) 342deg,
+    rgba(91,110,245,.5)  350deg,
+    transparent 360deg);
+  animation:mfCardSpin 5s linear infinite}
+.mf-card-glow::after{content:'';position:absolute;inset:1px;background:rgba(8,14,30,.94);border-radius:19px}
+@keyframes mfCardSpin{to{transform:rotate(360deg)}}
+.mf-card>*:not(.mf-card-glow){position:relative;z-index:1}
+
 /* right: live */
-.live-ey{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#38A8CC;background:rgba(56,168,204,.08);border:1px solid rgba(56,168,204,.22);padding:4px 12px;border-radius:20px;margin-bottom:1.25rem}
+.live-ey{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#38A8CC;background:rgba(56,168,204,.08);border:1px solid rgba(56,168,204,.22);padding:4px 12px;border-radius:20px;margin-bottom:.85rem}
 .ldot{width:5px;height:5px;border-radius:50%;background:#38A8CC;animation:lp 1.4s ease-in-out infinite}
 @keyframes lp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
-.live-h{font-size:1rem;font-weight:700;color:#fff;margin-bottom:1rem}
-.lcard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:.9rem 1rem;display:flex;gap:11px;align-items:flex-start;margin-bottom:8px;transition:.2s}
+.live-h{font-size:.9rem;font-weight:700;color:#fff;margin-bottom:.6rem}
+.lcard{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.5rem .75rem;display:flex;gap:9px;align-items:center;margin-bottom:5px;transition:.2s}
 .lcard:hover{border-color:rgba(56,168,204,.3)}
-.lic{font-size:1.25rem;flex-shrink:0;margin-top:1px}
-.lu{font-size:13px;font-weight:600;color:#fff}
-.ld{font-size:11.5px;color:var(--t2);margin-top:2px;line-height:1.5}
-.lt{font-size:10px;color:var(--t3);margin-top:4px}
-.live-more{display:block;text-align:center;font-size:12px;color:#38A8CC;margin-top:.75rem;letter-spacing:.04em;transition:.2s}
+.lic{font-size:1.05rem;flex-shrink:0}
+.lu{font-size:12px;font-weight:600;color:#fff}
+.ld{font-size:10.5px;color:var(--t2);margin-top:1px;line-height:1.4}
+.lt{font-size:9.5px;color:var(--t3);margin-top:1px}
+.live-more{display:block;text-align:center;font-size:12px;color:#38A8CC;margin-top:.6rem;letter-spacing:.04em;transition:.2s}
 .live-more:hover{opacity:.7}
 
 /* ── S4 — FITUR GRID ── */
@@ -394,7 +409,7 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
   {{-- Stats strip --}}
   <div class="stats-strip rv">
     <div class="ss-item">
-      <div class="ss-num"><span class="sc" data-t="50">50</span><span class="ss-suf">+</span></div>
+      <div class="ss-num"><span class="sc" data-t="100">100</span><span class="ss-suf">pertama</span></div>
       <div class="ss-lab">Musisi Aktif</div>
     </div>
     <div class="ss-item">
@@ -418,7 +433,8 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
   <div class="mid-wrap">
 
     {{-- LEFT: manifesto --}}
-    <div>
+    <div class="mf-card">
+      <div class="mf-card-glow"></div>
       <div class="mf-ey mr" id="mf-ey">Kami Percaya</div>
       <div class="mf-bar-wrap" id="mf-bar-wrap">
         <div class="mf-bar"></div>
@@ -516,7 +532,7 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
     </div>
     <div class="rm-head">Coming Soon</div>
     <div class="rm-pills">
-      @foreach(['AI Songwriter','Marketplace Session','Online Studio','Gig Finder Nasional','Festival Indie','Label Indie Platform'] as $s)
+      @foreach(['Marketplace Session','Studio Finder'] as $s)
       <span class="rp soon"><span class="rp-dot"></span>{{ $s }}</span>
       @endforeach
     </div>
