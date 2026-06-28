@@ -41,9 +41,20 @@ a{text-decoration:none;color:inherit}
 .itext{text-align:center;min-height:90px}
 .iline{font-size:clamp(.9rem,2.5vw,1.2rem);font-weight:300;color:rgba(255,255,255,.88);letter-spacing:.03em;opacity:0;transition:opacity .7s}
 .iline.s{opacity:1}
-.ilogo{font-size:clamp(2rem,7vw,3.2rem);font-weight:800;letter-spacing:.15em;color:#fff;opacity:0;transition:opacity 1s;margin-top:1.75rem}
-.ilogo span{color:#38A8CC}.ilogo.s{opacity:1}
-.itag{font-size:12px;color:rgba(255,255,255,.35);letter-spacing:.08em;opacity:0;transition:opacity 1s .3s;margin-top:.4rem;text-align:center}.itag.s{opacity:1}
+.ilogo{font-size:clamp(3rem,12vw,6.5rem);font-weight:800;letter-spacing:.18em;color:#fff;
+  opacity:0;transform:scale(.88);
+  transition:opacity .9s ease, transform .9s cubic-bezier(.22,1,.36,1);
+  margin-top:2rem;line-height:1}
+.ilogo span{color:#38A8CC}
+.ilogo.s{opacity:1;transform:scale(1)}
+.ilogo.s span{animation:accentflash 1.8s ease-out .6s forwards}
+@keyframes accentflash{
+  0%  {color:#38A8CC}
+  20% {color:#fff;text-shadow:0 0 40px #38A8CC,0 0 80px rgba(56,168,204,.4)}
+  100%{color:#38A8CC;text-shadow:0 0 12px rgba(56,168,204,.2)}
+}
+.itag{font-size:12px;color:rgba(255,255,255,.35);letter-spacing:.1em;opacity:0;
+  transition:opacity 1s .4s;margin-top:.6rem;text-align:center}.itag.s{opacity:1}
 
 /* ── NAV ── */
 nav{position:fixed;inset:0 0 auto;z-index:900;height:60px;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;transition:background .4s,border .4s}
@@ -112,12 +123,36 @@ section{position:relative;overflow:hidden}
 /* ── S3 — MANIFESTO + LIVE ── */
 #s-mid{padding:5rem 2rem;background:#020307}
 .mid-wrap{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
+
 /* left: manifesto */
 .mf-ey{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#38A8CC;margin-bottom:1.5rem}
 .mf-line{font-size:clamp(1rem,2.4vw,1.4rem);font-weight:300;color:rgba(255,255,255,.8);line-height:1.9;margin-bottom:.3rem}
 .mf-line.ac{font-size:clamp(1.1rem,2.7vw,1.55rem);font-weight:600;color:#fff}
 .mf-line.hl{color:#38A8CC}
 .mf-gap{height:1.4rem}
+
+/* manifesto bar + stagger reveal */
+.mf-bar-wrap{position:relative;padding-left:1.6rem}
+.mf-bar{position:absolute;left:0;top:0;width:2px;height:0;border-radius:2px;
+  background:linear-gradient(to bottom,#38A8CC,#5B6EF5 60%,#8B5CF6);
+  transition:height 2s cubic-bezier(.22,1,.36,1);box-shadow:0 0 8px rgba(56,168,204,.3)}
+.mf-bar-wrap.go .mf-bar{height:100%}
+
+/* individual line reveal: slide from left */
+.mr{opacity:0;transform:translateX(-20px);transition:opacity .55s ease, transform .55s cubic-bezier(.22,1,.36,1)}
+.mr.on{opacity:1;transform:none}
+
+/* highlight line glows after appearing */
+.mf-line.hl.on{animation:mfglow 3s ease-out .3s forwards}
+@keyframes mfglow{
+  0%  {text-shadow:none}
+  30% {text-shadow:0 0 28px rgba(56,168,204,.8),0 0 60px rgba(56,168,204,.3)}
+  100%{text-shadow:0 0 10px rgba(56,168,204,.2)}
+}
+
+/* EMINOR brand mark inline */
+.brand-em{font-weight:800;letter-spacing:.06em;color:#fff}
+.brand-em span{color:#38A8CC}
 /* right: live */
 .live-ey{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#38A8CC;background:rgba(56,168,204,.08);border:1px solid rgba(56,168,204,.22);padding:4px 12px;border-radius:20px;margin-bottom:1.25rem}
 .ldot{width:5px;height:5px;border-radius:50%;background:#38A8CC;animation:lp 1.4s ease-in-out infinite}
@@ -356,17 +391,20 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
 
     {{-- LEFT: manifesto --}}
     <div>
-      <div class="mf-ey rv">Kami Percaya</div>
-      <p class="mf-line rv">Bakat tidak memilih tempat lahir.</p>
-      <p class="mf-line rv">Musik tidak memilih kota.</p>
-      <div class="mf-gap"></div>
-      <p class="mf-line ac rv">Lagu yang hebat bisa lahir</p>
-      <p class="mf-line ac hl rv">di kamar berukuran 3×3 meter.</p>
-      <div class="mf-gap"></div>
-      <p class="mf-line rv" style="color:var(--t2)">Yang dibutuhkan hanyalah</p>
-      <p class="mf-line rv" style="color:var(--t2)">tempat untuk bertemu.</p>
-      <div class="mf-gap"></div>
-      <p class="mf-line ac rv" style="color:#38A8CC">Dan EMINOR ingin menjadi tempat itu.</p>
+      <div class="mf-ey mr" id="mf-ey">Kami Percaya</div>
+      <div class="mf-bar-wrap" id="mf-bar-wrap">
+        <div class="mf-bar"></div>
+        <p class="mf-line mr">Bakat tidak memilih tempat lahir.</p>
+        <p class="mf-line mr">Musik tidak memilih kota.</p>
+        <div class="mf-gap"></div>
+        <p class="mf-line ac mr">Lagu yang hebat bisa lahir</p>
+        <p class="mf-line ac hl mr">di kamar berukuran 3×3 meter.</p>
+        <div class="mf-gap"></div>
+        <p class="mf-line mr" style="color:var(--t2)">Yang dibutuhkan hanyalah</p>
+        <p class="mf-line mr" style="color:var(--t2)">tempat untuk bertemu.</p>
+        <div class="mf-gap"></div>
+        <p class="mf-line ac mr" style="color:#38A8CC">Dan <span class="brand-em">E<span>MINOR</span></span> ingin menjadi tempat itu.</p>
+      </div>
     </div>
 
     {{-- RIGHT: live community --}}
@@ -647,6 +685,30 @@ new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting
   },{threshold:.4});
   var strip=document.querySelector('.stats-strip');
   if(strip)obs.observe(strip);
+})();
+
+// ── MANIFESTO STAGGER ──
+(function(){
+  var done = false;
+  var obs  = new IntersectionObserver(function(es){
+    if(es[0].isIntersecting && !done){
+      done = true;
+      // eyebrow
+      var ey = document.getElementById('mf-ey');
+      if(ey) ey.classList.add('on');
+      // animated bar draws itself
+      var wrap = document.getElementById('mf-bar-wrap');
+      if(wrap) setTimeout(function(){ wrap.classList.add('go'); }, 120);
+      // stagger each line
+      var lines = document.querySelectorAll('#mf-bar-wrap .mr');
+      lines.forEach(function(el, i){
+        setTimeout(function(){ el.classList.add('on'); }, 180 + i * 110);
+      });
+      obs.disconnect();
+    }
+  }, {threshold:.18});
+  var sec = document.getElementById('s-mid');
+  if(sec) obs.observe(sec);
 })();
 
 // ── MODAL ──
