@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Maftune — Rumah Pertama Musisi Indonesia</title>
-<meta name="description" content="Maftune adalah rumah pertama bagi musisi Indonesia yang sedang tumbuh sendirian. Belajar, berkarya, dan bertemu musisi lain — semua di satu tempat.">
-<meta property="og:title" content="Maftune — Rumah Pertama Musisi Indonesia">
-<meta property="og:description" content="Tempat tumbuh untuk musisi Indonesia yang berkarya sendirian.">
+<title>EMINOR — Ekosistem Musik Indie Indonesia</title>
+<meta name="description" content="EMINOR adalah ekosistem musik indie Indonesia — tempat belajar, berkarya, bertemu musisi, dan tumbuh bersama. Gratis untuk semua musisi Indonesia.">
+<meta property="og:title" content="EMINOR — Ekosistem Musik Indie Indonesia">
+<meta property="og:description" content="Ekosistem musik indie Indonesia. Belajar, berkarya, dan bertemu musisi — semua di satu tempat.">
 <meta property="og:image" content="{{ asset('images/Margonoandi.jpeg') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -284,15 +284,15 @@ footer{background:#020307;padding:5rem 2rem 3rem;text-align:center;border-top:1p
     <div class="intro-line" id="il5" style="color:var(--text2);font-size:1rem">yang dibutuhkan</div>
     <div class="intro-line" id="il6" style="color:var(--text2);font-size:1rem">hanya tempat yang tepat.</div>
   </div>
-  <div class="intro-logo" id="intro-logo">MAF<span>TUNE</span></div>
-  <div class="intro-tagline" id="intro-tagline">Rumah pertama bagi musisi Indonesia</div>
+  <div class="intro-logo" id="intro-logo">E<span>MINOR</span></div>
+  <div class="intro-tagline" id="intro-tagline">Ekosistem Musik Indie Indonesia</div>
 </div>
 
 <!-- ─────────────────────────────────────────────
      NAVBAR
 ───────────────────────────────────────────── -->
 <nav id="navbar">
-  <a href="#" class="nav-logo">MAF<span>TUNE</span></a>
+  <a href="#" class="nav-logo">E<span>MINOR</span></a>
   <ul class="nav-links">
     <li><a href="#s-manifesto">Tentang</a></li>
     <li><a href="#s-fitur">Fitur</a></li>
@@ -324,7 +324,7 @@ footer{background:#020307;padding:5rem 2rem 3rem;text-align:center;border-top:1p
     </div>
 
     <p class="hero-tagline" id="hero-tagline">
-      Maftune adalah rumah pertama<br>
+      EMINOR — Ekosistem Musik Indie Indonesia.<br>
       bagi musisi Indonesia<br>
       yang sedang tumbuh sendirian.
     </p>
@@ -439,7 +439,7 @@ footer{background:#020307;padding:5rem 2rem 3rem;text-align:center;border-top:1p
     <p class="manifesto-line reveal" style="color:var(--text2)">Yang dibutuhkan hanyalah</p>
     <p class="manifesto-line reveal" style="color:var(--text2)">tempat untuk bertemu.</p>
     <div class="manifesto-spacer"></div>
-    <p class="manifesto-line accent reveal">Dan Maftune ingin menjadi tempat itu.</p>
+    <p class="manifesto-line accent reveal">Dan EMINOR ingin menjadi tempat itu.</p>
   </div>
 </section>
 
@@ -449,7 +449,7 @@ footer{background:#020307;padding:5rem 2rem 3rem;text-align:center;border-top:1p
 <section id="s-live">
   <div style="text-align:center">
     <div class="live-badge"><div class="live-dot"></div> Live Terus</div>
-    <h2 class="s-title" style="color:#fff">Hari Ini di Maftune</h2>
+    <h2 class="s-title" style="color:#fff">Hari Ini di EMINOR</h2>
     <p class="s-sub" style="color:var(--text2)">Bergabung setiap hari — musisi sepertimu selalu aktif di sini.</p>
   </div>
 
@@ -585,7 +585,7 @@ footer{background:#020307;padding:5rem 2rem 3rem;text-align:center;border-top:1p
      FOOTER
 ───────────────────────────────────────────── -->
 <footer>
-  <div class="footer-logo">MAF<span>TUNE</span></div>
+  <div class="footer-logo">E<span>MINOR</span></div>
   <p class="footer-tagline">
     Rumah pertama<br>bagi musisi Indonesia<br>yang sedang tumbuh sendirian.
   </p>
@@ -603,7 +603,7 @@ footer{background:#020307;padding:5rem 2rem 3rem;text-align:center;border-top:1p
     <a href="{{ route('library') }}">Diskografi</a>
     <a href="{{ route('google.login') }}">Masuk</a>
   </div>
-  <p class="footer-copy">© {{ date('Y') }} Maftune · margonoandi.my.id</p>
+  <p class="footer-copy">© {{ date('Y') }} EMINOR — Ekosistem Musik Indie Indonesia · margonoandi.my.id</p>
 </footer>
 
 <!-- ─────────────────────────────────────────────
@@ -632,7 +632,7 @@ footer{background:#020307;padding:5rem 2rem 3rem;text-align:center;border-top:1p
 <script>
 // ── INTRO ──
 (function(){
-  var seen = sessionStorage.getItem('mft_intro');
+  var seen = sessionStorage.getItem('eminor_intro');
   if (seen) { document.getElementById('intro').style.display = 'none'; initHero(); return; }
 
   var AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -680,14 +680,14 @@ footer{background:#020307;padding:5rem 2rem 3rem;text-align:center;border-top:1p
     var el = document.getElementById('intro');
     el.classList.add('fade-out');
     setTimeout(function(){ el.style.display='none'; initHero(); }, 900);
-    sessionStorage.setItem('mft_intro','1');
+    sessionStorage.setItem('eminor_intro','1');
   }
 
   seq.forEach(function(s){ setTimeout(s[1], s[0]); });
 })();
 
 function skipIntro(){
-  sessionStorage.setItem('mft_intro','1');
+  sessionStorage.setItem('eminor_intro','1');
   var el = document.getElementById('intro');
   el.classList.add('fade-out');
   setTimeout(function(){ el.style.display='none'; initHero(); }, 500);
