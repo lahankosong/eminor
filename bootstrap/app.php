@@ -15,9 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'isAdmin'    => \App\Http\Middleware\IsAdmin::class,
             'trackvisit' => \App\Http\Middleware\TrackPageVisit::class,
         ]);
-        // Guest yang akses route ber-auth diarahkan ke login Google
-        // (project tidak punya route bernama "login" → tanpa ini akan 500)
-        $middleware->redirectGuestsTo(fn () => route('google.login'));
+        // Guest yang akses route ber-auth diarahkan ke landing page EMINOR
+        // (timer 2 menit di landing akan memandu mereka login secara natural)
+        $middleware->redirectGuestsTo(fn () => route('home'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -10,9 +10,6 @@ class HomeController extends Controller
 {
     public function index()
     {
-        if (auth()->check()) {
-            return redirect('/aku');
-        }
         $songs = Song::where('is_active', true)
                      ->orderBy('track_number')
                      ->get();
@@ -124,7 +121,7 @@ class HomeController extends Controller
             $liveActivity = $acts->sortByDesc('ts')->take(5)->values();
         } catch (\Throwable $e) {}
 
-        return view('home', compact('songs', 'featuredSong', 'ctaSongs', 'settings', 'seo', 'musicians', 'previewPosts', 'liveActivity'));
+        return view('aku', compact('songs', 'featuredSong', 'ctaSongs', 'settings', 'seo', 'musicians', 'previewPosts', 'liveActivity'));
     }
 
     /** sitemap.xml dinamis: homepage + semua lagu aktif, termasuk image:image untuk Google Image. */

@@ -140,7 +140,8 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
 
 Route::middleware(['auth'])->group(function () {
     // Fanbase routes — track entry pertama ke fanbase per sesi
-    Route::get('/aku', [AkuController::class, 'index'])->name('aku')->middleware('trackvisit:fanbase');
+    // /aku sekarang redirect ke / (landing = app utama EMINOR untuk semua user)
+    Route::get('/aku', fn() => redirect('/'))->name('aku');
     Route::post('/aku', [AkuController::class, 'store'])->name('aku.store');
     Route::delete('/aku/{id}', [AkuController::class, 'destroy'])->name('aku.destroy');
     Route::post('/aku/{id}/like', [AkuController::class, 'like'])->name('aku.like');
