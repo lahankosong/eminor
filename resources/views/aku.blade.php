@@ -418,7 +418,11 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
     <li><a href="#s-mid">Komunitas</a></li>
     <li><a href="#s-feat">Roadmap</a></li>
   </ul>
-  <a href="{{ route('google.login') }}" class="ncta">Mulai Perjalanan</a>
+  @guest
+  <a href="#" onclick="openModal();return false;" class="ncta">Mulai Perjalanan</a>
+  @else
+  <a href="{{ route('kamu') }}" class="ncta">Dashboard</a>
+  @endguest
   <button class="nmob" onclick="toggleNav()">☰</button>
 </nav>
 
@@ -462,7 +466,11 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
       <div class="heqb"></div><div class="heqb"></div>
     </div>
     <div class="hact" id="hact">
-      <a href="{{ route('google.login') }}" class="btn btn-p">🎵 Mulai Perjalanan Musik</a>
+      @guest
+      <a href="#" onclick="openModal();return false;" class="btn btn-p">🎵 Mulai Perjalanan Musik</a>
+      @else
+      <a href="{{ route('kamu') }}" class="btn btn-p">🎵 Masuk ke Komunitas</a>
+      @endguest
       <a href="#s-mid" class="btn btn-g">▶ Kisah Kami</a>
     </div>
   </div>
@@ -662,7 +670,11 @@ $mqItems = ['Jakarta','Gitar','Indie Pop','Bandung','Piano','Folk','Yogyakarta',
       <div class="fc-d">31 artikel lengkap: teori, karir, produksi, dan bisnis musik indie.</div>
       <div class="fc-link">Baca materi →</div>
     </a>
-    <a href="{{ route('google.login') }}" class="fcard">
+    @guest
+    <a href="#" onclick="openModal();return false;" class="fcard">
+    @else
+    <a href="{{ route('kamu') }}" class="fcard">
+    @endguest
       <div class="fc-ic">👥</div>
       <div class="fc-t">Direktori Musisi</div>
       <div class="fc-d">Temukan kolaborator, session player, dan personil band by kota & genre.</div>
@@ -727,7 +739,11 @@ $mqItems = ['Jakarta','Gitar','Indie Pop','Bandung','Piano','Folk','Yogyakarta',
     <a href="{{ route('gig.board') }}">Papan Gig</a>
     <a href="{{ route('library.materi') }}">Materi</a>
     <a href="{{ route('library') }}">Diskografi</a>
-    <a href="{{ route('google.login') }}">Masuk</a>
+    @guest
+    <a href="#" onclick="openModal();return false;">Masuk</a>
+    @else
+    <a href="{{ route('kamu') }}">Dashboard</a>
+    @endguest
   </div>
   <p class="fcopy">© {{ date('Y') }} EMINOR — Ekosistem Musik Indie Indonesia · margonoandi.my.id</p>
 </footer>
