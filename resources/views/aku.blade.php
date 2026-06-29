@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>EMINOR — Ekosistem Musik Indie Indonesia</title>
-<meta name="description" content="EMINOR adalah ekosistem musik indie Indonesia — tempat belajar, berkarya, bertemu musisi, dan tumbuh bersama. Gratis untuk semua musisi.">
-<meta property="og:title" content="EMINOR — Ekosistem Musik Indie Indonesia">
-<meta property="og:image" content="{{ asset('images/Margonoandi.jpeg') }}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
+@extends('layouts.fanbase')
+
+@section('title', 'EMINOR — Ekosistem Musik Indie Indonesia')
+
+@push('styles')
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -33,8 +28,6 @@ a{text-decoration:none;color:inherit}
 /* ── INTRO ── */
 #intro{position:fixed;inset:0;background:#020307;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s}
 #intro.out{opacity:0;pointer-events:none}
-
-/* intro background */
 .ibg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .iaur{position:absolute;left:50%;top:50%;width:600px;height:600px;margin:-300px 0 0 -300px;
   background:radial-gradient(circle,rgba(56,168,204,.07) 0%,rgba(91,110,245,.05) 40%,transparent 70%);
@@ -77,18 +70,8 @@ a{text-decoration:none;color:inherit}
 .itag{font-size:12px;color:rgba(255,255,255,.35);letter-spacing:.1em;opacity:0;
   transition:opacity 1s .4s;margin-top:.6rem;text-align:center}.itag.s{opacity:1}
 
-/* ── NAV ── */
-nav{position:fixed;inset:0 0 auto;z-index:900;height:60px;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;transition:background .4s,border .4s}
-nav.on{background:rgba(6,8,15,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
-.nlogo{font-size:1.1rem;font-weight:800;letter-spacing:.1em;color:#fff}.nlogo span{color:#38A8CC}
-.nlinks{display:flex;gap:1.75rem;list-style:none}
-.nlinks a{font-size:12.5px;color:var(--t2);letter-spacing:.04em;transition:.2s}.nlinks a:hover{color:#fff}
-.ncta{background:#38A8CC;color:#fff;font-size:12px;font-weight:700;padding:8px 20px;border-radius:50px;letter-spacing:.05em;transition:.2s;white-space:nowrap}
-.ncta:hover{background:#2d8fad;transform:translateY(-1px)}
-.nmob{display:none;background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer}
-section{position:relative;overflow:hidden}
-
 /* ── HERO ── */
+section{position:relative;overflow:hidden}
 #hero{min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 3rem 4.5rem}
 .hbg{position:absolute;inset:0}
 .hslide{position:absolute;inset:0;opacity:0;transition:opacity 1.8s ease}
@@ -105,8 +88,6 @@ section{position:relative;overflow:hidden}
 .hf.sm{font-size:clamp(1rem,2.2vw,1.35rem);color:var(--t2)}
 .hf.big{font-size:clamp(1.5rem,3.8vw,2.5rem);font-weight:700;color:#fff;line-height:1.3}
 .hf.big span{color:#38A8CC}
-.htag{font-size:clamp(.88rem,1.8vw,1rem);color:var(--t2);line-height:1.85;max-width:460px;margin-bottom:2.25rem;opacity:0;transition:opacity .8s}
-.htag.s{opacity:1}
 .hact{display:flex;gap:12px;flex-wrap:wrap;opacity:0;transition:opacity .8s}
 .hact.s{opacity:1}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 30px;border-radius:50px;font-size:13.5px;font-weight:600;letter-spacing:.05em;cursor:pointer;transition:.2s;border:none;font-family:inherit}
@@ -119,7 +100,7 @@ section{position:relative;overflow:hidden}
 .harr{width:1px;height:36px;background:linear-gradient(to bottom,transparent,#38A8CC);animation:sp 2s ease-in-out infinite}
 @keyframes sp{0%,100%{opacity:.3;transform:scaleY(.8)}50%{opacity:1;transform:scaleY(1)}}
 
-/* ── S2 — EXPLORE (cards + stats) ── */
+/* ── S2 — EXPLORE ── */
 #s-exp{padding:4.5rem 2rem;background:#06080f}
 .exp-top{text-align:center;margin-bottom:2.5rem}
 .exp-ey{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#38A8CC;margin-bottom:.6rem}
@@ -134,7 +115,6 @@ section{position:relative;overflow:hidden}
 .ci-t{font-size:13px;font-weight:700;color:#fff;margin-bottom:.45rem}
 .ci-div{width:24px;height:1.5px;background:#38A8CC;border-radius:2px;margin:.5rem 0}
 .ci-tag{font-size:11px;color:var(--t2);line-height:1.8}
-/* stats strip */
 .stats-strip{display:flex;border:1px solid var(--border);border-radius:14px;overflow:hidden;max-width:600px;margin:0 auto}
 .ss-item{flex:1;padding:1rem .75rem;text-align:center;border-right:1px solid var(--border)}
 .ss-item:last-child{border-right:none}
@@ -145,52 +125,34 @@ section{position:relative;overflow:hidden}
 /* ── S3 — MANIFESTO + LIVE ── */
 #s-mid{padding:5rem 2rem;background:#020307}
 .mid-wrap{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
-
-/* left: manifesto */
 .mf-ey{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#38A8CC;margin-bottom:1.5rem;padding-left:1.6rem}
 .mf-line{font-size:clamp(1rem,2.4vw,1.4rem);font-weight:300;color:rgba(255,255,255,.8);line-height:1.9;margin-bottom:.3rem}
 .mf-line.ac{font-size:clamp(1.1rem,2.7vw,1.55rem);font-weight:600;color:#fff}
 .mf-line.hl{color:#38A8CC}
 .mf-gap{height:1.4rem}
-
-/* manifesto bar + stagger reveal */
 .mf-bar-wrap{position:relative;padding-left:1.6rem}
 .mf-bar{position:absolute;left:0;top:0;width:2px;height:0;border-radius:2px;
   background:linear-gradient(to bottom,#38A8CC,#5B6EF5 60%,#8B5CF6);
   transition:height 2s cubic-bezier(.22,1,.36,1);box-shadow:0 0 8px rgba(56,168,204,.3)}
 .mf-bar-wrap.go .mf-bar{height:100%}
-
-/* individual line reveal: slide from left */
 .mr{opacity:0;transform:translateX(-20px);transition:opacity .55s ease, transform .55s cubic-bezier(.22,1,.36,1)}
 .mr.on{opacity:1;transform:none}
-
-/* highlight line glows after appearing */
 .mf-line.hl.on{animation:mfglow 3s ease-out .3s forwards}
 @keyframes mfglow{
   0%  {text-shadow:none}
   30% {text-shadow:0 0 28px rgba(56,168,204,.8),0 0 60px rgba(56,168,204,.3)}
   100%{text-shadow:0 0 10px rgba(56,168,204,.2)}
 }
-
-/* EMINOR brand mark inline */
 .brand-em{font-weight:800;letter-spacing:.06em;color:#fff}
 .brand-em span{color:#38A8CC}
-
-/* manifesto card — spinning border glow */
 .mf-card{position:relative;border-radius:20px;padding:1.75rem 1.75rem 1.75rem 0;overflow:hidden;background:rgba(8,14,30,.92);isolation:isolate}
 .mf-card-glow{position:absolute;inset:0;pointer-events:none;z-index:0}
 .mf-card-glow::before{content:'';position:absolute;inset:-160%;
-  background:conic-gradient(from 0deg at 50% 50%,
-    transparent 328deg,
-    rgba(56,168,204,.75) 342deg,
-    rgba(91,110,245,.5)  350deg,
-    transparent 360deg);
+  background:conic-gradient(from 0deg at 50% 50%,transparent 328deg,rgba(56,168,204,.75) 342deg,rgba(91,110,245,.5) 350deg,transparent 360deg);
   animation:mfCardSpin 5s linear infinite}
 .mf-card-glow::after{content:'';position:absolute;inset:1px;background:rgba(8,14,30,.94);border-radius:19px}
 @keyframes mfCardSpin{to{transform:rotate(360deg)}}
 .mf-card>*:not(.mf-card-glow){position:relative;z-index:1}
-
-/* right: live */
 .live-ey{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#38A8CC;background:rgba(56,168,204,.08);border:1px solid rgba(56,168,204,.22);padding:4px 12px;border-radius:20px;margin-bottom:.85rem}
 .ldot{width:5px;height:5px;border-radius:50%;background:#38A8CC;animation:lp 1.4s ease-in-out infinite}
 @keyframes lp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
@@ -219,7 +181,6 @@ section{position:relative;overflow:hidden}
 .fc-d{font-size:12px;color:var(--t2);line-height:1.65}
 .fc-link{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:#38A8CC;margin-top:.7rem;font-weight:600;transition:.2s}
 .fc-link:hover{gap:8px}
-/* roadmap (di dalam s-feat) */
 .rm-row{max-width:820px;margin:0 auto}
 .rm-head{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--t3);font-weight:700;margin-bottom:.9rem;display:flex;align-items:center;gap:8px}
 .rm-head::after{content:'';flex:1;height:1px;background:var(--border)}
@@ -265,6 +226,8 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
 .flinks{display:flex;gap:1.75rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem}
 .flinks a{font-size:11.5px;color:var(--t3);letter-spacing:.05em;transition:.2s}.flinks a:hover{color:#38A8CC}
 .fcopy{font-size:10.5px;color:var(--t3)}
+.fwave{overflow:hidden;height:48px;margin-bottom:1.75rem;opacity:.7}
+.fwave svg{width:100%;height:48px;display:block}
 
 /* ── FILM GRAIN ── */
 #grain{position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:.032;
@@ -280,10 +243,7 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
 
 /* ── VINYL (intro) ── */
 .vinyl{width:90px;height:90px;border-radius:50%;position:relative;
-  background:conic-gradient(#0f0f0f 0deg,#1c1c1c 22deg,#090909 44deg,#151515 66deg,
-    #0f0f0f 88deg,#090909 110deg,#1c1c1c 132deg,#0f0f0f 154deg,#111 176deg,
-    #090909 198deg,#151515 220deg,#1c1c1c 242deg,#0f0f0f 264deg,#111 286deg,
-    #090909 308deg,#1c1c1c 330deg,#0f0f0f 352deg,#111 360deg);
+  background:conic-gradient(#0f0f0f 0deg,#1c1c1c 22deg,#090909 44deg,#151515 66deg,#0f0f0f 88deg,#090909 110deg,#1c1c1c 132deg,#0f0f0f 154deg,#111 176deg,#090909 198deg,#151515 220deg,#1c1c1c 242deg,#0f0f0f 264deg,#111 286deg,#090909 308deg,#1c1c1c 330deg,#0f0f0f 352deg,#111 360deg);
   animation:vspin 4s linear infinite;margin-bottom:1.5rem;
   box-shadow:0 0 30px rgba(56,168,204,.22),0 0 70px rgba(56,168,204,.08),0 0 120px rgba(56,168,204,.04)}
 .vinyl::before{content:'';position:absolute;inset:37%;border-radius:50%;
@@ -302,17 +262,11 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
 
 /* ── EQ BARS (hero) ── */
 .heq{display:flex;align-items:flex-end;gap:3px;height:20px;margin-bottom:1.5rem;opacity:.65}
-.heqb{width:3px;border-radius:2px 2px 0 0;
-  background:linear-gradient(to top,#38A8CC,#5B6EF5);
-  animation:heqbar 1s ease-in-out infinite alternate}
-.heqb:nth-child(1){animation-duration:.78s}
-.heqb:nth-child(2){animation-duration:1.12s;animation-delay:.1s}
-.heqb:nth-child(3){animation-duration:.68s;animation-delay:.22s}
-.heqb:nth-child(4){animation-duration:1.25s;animation-delay:.08s}
-.heqb:nth-child(5){animation-duration:.9s;animation-delay:.35s}
-.heqb:nth-child(6){animation-duration:1.05s;animation-delay:.15s}
-.heqb:nth-child(7){animation-duration:.72s;animation-delay:.45s}
-.heqb:nth-child(8){animation-duration:1.18s;animation-delay:.05s}
+.heqb{width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,#38A8CC,#5B6EF5);animation:heqbar 1s ease-in-out infinite alternate}
+.heqb:nth-child(1){animation-duration:.78s}.heqb:nth-child(2){animation-duration:1.12s;animation-delay:.1s}
+.heqb:nth-child(3){animation-duration:.68s;animation-delay:.22s}.heqb:nth-child(4){animation-duration:1.25s;animation-delay:.08s}
+.heqb:nth-child(5){animation-duration:.9s;animation-delay:.35s}.heqb:nth-child(6){animation-duration:1.05s;animation-delay:.15s}
+.heqb:nth-child(7){animation-duration:.72s;animation-delay:.45s}.heqb:nth-child(8){animation-duration:1.18s;animation-delay:.05s}
 @keyframes heqbar{from{height:3px}to{height:18px}}
 
 /* ── S-HOW — CARA KERJA ── */
@@ -325,9 +279,7 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
 .how-h{font-size:clamp(1.2rem,2.8vw,1.7rem);font-weight:700;color:#fff;margin-bottom:2.5rem}
 .how-grid{display:flex;align-items:stretch;gap:.85rem;justify-content:center}
 .how-conn{display:flex;align-items:center;padding-top:1.25rem;color:var(--t3);flex-shrink:0;font-size:.8rem}
-.how-step{flex:1;max-width:235px;background:var(--card);border:1px solid var(--border);
-  border-radius:16px;padding:1.4rem 1.1rem;position:relative;text-align:left;
-  transition:.22s}
+.how-step{flex:1;max-width:235px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.4rem 1.1rem;position:relative;text-align:left;transition:.22s}
 .how-step:hover{border-color:rgba(56,168,204,.35);transform:translateY(-4px);box-shadow:0 14px 36px rgba(56,168,204,.09)}
 .how-num{font-size:9px;font-weight:800;letter-spacing:.1em;color:#38A8CC;margin-bottom:.65rem}
 .how-ic{font-size:1.8rem;margin-bottom:.55rem;display:block}
@@ -335,18 +287,13 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
 .how-d{font-size:11.5px;color:var(--t2);line-height:1.75}
 
 /* ── MARQUEE STRIP ── */
-.mq-wrap{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
-  padding:10px 0;background:rgba(56,168,204,.025)}
+.mq-wrap{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:10px 0;background:rgba(56,168,204,.025)}
 .mq-track{display:flex;gap:0;width:max-content;animation:mq 40s linear infinite}
 .mq-track:hover{animation-play-state:paused}
 .mq-item{display:inline-flex;align-items:center;gap:1.5rem;padding:0 1.5rem;white-space:nowrap}
 .mq-item>span{font-size:10.5px;color:var(--t2);letter-spacing:.07em;text-transform:uppercase}
 .mq-item>.sep{color:var(--t3);font-size:7px}
 @keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-
-/* ── WAVEFORM FOOTER ── */
-.fwave{overflow:hidden;height:48px;margin-bottom:1.75rem;opacity:.7}
-.fwave svg{width:100%;height:48px;display:block}
 
 /* ── REVEAL ── */
 .rv{opacity:0;transform:translateY(20px);transition:.65s ease}.rv.on{opacity:1;transform:none}
@@ -360,7 +307,6 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
 }
 @media(max-width:640px){
   #hero{padding:0 1.5rem 4rem}
-  .nlinks,.ncta{display:none}.nmob{display:block}
   .cgrid{grid-template-columns:1fr 1fr}
   .fgrid{grid-template-columns:1fr}
   .stats-strip{flex-wrap:wrap}.ss-item{min-width:50%;border-right:none;border-bottom:1px solid var(--border)}
@@ -377,9 +323,14 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
   .hact{flex-direction:column}
   .btn{justify-content:center}
 }
+
+/* fanbase topbar integration */
+.fb-topbar{background:rgba(6,8,15,.92)!important;border-bottom:1px solid rgba(56,168,204,.14)!important;backdrop-filter:blur(16px)}
+.fb-brand{color:#fff!important;font-family:'Sora',sans-serif!important;font-weight:800!important;letter-spacing:.08em!important}
 </style>
-</head>
-<body>
+@endpush
+
+@section('fullpage')
 <div id="grain"></div>
 <div id="cglow"></div>
 
@@ -408,23 +359,6 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
   <div class="ilogo" id="ilogo">E<span>MINOR</span></div>
   <div class="itag" id="itag">Ekosistem Musik Indie Indonesia</div>
 </div>
-
-{{-- ════════ NAVBAR ════════ --}}
-<nav id="nav">
-  <a href="#" class="nlogo">E<span>MINOR</span></a>
-  <ul class="nlinks">
-    <li><a href="#s-mid">Visi</a></li>
-    <li><a href="#s-feat">Fitur</a></li>
-    <li><a href="#s-mid">Komunitas</a></li>
-    <li><a href="#s-feat">Roadmap</a></li>
-  </ul>
-  @guest
-  <a href="#" onclick="openModal();return false;" class="ncta">Mulai Perjalanan</a>
-  @else
-  <a href="{{ route('kamu') }}" class="ncta">Dashboard</a>
-  @endguest
-  <button class="nmob" onclick="toggleNav()">☰</button>
-</nav>
 
 {{-- ════════ HERO ════════ --}}
 <section id="hero">
@@ -456,10 +390,8 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
       <div class="hf sm"   id="hf6">Tidak semua musisi punya studio.</div>
       <div class="hf sm"   id="hf7">Tidak semua musisi punya koneksi.</div>
       <div class="hf big"  id="hf8">Tetapi semua musisi<br>pantas didengar.</div>
-      <div class="hf big"  id="hf9">E<span>MINOR</span> adalah Ekosistem Musisi Indie Indonesia<br>
-      yang sedang tumbuh sendirian.</div>
+      <div class="hf big"  id="hf9">E<span>MINOR</span> adalah Ekosistem Musisi Indie Indonesia<br>yang sedang tumbuh sendirian.</div>
     </div>
-
     <div class="heq" aria-hidden="true">
       <div class="heqb"></div><div class="heqb"></div><div class="heqb"></div>
       <div class="heqb"></div><div class="heqb"></div><div class="heqb"></div>
@@ -474,10 +406,7 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
       <a href="#s-mid" class="btn btn-g">▶ Kisah Kami</a>
     </div>
   </div>
-  <div class="hscroll">
-    <span>Scroll</span>
-    <div class="harr"></div>
-  </div>
+  <div class="hscroll"><span>Scroll</span><div class="harr"></div></div>
 </section>
 
 {{-- ════════ S2 — EXPLORE ════════ --}}
@@ -488,56 +417,17 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
     <p class="exp-sub">Pilih jalurmu — dan EMINOR akan memandumu.</p>
   </div>
   <div class="cgrid rv">
-    <div class="ci" onclick="openModal()">
-      <div class="ci-ic">🎸</div>
-      <div class="ci-t">Belajar Gitar</div>
-      <div class="ci-div"></div>
-      <div class="ci-tag">Chord · Tuner · BPM</div>
-    </div>
-    <div class="ci" onclick="openModal()">
-      <div class="ci-ic">🎤</div>
-      <div class="ci-t">Menulis Lagu</div>
-      <div class="ci-div"></div>
-      <div class="ci-tag">Notes · Inspirasi · AI</div>
-    </div>
-    <div class="ci" onclick="openModal()">
-      <div class="ci-ic">🥁</div>
-      <div class="ci-t">Mencari Band</div>
-      <div class="ci-div"></div>
-      <div class="ci-tag">Personil · Audisi · Kota</div>
-    </div>
-    <div class="ci" onclick="openModal()">
-      <div class="ci-ic">❤️</div>
-      <div class="ci-t">Bagikan Karya</div>
-      <div class="ci-div"></div>
-      <div class="ci-tag">Upload · Feedback · Fans</div>
-    </div>
-    <div class="ci" onclick="openModal()">
-      <div class="ci-ic">🌎</div>
-      <div class="ci-t">Komunitas</div>
-      <div class="ci-div"></div>
-      <div class="ci-tag">Chat · Gig · Diskusi</div>
-    </div>
+    <div class="ci" onclick="openModal()"><div class="ci-ic">🎸</div><div class="ci-t">Belajar Gitar</div><div class="ci-div"></div><div class="ci-tag">Chord · Tuner · BPM</div></div>
+    <div class="ci" onclick="openModal()"><div class="ci-ic">🎤</div><div class="ci-t">Menulis Lagu</div><div class="ci-div"></div><div class="ci-tag">Notes · Inspirasi · AI</div></div>
+    <div class="ci" onclick="openModal()"><div class="ci-ic">🥁</div><div class="ci-t">Mencari Band</div><div class="ci-div"></div><div class="ci-tag">Personil · Audisi · Kota</div></div>
+    <div class="ci" onclick="openModal()"><div class="ci-ic">❤️</div><div class="ci-t">Bagikan Karya</div><div class="ci-div"></div><div class="ci-tag">Upload · Feedback · Fans</div></div>
+    <div class="ci" onclick="openModal()"><div class="ci-ic">🌎</div><div class="ci-t">Komunitas</div><div class="ci-div"></div><div class="ci-tag">Chat · Gig · Diskusi</div></div>
   </div>
-
-  {{-- Stats strip --}}
   <div class="stats-strip rv">
-    <div class="ss-item">
-      <div class="ss-num"><span class="sc" data-t="100">100</span><span class="ss-suf">pertama</span></div>
-      <div class="ss-lab">Musisi Aktif</div>
-    </div>
-    <div class="ss-item">
-      <div class="ss-num"><span class="sc" data-t="14">14</span></div>
-      <div class="ss-lab">Alat Gratis</div>
-    </div>
-    <div class="ss-item">
-      <div class="ss-num"><span class="sc" data-t="31">31</span></div>
-      <div class="ss-lab">Materi Musik</div>
-    </div>
-    <div class="ss-item">
-      <div class="ss-num">24<span class="ss-suf">/7</span></div>
-      <div class="ss-lab">Komunitas</div>
-    </div>
+    <div class="ss-item"><div class="ss-num"><span class="sc" data-t="100">100</span><span class="ss-suf">pertama</span></div><div class="ss-lab">Musisi Aktif</div></div>
+    <div class="ss-item"><div class="ss-num"><span class="sc" data-t="14">14</span></div><div class="ss-lab">Alat Gratis</div></div>
+    <div class="ss-item"><div class="ss-num"><span class="sc" data-t="31">31</span></div><div class="ss-lab">Materi Musik</div></div>
+    <div class="ss-item"><div class="ss-num">24<span class="ss-suf">/7</span></div><div class="ss-lab">Komunitas</div></div>
   </div>
 </section>
 
@@ -547,34 +437,17 @@ footer{background:#020307;padding:3.5rem 2rem 2.5rem;text-align:center;border-to
     <div class="how-ey">Cara Kerja</div>
     <h2 class="how-h">Tiga langkah. Tanpa hambatan.</h2>
     <div class="how-grid">
-      <div class="how-step">
-        <div class="how-num">01 / MULAI</div>
-        <span class="how-ic">👤</span>
-        <div class="how-t">Buat Profil</div>
-        <div class="how-d">Login dengan Google dalam 10 detik. Isi profil musisimu — genre, instrumen, kota, dan karya.</div>
-      </div>
+      <div class="how-step"><div class="how-num">01 / MULAI</div><span class="how-ic">👤</span><div class="how-t">Buat Profil</div><div class="how-d">Login dengan Google dalam 10 detik. Isi profil musisimu — genre, instrumen, kota, dan karya.</div></div>
       <div class="how-conn">→</div>
-      <div class="how-step">
-        <div class="how-num">02 / JELAJAHI</div>
-        <span class="how-ic">🔍</span>
-        <div class="how-t">Temukan</div>
-        <div class="how-d">Cari personil band, gig, materi belajar, atau sesama musisi di kotamu dan seluruh Indonesia.</div>
-      </div>
+      <div class="how-step"><div class="how-num">02 / JELAJAHI</div><span class="how-ic">🔍</span><div class="how-t">Temukan</div><div class="how-d">Cari personil band, gig, materi belajar, atau sesama musisi di kotamu dan seluruh Indonesia.</div></div>
       <div class="how-conn">→</div>
-      <div class="how-step">
-        <div class="how-num">03 / TUMBUH</div>
-        <span class="how-ic">🎵</span>
-        <div class="how-t">Berkarya</div>
-        <div class="how-d">Upload lagu, bagikan ke komunitas, dan dapatkan feedback nyata dari sesama musisi indie.</div>
-      </div>
+      <div class="how-step"><div class="how-num">03 / TUMBUH</div><span class="how-ic">🎵</span><div class="how-t">Berkarya</div><div class="how-d">Upload lagu, bagikan ke komunitas, dan dapatkan feedback nyata dari sesama musisi indie.</div></div>
     </div>
   </div>
 </section>
 
 {{-- ════════ MARQUEE STRIP ════════ --}}
-@php
-$mqItems = ['Jakarta','Gitar','Indie Pop','Bandung','Piano','Folk','Yogyakarta','Ukulele','Jazz','Surabaya','Bass','Metal','Bali','Drum','R&B','Medan','Biola','Reggae','Semarang','Flute','Electronic','Makassar','Saksofon','Blues','Vokal','Alternative','Ambient','Post-Rock'];
-@endphp
+@php $mqItems = ['Jakarta','Gitar','Indie Pop','Bandung','Piano','Folk','Yogyakarta','Ukulele','Jazz','Surabaya','Bass','Metal','Bali','Drum','R&B','Medan','Biola','Reggae','Semarang','Flute','Electronic','Makassar','Saksofon','Blues','Vokal','Alternative','Ambient','Post-Rock']; @endphp
 <div class="mq-wrap" aria-hidden="true">
   <div class="mq-track">
     @foreach(array_merge($mqItems,$mqItems) as $mq)
@@ -587,8 +460,6 @@ $mqItems = ['Jakarta','Gitar','Indie Pop','Bandung','Piano','Folk','Yogyakarta',
 <section id="s-mid">
   <div class="aurora"></div>
   <div class="mid-wrap">
-
-    {{-- LEFT: manifesto --}}
     <div class="mf-card">
       <div class="mf-card-glow"></div>
       <div class="mf-ey mr" id="mf-ey">Kami Percaya</div>
@@ -606,20 +477,11 @@ $mqItems = ['Jakarta','Gitar','Indie Pop','Bandung','Piano','Folk','Yogyakarta',
         <p class="mf-line ac mr" style="color:#38A8CC">Dan <span class="brand-em">E<span>MINOR</span></span> ingin menjadi tempat itu.</p>
       </div>
     </div>
-
-    {{-- RIGHT: live community --}}
     <div class="rv">
       <div class="live-ey"><div class="ldot"></div> Live Terus</div>
       <div class="live-h">Hari ini di EMINOR</div>
       @forelse($liveActivity as $act)
-      <div class="lcard">
-        <div class="lic">{{ $act['icon'] }}</div>
-        <div>
-          <div class="lu">{{ $act['user'] }}</div>
-          <div class="ld">{{ $act['text'] }}</div>
-          <div class="lt">{{ $act['time'] }}</div>
-        </div>
-      </div>
+      <div class="lcard"><div class="lic">{{ $act['icon'] }}</div><div><div class="lu">{{ $act['user'] }}</div><div class="ld">{{ $act['text'] }}</div><div class="lt">{{ $act['time'] }}</div></div></div>
       @empty
       <div class="lcard"><div class="lic">🎤</div><div><div class="lu">Fajar</div><div class="ld">Baru upload lagu perdana</div><div class="lt">2 menit lalu</div></div></div>
       <div class="lcard"><div class="lic">🥁</div><div><div class="lu">Rama</div><div class="ld">Sedang mencari drummer di Yogyakarta</div><div class="lt">5 menit lalu</div></div></div>
@@ -628,61 +490,26 @@ $mqItems = ['Jakarta','Gitar','Indie Pop','Bandung','Piano','Folk','Yogyakarta',
       @endforelse
       <a href="{{ route('gig.board') }}" class="live-more">Lihat semua aktivitas →</a>
     </div>
-
   </div>
 </section>
 
 {{-- ════════ S4 — FITUR + ROADMAP + CTA ════════ --}}
 <section id="s-feat">
-  <div class="feat-top rv">
-    <h2>Semua yang kamu butuhkan</h2>
-    <p>Tools, komunitas, dan peluang — dalam satu platform. Gratis.</p>
-  </div>
-
+  <div class="feat-top rv"><h2>Semua yang kamu butuhkan</h2><p>Tools, komunitas, dan peluang — dalam satu platform. Gratis.</p></div>
   <div class="fgrid rv">
-    <a href="{{ route('tools.chord-builder') }}" class="fcard">
-      <div class="fc-ic">🎸</div>
-      <div class="fc-t">Chord Builder</div>
-      <div class="fc-d">Visualisasi chord gitar, ukulele, piano & bass. Transposi otomatis.</div>
-      <div class="fc-link">Coba sekarang →</div>
-    </a>
-    <a href="{{ route('tools.bpm-kalkulator') }}" class="fcard">
-      <div class="fc-ic">🥁</div>
-      <div class="fc-t">BPM Calculator</div>
-      <div class="fc-d">Tap tempo untuk menemukan BPM lagu yang sedang kamu dengar.</div>
-      <div class="fc-link">Coba sekarang →</div>
-    </a>
-    <a href="{{ route('gig.board') }}" class="fcard">
-      <div class="fc-ic">🎪</div>
-      <div class="fc-t">Papan Gig</div>
-      <div class="fc-d">Audisi, session player, open mic & rekaman — peluang nasional.</div>
-      <div class="fc-link">Lihat gig →</div>
-    </a>
-    <a href="{{ route('tools.epk') }}" class="fcard">
-      <div class="fc-ic">📄</div>
-      <div class="fc-t">EPK Generator</div>
-      <div class="fc-d">Buat Electronic Press Kit profesional untuk dikirim ke label & promotor.</div>
-      <div class="fc-link">Buat EPK →</div>
-    </a>
-    <a href="{{ route('library.materi') }}" class="fcard">
-      <div class="fc-ic">📚</div>
-      <div class="fc-t">Materi Musik</div>
-      <div class="fc-d">31 artikel lengkap: teori, karir, produksi, dan bisnis musik indie.</div>
-      <div class="fc-link">Baca materi →</div>
-    </a>
+    <a href="{{ route('tools.chord-builder') }}" class="fcard"><div class="fc-ic">🎸</div><div class="fc-t">Chord Builder</div><div class="fc-d">Visualisasi chord gitar, ukulele, piano & bass. Transposi otomatis.</div><div class="fc-link">Coba sekarang →</div></a>
+    <a href="{{ route('tools.bpm-kalkulator') }}" class="fcard"><div class="fc-ic">🥁</div><div class="fc-t">BPM Calculator</div><div class="fc-d">Tap tempo untuk menemukan BPM lagu yang sedang kamu dengar.</div><div class="fc-link">Coba sekarang →</div></a>
+    <a href="{{ route('gig.board') }}" class="fcard"><div class="fc-ic">🎪</div><div class="fc-t">Papan Gig</div><div class="fc-d">Audisi, session player, open mic & rekaman — peluang nasional.</div><div class="fc-link">Lihat gig →</div></a>
+    <a href="{{ route('tools.epk') }}" class="fcard"><div class="fc-ic">📄</div><div class="fc-t">EPK Generator</div><div class="fc-d">Buat Electronic Press Kit profesional untuk dikirim ke label & promotor.</div><div class="fc-link">Buat EPK →</div></a>
+    <a href="{{ route('library.materi') }}" class="fcard"><div class="fc-ic">📚</div><div class="fc-t">Materi Musik</div><div class="fc-d">31 artikel lengkap: teori, karir, produksi, dan bisnis musik indie.</div><div class="fc-link">Baca materi →</div></a>
     @guest
     <a href="#" onclick="openModal();return false;" class="fcard">
     @else
     <a href="{{ route('kamu') }}" class="fcard">
     @endguest
-      <div class="fc-ic">👥</div>
-      <div class="fc-t">Direktori Musisi</div>
-      <div class="fc-d">Temukan kolaborator, session player, dan personil band by kota & genre.</div>
-      <div class="fc-link">Cari musisi →</div>
+      <div class="fc-ic">👥</div><div class="fc-t">Direktori Musisi</div><div class="fc-d">Temukan kolaborator, session player, dan personil band by kota & genre.</div><div class="fc-link">Cari musisi →</div>
     </a>
   </div>
-
-  {{-- Roadmap --}}
   <div class="rm-row rv">
     <div class="rm-head">Yang sudah ada</div>
     <div class="rm-pills">
@@ -697,15 +524,10 @@ $mqItems = ['Jakarta','Gitar','Indie Pop','Bandung','Piano','Folk','Yogyakarta',
       @endforeach
     </div>
   </div>
-
-  {{-- CTA --}}
   <div class="cta-wrap rv">
     <div class="aurora" style="opacity:.5"></div>
     <h2 class="cta-h" style="position:relative;z-index:1">Masih Berkarya Sendirian?</h2>
-    <p class="cta-sub" style="position:relative;z-index:1">
-      Bergabunglah bersama musisi Indonesia yang percaya<br>
-      karya hebat tidak ditentukan oleh tempat lahir.
-    </p>
+    <p class="cta-sub" style="position:relative;z-index:1">Bergabunglah bersama musisi Indonesia yang percaya<br>karya hebat tidak ditentukan oleh tempat lahir.</p>
     <div style="position:relative;z-index:1">
       <button class="cta-btn" onclick="openModal()">
         <div class="cta-line"></div>
@@ -728,12 +550,7 @@ $mqItems = ['Jakarta','Gitar','Indie Pop','Bandung','Piano','Folk','Yogyakarta',
   <div class="flogo">E<span>MINOR</span></div>
   <p class="ftag">Ekosistem Musik Indie Indonesia<br>Rumah pertama bagi musisi yang sedang tumbuh sendirian.</p>
   <div class="fdiv"></div>
-  <p class="fpoem">
-    Karena setiap lagu...<br>
-    <em>selalu dimulai</em><br>
-    <em>oleh seseorang yang berani</em><br>
-    <em>memainkan chord pertama.</em>
-  </p>
+  <p class="fpoem">Karena setiap lagu...<br><em>selalu dimulai</em><br><em>oleh seseorang yang berani</em><br><em>memainkan chord pertama.</em></p>
   <div class="flinks">
     <a href="{{ route('tools.index') }}">Alat Musisi</a>
     <a href="{{ route('gig.board') }}">Papan Gig</a>
@@ -765,12 +582,13 @@ $mqItems = ['Jakarta','Gitar','Indie Pop','Bandung','Piano','Folk','Yogyakarta',
     </a>
   </div>
 </div>
+@endsection
 
+@push('scripts')
 <script>
 // ── INTRO ──
 (function(){
   if(sessionStorage.getItem('eminor_i')){ document.getElementById('intro').style.display='none'; startHero(); return; }
-
   var AC = window.AudioContext||window.webkitAudioContext;
   function tick(){
     if(!AC) return;
@@ -784,7 +602,6 @@ $mqItems = ['Jakarta','Gitar','Indie Pop','Bandung','Piano','Folk','Yogyakarta',
   }
   var di=0,ds=[document.getElementById('d1'),document.getElementById('d2'),document.getElementById('d3')];
   function pd(){var d=ds[di%3];di++;d.style.animation='none';d.offsetHeight;d.style.animation='dpop .4s ease forwards';}
-
   var seq=[
     [0,   function(){tick();pd();}],
     [480, function(){tick();pd();}],
@@ -814,73 +631,38 @@ function skipIntro(){
   setTimeout(function(){el.style.display='none';startHero();},500);
 }
 
-// ── HERO TEXT LOOP (infinite) ──
+// ── HERO TEXT LOOP ──
 function startHero(){
-  // hold = ms the text stays visible AFTER fade-in
-  var FADE = 800;   // matches CSS transition duration
-  var GAP  = 280;   // silent gap between items
-  var items = [
-    {id:'hf0', hold: 700},   // Dulu...
-    {id:'hf1', hold:1600},   // musisi membutuhkan label...
-    {id:'hf2', hold: 700},   // Sekarang...
-    {id:'hf3', hold:1600},   // yang dibutuhkan...
-    {id:'hf4', hold:1600},   // Em
-    {id:'hf5', hold:1600},   // Tidak semua ... kota besar
-    {id:'hf6', hold:1600},   // Tidak semua ... studio
-    {id:'hf7', hold:2400},   // Tidak semua ... koneksi
-    {id:'hf8', hold:3200},   // Tetapi semua musisi pantas didengar
-    {id:'hf9', hold:3200},   // EMINOR adalah rumah pertama...
+  var FADE=800, GAP=280;
+  var items=[
+    {id:'hf0',hold:700},{id:'hf1',hold:1600},{id:'hf2',hold:700},{id:'hf3',hold:1600},
+    {id:'hf4',hold:1600},{id:'hf5',hold:1600},{id:'hf6',hold:1600},{id:'hf7',hold:2400},
+    {id:'hf8',hold:3200},{id:'hf9',hold:3200},
   ];
-
-  var idx = 0;
-  var ctaShown = false;
-
+  var idx=0,ctaShown=false;
   function showItem(){
-    var item = items[idx];
-    var el   = document.getElementById(item.id);
+    var item=items[idx],el=document.getElementById(item.id);
     if(!el) return next();
-
-    el.classList.add('s');                         // fade in
-
+    el.classList.add('s');
     setTimeout(function(){
-      el.classList.remove('s');                    // fade out
+      el.classList.remove('s');
       setTimeout(function(){
-        // show CTA once after first full cycle (hf8 = last item)
-        if(!ctaShown && idx === items.length - 1){
-          ctaShown = true;
-          var ha = document.getElementById('hact');
-          if(ha) ha.classList.add('s');
-        }
+        if(!ctaShown&&idx===items.length-1){ctaShown=true;var ha=document.getElementById('hact');if(ha)ha.classList.add('s');}
         next();
-      }, FADE + GAP);                              // wait fade-out + gap
-    }, FADE + item.hold);                          // wait fade-in + hold
+      },FADE+GAP);
+    },FADE+item.hold);
   }
-
-  function next(){
-    idx = (idx + 1) % items.length;
-    showItem();
-  }
-
-  setTimeout(showItem, 200);
-
-  // background slides
-  var sl=document.querySelectorAll('.hslide'), si=0;
-  setInterval(function(){
-    sl[si].classList.remove('on');
-    si = (si+1) % sl.length;
-    sl[si].classList.add('on');
-  }, 4500);
+  function next(){idx=(idx+1)%items.length;showItem();}
+  setTimeout(showItem,200);
+  var sl=document.querySelectorAll('.hslide'),si=0;
+  setInterval(function(){sl[si].classList.remove('on');si=(si+1)%sl.length;sl[si].classList.add('on');},4500);
 }
 
-// ── NAVBAR ──
-window.addEventListener('scroll',function(){document.getElementById('nav').classList.toggle('on',scrollY>60);});
-
 // ── SCROLL REVEAL ──
-new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)e.target.classList.add('on');});},{threshold:.12})
-  .observe === undefined || (function(){
-    var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)e.target.classList.add('on');});},{threshold:.12});
-    document.querySelectorAll('.rv').forEach(function(el){obs.observe(el);});
-  })();
+(function(){
+  var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)e.target.classList.add('on');});},{threshold:.12});
+  document.querySelectorAll('.rv').forEach(function(el){obs.observe(el);});
+})();
 
 // ── STAT COUNTERS ──
 (function(){
@@ -889,13 +671,8 @@ new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting
     if(es[0].isIntersecting&&!done){
       done=true;
       document.querySelectorAll('.sc').forEach(function(el){
-        var t=parseInt(el.dataset.t),s=0,st=null;
-        (function run(ts){
-          if(!st)st=ts;
-          var p=Math.min((ts-st)/1200,1),e=1-Math.pow(1-p,3);
-          el.textContent=Math.floor(e*t);
-          if(p<1)requestAnimationFrame(run);else el.textContent=t;
-        })(performance.now());
+        var t=parseInt(el.dataset.t),st=null;
+        (function run(ts){if(!st)st=ts;var p=Math.min((ts-st)/1200,1),e=1-Math.pow(1-p,3);el.textContent=Math.floor(e*t);if(p<1)requestAnimationFrame(run);else el.textContent=t;})(performance.now());
       });
       obs.disconnect();
     }
@@ -906,26 +683,17 @@ new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting
 
 // ── MANIFESTO STAGGER ──
 (function(){
-  var done = false;
-  var obs  = new IntersectionObserver(function(es){
-    if(es[0].isIntersecting && !done){
-      done = true;
-      // eyebrow
-      var ey = document.getElementById('mf-ey');
-      if(ey) ey.classList.add('on');
-      // animated bar draws itself
-      var wrap = document.getElementById('mf-bar-wrap');
-      if(wrap) setTimeout(function(){ wrap.classList.add('go'); }, 120);
-      // stagger each line
-      var lines = document.querySelectorAll('#mf-bar-wrap .mr');
-      lines.forEach(function(el, i){
-        setTimeout(function(){ el.classList.add('on'); }, 180 + i * 110);
-      });
+  var done=false;
+  var obs=new IntersectionObserver(function(es){
+    if(es[0].isIntersecting&&!done){
+      done=true;
+      var ey=document.getElementById('mf-ey');if(ey)ey.classList.add('on');
+      var wrap=document.getElementById('mf-bar-wrap');if(wrap)setTimeout(function(){wrap.classList.add('go');},120);
+      document.querySelectorAll('#mf-bar-wrap .mr').forEach(function(el,i){setTimeout(function(){el.classList.add('on');},180+i*110);});
       obs.disconnect();
     }
-  }, {threshold:.18});
-  var sec = document.getElementById('s-mid');
-  if(sec) obs.observe(sec);
+  },{threshold:.18});
+  var sec=document.getElementById('s-mid');if(sec)obs.observe(sec);
 })();
 
 // ── MODAL ──
@@ -937,27 +705,19 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()
 @guest
 (function(){
   if(sessionStorage.getItem('eminor_gate')) return;
-  var DELAY = 120; // detik
-  var bar   = null;
-
-  // inject progress bar tipis di atas halaman
-  var pb = document.createElement('div');
-  pb.id  = 'gtimer';
-  pb.style.cssText = 'position:fixed;top:0;left:0;height:2px;width:100%;background:linear-gradient(90deg,#38A8CC,#5B6EF5);z-index:9999;transform-origin:left;transform:scaleX(1);transition:transform '+DELAY+'s linear;pointer-events:none';
+  var DELAY=120;
+  var pb=document.createElement('div');
+  pb.id='gtimer';
+  pb.style.cssText='position:fixed;top:0;left:0;height:2px;width:100%;background:linear-gradient(90deg,#38A8CC,#5B6EF5);z-index:9999;transform-origin:left;transform:scaleX(1);transition:transform '+DELAY+'s linear;pointer-events:none';
   document.body.appendChild(pb);
-  // mulai animasi setelah render
-  requestAnimationFrame(function(){ requestAnimationFrame(function(){ pb.style.transform='scaleX(0)'; }); });
-
-  bar = setTimeout(function(){
+  requestAnimationFrame(function(){requestAnimationFrame(function(){pb.style.transform='scaleX(0)';});});
+  setTimeout(function(){
     sessionStorage.setItem('eminor_gate','1');
-    // ubah konten modal menjadi pesan konversi
-    var mh = document.querySelector('#mbg .mh');
-    var ms = document.querySelector('#mbg .ms');
-    if(mh) mh.innerHTML = 'Kamu sudah 2 menit di sini. 🎵';
-    if(ms) ms.textContent = 'Sesi gratis kamu habis. Daftar gratis untuk terus menjelajahi EMINOR — tanpa batas.';
-    if(pb) pb.remove();
-    openModal();
-  }, DELAY * 1000);
+    var mh=document.querySelector('#mbg .mh');var ms=document.querySelector('#mbg .ms');
+    if(mh)mh.innerHTML='Kamu sudah 2 menit di sini. 🎵';
+    if(ms)ms.textContent='Sesi gratis kamu habis. Daftar gratis untuk terus menjelajahi EMINOR — tanpa batas.';
+    pb.remove();openModal();
+  },DELAY*1000);
 })();
 @endguest
 
@@ -965,38 +725,18 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()
 (function(){
   var g=document.getElementById('cglow'),rx=0,ry=0,cx=window.innerWidth/2,cy=window.innerHeight/2;
   document.addEventListener('mousemove',function(e){cx=e.clientX;cy=e.clientY;});
-  function loop(){
-    rx+=(cx-rx)*.08; ry+=(cy-ry)*.08;
-    if(g){g.style.left=rx+'px';g.style.top=ry+'px';}
-    requestAnimationFrame(loop);
-  }
+  function loop(){rx+=(cx-rx)*.08;ry+=(cy-ry)*.08;if(g){g.style.left=rx+'px';g.style.top=ry+'px';}requestAnimationFrame(loop);}
   loop();
 })();
 
-// ── 3D CARD TILT (feature grid) ──
+// ── 3D CARD TILT ──
 document.querySelectorAll('.fcard').forEach(function(c){
   c.addEventListener('mousemove',function(e){
-    var r=c.getBoundingClientRect();
-    var x=(e.clientX-r.left)/r.width-.5;
-    var y=(e.clientY-r.top)/r.height-.5;
+    var r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
     c.style.transform='perspective(700px) rotateY('+(x*10)+'deg) rotateX('+(-y*10)+'deg) translateY(-4px)';
     c.style.transition='transform .05s';
   });
-  c.addEventListener('mouseleave',function(){
-    c.style.transform='';
-    c.style.transition='transform .35s ease';
-  });
+  c.addEventListener('mouseleave',function(){c.style.transform='';c.style.transition='transform .35s ease';});
 });
-
-// ── MOBILE NAV ──
-function toggleNav(){
-  var l=document.querySelector('.nlinks'),c=document.querySelector('.ncta');
-  if(!l)return;
-  var open=l.style.display==='flex';
-  l.style.cssText=open?'':'display:flex;flex-direction:column;position:fixed;top:60px;left:0;right:0;background:rgba(6,8,15,.96);backdrop-filter:blur(16px);padding:1.25rem 2rem;gap:1rem;border-bottom:1px solid var(--border);z-index:800';
-  if(c)c.style.cssText=open?'':'display:block;margin:0 2rem 1.25rem;text-align:center';
-}
 </script>
-</body>
-</html>
-
+@endpush

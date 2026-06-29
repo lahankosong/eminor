@@ -788,6 +788,7 @@
 <div class="fb-topbar">
     <a href="{{ route('aku') }}" class="fb-brand">MARGONOANDI <span>· fanbase</span></a>
     <div class="fb-topbar-right">
+        @auth
         <a href="{{ route('musisi.index') }}" class="fb-notif-btn {{ request()->routeIs('musisi*') ? 'active' : '' }}" title="Direktori Musisi" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
         </a>
@@ -837,19 +838,27 @@
                 </a>
             </div>
         </div>
+        @else
+        <a href="{{ route('google.login') }}" style="background:#38A8CC;color:#fff;font-size:12px;font-weight:700;padding:7px 18px;border-radius:50px;text-decoration:none;">Masuk</a>
+        @endauth
     </div>
 </div>
 
+@hasSection('fullpage')
+@yield('fullpage')
+@else
 <div class="fb-layout">
 
     {{-- LEFT SIDEBAR --}}
     <aside class="fb-sidebar-left">
     <div class="fb-sidebar-scroll">
+        @auth
         <div class="fb-profile-card">
             <img src="{{ Auth::user()->avatar ?? asset('images/default-avatar.png') }}" class="fb-profile-avatar" alt="">
             <div class="fb-profile-name">{{ Auth::user()->name }}</div>
             <div class="fb-profile-sub">&#10022; Member Margonoandi</div>
         </div>
+        @endauth
 
         <nav class="fb-nav">
             <a href="{{ route('aku') }}"
@@ -976,6 +985,7 @@
     </main>
 
     {{-- RIGHT SIDEBAR --}}
+    @auth
     <aside class="fb-sidebar-right">
         @php
             $onlineMembers = \App\Models\User::where('id','!=',Auth::id())->get()
@@ -1111,8 +1121,10 @@
             </p>
         </div>
     </aside>
+    @endauth
 
 </div>
+@endif
 
 {{-- PLAYLIST POPUP (mobile) --}}
 <div class="fb-playlist-overlay" id="fbPlaylistOverlay" onclick="fbClosePlaylist()"></div>
