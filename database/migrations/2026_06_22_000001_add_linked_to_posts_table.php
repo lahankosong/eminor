@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->string('linked_type', 20)->nullable()->after('is_pinned');
-            $table->unsignedBigInteger('linked_id')->nullable()->after('linked_type');
+            $table->string('linked_type', 20)->nullable();
+            $table->unsignedBigInteger('linked_id')->nullable();
             $table->index(['linked_type', 'linked_id'], 'posts_linked_index');
         });
     }
@@ -23,3 +23,4 @@ return new class extends Migration
         });
     }
 };
+

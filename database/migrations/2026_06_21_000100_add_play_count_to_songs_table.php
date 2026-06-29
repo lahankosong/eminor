@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::table('songs', function (Blueprint $table) {
             if (!Schema::hasColumn('songs', 'play_count')) {
-                $table->unsignedBigInteger('play_count')->default(0)->after('featured');
+                $table->unsignedBigInteger('play_count')->default(0);
             }
         });
     }
@@ -23,3 +23,4 @@ return new class extends Migration {
         });
     }
 };
+

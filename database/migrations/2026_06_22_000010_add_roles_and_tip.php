@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         if (Schema::hasTable('users') && !Schema::hasColumn('users', 'roles')) {
             Schema::table('users', function (Blueprint $table) {
-                $table->string('roles')->nullable()->after('avatar');
+                $table->string('roles')->nullable();
             });
         }
         if (Schema::hasTable('musician_profiles') && !Schema::hasColumn('musician_profiles', 'tip_url')) {
@@ -29,3 +29,4 @@ return new class extends Migration {
         }
     }
 };
+

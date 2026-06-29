@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -9,9 +9,9 @@ return new class extends Migration {
         if (Schema::hasTable('post_comments')) {
             Schema::table('post_comments', function (Blueprint $table) {
                 if (!Schema::hasColumn('post_comments', 'parent_id'))
-                    $table->unsignedBigInteger('parent_id')->nullable()->after('post_id');
+                    $table->unsignedBigInteger('parent_id')->nullable();
                 if (!Schema::hasColumn('post_comments', 'likes_count'))
-                    $table->unsignedInteger('likes_count')->default(0)->after('body');
+                    $table->unsignedInteger('likes_count')->default(0);
             });
         }
 
@@ -28,3 +28,4 @@ return new class extends Migration {
     }
     public function down(): void {}
 };
+

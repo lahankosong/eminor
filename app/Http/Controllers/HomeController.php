@@ -3,125 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
-use App\Models\Song;
-use App\Models\SiteSetting;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        $songs = Song::where('is_active', true)
-                     ->orderBy('track_number')
-                     ->get();
-
-        $featuredSong = $songs->where('youtube_id', 'TG8oAcVRnzA')->first()
-                     ?? $songs->first();
-
-        $ctaSongs = Song::where('featured', true)
-                        ->where('is_active', true)
-                        ->take(3)
-                        ->get();
-
-        $settings = SiteSetting::all()->keyBy('key')->map(fn($s) => $s->value);
-
-        $artistName = $settings['artist_name'] ?? 'Margonoandi';
-        $heroDesc   = \Illuminate\Support\Str::limit(strip_tags($settings['hero_story'] ?? ''), 160)
-                    ?: 'Dengarkan lagu Margonoandi, belajar chord & tuner, dan gabung komunitas musisi Indonesia.';
-        $sameAs = array_values(array_filter([
-            $settings['spotify_url'] ?? null,
-            $settings['youtube_url'] ?? null,
-            $settings['apple_music_url'] ?? null,
-        ]));
-
-        $seo = [
-            'title'       => 'Margonoandi — Lagu, Chord & Komunitas Musik Indonesia',
-            'description' => $heroDesc,
-            'image'       => asset('images/Margonoandi.jpeg'),
-            'url'         => url('/'),
-            'type'        => 'music.musician',
-            'schema'      => [
-                '@context' => 'https://schema.org',
-                '@graph'   => [
-                    [
-                        '@type'       => 'WebSite',
-                        'name'        => $artistName,
-                        'url'         => url('/'),
-                        'description' => $heroDesc,
-                        'inLanguage'  => 'id',
-                    ],
-                    [
-                        '@type'       => 'MusicGroup',
-                        'name'        => $artistName,
-                        'url'         => url('/'),
-                        'image'       => asset('images/Margonoandi.jpeg'),
-                        'genre'       => ['Indie', 'Pop Indonesia'],
-                        'description' => \Illuminate\Support\Str::limit(strip_tags($settings['hero_story'] ?? ''), 250),
-                        'sameAs'      => $sameAs,
-                        'track'       => $songs->take(5)->map(fn($s) => [
-                            '@type' => 'MusicRecording',
-                            'name'  => $s->title,
-                            'url'   => route('song.show', $s->slug),
-                        ])->values()->toArray(),
-                    ],
-                    [
-                        '@type'           => 'ItemList',
-                        'name'            => 'Lagu-lagu Margonoandi',
-                        'url'             => url('/'),
-                        'itemListElement' => $songs->take(10)->values()->map(fn($s, $i) => [
-                            '@type'    => 'ListItem',
-                            'position' => $i + 1,
-                            'name'     => $s->title,
-                            'url'      => route('song.show', $s->slug),
-                        ])->toArray(),
-                    ],
-                ],
-            ],
-        ];
-
-        // Teaser musisi untuk landing (HANYA field publik aman: nama/peran/lokasi/genre/bio.
-        // Tanpa kontak/portofolio/tip — detail lengkap wajib login via /musisi/{id} yang auth-only).
-        $musicians = collect();
-        try {
-            $musicians = \App\Models\MusicianProfile::with('user')
-                ->where('is_active', true)
-                ->whereNotNull('roles')->where('roles', '!=', '')
-                ->latest('updated_at')->take(8)->get()
-                ->map(fn ($p) => [
-                    'name'     => $p->user->name ?? 'Musisi',
-                    'avatar'   => $p->photoUrl(),
-                    'roles'    => $p->rolesArray(),
-                    'skill'    => $p->skill_level,
-                    'location' => $p->location,
-                    'genres'   => $p->genresArray(),
-                    'bio'      => \Illuminate\Support\Str::limit(strip_tags((string) $p->bio), 130),
-                ])->values();
-        } catch (\Throwable $e) {}
-
-        $previewPosts = collect();
-        try {
-            $previewPosts = Post::with('user')->latest()->take(3)->get();
-        } catch (\Throwable $e) {}
-
-        // Live Community feed untuk landing page
+        // Live Community feed — fallback ke placeholder jika tabel belum ada
         $liveActivity = collect();
         try {
             $acts = collect();
             Post::with('user')->latest()->take(4)->get()->each(fn($p) => $acts->push([
-                'icon' => '🎵', 'user' => $p->user->name ?? 'Musisi',
-                'text' => \Illuminate\Support\Str::limit($p->body, 55),
+                'icon' => '🎵',
+                'user' => $p->user->name ?? 'Musisi',
+                'text' => \Illuminate\Support\Str::limit($p->body, 65),
                 'time' => $p->created_at->diffForHumans(),
                 'ts'   => $p->created_at->timestamp,
             ]));
-            \App\Models\GigPost::with('user')->where('status','open')->latest()->take(3)->get()->each(fn($g) => $acts->push([
-                'icon' => '🥁', 'user' => $g->user->name ?? 'Musisi',
-                'text' => \Illuminate\Support\Str::limit($g->title, 55),
+            \App\Models\GigPost::with('user')->where('status', 'open')->latest()->take(3)->get()->each(fn($g) => $acts->push([
+                'icon' => '🥁',
+                'user' => $g->user->name ?? 'Musisi',
+                'text' => \Illuminate\Support\Str::limit($g->title, 65),
                 'time' => $g->created_at->diffForHumans(),
                 'ts'   => $g->created_at->timestamp,
             ]));
             $liveActivity = $acts->sortByDesc('ts')->take(5)->values();
         } catch (\Throwable $e) {}
 
-        return view('aku', compact('songs', 'featuredSong', 'ctaSongs', 'settings', 'seo', 'musicians', 'previewPosts', 'liveActivity'));
+        return view('aku', compact('liveActivity'));
     }
 
     /** sitemap.xml dinamis: homepage + semua lagu aktif, termasuk image:image untuk Google Image. */

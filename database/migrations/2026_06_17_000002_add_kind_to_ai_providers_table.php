@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('ai_providers', function (Blueprint $table) {
             if (!Schema::hasColumn('ai_providers', 'kind')) {
-                $table->string('kind', 12)->default('text')->after('format'); // text | image
+                $table->string('kind', 12)->default('text'); // text | image
             }
         });
     }
@@ -24,3 +24,4 @@ return new class extends Migration
         });
     }
 };
+

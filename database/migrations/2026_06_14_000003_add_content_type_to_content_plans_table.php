@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('content_plans', function (Blueprint $table) {
             if (!Schema::hasColumn('content_plans', 'content_type')) {
-                $table->string('content_type')->default('short')->after('platforms');
+                $table->string('content_type')->default('short');
             }
         });
     }
@@ -24,3 +24,4 @@ return new class extends Migration
         });
     }
 };
+
