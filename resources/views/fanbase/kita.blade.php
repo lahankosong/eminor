@@ -1,8 +1,49 @@
 @extends('layouts.fanbase')
-@section('title', 'Kita')
+@section('title', 'Stage')
 
 @push('styles')
 <style>
+    /* ── INTRO OVERLAY ── */
+    #eminor-backdrop { position:fixed;inset:0;background:rgba(8,14,30,.92);z-index:9998;opacity:1;transition:opacity .6s ease; }
+    #eminor-backdrop.hide { opacity:0;pointer-events:none; }
+    #eminor-intro {
+        position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;
+        align-items:center;justify-content:center;padding:2rem;
+    }
+    .ei-metro { display:flex;gap:6px;margin-bottom:1.5rem; }
+    .ei-dot { width:10px;height:10px;border-radius:50%;background:var(--sky);opacity:0;transition:opacity .3s ease; }
+    .ei-dot.on { opacity:1; }
+    .ei-vinyl {
+        width:140px;height:140px;border-radius:50%;
+        background:conic-gradient(#0b1f2e 0deg,#1a3a4a 60deg,#0b1f2e 120deg,#1a3a4a 180deg,#0b1f2e 240deg,#1a3a4a 300deg,#0b1f2e 360deg);
+        border:3px solid rgba(56,168,204,.3);display:flex;align-items:center;justify-content:center;
+        opacity:0;transition:opacity .7s ease;flex-shrink:0;
+    }
+    .ei-vinyl::after { content:'';width:36px;height:36px;border-radius:50%;background:#0b1520;border:2px solid rgba(56,168,204,.4); }
+    .ei-vinyl.show { opacity:1;animation:eiSpin 3s linear infinite; }
+    @keyframes eiSpin { to { transform:rotate(360deg); } }
+    .ei-text { position:relative;height:70px;margin-top:1.5rem;text-align:center;width:100%;max-width:360px; }
+    .ei-line { position:absolute;left:0;right:0;font-size:1rem;font-weight:600;color:#fff;opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s ease; }
+    .ei-line.show { opacity:1;transform:translateY(0); }
+    .ei-line.dim { color:rgba(255,255,255,.45);font-size:.85rem;font-weight:400; }
+    .ei-line.big { font-size:2rem;font-weight:800;letter-spacing:.08em;color:#fff; }
+    .ei-line.big span { color:var(--sky); }
+    .ei-eq { display:flex;gap:3px;align-items:flex-end;height:28px;margin-top:1.5rem;opacity:0;transition:opacity .5s ease; }
+    .ei-eq.show { opacity:1; }
+    .ei-eqb { width:4px;border-radius:3px;background:var(--sky);animation:eiEq 1s ease-in-out infinite alternate; }
+    .ei-eqb:nth-child(1){height:8px;animation-delay:0s}
+    .ei-eqb:nth-child(2){height:18px;animation-delay:.1s}
+    .ei-eqb:nth-child(3){height:12px;animation-delay:.2s}
+    .ei-eqb:nth-child(4){height:22px;animation-delay:.05s}
+    .ei-eqb:nth-child(5){height:14px;animation-delay:.15s}
+    .ei-eqb:nth-child(6){height:20px;animation-delay:.25s}
+    @keyframes eiEq { to { height:6px;opacity:.4; } }
+    #ei-disc { opacity:0;transition:opacity .7s ease;max-width:360px;width:calc(100vw - 3rem);margin-top:1.75rem;flex-shrink:0; }
+    #ei-disc.show { opacity:1; }
+    #ei-disc .fb-beta { background:rgba(8,14,30,.78);border:1px solid rgba(56,168,204,.28);border-radius:14px;padding:1rem 1.25rem;backdrop-filter:blur(14px);font-size:13px;color:rgba(255,255,255,.82);line-height:1.7;text-align:left;margin-top:0 !important; }
+    #ei-disc .fb-beta b { color:#38A8CC;font-weight:700; }
+    #ei-disc .bic { font-size:20px;display:block;margin-bottom:.5rem; }
+
     /* PAGE HEADER */
     .kita-page-header {
         margin-bottom: 1.25rem;
@@ -369,8 +410,36 @@
 
 @section('content')
 
+{{-- INTRO OVERLAY --}}
+<div id="eminor-backdrop"></div>
+<div id="eminor-intro">
+    <div class="ei-metro">
+        <div class="ei-dot" id="eid1"></div>
+        <div class="ei-dot" id="eid2"></div>
+        <div class="ei-dot" id="eid3"></div>
+    </div>
+    <div class="ei-vinyl" id="ei-vinyl"></div>
+    <div class="ei-text">
+        <div class="ei-line dim" id="eil0">Dulu...</div>
+        <div class="ei-line" id="eil1">musisi membutuhkan label untuk didengar.</div>
+        <div class="ei-line dim" id="eil2">Sekarang...</div>
+        <div class="ei-line" id="eil3">yang dibutuhkan hanya tempat yang tepat.</div>
+        <div class="ei-line big" id="eil4">E<span>MINOR</span></div>
+    </div>
+    <div class="ei-eq" id="ei-eq">
+        <div class="ei-eqb"></div><div class="ei-eqb"></div><div class="ei-eqb"></div>
+        <div class="ei-eqb"></div><div class="ei-eqb"></div><div class="ei-eqb"></div>
+    </div>
+    <div id="ei-disc">
+        <div class="fb-beta">
+            <span class="bic">&#128679;</span>
+            <span>Jujur ya &mdash; ini <b>masih tahap beta</b>, dan untuk sekarang masih <b>menumpang di web pribadi</b> saya. Tapi kalau dukungan kalian besar, saya akan lebih serius bangun <b>rumah baru</b> yang layak buat ekosistem ini. Langkah besar ini dimulai dari bagikan ke teman temanmu. &#128293;</span>
+        </div>
+    </div>
+</div>
+
 <div class="kita-page-header">
-    <div class="kita-page-title">&#128101; Kita</div>
+    <div class="kita-page-title">&#127911; Stage</div>
     <div class="kita-page-sub">Ceritakan apapun — semuanya mendengar</div>
 </div>
 
@@ -689,6 +758,56 @@
 @endsection
 
 @push('scripts')
+<script>
+/* ===== INTRO OVERLAY ===== */
+(function(){
+    var SEEN_KEY = 'eminor_seen_intro';
+    if (sessionStorage.getItem(SEEN_KEY)) {
+        document.getElementById('eminor-backdrop').style.display = 'none';
+        document.getElementById('eminor-intro').style.display    = 'none';
+        return;
+    }
+    sessionStorage.setItem(SEEN_KEY, '1');
+    var TOTAL_MS = 14000;
+    function hideAll() {
+        ['eminor-backdrop','eminor-intro'].forEach(function(id){
+            var el = document.getElementById(id);
+            if (el) { el.classList.add('hide'); setTimeout(function(){ el.style.display='none'; }, 700); }
+        });
+    }
+    function showLine(id) { var el=document.getElementById(id); if(el) el.classList.add('show'); }
+    function hideLine(id) { var el=document.getElementById(id); if(el) el.classList.remove('show'); }
+    function popDot(id)   { var el=document.getElementById(id); if(el){ el.classList.add('on'); setTimeout(function(){ el.classList.remove('on'); },300); } }
+
+    setTimeout(function(){ popDot('eid1'); }, 0);
+    setTimeout(function(){ popDot('eid2'); }, 400);
+    setTimeout(function(){ popDot('eid3'); var v=document.getElementById('ei-vinyl'); if(v) v.classList.add('show'); }, 800);
+    setTimeout(function(){ showLine('eil0'); }, 1100);
+    setTimeout(function(){ showLine('eil1'); }, 1700);
+    setTimeout(function(){ hideLine('eil0'); hideLine('eil1'); showLine('eil2'); }, 2900);
+    setTimeout(function(){ showLine('eil3'); }, 3500);
+    setTimeout(function(){
+        hideLine('eil2'); hideLine('eil3'); showLine('eil4');
+        var eq=document.getElementById('ei-eq'); if(eq) eq.classList.add('show');
+    }, 4600);
+    setTimeout(function(){
+        hideLine('eil4');
+        ['ei-vinyl','ei-eq','ei-text'].forEach(function(id){
+            var el=document.getElementById(id)||document.querySelector('.'+id);
+            if(el){ el.style.opacity='0'; setTimeout(function(){ el.style.display='none'; },650); }
+        });
+        document.querySelectorAll('.ei-vinyl,.ei-eq,.ei-text,.ei-metro').forEach(function(el){
+            el.style.transition='opacity .65s ease'; el.style.opacity='0';
+            setTimeout(function(){ el.style.display='none'; },650);
+        });
+        setTimeout(function(){
+            var disc=document.getElementById('ei-disc'); if(disc) disc.classList.add('show');
+        }, 400);
+    }, 5500);
+    setTimeout(hideAll, TOTAL_MS);
+    document.getElementById('eminor-intro').addEventListener('click', hideAll);
+})();
+</script>
 <script>
 var BASE_URL  = '{{ url("") }}';
 var csrfToken = '{{ csrf_token() }}';

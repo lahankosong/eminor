@@ -1,25 +1,15 @@
-@extends('layouts.app')
-@section('title', 'Materi Musik Gratis — Panduan dari Teori sampai Rilis')
+@extends('layouts.fanbase')
+@section('title', 'Materi Musik')
 
 @push('styles')
 <style>
+    .fb-main { --card-bg: var(--card); --accent: var(--sky); --accent-dim: var(--sky-lt); --bg: var(--cream); --bg-3: var(--surface); --border-2: var(--border-lt); --text: var(--text-1); }
+
     /* ===== LAYOUT ===== */
-    /* Override main hanya untuk halaman 3-kolom ini */
-    main:has(.mat-outer) { max-width: 1240px !important; }
-
-    .mat-outer { max-width: 100%; padding: 1.5rem 0 5rem; }
-
-    .mat-layout {
-        display: grid;
-        grid-template-columns: 185px minmax(0, 1fr) 210px;
-        gap: 28px;
-        align-items: start;
-    }
-    @media(max-width: 1080px) { .mat-layout { grid-template-columns: 185px minmax(0, 1fr); } .mat-sidebar-right { display: none; } }
-    @media(max-width: 720px)  { .mat-layout { grid-template-columns: 1fr; } .mat-sidebar-left { display: none; } }
+    .mat-outer { padding: 0 0 2rem; }
 
     .mat-back { display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--text-3);text-decoration:none;margin-bottom:1.25rem; }
-    .mat-back:hover { color:var(--text); }
+    .mat-back:hover { color:var(--text-1); }
 
     /* ===== COMMUNITY SNAPSHOT ===== */
     .cs-strip {
@@ -69,30 +59,11 @@
     .cs-cta.locked { color: var(--text-3); }
     .cs-cta.locked:hover { color: var(--accent); }
 
-    /* Mobile filter chips */
-    .mat-filter-mobile { display:none;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem; }
-    @media(max-width:960px) { .mat-filter-mobile { display:flex; } }
+    /* Filter chips — always visible */
+    .mat-filter-mobile { display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem; }
     .mat-chip { padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:none;color:var(--text-3);font-size:12px;font-weight:500;cursor:pointer;transition:.15s;font-family:inherit; }
-    .mat-chip:hover { border-color:var(--accent);color:var(--accent); }
-    .mat-chip.active { background:var(--accent);color:#fff;border-color:var(--accent); }
-
-    /* ===== LEFT SIDEBAR ===== */
-    .mat-sidebar-left { position: sticky; top: 70px; }
-    .mat-sidebar-title { font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--text-3);margin-bottom:.75rem; }
-
-    .mat-nav-item {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 8px 12px; border-radius: 10px; margin-bottom: 3px;
-        text-decoration: none; cursor: pointer; background: none; border: none;
-        font-family: inherit; width: 100%; text-align: left;
-        font-size: 13px; color: var(--text-3); transition: .15s;
-    }
-    .mat-nav-item:hover { background: var(--card-bg); color: var(--text); }
-    .mat-nav-item.active { background: var(--accent-dim); color: var(--accent); font-weight: 600; }
-    .mat-nav-count { font-size: 11px; background: var(--bg-3); border-radius: 20px; padding: 1px 7px; color: var(--text-3); font-weight: 500; }
-    .mat-nav-item.active .mat-nav-count { background: rgba(56,168,204,.2); color: var(--accent); }
-
-    .mat-nav-divider { height: 1px; background: var(--border); margin: .75rem 0; }
+    .mat-chip:hover { border-color:var(--sky);color:var(--sky-dk); }
+    .mat-chip.active { background:var(--sky);color:#fff;border-color:var(--sky); }
 
     /* ===== MAIN ===== */
     .mat-section-label { font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);font-weight:700;margin:1.5rem 0 .75rem;padding-bottom:.4rem;border-bottom:1px solid var(--border); }
@@ -112,19 +83,6 @@
     .mat-btn-dl:hover { background:var(--accent);color:#fff; }
     .mat-btn-dl-lock { font-size:11px;padding:4px 12px;border-radius:12px;background:var(--card-bg);border:1px solid var(--border);color:var(--text-3);display:inline-flex;align-items:center;gap:4px; }
 
-    /* ===== RIGHT SIDEBAR ===== */
-    .mat-sidebar-right { position: sticky; top: 70px; display: flex; flex-direction: column; gap: 14px; }
-    .mat-widget { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 1rem; }
-    .mat-widget-title { font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--text-3); margin-bottom: .75rem; }
-    .mat-tool-link { display:flex;align-items:center;gap:8px;padding:7px 0;text-decoration:none;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text-3);transition:.15s; }
-    .mat-tool-link:last-child { border-bottom:none;padding-bottom:0; }
-    .mat-tool-link:hover { color:var(--accent); }
-    .mat-tool-link span:first-child { font-size:15px;flex-shrink:0; }
-    .mat-see-all { display:block;text-align:center;font-size:11px;color:var(--accent);text-decoration:none;margin-top:.5rem;font-weight:600; }
-    .mat-cta-widget { background:linear-gradient(135deg,var(--accent-dim),rgba(56,168,204,.02));border:1px solid rgba(56,168,204,.25);border-radius:16px;padding:1rem;text-align:center; }
-    .mat-cta-widget h4 { font-size:13px;font-weight:700;color:var(--text);margin-bottom:.35rem; }
-    .mat-cta-widget p { font-size:11.5px;color:var(--text-3);margin-bottom:.85rem;line-height:1.55; }
-    .mat-cta-btn { display:inline-block;padding:8px 18px;border-radius:20px;background:var(--accent);color:#fff;font-size:12px;font-weight:600;text-decoration:none; }
 </style>
 @endpush
 
@@ -152,11 +110,7 @@
             <div style="font-size:22px;margin:4px 0;">👤 👤 👤</div>
             @endif
             <p class="cs-desc">Temukan personil, kolaborator, dan partner rekaman di kotamu.</p>
-            @auth
-            <a href="{{ route('musisi.index') }}" class="cs-cta">Cari personil →</a>
-            @else
-            <a href="{{ route('google.login') }}" class="cs-cta locked">🔒 Cari personil →</a>
-            @endauth
+            <a href="{{ route('kamu') }}" class="cs-cta">Cari personil →</a>
         </div>
 
         {{-- Kartu 2: Gig Terbaru --}}
@@ -172,11 +126,7 @@
             @else
             <div class="cs-gig-title" style="color:var(--text-3);">Belum ada gig terbuka — jadilah yang pertama!</div>
             @endif
-            @auth
             <a href="{{ route('gig.board') }}" class="cs-cta">Lihat semua gig →</a>
-            @else
-            <a href="{{ route('google.login') }}" class="cs-cta locked">🔒 Lamar sekarang →</a>
-            @endauth
         </div>
 
         {{-- Kartu 3: Diskusi Terbaru --}}
@@ -188,11 +138,7 @@
             @else
             <div class="cs-post-text">Jadilah yang pertama memulai diskusi tentang musik...</div>
             @endif
-            @auth
-            <a href="{{ route('community.index') }}" class="cs-cta">Ikut diskusi →</a>
-            @else
-            <a href="{{ route('google.login') }}" class="cs-cta locked">🔒 Gabung komunitas →</a>
-            @endauth
+            <a href="{{ route('aku') }}" class="cs-cta">Ikut diskusi →</a>
         </div>
 
     </div>{{-- .cs-strip --}}
@@ -213,98 +159,41 @@
     $catIcons  = ['teori'=>'🎵','produksi'=>'🎛️','kolaborasi'=>'🤝','rilis'=>'🚀','karir'=>'💼'];
     @endphp
 
-    <div class="mat-layout">
-
-        {{-- LEFT SIDEBAR --}}
-        <aside class="mat-sidebar-left">
-            <div class="mat-sidebar-title">Kategori</div>
-            <button class="mat-nav-item active" onclick="matFilter('all',this)" data-cat="all">
-                <span>📖 Semua</span>
-                <span class="mat-nav-count">{{ $articles->count() }}</span>
-            </button>
-            @foreach($catLabels as $cat => $label)
-            @if($grouped->has($cat))
-            <button class="mat-nav-item" onclick="matFilter('{{ $cat }}',this)" data-cat="{{ $cat }}">
-                <span>{{ $catIcons[$cat] }} {{ $label }}</span>
-                <span class="mat-nav-count">{{ $grouped[$cat]->count() }}</span>
-            </button>
-            @endif
-            @endforeach
-
-            <div class="mat-nav-divider"></div>
-            <div class="mat-sidebar-title">Jelajah</div>
-            <a href="{{ route('library') }}" class="mat-nav-item" style="text-decoration:none;">🎵 Diskografi</a>
-            <a href="{{ route('tools.index') }}" class="mat-nav-item" style="text-decoration:none;">🎛️ Alat Musisi</a>
-            <a href="{{ route('gig.board') }}" class="mat-nav-item" style="text-decoration:none;">🎪 Papan Gig</a>
-        </aside>
-
-        {{-- MAIN CONTENT --}}
-        <main>
-            @foreach($catLabels as $cat => $label)
-            @if($grouped->has($cat))
-            <div class="mat-section" data-cat="{{ $cat }}">
-                <div class="mat-section-label">{{ $catIcons[$cat] }} {{ $label }}</div>
-                <div class="mat-grid">
-                    @foreach($grouped[$cat] as $a)
-                    <a href="{{ route('library.materi.show', $a->slug) }}" class="mat-card">
-                        <div class="mat-card-top">
-                            <span class="mat-cat-pill" style="background:{{ $catColors[$cat] }}">{{ $label }}</span>
-                            <span class="mat-time">🕐 {{ $a->reading_time }} mnt</span>
-                        </div>
-                        <div class="mat-card-title">{{ $a->title }}</div>
-                        <div class="mat-card-excerpt">{{ $a->excerpt }}</div>
-                        <div class="mat-card-footer" onclick="event.stopPropagation()">
-                            <span class="mat-btn-read">Baca artikel →</span>
-                            @auth
-                            <a href="{{ route('library.materi.download', $a->slug) }}" class="mat-btn-dl" onclick="event.stopPropagation()">⬇ Unduh</a>
-                            @else
-                            <span class="mat-btn-dl-lock">🔒 Unduh</span>
-                            @endauth
-                        </div>
-                    </a>
-                    @endforeach
-                </div>
+    @foreach($catLabels as $cat => $label)
+        @if($grouped->has($cat))
+        <div class="mat-section" data-cat="{{ $cat }}">
+            <div class="mat-section-label">{{ $catIcons[$cat] }} {{ $label }}</div>
+            <div class="mat-grid">
+                @foreach($grouped[$cat] as $a)
+                <a href="{{ route('library.materi.show', $a->slug) }}" class="mat-card">
+                    <div class="mat-card-top">
+                        <span class="mat-cat-pill" style="background:{{ $catColors[$cat] }}">{{ $label }}</span>
+                        <span class="mat-time">🕐 {{ $a->reading_time }} mnt</span>
+                    </div>
+                    <div class="mat-card-title">{{ $a->title }}</div>
+                    <div class="mat-card-excerpt">{{ $a->excerpt }}</div>
+                    <div class="mat-card-footer" onclick="event.stopPropagation()">
+                        <span class="mat-btn-read">Baca artikel →</span>
+                        @auth
+                        <a href="{{ route('library.materi.download', $a->slug) }}" class="mat-btn-dl" onclick="event.stopPropagation()">⬇ Unduh</a>
+                        @else
+                        <span class="mat-btn-dl-lock">🔒 Unduh</span>
+                        @endauth
+                    </div>
+                </a>
+                @endforeach
             </div>
-            @endif
-            @endforeach
+        </div>
+        @endif
+        @endforeach
 
-            @guest
-            <div style="background:linear-gradient(135deg,var(--accent-dim),rgba(56,168,204,.02));border:1px solid rgba(56,168,204,.2);border-radius:20px;padding:1.5rem;text-align:center;margin-top:2rem;">
-                <h3 style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.4rem;">🔒 Download Semua Artikel</h3>
-                <p style="font-size:13px;color:var(--text-3);margin-bottom:1rem;">Login untuk download semua artikel dalam format Markdown.</p>
-                <a href="{{ route('google.login') }}" style="display:inline-block;padding:10px 24px;border-radius:30px;background:var(--accent);color:#fff;text-decoration:none;font-size:13px;font-weight:600;">Login dengan Google</a>
-            </div>
-            @endguest
-        </main>
-
-        {{-- RIGHT SIDEBAR --}}
-        <aside class="mat-sidebar-right">
-            <div class="mat-widget">
-                <div class="mat-widget-title">🎛 Alat untuk Musisi</div>
-                <a href="{{ route('tools.chord-builder') }}" class="mat-tool-link"><span>🎸</span><span>Chord Builder</span></a>
-                <a href="{{ route('tools.transpose-kunci') }}" class="mat-tool-link"><span>🔀</span><span>Transpose Kunci</span></a>
-                <a href="{{ route('tools.bpm-kalkulator') }}" class="mat-tool-link"><span>🥁</span><span>BPM Calculator</span></a>
-                <a href="{{ route('tools.kalkulator-royalti') }}" class="mat-tool-link"><span>💰</span><span>Kalkulator Royalti</span></a>
-                <a href="{{ route('tools.epk') }}" class="mat-tool-link"><span>📄</span><span>EPK Generator</span></a>
-                <a href="{{ route('tools.index') }}" class="mat-see-all">Lihat semua alat →</a>
-            </div>
-
-            @guest
-            <div class="mat-cta-widget">
-                <h4>🎵 Gabung Komunitas</h4>
-                <p>Download semua artikel, ikut diskusi musisi, dan temukan kolaborator.</p>
-                <a href="{{ route('google.login') }}" class="mat-cta-btn">Masuk Gratis</a>
-            </div>
-            @else
-            <div class="mat-cta-widget">
-                <h4>🎪 Papan Gig</h4>
-                <p>Cari audisi band, open mic, dan peluang manggung di kotamu.</p>
-                <a href="{{ route('gig.board') }}" class="mat-cta-btn">Lihat Gig →</a>
-            </div>
-            @endguest
-        </aside>
-
-    </div>{{-- .mat-layout --}}
+        @guest
+        <div style="background:linear-gradient(135deg,var(--sky-lt),rgba(56,168,204,.02));border:1px solid rgba(56,168,204,.2);border-radius:20px;padding:1.5rem;text-align:center;margin-top:2rem;">
+            <h3 style="font-size:1rem;font-weight:700;color:var(--text-1);margin-bottom:.4rem;">🔒 Download Semua Artikel</h3>
+            <p style="font-size:13px;color:var(--text-3);margin-bottom:1rem;">Login untuk download semua artikel dalam format Markdown.</p>
+            <a href="{{ route('google.login') }}" style="display:inline-block;padding:10px 24px;border-radius:30px;background:var(--sky);color:#fff;text-decoration:none;font-size:13px;font-weight:600;">Login dengan Google</a>
+        </div>
+        @endguest
 </div>
 @endsection
 

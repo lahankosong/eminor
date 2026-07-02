@@ -2,16 +2,84 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AkuPost;
+use App\Models\AkuLike;
 use App\Models\Post;
+use App\Models\GigPost;
+use App\Models\Song;
+use App\Models\Article;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
+    /**
+     * LANDING PAGE — langsung tampilkan fanbase (fanbase/aku.blade)
+     * Guest bisa lihat 3 menit, setelah itu wajib login
+     */
+    public function fanbaseLanding()
+    {
+        // Ambil data seperti di AkuController::index()
+        $posts = AkuPost::with(['user', 'comments.user', 'comments.replies.user'])
+            ->orderByDesc('is_pinned')
+            ->orderByDesc('created_at')
+            ->paginate(10);
+
+        $likedIds = [];
+        $likersByPost = collect();
+        $isNewMember = false;
+
+        if (Auth::check()) {
+            $likedIds = AkuLike::where('user_id', Auth::id())
+                ->pluck('aku_post_id')->toArray();
+
+            $likersByPost = AkuLike::whereIn('aku_post_id', $posts->pluck('id'))
+                ->with('user')
+                ->latest()
+                ->get()
+                ->groupBy('aku_post_id')
+                ->map(fn($likes) => $likes->take(5)->map(fn($l) => [
+                    'name'   => $l->user->name ?? '?',
+                    'avatar' => $l->user->avatar ?? null,
+                ])->values());
+
+            $isNewMember = Auth::user()->created_at
+                && Auth::user()->created_at->diffInDays(now()) <= 7;
+        }
+
+        // Live Activity untuk side panel
+        $liveActivity = $this->getLiveActivity();
+
+        // Kirim flag ke view
+        $isLandingMode = true;
+
+        // ============================================================
+        // PERBAIKAN: arahkan ke fanbase/aku.blade
+        // ============================================================
+        return view('fanbase.aku', compact(
+            'posts',
+            'likedIds',
+            'likersByPost',
+            'isNewMember',
+            'liveActivity',
+            'isLandingMode'
+        ));
+    }
+
+    /**
+     * Homepage lama — alias ke fanbaseLanding
+     */
     public function index()
     {
-        // Live Community feed — fallback ke placeholder jika tabel belum ada
-        $liveActivity = collect();
+        return $this->fanbaseLanding();
+    }
+
+    /**
+     * Ambil aktivitas live untuk side panel
+     */
+    private function getLiveActivity()
+    {
+        $acts = collect();
         try {
-            $acts = collect();
             Post::with('user')->latest()->take(4)->get()->each(fn($p) => $acts->push([
                 'icon' => '🎵',
                 'user' => $p->user->name ?? 'Musisi',
@@ -19,20 +87,22 @@ class HomeController extends Controller
                 'time' => $p->created_at->diffForHumans(),
                 'ts'   => $p->created_at->timestamp,
             ]));
-            \App\Models\GigPost::with('user')->where('status', 'open')->latest()->take(3)->get()->each(fn($g) => $acts->push([
+            GigPost::with('user')->where('status', 'open')->latest()->take(3)->get()->each(fn($g) => $acts->push([
                 'icon' => '🥁',
                 'user' => $g->user->name ?? 'Musisi',
                 'text' => \Illuminate\Support\Str::limit($g->title, 65),
                 'time' => $g->created_at->diffForHumans(),
                 'ts'   => $g->created_at->timestamp,
             ]));
-            $liveActivity = $acts->sortByDesc('ts')->take(5)->values();
-        } catch (\Throwable $e) {}
-
-        return view('aku', compact('liveActivity'));
+            return $acts->sortByDesc('ts')->take(5)->values();
+        } catch (\Throwable $e) {
+            return collect();
+        }
     }
 
-    /** sitemap.xml dinamis: homepage + semua lagu aktif, termasuk image:image untuk Google Image. */
+    /**
+     * sitemap.xml dinamis
+     */
     public function sitemap()
     {
         $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
@@ -47,8 +117,15 @@ class HomeController extends Controller
         $xml .= '    <image:image><image:loc>' . $homeImg . '</image:loc><image:title>Margonoandi</image:title></image:image>' . "\n";
         $xml .= '  </url>' . "\n";
 
-        // Tools publik (SEO): pemotong lagu + penghapus vokal — gratis, client-side
-        foreach (['tools.index', 'tools.potong-lagu', 'tools.hapus-vokal', 'tools.cover-art', 'tools.kartu-rilis', 'tools.countdown', 'tools.edit-metadata', 'tools.chord-builder', 'tools.bpm-kalkulator', 'tools.kalkulator-royalti', 'tools.rate-card', 'tools.transpose-kunci', 'tools.epk', 'tools.setlist', 'tools.release-planner', 'gig.board'] as $toolRoute) {
+        // Tools publik
+        $toolRoutes = [
+            'tools.index', 'tools.potong-lagu', 'tools.hapus-vokal',
+            'tools.cover-art', 'tools.kartu-rilis', 'tools.countdown',
+            'tools.edit-metadata', 'tools.chord-builder', 'tools.bpm-kalkulator',
+            'tools.kalkulator-royalti', 'tools.rate-card', 'tools.transpose-kunci',
+            'tools.epk', 'tools.setlist', 'tools.release-planner', 'gig.board'
+        ];
+        foreach ($toolRoutes as $toolRoute) {
             try {
                 $xml .= '  <url>' . "\n";
                 $xml .= '    <loc>' . htmlspecialchars(route($toolRoute)) . '</loc>' . "\n";
@@ -58,7 +135,7 @@ class HomeController extends Controller
             } catch (\Throwable $e) {}
         }
 
-        // Materi musik: halaman index + tiap artikel
+        // Materi musik
         try {
             $xml .= '  <url>' . "\n";
             $xml .= '    <loc>' . htmlspecialchars(route('library.materi')) . '</loc>' . "\n";
@@ -68,7 +145,7 @@ class HomeController extends Controller
         } catch (\Throwable $e) {}
 
         try {
-            foreach (\App\Models\Article::orderBy('batch')->orderBy('id')->get(['slug','updated_at']) as $art) {
+            foreach (Article::orderBy('batch')->orderBy('id')->get(['slug','updated_at']) as $art) {
                 try { $loc = route('library.materi.show', $art->slug); } catch (\Throwable $e) { continue; }
                 $xml .= '  <url>' . "\n";
                 $xml .= '    <loc>' . htmlspecialchars($loc) . '</loc>' . "\n";
@@ -78,6 +155,7 @@ class HomeController extends Controller
             }
         } catch (\Throwable $e) {}
 
+        // Lagu
         try {
             $songs = Song::where('is_active', true)
                 ->whereNotNull('slug')->where('slug', '!=', '')

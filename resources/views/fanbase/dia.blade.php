@@ -1,5 +1,5 @@
 @extends('layouts.fanbase')
-@section('title', 'Dia')
+@section('title', 'Room')
 
 @push('styles')
 <style>

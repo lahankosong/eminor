@@ -1,21 +1,22 @@
-@extends('layouts.app')
-@section('title', $article->title . ' — Materi Musik Margonoandi')
+@extends('layouts.fanbase')
+@section('title', $article->title)
 
 @push('styles')
 <style>
+    .fb-main { --card-bg: var(--card); --accent: var(--sky); --accent-dim: var(--sky-lt); --bg: var(--cream); --bg-3: var(--surface); --border-2: var(--border-lt); --text: var(--text-1); }
+
     /* ===== LAYOUT ===== */
-    .art-outer { max-width: 100%; padding: 1.5rem 0 5rem; }
+    .art-outer { padding: 0 0 2rem; }
 
     .art-layout {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 210px;
-        gap: 32px;
+        grid-template-columns: 1fr;
+        gap: 24px;
         align-items: start;
     }
-    @media(max-width: 860px) { .art-layout { grid-template-columns: 1fr; } .art-sidebar { display: none; } }
 
     .art-back { display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--text-3);text-decoration:none;margin-bottom:1.25rem; }
-    .art-back:hover { color:var(--text); }
+    .art-back:hover { color:var(--text-1); }
 
     /* ===== ARTICLE CONTENT ===== */
     .art-meta { display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap; }
@@ -57,33 +58,12 @@
     .art-nav-title { font-size:12px;font-weight:600;color:var(--text);line-height:1.4; }
     .art-nav-card.right { text-align:right; }
 
-    /* ===== RIGHT SIDEBAR ===== */
-    .art-sidebar { position: sticky; top: 70px; display: flex; flex-direction: column; gap: 14px; }
-
-    .art-widget { background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:1rem; }
-    .art-widget-title { font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--text-3);margin-bottom:.75rem; }
-
-    .art-related-link { display:flex;flex-direction:column;gap:2px;padding:8px 0;border-bottom:1px solid var(--border);text-decoration:none;transition:.15s; }
-    .art-related-link:last-child { border-bottom:none;padding-bottom:0; }
-    .art-related-link:hover .art-related-title { color:var(--accent); }
-    .art-related-title { font-size:12.5px;font-weight:500;color:var(--text);line-height:1.35; }
-    .art-related-meta { font-size:10px;color:var(--text-3); }
-
-    .art-tool-link { display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);text-decoration:none;font-size:12.5px;color:var(--text-3);transition:.15s; }
-    .art-tool-link:last-child { border-bottom:none;padding-bottom:0; }
-    .art-tool-link:hover { color:var(--accent); }
-    .art-tool-link span:first-child { font-size:15px;flex-shrink:0; }
-
-    .art-gig-card { background:linear-gradient(135deg,var(--accent-dim),rgba(56,168,204,.02));border:1px solid rgba(56,168,204,.25);border-radius:16px;padding:1rem; }
-    .art-gig-type { display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--accent-dim);color:var(--accent);margin-bottom:6px; }
-    .art-gig-title { font-size:13px;font-weight:600;color:var(--text);line-height:1.35;margin-bottom:5px; }
-    .art-gig-meta { font-size:11px;color:var(--text-3);margin-bottom:.75rem; }
-    .art-gig-cta { display:block;text-align:center;padding:7px 0;border-radius:20px;background:var(--accent);color:#fff;font-size:12px;font-weight:600;text-decoration:none; }
-
-    .art-cta-widget { background:linear-gradient(135deg,var(--accent-dim),rgba(56,168,204,.02));border:1px solid rgba(56,168,204,.25);border-radius:16px;padding:1rem;text-align:center; }
-    .art-cta-widget h4 { font-size:13px;font-weight:700;color:var(--text);margin-bottom:.35rem; }
-    .art-cta-widget p { font-size:11.5px;color:var(--text-3);margin-bottom:.85rem;line-height:1.55; }
-    .art-cta-btn { display:inline-block;padding:8px 18px;border-radius:20px;background:var(--accent);color:#fff;font-size:12px;font-weight:600;text-decoration:none; }
+    /* Related articles (below article, shown as row) */
+    .art-related-row { display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:1.5rem; }
+    .art-related-card { background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.85rem;text-decoration:none;transition:.2s; }
+    .art-related-card:hover { border-color:var(--sky); }
+    .art-related-title { font-size:12.5px;font-weight:500;color:var(--text-1);line-height:1.35; }
+    .art-related-meta { font-size:10px;color:var(--text-3);margin-top:3px; }
 </style>
 @endpush
 
@@ -144,64 +124,20 @@
             @endif
         </div>
 
-        {{-- ===== RIGHT SIDEBAR ===== --}}
-        <aside class="art-sidebar">
-
-            {{-- Artikel terkait --}}
-            @if($related->count())
-            <div class="art-widget">
-                <div class="art-widget-title">📖 Artikel Terkait</div>
-                @foreach($related as $r)
-                <a href="{{ route('library.materi.show', $r->slug) }}" class="art-related-link">
-                    <div class="art-related-title">{{ $r->title }}</div>
-                    <div class="art-related-meta">🕐 {{ $r->reading_time }} mnt</div>
-                </a>
-                @endforeach
-                <a href="{{ route('library.materi') }}" style="display:block;text-align:center;font-size:11px;color:var(--accent);text-decoration:none;margin-top:.6rem;font-weight:600;">Semua artikel →</a>
-            </div>
-            @endif
-
-            {{-- Alat relevan per kategori --}}
-            <div class="art-widget">
-                <div class="art-widget-title">🎛 Alat Terkait</div>
-                @foreach($relevantTools as $t)
-                <a href="{{ route($t['route']) }}" class="art-tool-link">
-                    <span>{{ $t['icon'] }}</span><span>{{ $t['name'] }}</span>
-                </a>
-                @endforeach
-                <a href="{{ route('tools.index') }}" style="display:block;text-align:center;font-size:11px;color:var(--accent);text-decoration:none;margin-top:.5rem;font-weight:600;">Semua alat →</a>
-            </div>
-
-            {{-- Gig terbaru --}}
-            @if($latestGig)
-            <div class="art-gig-card">
-                <div class="art-widget-title">🎪 Gig Terbaru</div>
-                <div class="art-gig-type">{{ \App\Models\GigPost::typeLabel($latestGig->type) }}</div>
-                <div class="art-gig-title">{{ $latestGig->title }}</div>
-                <div class="art-gig-meta">
-                    @if($latestGig->location)📍 {{ $latestGig->location }}@endif
-                    @if($latestGig->date_event) · 🗓 {{ $latestGig->date_event->format('d M Y') }}@endif
-                </div>
-                @auth
-                <a href="{{ route('gig.board') }}" class="art-gig-cta">Lihat gig →</a>
-                @else
-                <a href="{{ route('google.login') }}" class="art-gig-cta">🔒 Login untuk lamar</a>
-                @endauth
-            </div>
-            @endif
-
-            {{-- CTA --}}
-            @guest
-            <div class="art-cta-widget">
-                <h4>🎵 Gabung Komunitas</h4>
-                <p>Download artikel, diskusi dengan musisi lain, dan temukan personil.</p>
-                <a href="{{ route('google.login') }}" class="art-cta-btn">Masuk Gratis</a>
-            </div>
-            @endguest
-
-        </aside>
-
     </div>
+
+    {{-- Artikel terkait (below) --}}
+    @if($related->count())
+    <p style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--text-3);margin-top:2rem;margin-bottom:.6rem;">📖 Artikel Terkait</p>
+    <div class="art-related-row">
+        @foreach($related as $r)
+        <a href="{{ route('library.materi.show', $r->slug) }}" class="art-related-card">
+            <div class="art-related-title">{{ $r->title }}</div>
+            <div class="art-related-meta">🕐 {{ $r->reading_time }} mnt</div>
+        </a>
+        @endforeach
+    </div>
+    @endif
 </div>
 @endsection
 

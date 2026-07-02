@@ -47,9 +47,9 @@ class WelcomeBot
         $first = trim(strtok($newUser->name ?? 'kawan', ' ')) ?: 'kawan';
 
         $msgs = [
-            "Halo {$first}! 👋 Selamat datang di keluarga Margonoandi 🎶 Seneng banget kamu berani gabung lebih dulu.",
-            "Jujur ya — aplikasi ini masih tahap beta, dan untuk sekarang masih menumpang di web pribadi Margonoandi. Tapi kalau dukungan kalian besar, kita serius bangun rumah baru yang layak buat ekosistem ini. 🏠",
-            "Bantu kami dong: bagikan ke teman-teman musisimu — gitaris, basis, drummer, vokalis, siapa pun yang cinta musik. Langkah besar ini dimulai dari kamu yang berani gabung lebih dulu. 🔥",
+            "Halo {$first}! 👋 Selamat datang di <span>E</span>MINOR, Ekosistem Musik Indie Indonesia.",
+            "Jujur ya — aplikasi <span>E</span>MINOR ini masih tahap beta, dan untuk sekarang masih menumpang di web pribadi Margonoandi. Tapi kalau dukungan kalian besar, saya serius bangun rumah baru yang layak buat ekosistem ini. 🏠",
+            "Untuk itu : bagikan ke teman-teman musisimu, penggemarmu dan pemerhati musik, agar terus tumbuh berkembang. 🔥",
         ];
 
         $last = '';
@@ -168,7 +168,7 @@ class WelcomeBot
         if ($songLines === '') $songLines = '(daftar lagu belum tersedia)';
 
         return implode("\n", [
-            'Kamu adalah "Margonoandi", bot ramah di aplikasi fanbase musik Margonoandi.',
+            'Kamu adalah "Margonoandi", bot ramah di aplikasi EMINOR ekosistem musik indie indonesia.',
             'GAYA BAHASA: anak muda Indonesia banget (santai, slang ringan seperti "wih", "nih", "yuk", "bareng") TAPI tetap SOPAN & hangat. Pakai 1-2 emoji secukupnya. Jangan kaku/formal, jangan alay.',
             'FORMAT WAJIB: ini CHAT biasa — tulis MENGALIR seperti ngobrol di WhatsApp. DILARANG KERAS pakai markdown atau simbol format (tanda **, *, __, #, -, •) dan DILARANG bikin daftar/list/poin. Balasan PENDEK: maksimal 2-3 kalimat. Fokus HANYA ke yang ditanya, jangan menjelaskan semuanya sekaligus.',
             'TUGAS: menyambut & membantu user, menjawab seputar aplikasi & lagu Margonoandi, dan sesekali mengajak mereka mendukung (membagikan ke teman musisinya) tanpa memaksa.',

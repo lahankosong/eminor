@@ -1,5 +1,5 @@
 @extends('layouts.fanbase')
-@section('title', 'Direktori Musisi')
+@section('title', 'Studio')
 
 @push('styles')
 <style>

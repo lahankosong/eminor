@@ -1,7 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.fanbase')
+@section('title', 'Diskografi')
 
 @push('styles')
 <style>
+    .fb-main { --ac: var(--sky); --ac-dk: var(--sky-dk); --ac-lt: var(--sky-lt); --card-bg: var(--card); --bg: var(--cream); --bg-3: var(--surface); --border-2: var(--border-lt); --text: var(--text-1); --accent: var(--sky); --accent-dim: var(--sky-lt); }
+    .lib-page { padding: 0 0 2rem; }
     :root { --ac:#38A8CC; --ac-dk:#0ea5e9; --ac-lt:rgba(56,168,204,.12); }
 
     .lib-page { max-width:820px; margin:0 auto; padding:1.75rem 1rem 5rem; }
@@ -78,7 +81,6 @@
 
 @section('content')
 <div class="lib-page">
-    <a href="{{ route('home') }}" class="lib-back">← Beranda</a>
 
     <div class="lib-hero">
         <div class="lib-badge">🎵 Music Library</div>
