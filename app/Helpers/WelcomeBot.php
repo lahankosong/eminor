@@ -47,9 +47,9 @@ class WelcomeBot
         $first = trim(strtok($newUser->name ?? 'kawan', ' ')) ?: 'kawan';
 
         $msgs = [
-            "Halo {$first}! 👋 Selamat datang di <span>E</span>MINOR, Ekosistem Musik Indie Indonesia.",
-            "Jujur ya — aplikasi <span>E</span>MINOR ini masih tahap beta dan terus berkembang. Kalau dukungan kalian besar, kita bangun ekosistem ini jadi rumah yang makin layak buat musisi Indonesia! 🏠",
-            "Untuk itu : bagikan ke teman-teman musisimu, penggemarmu dan pemerhati musik, agar terus tumbuh berkembang. 🔥",
+            "Halo {$first}! 👋 Selamat datang di <span>E</span>MINOR — ekosistem musik indie Indonesia yang dibangun dari kamar, untuk semua musisi.",
+            "EMINOR lahir karena satu kenyataan pahit: musisi asli makin susah didengar di platform besar. Sudah coba FB Ads, TikTok Ads, Google Ads — tapi algoritmanya dikuasai konten kreator dari berbagai profesi, bukan musisi murni. Daripada terus berjuang di platform orang, kita bangun rumah sendiri. 🏠",
+            "Di sini kamu bisa bikin profil musisi, cari personil band, pakai tools gratis (chord, tuner, BPM, potong lagu, dll), dan tumbuh bareng komunitas musisi Indonesia. Ajak teman musisimu bergabung — ekosistem ini besar karena kalian. 🔥",
         ];
 
         $last = '';
@@ -149,35 +149,27 @@ class WelcomeBot
         return $resp->successful() ? (string) $resp->json('choices.0.message.content', '') : '';
     }
 
-    /** System prompt: persona + visi/misi + data lagu nyata dari DB (anti-ngarang). */
+    /** System prompt: persona EMINOR — fokus ekosistem, bukan promosi lagu. */
     protected static function systemPrompt(): string
     {
-        $songLines = '';
-        try {
-            $songs = Song::where('is_active', true)->orderBy('track_number')
-                ->get(['title', 'era', 'story_hook', 'key_signature', 'chords']);
-            $songLines = $songs->map(function ($s) {
-                $b = '- ' . $s->title;
-                if ($s->era)           $b .= ' (' . $s->era . ')';
-                if ($s->story_hook)    $b .= ' — ' . Str::limit($s->story_hook, 90);
-                if ($s->key_signature) $b .= ' [key ' . $s->key_signature . ']';
-                if (!empty($s->chords)) $b .= ' [ada chord]';
-                return $b;
-            })->implode("\n");
-        } catch (\Throwable $e) {}
-        if ($songLines === '') $songLines = '(daftar lagu belum tersedia)';
-
         return implode("\n", [
             'Kamu adalah bot ramah EMINOR — ekosistem musik indie Indonesia.',
-            'GAYA BAHASA: anak muda Indonesia banget (santai, slang ringan seperti "wih", "nih", "yuk", "bareng") TAPI tetap SOPAN & hangat. Pakai 1-2 emoji secukupnya. Jangan kaku/formal, jangan alay.',
-            'FORMAT WAJIB: ini CHAT biasa — tulis MENGALIR seperti ngobrol di WhatsApp. DILARANG KERAS pakai markdown atau simbol format (tanda **, *, __, #, -, •) dan DILARANG bikin daftar/list/poin. Balasan PENDEK: maksimal 2-3 kalimat. Fokus HANYA ke yang ditanya, jangan menjelaskan semuanya sekaligus.',
-            'TUGAS: menyambut & membantu user, menjawab seputar aplikasi & lagu di EMINOR, dan sesekali mengajak mereka mendukung (membagikan ke teman musisinya) tanpa memaksa.',
-            'VISI: EMINOR adalah gerakan ekosistem musik Indonesia "dimulai dari kamarmu" untuk SEMUA peran (gitaris, basis, drummer, vokalis, keyboardis, songwriter, arranger, event/wedding organizer, promotor, penikmat musik). Statusnya MASIH BETA dan terus berkembang; kalau dukungan besar, akan dibangun "rumah baru" yang lebih layak.',
-            'FITUR APP (sebut SEPERLUNYA saja, jangan didaftar semua): pemutar lagu, belajar chord gitar/piano/ukulele/bass + tuner gitar, komunitas (Aku & Kita), chat (Dia), direktori musisi & cari personil band, catatan pribadi. Kalau ditanya "ada fitur apa", sebut 1-3 yang paling relevan dengan santai lalu tawarkan cerita lebih, JANGAN sebut semua.',
-            'LAGU EMINOR (HANYA gunakan data ini; JANGAN mengarang judul/cerita/fakta lain):',
-            $songLines,
-            'TETAP ON-TOPIC: HANYA bahas seputar musik, lagu Margonoandi, dan fitur aplikasi ini. Kalau user ngobrol di luar topik (nanya kabar, "udah makan belum", curhat pribadi, dll), tanggapi singkat & ramah SECUKUPNYA lalu arahkan balik ke musik/aplikasi dengan halus. Jangan ikut ngelantur.',
-            'ATURAN: JANGAN PERNAH menyebut judul lagu, lirik, atau cerita yang TIDAK ADA persis di daftar lagu di atas (dilarang mengarang/menebak). Kalau ditanya lagu yang tak ada di daftar, akui jujur belum tahu/belum ada. Jangan menjanjikan fitur yang belum ada. Selalu Bahasa Indonesia, jangan kasar/SARA. Jangan pernah menyebut nama "Margonoandi" atau "Rakhman Andi" — kamu adalah EMINOR.',
+
+            'GAYA BAHASA: anak muda Indonesia (santai, slang ringan: "wih", "nih", "yuk", "bareng") tapi SOPAN & hangat. 1-2 emoji secukupnya. Jangan kaku, jangan alay.',
+            'FORMAT WAJIB: chat biasa — mengalir seperti WhatsApp. DILARANG pakai markdown (**, *, #, -, •) atau daftar/list. Balasan PENDEK: maksimal 2-3 kalimat. Fokus ke yang ditanya saja.',
+
+            'CERITA AWAL EMINOR (gunakan ini kalau ditanya sejarah/latar belakang):',
+            'EMINOR lahir dari frustrasi seorang musisi kamar bernama Margonoandi. Lagunya awalnya di YouTube (@rahmento), kemudian diproduksi ulang dengan Suno dan dirilis ke agregator musik. Sudah promosi habis-habisan — Facebook Ads, TikTok Ads, Google Ads — tapi tidak ada yang menembus algoritma. Bukan karena lagunya jelek, tapi karena platform-platform itu sekarang dikuasai oleh content creator dari berbagai profesi non-musik yang lebih tahu cara main algoritma. Musisi asli makin susah didengar. Dari frustrasi itulah muncul ide: daripada berjuang sendirian di platform orang, kenapa tidak bangun ekosistem sendiri khusus untuk musisi? Itulah EMINOR.',
+
+            'VISI & MISI EMINOR:',
+            'EMINOR adalah gerakan "dimulai dari kamarmu" — tempat semua peran musik tumbuh bareng: gitaris, bassist, drummer, vokalis, keyboardis, songwriter, arranger, event organizer, promotor, sampai penikmat musik. Bukan tentang satu artis. Ini tentang seluruh ekosistem musik Indonesia.',
+
+            'FITUR APP (sebut 1-3 yang relevan, jangan didaftar semua): tools gratis (chord builder, tuner, BPM, potong lagu, hapus vokal, rate card, EPK, dll), komunitas Stage & Studio, chat Room, direktori musisi, cari personil band, dan pencatatan pribadi musisi.',
+
+            'TOPIK YANG BOLEH DIBAHAS: visi/misi/cerita EMINOR, fitur aplikasi, tips musik umum, cara tumbuh sebagai musisi indie, ekosistem musik Indonesia. JANGAN promosikan lagu atau artis tertentu — EMINOR bukan tentang satu musisi.',
+
+            'TETAP ON-TOPIC: kalau user nanya di luar topik musik/app, tanggapi singkat lalu arahkan balik dengan halus.',
+            'ATURAN: jangan menjanjikan fitur yang belum ada. Selalu Bahasa Indonesia. Jangan kasar/SARA. JANGAN pernah menyebut nama "Margonoandi" atau "Rakhman Andi" dalam balasan kecuali user yang duluan menyebutnya dan kamu cukup bilang "iya, beliau yang mendirikan EMINOR" lalu fokus balik ke ekosistem.',
         ]);
     }
 
@@ -219,24 +211,30 @@ class WelcomeBot
         };
 
         if ($t === '' || $has(['halo', 'hai', 'hello', 'assalam', 'pagi', 'siang', 'sore', 'malam']))
-            return "Halo {$first}! 👋 Seneng kamu mampir. Mau eksplor apa nih — dengerin lagu, belajar chord, atau stem gitar? 🎶";
+            return "Halo {$first}! 👋 Selamat datang di EMINOR — ekosistem musik indie Indonesia. Mau eksplor tools, cari personil band, atau mau tau cerita kenapa EMINOR lahir? 🎸";
         if ($has(['gratis', 'bayar', 'harga', 'biaya', 'premium', 'langganan']))
-            return "Tenang, semua fitur GRATIS kok 🙌 Cukup login. Kalau suka, bantu bagikan ke teman ya 🔥";
+            return "Semua fitur GRATIS kok {$first} 🙌 Cukup login Google. Kalau suka, bantu sebarin ke teman musisimu ya 🔥";
         if ($has(['stem', 'tuner', 'setel', 'setem', 'fals']))
-            return "Buat stem gitar, buka menu Kamu → Tuner ya. Tinggal petik senarnya, nanti dipandu 🎸";
+            return "Buat stem gitar ada di menu Tools → Tuner {$first}. Tinggal petik senarnya, langsung dipandu 🎸";
         if ($has(['chord', 'kunci', 'gitar', 'piano', 'ukulele', 'bass', 'genjreng']))
-            return "Belajar chord ada di menu Kamu → Chord — lengkap gitar, piano, ukulele, sama bass, plus bisa dibunyikan 🎶 Cobain deh!";
-        if ($has(['dukung', 'support', 'bagi', 'share', 'sebar', 'promosi', 'ajak']))
-            return "Makasih banyak! 🙏🔥 Bantu kami dengan membagikan link aplikasi ini ke teman-teman musisimu ya. Gerakan ini dimulai dari kamu 💪";
-        if ($has(['lagu', 'dengar', 'denger', 'musik', 'putar', 'play']))
-            return "Cus dengerin lagu-lagunya di halaman utama 🎧 Sambil belajar chord-nya juga bisa. Ada genre favoritmu?";
-        if ($has(['beta', 'rumah', 'serius', 'kapan', 'rilis', 'resmi']))
-            return "Iya nih, EMINOR masih BETA dan terus berkembang. Kalau dukungan kalian gede, kita bangun ekosistem ini jadi rumah yang makin layak buat musisi Indonesia 🏠🔥";
-        if ($has(['siapa', 'bot', 'asisten', 'kamu apa']))
-            return "Aku bot EMINOR 🤖 — temen ngobrol sekaligus pemandu kamu di ekosistem ini. Tanya aja apa pun soal app atau lagunya 🎶";
-        if ($has(['makasih', 'terima kasih', 'thanks', 'mantap', 'keren', 'bagus']))
-            return "Sama-sama! 🙌 Seneng bisa bantu. Jangan lupa ajak temen ya biar makin rame 🔥";
+            return "Ada Chord Builder di Tools — lengkap gitar, piano, ukulele, sama bass, bisa dibunyikan juga 🎶 Cek aja di menu Tools!";
+        if ($has(['dukung', 'support', 'bagi', 'share', 'sebar', 'ajak']))
+            return "Makasih banget {$first}! 🙏 Cara paling ampuh dukung EMINOR ya bagiin ke teman-teman musisimu. Gerakan ini tumbuh dari kalian 💪";
+        if ($has(['algoritma', 'platform', 'tiktok', 'facebook', 'instagram', 'youtube', 'spotify', 'streaming']))
+            return "Nah itu dia masalah kita semua — platform besar sekarang dikuasai content creator berbagai profesi, bukan musisi murni. Makanya EMINOR hadir: ekosistem kita sendiri 🏠";
+        if ($has(['kenapa', 'awal', 'sejarah', 'cerita', 'mulai', 'lahir', 'buat', 'bikin', 'didirikan']))
+            return "EMINOR lahir dari frustrasi musisi yang sudah promosi di FB, TikTok, Google Ads tapi algoritmanya dikuasai konten kreator berbagai profesi. Daripada terus berjuang di platform orang, mendingan bangun ekosistem sendiri — buat semua musisi Indonesia 🎯";
+        if ($has(['personil', 'cari', 'band', 'kolaborasi', 'anggota', 'join', 'drummer', 'gitaris', 'bassist', 'vokalis']))
+            return "Ada fitur direktori musisi di Studio {$first} — bisa bikin profil, lihat skill musisi lain, dan posting lowongan personil band. Cus coba! 🎸";
+        if ($has(['tools', 'tool', 'fitur', 'apa aja', 'apa saja', 'ada apa']))
+            return "Ada banyak tools gratis nih: tuner, chord builder, BPM, potong lagu, hapus vokal, EPK generator, rate card, sampai release planner — semuanya di menu Tools. Mau yang mana dulu? 🛠️";
+        if ($has(['beta', 'rumah', 'kapan', 'rilis', 'resmi', 'selesai']))
+            return "EMINOR masih BETA dan terus berkembang {$first}. Kalau makin banyak musisi gabung, ekosistem ini makin kuat dan kita bisa bangun sesuatu yang lebih besar lagi 🏠🔥";
+        if ($has(['siapa', 'bot', 'asisten', 'kamu apa', 'kamu siapa']))
+            return "Aku bot EMINOR 🤖 — pemandu kamu di ekosistem ini. Tanya soal fitur, cerita EMINOR, atau cara tumbuh sebagai musisi indie — aku siap!";
+        if ($has(['makasih', 'terima kasih', 'thanks', 'mantap', 'keren', 'bagus', 'oke', 'sip']))
+            return "Sama-sama {$first}! 🙌 Jangan lupa ajak temen musisimu gabung — makin rame makin seru 🔥";
 
-        return "Hmm, aku belum yakin nangkep maksudmu 😅 Tapi aku bisa bantu soal lagu, belajar chord, tuner, atau cara dukung gerakan ini. Mau yang mana, {$first}? 🎶";
+        return "Aku bisa bantu soal fitur EMINOR, tools gratis, cari personil, atau cerita kenapa ekosistem ini dibuat. Mau mulai dari mana, {$first}? 🎸";
     }
 }
