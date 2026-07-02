@@ -1,22 +1,27 @@
 <?php
-// Clear Laravel config/route/view cache — jalankan sekali setelah edit .env
+// Hapus file cache Laravel langsung — tanpa bootstrap app
 // Akses: https://www.eminor.margonoandi.my.id/fixcache.php
 
-define('LARAVEL_START', microtime(true));
-$root = dirname(__DIR__);
-require $root . '/vendor/autoload.php';
-$app = require $root . '/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
-
-$results = [];
-foreach (['config:clear', 'route:clear', 'view:clear', 'cache:clear'] as $cmd) {
-    $kernel->call($cmd);
-    $results[$cmd] = '✅ done';
-}
+$root  = dirname(__DIR__);
+$files = [
+    $root . '/bootstrap/cache/config.php',
+    $root . '/bootstrap/cache/routes-v7.php',
+    $root . '/bootstrap/cache/routes.php',
+    $root . '/bootstrap/cache/packages.php',
+    $root . '/bootstrap/cache/services.php',
+    $root . '/bootstrap/cache/events.php',
+];
 
 header('Content-Type: text/plain; charset=utf-8');
-echo "=== Laravel Cache Cleared ===\n\n";
-foreach ($results as $cmd => $status) {
-    echo "$cmd → $status\n";
+echo "=== Laravel Cache Clear ===\n\n";
+
+foreach ($files as $f) {
+    if (file_exists($f)) {
+        unlink($f);
+        echo "Deleted: " . basename($f) . "\n";
+    } else {
+        echo "Not found (ok): " . basename($f) . "\n";
+    }
 }
-echo "\nSelesai. Hapus file ini setelah dipakai.\n";
+
+echo "\nDone. Coba login lagi.\n";
