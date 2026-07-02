@@ -131,7 +131,7 @@
 
     <div class="rc-cta">
         <h2>🎸 Rilis lagumu, bangun basis penggemar</h2>
-        <p>Setelah promo siap, tampilkan karyamu di <b>Margonoandi</b> — profil portofolio gratis (kartu + QR), temukan personil &amp; gig, gabung komunitas musisi Indonesia.</p>
+        <p>Setelah promo siap, tampilkan karyamu di <b>EMINOR</b> — profil portofolio gratis (kartu + QR), temukan personil &amp; gig, gabung komunitas musisi Indonesia.</p>
         <a href="{{ route('google.login') }}" class="rc-cta-btn">Buat profil musisi gratis →</a>
     </div>
 
@@ -143,7 +143,7 @@
     </div>
 
     <p style="text-align:center;margin-top:2.5rem;font-size:11px;color:var(--text-3,#94a3b8);">
-        Bagian dari <a href="{{ route('home') }}" style="color:var(--ac);">Margonoandi Fanbase</a> 🎸 ·
+        Bagian dari <a href="{{ route('home') }}" style="color:var(--ac);">EMINOR Ekosistem</a> 🎸 ·
         <a href="{{ route('tools.countdown') }}" style="color:var(--ac);">Countdown Live</a> ·
         <a href="{{ route('tools.cover-art') }}" style="color:var(--ac);">Buat Cover</a> ·
         <a href="{{ route('tools.hapus-vokal') }}" style="color:var(--ac);">Hapus Vokal</a>
@@ -240,7 +240,7 @@ function draw(c,W,H){
         act.forEach(function(k,i){var w=wid[i],p=PLATS[k];c.fillStyle=p[0];rr(c,x,by,w,hh,hh/2);c.fill();c.fillStyle=p[1];c.textBaseline='middle';c.fillText(p[2],x+w/2,by+hh/2);c.textBaseline='alphabetic';x+=w+gap;});
     }
     // brand
-    c.fillStyle=S.tc;c.globalAlpha=.72;c.font='600 '+(U*0.026)+'px "Space Grotesk",sans-serif';c.fillText('margonoandi.my.id',cx,H*0.96);c.globalAlpha=1;
+    c.fillStyle=S.tc;c.globalAlpha=.72;c.font='600 '+(U*0.026)+'px "Space Grotesk",sans-serif';c.fillText('EMINOR.my.id',cx,H*0.96);c.globalAlpha=1;
 }
 function redraw(){var d=dims();if(cv.width!==d[0]||cv.height!==d[1]){cv.width=d[0];cv.height=d[1];}draw(ctx,cv.width,cv.height);}
 

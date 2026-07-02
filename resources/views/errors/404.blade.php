@@ -1,7 +1,7 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('content')
-@php $seo = ['title' => 'Halaman Tak Ditemukan (404) — Margonoandi', 'robots' => 'noindex, follow']; @endphp
+@php $seo = ['title' => 'Halaman Tak Ditemukan (404) — EMINOR', 'robots' => 'noindex, follow']; @endphp
 <div style="max-width:520px;margin:0 auto;padding:4rem 1.25rem;text-align:center;">
     <div style="font-size:4rem;line-height:1;margin-bottom:.5rem;">🎸</div>
     <div style="font-family:'Space Grotesk','Sora','Inter',sans-serif;font-size:clamp(2.2rem,9vw,3.5rem);font-weight:800;color:var(--accent,#38bdf8);line-height:1;">404</div>

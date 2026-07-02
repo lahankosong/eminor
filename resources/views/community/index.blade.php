@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @push('styles')
 <style>
@@ -41,9 +41,9 @@
 
 <div class="community-hero">
     <span class="coming-badge">Segera hadir</span>
-    <h1>Rumah Margonoandi</h1>
+    <h1>Rumah EMINOR</h1>
     <p>
-        Tempat ngobrol, diskusi, dan kolaborasi langsung dengan Rakhman Andi.
+        Tempat ngobrol, diskusi, dan kolaborasi langsung dengan Eminor.
         Komunitas sedang dibangun — jadilah yang pertama bergabung.
     </p>
     <a href="{{ route('home') }}"
@@ -68,7 +68,7 @@
         <div class="coming-card">
             <div class="coming-card-icon">&#127908;</div>
             <div class="coming-card-title">Room Kolaborasi</div>
-            <div class="coming-card-desc">Punya ide lagu? Ajak Rakhman Andi dan member lain untuk berkolaborasi dalam satu room privat.</div>
+            <div class="coming-card-desc">Punya ide lagu? Ajak Eminor dan member lain untuk berkolaborasi dalam satu room privat.</div>
         </div>
         <div class="coming-card">
             <div class="coming-card-icon">&#128276;</div>

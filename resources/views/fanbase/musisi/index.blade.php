@@ -1,4 +1,4 @@
-@extends('layouts.fanbase')
+﻿@extends('layouts.fanbase')
 @section('title', 'Studio')
 
 @push('styles')
@@ -87,7 +87,7 @@
 
 <div class="mus-hero">
     <h2>🎸 Direktori Musisi</h2>
-    <p>Temukan personil, kolaborator, band, dan peluang gig — sesama musisi Margonoandi.</p>
+    <p>Temukan personil, kolaborator, band, dan peluang gig — sesama musisi EMINOR.</p>
     <div class="mus-hero-actions">
         @if($myProfile)
         <a href="{{ route('musisi.edit') }}" class="btn-w btn-w-ghost">Edit profilku</a>

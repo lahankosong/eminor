@@ -80,7 +80,7 @@
                 </div>
 
                 <label class="epk-label">Nama Artis / Band</label>
-                <input type="text" class="epk-input" id="epkName" placeholder="Margonoandi" oninput="renderEPK()">
+                <input type="text" class="epk-input" id="epkName" placeholder="EMINOR" oninput="renderEPK()">
 
                 <div class="epk-row">
                     <div>
@@ -351,7 +351,7 @@ function renderEPK() {
     ctx.fillStyle = 'rgba(255,255,255,.3)';
     ctx.font = '18px "Space Grotesk", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Dibuat dengan EPK Generator gratis · margonoandi.my.id/tools/epk', W/2, H - 28);
+    ctx.fillText('Dibuat dengan EPK Generator gratis · EMINOR.my.id/tools/epk', W/2, H - 28);
 }
 
 function roundRectFill(ctx, x, y, w, h, r) {

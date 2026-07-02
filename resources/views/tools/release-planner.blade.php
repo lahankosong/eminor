@@ -80,7 +80,7 @@
         </div>
         <div class="rp-field">
             <label class="rp-label">Nama Artis</label>
-            <input type="text" id="rpArtist" class="rp-input" placeholder="cth: Margonoandi" value="Margonoandi" oninput="generate()">
+            <input type="text" id="rpArtist" class="rp-input" placeholder="cth: EMINOR" value="EMINOR" oninput="generate()">
         </div>
         <div class="rp-field">
             <label class="rp-label">Tanggal Rilis</label>
@@ -175,7 +175,7 @@ var PHASES = [
             { text: 'Posting countdown harian (7, 6, 5, 4, 3, 2, 1 hari lagi)', tag: 'promo' },
             { text: 'Share cuplikan lirik atau kutipan bermakna setiap hari', tag: 'konten' },
             { text: 'Engage aktif dengan semua komentar dan DM yang masuk', tag: 'engagement' },
-            { text: 'Hubungi fanbase terdekat secara personal (WhatsApp, DM) untuk support di hari-H', tag: 'komunitas' },
+            { text: 'Hubungi Ekosistem terdekat secara personal (WhatsApp, DM) untuk support di hari-H', tag: 'komunitas' },
             { text: 'Test semua link: pre-save, sosmed bio, press kit', tag: 'teknis' },
             { text: 'Siapkan setlist kalau ada rencana live / siaran live hari rilis', tag: 'persiapan', link: { text: 'Setlist Builder', route: '{{ route("tools.setlist") }}' } },
         ]

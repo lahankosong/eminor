@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id" data-theme="dark">
 <head>
     <meta charset="UTF-8">
@@ -10,8 +10,8 @@
 
     {{-- ===== SEO ===== --}}
     @php
-        $seoTitle = $seo['title'] ?? 'Margonoandi — Lagu, Chord & Komunitas Musik Indonesia';
-        $seoDesc  = $seo['description'] ?? 'Dengarkan lagu Margonoandi, belajar chord gitar/piano/ukulele/bass + tuner, dan gabung komunitas musisi. Ekosistem musik Indonesia, dimulai dari kamarmu.';
+        $seoTitle = $seo['title'] ?? 'EMINOR — Lagu, Chord & Komunitas Musik Indonesia';
+        $seoDesc  = $seo['description'] ?? 'Dengarkan lagu EMINOR, belajar chord gitar/piano/ukulele/bass + tuner, dan gabung komunitas musisi. Ekosistem musik Indonesia, dimulai dari kamarmu.';
         $seoImage = $seo['image'] ?? asset('images/Margonoandi.jpeg');
         $seoUrl   = $seo['url'] ?? url()->current();
         $seoType  = $seo['type'] ?? 'website';
@@ -26,7 +26,7 @@
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/images/icon.svg">
     <meta property="og:type" content="{{ $seoType }}">
-    <meta property="og:site_name" content="Margonoandi">
+    <meta property="og:site_name" content="EMINOR">
     <meta property="og:title" content="{{ $seoTitle }}">
     <meta property="og:description" content="{{ $seoDesc }}">
     <meta property="og:url" content="{{ $seoUrl }}">
@@ -36,8 +36,8 @@
     <meta name="twitter:description" content="{{ $seoDesc }}">
     <meta name="twitter:image" content="{{ $seoImage }}">
     <meta property="og:locale" content="id_ID">
-    <meta name="author" content="Margonoandi">
-    <meta name="application-name" content="Margonoandi">
+    <meta name="author" content="EMINOR">
+    <meta name="application-name" content="EMINOR">
     @isset($seo['schema'])
     <script type="application/ld+json">{!! json_encode($seo['schema'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
     @endisset
@@ -386,7 +386,7 @@
 {{-- NAV --}}
 <nav class="top-nav" id="topNav">
 
-    <a href="{{ route('home') }}" class="nav-brand">MARGONOANDI</a>
+    <a href="{{ route('home') }}" class="nav-brand">EMINOR</a>
 
     <div class="nav-center">
         <a href="{{ route('tools.index') }}" class="nav-link {{ request()->routeIs('tools.*') ? 'active' : '' }}">🎛 Alat</a>
@@ -422,7 +422,7 @@
 {{-- FOOTER --}}
 <footer>
     <div class="footer-inner">
-        <div class="footer-brand-label">Margonoandi</div>
+        <div class="footer-brand-label">EMINOR</div>
         <div class="footer-sep"></div>
         <div class="footer-links">
             <a href="https://open.spotify.com/playlist/1lpXuXUd3wMbwWe0stM0dD"
@@ -450,7 +450,7 @@
             <a href="{{ route('tools.epk') }}" class="footer-link">&#127908; EPK Generator</a>
             <a href="{{ route('gig.board') }}" class="footer-link">&#127914; Papan Gig</a>
         </div>
-        <div class="footer-copy">© 2026 Margonoandi · Semua lagu dilindungi hak cipta</div>
+        <div class="footer-copy">© 2026 EMINOR · Semua lagu dilindungi hak cipta</div>
     </div>
 </footer>
 

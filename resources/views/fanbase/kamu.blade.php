@@ -750,7 +750,7 @@
     {{-- Headstock (gambar + area klik pasak) --}}
     <div class="tuner-headstock-wrap">
         <div class="tuner-hs">
-            <img class="tuner-hs-img" src="{{ asset('images/tuner/headstock.png') }}" alt="Headstock gitar Margonoandi">
+            <img class="tuner-hs-img" src="{{ asset('images/tuner/headstock.png') }}" alt="Headstock gitar EMINOR">
             {{-- Area klik transparan di tiap pasak (digeser keluar agar tak menimpa tuner). KIRI: D·A·E  KANAN: G·B·e --}}
             <button class="tuner-peg" style="left:-5%;top:24.5%"  data-freq="146.83" data-label="D" id="pegD"  onclick="tunerPickPeg(this)"><span class="pg-txt">D</span></button>
             <button class="tuner-peg" style="left:-5%;top:42%"  data-freq="110.00" data-label="A" id="pegA"  onclick="tunerPickPeg(this)"><span class="pg-txt">A</span></button>
@@ -784,7 +784,7 @@
     <div id="chordGitar">
     <div class="chord-head">
         <div class="chord-title">&#127928; Chord Gitar untuk Pemula</div>
-        <p class="chord-sub">Kunci dasar yang paling sering dipakai di lagu pop/indie — termasuk lagu Margonoandi. Senar tebal di kiri = E rendah (senar 6).</p>
+        <p class="chord-sub">Kunci dasar yang paling sering dipakai di lagu pop/indie — termasuk lagu EMINOR. Senar tebal di kiri = E rendah (senar 6).</p>
         <div class="chord-legend">
             <span><b>&times;</b> jangan dibunyikan</span>
             <span><b>o</b> senar terbuka</span>
@@ -1252,7 +1252,7 @@ var CHORDS = [
     {n:'G',  cat:'mayor', f:[3,2,0,0,0,3], fg:[2,1,0,0,0,3], tip:'Jari 2 & 1 di senar 6-5, jari 3 di senar 1.'},
     {n:'D',  cat:'mayor', f:[-1,-1,0,2,3,2], fg:[0,0,0,1,3,2], tip:'Bentuk segitiga di 3 senar tipis.'},
     {n:'A',  cat:'mayor', f:[-1,0,2,2,2,0], fg:[0,0,1,2,3,0], tip:'Tiga jari sejajar di fret 2.'},
-    {n:'E',  cat:'mayor', f:[0,2,2,1,0,0], fg:[0,2,3,1,0,0], tip:'Chord favorit Margonoandi.'},
+    {n:'E',  cat:'mayor', f:[0,2,2,1,0,0], fg:[0,2,3,1,0,0], tip:'Chord favorit EMINOR.'},
     {n:'F',  cat:'mayor', f:[-1,-1,3,2,1,1], fg:[0,0,3,2,1,1], tip:'Versi mudah 4 senar, tanpa barre.'},
     {n:'Am', cat:'minor', f:[-1,0,2,2,1,0], fg:[0,0,2,3,1,0], tip:'Mirip E digeser — nuansa galau.'},
     {n:'Em', cat:'minor', f:[0,2,2,0,0,0], fg:[0,2,3,0,0,0], tip:'Paling gampang, cuma 2 jari.'},

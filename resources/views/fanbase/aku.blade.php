@@ -1,4 +1,4 @@
-@extends('layouts.fanbase')
+﻿@extends('layouts.fanbase')
 @section('title', 'Aku — Ekosistem Musik Indie Indonesia')
 
 @push('styles')
@@ -490,7 +490,7 @@
      EMINOR INTRO OVERLAY
      Muncul saat pertama kali buka halaman (sessionStorage check).
      Layer: backdrop(9998) < intro-anim(9999) < disc-badge(10000)
-     Total durasi: 12 detik → semua fade out → fanbase visible.
+     Total durasi: 12 detik → semua fade out → Ekosistem visible.
 ══════════════════════════════════════════════════════ --}}
 {{-- 1. Dark backdrop --}}
 <div id="eminor-backdrop"></div>
@@ -525,7 +525,7 @@
 <div id="eminor-disc">
     <div class="disc-tag-pill">Beta Edition</div>
     <p class="disc-main-title">E<span>MINOR</span></p>
-    <p class="disc-sub">Menumpang di Project <strong>Margonoandi Fanbase</strong></p>
+    <p class="disc-sub">Menumpang di Project <strong>EMINOR Ekosistem</strong></p>
     <p class="disc-pwa">Sudah bisa di-download sebagai aplikasi (PWA)</p>
     <div class="disc-divider"></div>
     <p class="disc-support">
@@ -565,7 +565,7 @@
         <div class="aku-page-title">🏠 Aku</div>
         <div class="aku-page-sub">
             @auth
-            Catatan &amp; cerita dari Rakhman Andi
+            Catatan &amp; cerita dari Eminor
             @else
             Ekosistem Musik Indie Indonesia
             @endauth
@@ -586,7 +586,7 @@
     <div class="welcome-banner-body">
         <div class="welcome-banner-title">Selamat datang, {{ Auth::user()->name }}! ✨</div>
         <div class="welcome-banner-sub">
-            Halo, member baru! Senang kamu sudah bergabung di fanbase Rakhman Andi.
+            Halo, member baru! Senang kamu sudah bergabung di Ekosistem Eminor.
             Di sini kamu bisa membaca catatan &amp; cerita, memberikan like, dan berkomentar. Selamat menikmati! 💛
         </div>
     </div>
@@ -599,7 +599,7 @@
 @auth
 @if(in_array(Auth::user()->email, config('admin.emails', [])))
 <div class="aku-form">
-    <span class="aku-form-label">Tulis sesuatu untuk fanbase</span>
+    <span class="aku-form-label">Tulis sesuatu untuk Ekosistem</span>
     <form method="POST" action="{{ route('aku.store') }}" enctype="multipart/form-data">
         @csrf
         <input type="text" name="title" class="aku-form-input" placeholder="Judul (opsional)...">
@@ -792,7 +792,7 @@
 @else
 <div class="empty-aku">
     <div style="font-size:42px;">✏️</div>
-    <p>Belum ada postingan dari Rakhman Andi.</p>
+    <p>Belum ada postingan dari Eminor.</p>
 </div>
 @endif
 

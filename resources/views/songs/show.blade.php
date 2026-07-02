@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @push('preload')
 @if($song->youtube_id)
@@ -325,7 +325,7 @@
                 <span style="font-size:24px;">🎸</span>
                 <div style="flex:1;min-width:0;">
                     <div style="font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:3px;">Eksplor chord {{ $song->title }} di Chord Builder</div>
-                    <div style="font-size:12px;color:var(--text-3);">Generate variasi progresi chord, transpose kunci, dan simpan favoritmu — gratis di fanbase.</div>
+                    <div style="font-size:12px;color:var(--text-3);">Generate variasi progresi chord, transpose kunci, dan simpan favoritmu — gratis di Ekosistem.</div>
                 </div>
                 <a href="{{ route('tools.chord-builder') }}" style="flex-shrink:0;padding:8px 18px;border-radius:20px;background:var(--accent);color:#fff;font-size:12.5px;font-weight:600;text-decoration:none;white-space:nowrap;">Buka Chord Builder →</a>
             </div>
@@ -336,7 +336,7 @@
         <div class="song-section">
             <div style="background:linear-gradient(135deg,rgba(56,168,204,.08),rgba(56,168,204,.03));border:1px solid rgba(56,168,204,.2);border-radius:14px;padding:1.1rem 1.2rem;">
                 <div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:.4rem;">💬 Komunitas Musisi</div>
-                <p style="font-size:13.5px;color:var(--text-2);margin-bottom:.85rem;line-height:1.6;">Punya cerita tentang lagu ini, pertanyaan chord, atau mau cover? Diskusikan di komunitas musisi Margonoandi — tempat musisi kamar Indonesia saling berbagi.</p>
+                <p style="font-size:13.5px;color:var(--text-2);margin-bottom:.85rem;line-height:1.6;">Punya cerita tentang lagu ini, pertanyaan chord, atau mau cover? Diskusikan di komunitas musisi EMINOR — tempat musisi kamar Indonesia saling berbagi.</p>
                 @auth
                 <a href="{{ route('kita') }}" style="display:inline-block;padding:8px 20px;border-radius:20px;background:var(--accent);color:#fff;font-size:12.5px;font-weight:600;text-decoration:none;">Diskusikan di komunitas →</a>
                 @else
@@ -349,9 +349,9 @@
         <div class="song-section">
             <p class="song-section-title">Bagikan lagu ini</p>
             <div class="share-buttons">
-                <a href="https://wa.me/?text={{ urlencode($song->title . ' — Margonoandi | ' . url()->current()) }}"
+                <a href="https://wa.me/?text={{ urlencode($song->title . ' — EMINOR | ' . url()->current()) }}"
                    target="_blank" class="share-btn share-wa">&#128172; WhatsApp</a>
-                <a href="https://twitter.com/intent/tweet?text={{ urlencode('Dengerin "' . $song->title . '" dari Margonoandi') }}&url={{ urlencode(url()->current()) }}"
+                <a href="https://twitter.com/intent/tweet?text={{ urlencode('Dengerin "' . $song->title . '" dari EMINOR') }}&url={{ urlencode(url()->current()) }}"
                    target="_blank" class="share-btn share-x">&#10005; Twitter/X</a>
                 <button class="share-btn share-copy" id="copyBtn" onclick="copyLink()">&#128279; Salin link</button>
             </div>
@@ -408,7 +408,7 @@
             <img src="https://img.youtube.com/vi/{{ $song->youtube_id }}/mqdefault.jpg"
                  class="sidebar-thumb" alt="{{ $song->title }}">
             <div class="sidebar-title">{{ $song->title }}</div>
-            <div class="sidebar-era">{{ $song->era ?? 'Margonoandi' }}</div>
+            <div class="sidebar-era">{{ $song->era ?? 'EMINOR' }}</div>
             <div class="sidebar-links">
                 @if($song->spotify_url)
                 <a href="{{ $song->spotify_url }}" target="_blank" class="sidebar-link sidebar-link-spotify">

@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+﻿@extends('layouts.admin')
 
 @push('styles')
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Caveat:wght@700&family=Poppins:wght@700;800&family=Montserrat:wght@700&family=Oswald:wght@600&family=Playfair+Display:wght@700&family=Lobster&display=swap" rel="stylesheet">
@@ -177,7 +177,7 @@
         <div id="batchBanner" style="display:none;background:var(--accent-dim);border:1px solid var(--accent);border-radius:8px;padding:8px 11px;margin-bottom:10px;font-size:12px;color:var(--text);"></div>
         <div class="row" style="align-items:center;margin-bottom:8px;">
             <span class="muted">Watermark</span>
-            <input type="text" class="fi" id="wmInput" value="margonoandi.my.id" oninput="renderPreview()" style="flex:1;min-width:130px;" placeholder="kosongkan = tanpa">
+            <input type="text" class="fi" id="wmInput" value="EMINOR.my.id" oninput="renderPreview()" style="flex:1;min-width:130px;" placeholder="kosongkan = tanpa">
         </div>
         <div class="row" style="align-items:center;">
             <span class="muted">Format</span>
@@ -919,7 +919,7 @@ function applyConfig(c){
     ['narStart','narEnd','gongStart','gongEnd'].forEach(function(id){ document.getElementById(id).value = c[id]||''; });
     document.getElementById('ratioSel').value = c.ratio||'9:16'; ratio = c.ratio||'9:16';
     document.getElementById('qualitySel').value = c.quality||'720'; quality = parseInt(c.quality||'720',10);
-    document.getElementById('wmInput').value = (c.watermark != null) ? c.watermark : 'margonoandi.my.id';
+    document.getElementById('wmInput').value = (c.watermark != null) ? c.watermark : 'EMINOR.my.id';
     var tb = document.querySelector('#tplOpt .ratio-btn[data-t="'+(c.tpl||'impact')+'"]'); if (tb) pickTpl(tb);
     document.getElementById('capFontSel').value = c.font||''; capFont = c.font||'';
     if (c.color){ document.getElementById('capColorSel').value = c.color; capColor = c.color; }

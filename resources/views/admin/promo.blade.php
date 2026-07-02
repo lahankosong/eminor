@@ -1,4 +1,4 @@
-?@extends('layouts.admin')
+﻿?@extends('layouts.admin')
 
 @push('styles')
 <style>
@@ -205,7 +205,7 @@
 <script>
 var SONGS = {!! json_encode($songsData, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) !!};
 
-var SITE = 'margonoandi.my.id';
+var SITE = 'EMINOR.my.id';
 var igVariants = ['', '', ''];
 
 function songById(id) { return SONGS.find(function(s){ return s.id === id; }); }
@@ -224,7 +224,7 @@ function selectSong(id, el) {
     var yt    = 'https://youtu.be/' + s.youtube_id;
     var listen = s.spotify ? s.spotify : yt;
     var eraTag = s.era ? '#' + s.era.replace(/[^a-zA-Z0-9]/g, '') : '';
-    var tags  = ['#margonoandi', '#musisiindie', '#laguindonesia', '#singersongwriter'];
+    var tags  = ['#EMINOR', '#musisiindie', '#laguindonesia', '#singersongwriter'];
     if (eraTag) tags.push(eraTag);
     var tagLine = tags.join(' ');
 
@@ -256,7 +256,7 @@ function selectSong(id, el) {
 
     // YouTube Description
     document.getElementById('tplYt').value =
-        s.title + ' — Margonoandi (Official Audio)\n\n' +
+        s.title + ' — EMINOR (Official Audio)\n\n' +
         (hook ? hook + '\n\n' : '') +
         (desc ? desc + '\n\n' : '') +
         '🎧 Dengarkan di semua platform:\n' +
@@ -269,13 +269,13 @@ function selectSong(id, el) {
     // Spotify Pitch (untuk kurator)
     document.getElementById('tplSpotify').value =
         'Halo,\n\n' +
-        'Saya Margonoandi, songwriter independen dari Indonesia. ' +
+        'Saya EMINOR, songwriter independen dari Indonesia. ' +
         'Saya ingin submit lagu "' + s.title + '"' +
         (s.key || s.tempo ? ' (' + [s.key ? 'key ' + s.key : '', s.tempo ? s.tempo + ' BPM' : ''].filter(Boolean).join(', ') + ')' : '') + '.\n\n' +
         (hook ? hook + '\n\n' : '') +
         'Cocok untuk playlist bertema akustik/indie/galau Indonesia. ' +
         'Link: ' + listen + '\n\n' +
-        'Terima kasih atas waktunya.\n— Margonoandi (' + SITE + ')';
+        'Terima kasih atas waktunya.\n— EMINOR (' + SITE + ')';
 
     // Discord
     document.getElementById('tplDiscord').value =

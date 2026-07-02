@@ -1,4 +1,4 @@
-@extends('layouts.fanbase')
+﻿@extends('layouts.fanbase')
 @section('title', 'Stage')
 
 @push('styles')
@@ -494,7 +494,7 @@
              class="member-log-avatar" alt="">
         <div class="member-log-body">
             <div class="member-log-text">
-                <strong>{{ $log->user->name ?? 'Member' }}</strong> baru saja bergabung di fanbase Rakhman Andi &#127881;
+                <strong>{{ $log->user->name ?? 'Member' }}</strong> baru saja bergabung di Ekosistem Eminor &#127881;
             </div>
             <div class="member-log-date">{{ $log->created_at->diffForHumans() }}</div>
         </div>
@@ -690,7 +690,7 @@
              class="member-log-avatar" alt="">
         <div class="member-log-body">
             <div class="member-log-text">
-                <strong>{{ $log->user->name ?? 'Member' }}</strong> baru saja bergabung di fanbase Rakhman Andi &#127881;
+                <strong>{{ $log->user->name ?? 'Member' }}</strong> baru saja bergabung di Ekosistem Eminor &#127881;
             </div>
             <div class="member-log-date">{{ $log->created_at->diffForHumans() }}</div>
         </div>

@@ -1,4 +1,4 @@
-@extends('layouts.fanbase')
+﻿@extends('layouts.fanbase')
 @section('title', $post->title)
 
 @push('styles')
@@ -113,7 +113,7 @@
             @if($post->user_id === auth()->id())
             <form method="POST" action="{{ route('dia.start', $m->user_id) }}" style="margin:0;">
                 @csrf
-                <input type="hidden" name="intro" value="Halo! 👋 Aku lihat profilmu cocok untuk lowongan '{{ $post->title }}' yang aku posting di Margonoandi. Tertarik gabung?">
+                <input type="hidden" name="intro" value="Halo! 👋 Aku lihat profilmu cocok untuk lowongan '{{ $post->title }}' yang aku posting di EMINOR. Tertarik gabung?">
                 <button type="submit" style="font-size:12px;padding:6px 12px;border-radius:10px;background:var(--sky);color:#fff;border:none;cursor:pointer;white-space:nowrap;">💬 Ajak</button>
             </form>
             @endif

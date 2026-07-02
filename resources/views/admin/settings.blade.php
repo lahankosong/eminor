@@ -1,4 +1,4 @@
-?@extends('layouts.admin')
+﻿?@extends('layouts.admin')
 
 @push('styles')
 <style>
@@ -159,8 +159,8 @@
                 <div class="form-group">
                     <label class="form-label">Nama Artis / Songwriter</label>
                     <input type="text" name="artist_name" class="form-input"
-                        value="{{ $settings['artist_name']->value ?? 'Rakhman Andi' }}"
-                        placeholder="Rakhman Andi">
+                        value="{{ $settings['artist_name']->value ?? 'Eminor' }}"
+                        placeholder="Eminor">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Role / Profesi</label>
@@ -172,7 +172,7 @@
                     <label class="form-label">Project / Album Fokus</label>
                     <input type="text" name="artist_project" class="form-input"
                         value="{{ $settings['artist_project']->value ?? '' }}"
-                        placeholder="Margonoandi — 15 Lagu 2000–2026">
+                        placeholder="EMINOR — 15 Lagu 2000–2026">
                 </div>
             </div>
         </div>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id" data-theme="light">
 <head>
     <script>
@@ -32,12 +32,12 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Margonoandi">
+    <meta name="apple-mobile-web-app-title" content="EMINOR">
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/svg+xml" href="/images/icon.svg">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/images/icon.svg">
-    <title>Margonoandi — @yield('title', 'Fanbase')</title>
+    <title>EMINOR — @yield('title', 'Ekosistem')</title>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
     <style>
         /* ===== DESIGN TOKENS ===== */
@@ -786,7 +786,7 @@
 
 {{-- TOP BAR --}}
 <div class="fb-topbar">
-    <a href="{{ route('aku') }}" class="fb-brand">MARGONOANDI <span>· fanbase</span></a>
+    <a href="{{ route('aku') }}" class="fb-brand">EMINOR <span>· Ekosistem</span></a>
     <div class="fb-topbar-right">
         @auth
         <a href="{{ route('kamu') }}" class="fb-notif-btn {{ request()->routeIs('kamu','musisi*') ? 'active' : '' }}" title="Studio / Musisi" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
@@ -856,7 +856,7 @@
         <div class="fb-profile-card">
             <img src="{{ Auth::user()->avatar ?? asset('images/default-avatar.png') }}" class="fb-profile-avatar" alt="">
             <div class="fb-profile-name">{{ Auth::user()->name }}</div>
-            <div class="fb-profile-sub">&#10022; Member Margonoandi</div>
+            <div class="fb-profile-sub">&#10022; Member EMINOR</div>
         </div>
         @endauth
 
@@ -1108,9 +1108,9 @@
         <div class="fb-widget">
             <p class="fb-widget-title">Tentang</p>
             <p style="font-size:11px;color:var(--text-3);line-height:1.8;">
-                Fanbase resmi Margonoandi<br>
+                Ekosistem resmi EMINOR<br>
                 15 lagu · 2000–2026<br>
-                <span style="color:var(--sky-dk);font-weight:600;">by Rakhman Andi</span>
+                <span style="color:var(--sky-dk);font-weight:600;">by Eminor</span>
             </p>
         </div>
     </aside>
@@ -1131,7 +1131,7 @@
             <img id="fbPopupThumb" src="" class="fb-playlist-now-thumb" alt="">
             <div style="flex:1;min-width:0;">
                 <div class="fb-playlist-now-title" id="fbPopupTitle">Pilih lagu...</div>
-                <div class="fb-playlist-now-era"   id="fbPopupEra">Margonoandi</div>
+                <div class="fb-playlist-now-era"   id="fbPopupEra">EMINOR</div>
             </div>
         </div>
         <div class="fb-playlist-controls">

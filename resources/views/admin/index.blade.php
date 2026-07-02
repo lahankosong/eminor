@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+﻿@extends('layouts.admin')
 
 @section('title', 'Production Dashboard')
 
@@ -352,13 +352,13 @@
             </div>
             <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:1rem 1.1rem;">
                 <div style="font-size:1.6rem;font-weight:700;color:#15803d;font-family:'Sora',sans-serif;">{{ $todayFb }}</div>
-                <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-top:2px;">Masuk Fanbase Hari Ini</div>
+                <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-top:2px;">Masuk Ekosistem Hari Ini</div>
                 <div style="font-size:10px;color:var(--text-4);margin-top:1px;">Total all-time: {{ number_format($totalFb) }}</div>
             </div>
             <div style="background:#fdf4ff;border:1px solid #e9d5ff;border-radius:12px;padding:1rem 1.1rem;">
                 <div style="font-size:1.6rem;font-weight:700;color:#9333ea;font-family:'Sora',sans-serif;">{{ $convRate }}%</div>
                 <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-top:2px;">Conversion Rate</div>
-                <div style="font-size:10px;color:var(--text-4);margin-top:1px;">Landing → masuk fanbase</div>
+                <div style="font-size:10px;color:var(--text-4);margin-top:1px;">Landing → masuk Ekosistem</div>
             </div>
         </div>
 
@@ -374,7 +374,7 @@
             <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">
                 <div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:70px;">
                     <div style="flex:1;height:{{ $hpH }}px;background:var(--sky);border-radius:3px 3px 0 0;min-height:{{ $day['hp'] > 0 ? 3 : 0 }}px;" title="Landing: {{ $day['hp'] }}"></div>
-                    <div style="flex:1;height:{{ $fbH }}px;background:#22c55e;border-radius:3px 3px 0 0;min-height:{{ $day['fb'] > 0 ? 3 : 0 }}px;" title="Fanbase: {{ $day['fb'] }}"></div>
+                    <div style="flex:1;height:{{ $fbH }}px;background:#22c55e;border-radius:3px 3px 0 0;min-height:{{ $day['fb'] > 0 ? 3 : 0 }}px;" title="Ekosistem: {{ $day['fb'] }}"></div>
                 </div>
                 <div style="font-size:9px;color:var(--text-4);white-space:nowrap;">{{ $day['label'] }}</div>
             </div>
@@ -385,7 +385,7 @@
                 <div style="width:10px;height:10px;background:var(--sky);border-radius:2px;"></div> Landing Page
             </div>
             <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-3);">
-                <div style="width:10px;height:10px;background:#22c55e;border-radius:2px;"></div> Fanbase
+                <div style="width:10px;height:10px;background:#22c55e;border-radius:2px;"></div> Ekosistem
             </div>
         </div>
         @endif

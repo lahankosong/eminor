@@ -134,7 +134,7 @@
         </div>
         <div class="sl-field">
             <label class="sl-label">Nama Artis / Band</label>
-            <input type="text" id="slArtist" class="sl-input" placeholder="cth: Margonoandi" value="Margonoandi">
+            <input type="text" id="slArtist" class="sl-input" placeholder="cth: EMINOR" value="EMINOR">
         </div>
         <div class="sl-field">
             <label class="sl-label">Durasi per Lagu (menit, default)</label>
@@ -401,7 +401,7 @@ function downloadTxt() {
     var blob = new Blob([buildText()], { type: 'text/plain;charset=utf-8' });
     var a    = document.createElement('a');
     a.href   = URL.createObjectURL(blob);
-    a.download = 'setlist-' + (document.getElementById('slEvent').value || 'margonoandi').replace(/\s+/g,'-').toLowerCase() + '.txt';
+    a.download = 'setlist-' + (document.getElementById('slEvent').value || 'EMINOR').replace(/\s+/g,'-').toLowerCase() + '.txt';
     a.click();
     URL.revokeObjectURL(a.href);
 }

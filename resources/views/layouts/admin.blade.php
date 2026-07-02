@@ -1,13 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Admin — @yield('title', 'Dashboard') · Margonoandi</title>
+    <title>Admin — @yield('title', 'Dashboard') · EMINOR</title>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
     <style>
-        /* ===== TOKENS (same as fanbase) ===== */
+        /* ===== TOKENS (same as Ekosistem) ===== */
         :root {
             --sky:        #38A8CC;
             --sky-lt:     #E6F4FA;
@@ -96,7 +96,7 @@
         .adm-avatar { cursor:pointer; transition:0.2s; }
         .adm-avatar:hover { border-color:#fff; transform:scale(1.05); }
 
-        /* Menu akun admin (foto profil → Profil / Fanbase / Keluar) */
+        /* Menu akun admin (foto profil → Profil / Ekosistem / Keluar) */
         .adm-profile-menu { position:relative; }
         .adm-profile-dropdown {
             display:none; position:absolute; top:calc(100% + 10px); right:0;
@@ -215,10 +215,10 @@
 <!-- TOPBAR -->
 <header class="adm-topbar">
     <a href="{{ route('admin.index') }}" class="adm-brand">
-        MARGONOANDI <span>ADMIN</span>
+        EMINOR <span>ADMIN</span>
     </a>
     <div class="adm-topbar-right">
-        <a href="{{ route('aku') }}" class="adm-back">← Fanbase</a>
+        <a href="{{ route('aku') }}" class="adm-back">← Ekosistem</a>
         <div class="adm-profile-menu">
             <img class="adm-avatar" id="admProfileBtn" role="button" tabindex="0" title="Menu akun"
                  src="{{ Auth::user()->avatar ?? asset('images/default-avatar.png') }}"
@@ -234,7 +234,7 @@
                     </div>
                 </div>
                 <a href="{{ route('profile') }}" class="adm-profile-dd-item">👤 Profil</a>
-                <a href="{{ route('aku') }}" class="adm-profile-dd-item">← Kembali ke Fanbase</a>
+                <a href="{{ route('aku') }}" class="adm-profile-dd-item">← Kembali ke Ekosistem</a>
                 <a href="{{ route('logout') }}" class="adm-profile-dd-item danger">🚪 Keluar</a>
             </div>
         </div>
@@ -311,7 +311,7 @@
         <div class="adm-nav-divider"></div>
         <nav class="adm-nav">
             <a href="{{ route('aku') }}" class="adm-nav-item adm-nav-back">
-                <span class="adm-nav-icon">←</span> Kembali ke Fanbase
+                <span class="adm-nav-icon">←</span> Kembali ke Ekosistem
             </a>
         </nav>
     </aside>

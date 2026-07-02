@@ -1,4 +1,4 @@
-@extends('layouts.fanbase')
+﻿@extends('layouts.fanbase')
 @section('title', 'Pasang Pengumuman Gig')
 
 @push('styles')

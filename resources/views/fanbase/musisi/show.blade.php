@@ -1,4 +1,4 @@
-@extends('layouts.fanbase')
+﻿@extends('layouts.fanbase')
 @section('title', $profile->user->name ?? 'Musisi')
 
 @push('styles')
@@ -94,9 +94,9 @@
 <script>
 function msShareProfile(){
     var url = window.location.href;
-    var title = {{ Illuminate\Support\Js::from(($profile->user->name ?? 'Musisi') . ' — Margonoandi') }};
+    var title = {{ Illuminate\Support\Js::from(($profile->user->name ?? 'Musisi') . ' — EMINOR') }};
     if (navigator.share) {
-        navigator.share({ title: title, text: 'Cek profil musisi ini di Margonoandi', url: url }).catch(function(){});
+        navigator.share({ title: title, text: 'Cek profil musisi ini di EMINOR', url: url }).catch(function(){});
     } else if (navigator.clipboard) {
         navigator.clipboard.writeText(url).then(function(){ alert('Link profil disalin!'); }).catch(function(){ prompt('Salin link:', url); });
     } else { prompt('Salin link:', url); }

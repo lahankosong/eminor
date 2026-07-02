@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('content')
 @php
@@ -8,7 +8,7 @@
 @endphp
 
 <div class="section" style="max-width:480px;margin:0 auto;text-align:center;">
-    <p class="section-eyebrow">Profil Musisi · Margonoandi</p>
+    <p class="section-eyebrow">Profil Musisi · EMINOR</p>
 
     <div class="ms-pub-card" style="background:var(--card-bg);border:1px solid var(--border);border-radius:22px;padding:2rem 1.5rem;margin-top:1rem;transition:transform .15s ease;transform-style:preserve-3d;will-change:transform;">
         <img src="{{ $profile->photoUrl() }}"
@@ -44,7 +44,7 @@
 
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:1.25rem;">
         <button type="button" id="msCardBtn" onclick="msShareCard()" class="btn-ghost" style="cursor:pointer;">📸 Bagikan sebagai gambar</button>
-        <a href="{{ route('home') }}" class="btn-ghost" style="text-decoration:none;">← Jelajahi Margonoandi</a>
+        <a href="{{ route('home') }}" class="btn-ghost" style="text-decoration:none;">← Jelajahi EMINOR</a>
     </div>
 </div>
 

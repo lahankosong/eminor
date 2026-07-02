@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @push('styles')
 <style>
@@ -293,7 +293,7 @@
             </div>
             <div>
                 <div class="chat-header-name">{{ $other->name }}</div>
-                <div class="chat-header-sub">Member Margonoandi</div>
+                <div class="chat-header-sub">Member EMINOR</div>
             </div>
         </div>
 

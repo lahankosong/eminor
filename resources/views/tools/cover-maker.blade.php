@@ -141,7 +141,7 @@
 
     <div class="cm-cta">
         <h2>🎸 Mau rilis lagumu?</h2>
-        <p>Setelah cover-nya jadi, tampilkan karyamu di <b>Margonoandi</b> — buat <b>profil portofolio gratis</b> (kartu + QR), temukan <b>personil &amp; gig</b>, gabung komunitas musisi Indonesia.</p>
+        <p>Setelah cover-nya jadi, tampilkan karyamu di <b>EMINOR</b> — buat <b>profil portofolio gratis</b> (kartu + QR), temukan <b>personil &amp; gig</b>, gabung komunitas musisi Indonesia.</p>
         <a href="{{ route('google.login') }}" class="cm-cta-btn">Buat profil musisi gratis →</a>
     </div>
 
@@ -153,7 +153,7 @@
     </div>
 
     <p style="text-align:center;margin-top:2.5rem;font-size:11px;color:var(--text-3,#94a3b8);">
-        Bagian dari <a href="{{ route('home') }}" style="color:var(--ac);">Margonoandi Fanbase</a> 🎸 ·
+        Bagian dari <a href="{{ route('home') }}" style="color:var(--ac);">EMINOR Ekosistem</a> 🎸 ·
         <a href="{{ route('tools.hapus-vokal') }}" style="color:var(--ac);">Hapus Vokal</a> ·
         <a href="{{ route('tools.potong-lagu') }}" style="color:var(--ac);">Potong Lagu</a>
     </p>

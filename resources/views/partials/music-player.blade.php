@@ -1,4 +1,4 @@
-@php
+﻿@php
     $playerSongs = \App\Models\Song::whereNotNull('audio_file')
         ->where('audio_file', '!=', '')
         ->where('is_active', true)
@@ -9,9 +9,9 @@
 @if($playerSongs->count() > 0)
 
 {{-- ===== DESKTOP SIDEBAR PLAYER ===== --}}
-<div class="fanbase-player-sidebar" id="fpsidebarPlayer">
+<div class="Ekosistem-player-sidebar" id="fpsidebarPlayer">
     <div class="fps-header">
-        <span class="fps-title">&#9834; Margonoandi</span>
+        <span class="fps-title">&#9834; EMINOR</span>
         <button class="fps-toggle" onclick="toggleSidebarPlayer()" title="Sembunyikan">&#8722;</button>
     </div>
 
@@ -23,7 +23,7 @@
         </div>
         <div class="fps-now-info">
             <div class="fps-now-title" id="fpNowTitle">Pilih lagu</div>
-            <div class="fps-now-era"   id="fpNowEra">Margonoandi</div>
+            <div class="fps-now-era"   id="fpNowEra">EMINOR</div>
         </div>
     </div>
 
@@ -57,7 +57,7 @@
             <div class="fps-track-num" id="fpTrackNum{{ $i }}">{{ $i + 1 }}</div>
             <div class="fps-track-info">
                 <div class="fps-track-title">{{ $s->title }}</div>
-                <div class="fps-track-era">{{ $s->era ?? 'Margonoandi' }}</div>
+                <div class="fps-track-era">{{ $s->era ?? 'EMINOR' }}</div>
             </div>
             <span class="fps-track-icon" id="fpTrackIcon{{ $i }}">&#9654;</span>
         </div>
@@ -66,12 +66,12 @@
 </div>
 
 {{-- Collapsed tab --}}
-<div class="fanbase-player-tab" id="fpTab" onclick="toggleSidebarPlayer()" style="display:none;">
+<div class="Ekosistem-player-tab" id="fpTab" onclick="toggleSidebarPlayer()" style="display:none;">
     <span>&#9834;</span>
 </div>
 
 {{-- ===== MOBILE STICKY PLAYER ===== --}}
-<div class="fanbase-player-mobile" id="fpMobilePlayer">
+<div class="Ekosistem-player-mobile" id="fpMobilePlayer">
     <div class="fpm-inner" onclick="fpExpandMobile()">
         <img class="fpm-thumb" id="fpmThumb" src="" alt="">
         <div class="fpm-info">
@@ -89,13 +89,13 @@
 </div>
 
 {{-- ===== MOBILE EXPANDED PLAYER ===== --}}
-<div class="fanbase-player-expanded" id="fpExpanded">
+<div class="Ekosistem-player-expanded" id="fpExpanded">
     <div class="fpe-handle" onclick="fpCollapseMobile()">
         <div class="fpe-handle-bar"></div>
     </div>
     <img class="fpe-cover" id="fpeThumb" src="" alt="">
     <div class="fpe-title"  id="fpeTitle">—</div>
-    <div class="fpe-era"    id="fpeEra">Margonoandi</div>
+    <div class="fpe-era"    id="fpeEra">EMINOR</div>
 
     <div class="fpe-progress-wrap" onclick="fpSeekMobile(event)" id="fpeProgressWrap">
         <div class="fpe-progress-bar">
@@ -134,7 +134,7 @@
 
 <style>
 /* ===== DESKTOP SIDEBAR PLAYER ===== */
-.fanbase-player-sidebar {
+.Ekosistem-player-sidebar {
     position: fixed; right: 16px; bottom: 16px;
     width: 240px; background: #0a0a0a;
     border: 1px solid #1a1a1a; border-radius: 14px;
@@ -228,7 +228,7 @@
 .fps-track-icon { font-size: 8px; color: #2a2a2a; flex-shrink: 0; }
 .fps-track.active .fps-track-icon { color: #4ade80; }
 
-.fanbase-player-tab {
+.Ekosistem-player-tab {
     position: fixed; right: 16px; bottom: 80px;
     width: 40px; height: 40px; border-radius: 50%;
     background: #0a0a0a; border: 1px solid #1a1a1a;
@@ -236,10 +236,10 @@
     font-size: 16px; color: #555; cursor: pointer; z-index: 400;
     box-shadow: 0 4px 16px rgba(0,0,0,0.5); transition: 0.2s;
 }
-.fanbase-player-tab:hover { color: #fff; border-color: #333; }
+.Ekosistem-player-tab:hover { color: #fff; border-color: #333; }
 
 /* ===== MOBILE STICKY PLAYER ===== */
-.fanbase-player-mobile {
+.Ekosistem-player-mobile {
     display: none;
     position: fixed; bottom: 60px; left: 0; right: 0;
     background: rgba(8,8,8,0.97); backdrop-filter: blur(12px);
@@ -273,7 +273,7 @@
 }
 
 /* ===== MOBILE EXPANDED PLAYER ===== */
-.fanbase-player-expanded {
+.Ekosistem-player-expanded {
     display: none; position: fixed; bottom: 0; left: 0; right: 0;
     background: #0a0a0a; border-top: 1px solid #1a1a1a;
     border-radius: 20px 20px 0 0; z-index: 600;
@@ -281,7 +281,7 @@
     max-height: 90vh; overflow-y: auto;
     transform: translateY(100%); transition: transform 0.35s ease;
 }
-.fanbase-player-expanded.open {
+.Ekosistem-player-expanded.open {
     display: block; transform: translateY(0);
 }
 .fpe-overlay {
@@ -339,14 +339,14 @@
 
 /* Show/hide by screen */
 @media (min-width: 769px) {
-    .fanbase-player-mobile { display: none !important; }
-    .fanbase-player-expanded { display: none !important; }
+    .Ekosistem-player-mobile { display: none !important; }
+    .Ekosistem-player-expanded { display: none !important; }
     .fpe-overlay { display: none !important; }
 }
 @media (max-width: 768px) {
-    .fanbase-player-sidebar { display: none !important; }
-    .fanbase-player-tab     { display: none !important; }
-    .fanbase-player-mobile  { display: block; }
+    .Ekosistem-player-sidebar { display: none !important; }
+    .Ekosistem-player-tab     { display: none !important; }
+    .Ekosistem-player-mobile  { display: block; }
 }
 </style>
 
@@ -355,7 +355,7 @@
 $tracksJs = $playerSongs->map(function($s) {
     return [
         'title'     => $s->title,
-        'era'       => $s->era ?? 'Margonoandi',
+        'era'       => $s->era ?? 'EMINOR',
         'audio'     => asset($s->audio_file),
         'thumb'     => 'https://img.youtube.com/vi/' . $s->youtube_id . '/mqdefault.jpg',
         'slug'      => $s->slug,

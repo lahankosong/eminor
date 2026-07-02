@@ -63,7 +63,7 @@
 
             <div class="rc-form-section">
                 <label class="rc-label">Nama Artis / Band</label>
-                <input type="text" class="rc-input" id="rcName" placeholder="Margonoandi" oninput="updatePreview()">
+                <input type="text" class="rc-input" id="rcName" placeholder="EMINOR" oninput="updatePreview()">
             </div>
 
             <div class="rc-form-section">
@@ -330,7 +330,7 @@ function updatePreview() {
     ctx.fillStyle = 'rgba(255,255,255,.35)';
     ctx.font = '20px "Space Grotesk", sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText('margonoandi.my.id', W - 60, footerY + 44);
+    ctx.fillText('EMINOR.my.id', W - 60, footerY + 44);
 
     ctx.fillStyle = 'rgba(255,255,255,.2)';
     ctx.font = '17px "Space Grotesk", sans-serif';
@@ -383,7 +383,7 @@ function updateWaLink() {
     var txt = '💼 Rate Card ' + name + '\n\n';
     services.forEach(function(s) { txt += '• ' + s.name + ': ' + s.price + '\n'; });
     if (contact) txt += '\n📱 ' + contact;
-    txt += '\n\n🎵 Dibuat di margonoandi.my.id/tools/rate-card';
+    txt += '\n\n🎵 Dibuat di EMINOR.my.id/tools/rate-card';
     document.getElementById('rcWaBtn').href = 'https://wa.me/?text=' + encodeURIComponent(txt);
 }
 

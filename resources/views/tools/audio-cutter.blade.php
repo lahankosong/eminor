@@ -192,7 +192,7 @@
     </div>
 
     <p style="text-align:center;margin-top:2.5rem;font-size:11px;color:var(--text-3,#94a3b8);">
-        Bagian dari <a href="{{ route('home') }}" style="color:var(--ac);">Margonoandi Fanbase</a> — komunitas musisi Indonesia 🎸
+        Bagian dari <a href="{{ route('home') }}" style="color:var(--ac);">EMINOR Ekosistem</a> — komunitas musisi Indonesia 🎸
     </p>
 
 

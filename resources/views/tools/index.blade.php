@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @push('styles')
 <style>
@@ -92,7 +92,7 @@
 
             <div class="th-musisi-cta">
                 <h2>🎸 Lebih dari sekadar alat</h2>
-                <p>Margonoandi adalah <b>ekosistem musisi Indonesia</b> — buat profil portofolio gratis, temukan personil &amp; gig lewat matchmaking, dan tumbuh bareng komunitas.</p>
+                <p>EMINOR adalah <b>ekosistem musisi Indonesia</b> — buat profil portofolio gratis, temukan personil &amp; gig lewat matchmaking, dan tumbuh bareng komunitas.</p>
                 <a href="{{ route('google.login') }}" class="th-musisi-btn">Buat profil musisi gratis →</a>
             </div>
         </div>
@@ -152,7 +152,7 @@
     </div>
 
     <p style="text-align:center;margin-top:2rem;font-size:11px;color:var(--text-3,#94a3b8);">
-        Bagian dari <a href="{{ route('home') }}" style="color:var(--ac);">Margonoandi Fanbase</a> — komunitas musisi Indonesia 🎸
+        Bagian dari <a href="{{ route('home') }}" style="color:var(--ac);">EMINOR Ekosistem</a> — komunitas musisi Indonesia 🎸
     </p>
 </div>
 @endsection

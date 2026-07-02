@@ -63,7 +63,7 @@
     </div>
     <div class="cd-disp-date" id="cdDate"></div>
     <a class="cd-btn" id="cdBtn" target="_blank" rel="noopener">🔔 Pre-save / Dengarkan</a>
-    <div class="cd-made">dibuat gratis di <a href="{{ route('tools.countdown') }}">margonoandi.my.id</a></div>
+    <div class="cd-made">dibuat gratis di <a href="{{ route('tools.countdown') }}">EMINOR.my.id</a></div>
 </div>
 
 @else
@@ -102,7 +102,7 @@
     </div>
 
     <p style="text-align:center;margin-top:2.5rem;font-size:11px;color:var(--text-3,#94a3b8);">
-        Bagian dari <a href="{{ route('home') }}" style="color:var(--ac);">Margonoandi Fanbase</a> 🎸 ·
+        Bagian dari <a href="{{ route('home') }}" style="color:var(--ac);">EMINOR Ekosistem</a> 🎸 ·
         <a href="{{ route('tools.kartu-rilis') }}" style="color:var(--ac);">Kartu Promo Rilis</a>
     </p>
 </div>

@@ -1,4 +1,4 @@
-@extends('layouts.fanbase')
+﻿@extends('layouts.fanbase')
 @section('title', 'Room')
 
 @push('styles')
@@ -410,7 +410,7 @@
             @if($msg->user_id !== Auth::id())
             <div class="dia-msg-name">{{ $msg->user->name }}</div>
             @endif
-            @if($msg->media_type)@include('fanbase.partials.dia-media', ['url' => asset($msg->media_url), 'type' => $msg->media_type])@endif
+            @if($msg->media_type)@include('Ekosistem.partials.dia-media', ['url' => asset($msg->media_url), 'type' => $msg->media_type])@endif
             @if($msg->body)<div class="dia-msg-bubble">{{ $msg->body }}</div>@endif
             <div class="dia-msg-time">{{ $msg->created_at->diffForHumans() }}</div>
         </div>
@@ -461,7 +461,7 @@
             @if($msg->user_id !== Auth::id())
             <div class="dia-msg-name">{{ $msg->user->name }}</div>
             @endif
-            @if($msg->media_type)@include('fanbase.partials.dia-media', ['url' => asset($msg->media_url), 'type' => $msg->media_type])@endif
+            @if($msg->media_type)@include('Ekosistem.partials.dia-media', ['url' => asset($msg->media_url), 'type' => $msg->media_type])@endif
             @if($msg->body)<div class="dia-msg-bubble">{{ $msg->body }}</div>@endif
             <div class="dia-msg-time">{{ $msg->created_at->diffForHumans() }}</div>
         </div>

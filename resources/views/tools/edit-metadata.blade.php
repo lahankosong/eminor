@@ -104,7 +104,7 @@
 
     <div class="md-cta">
         <h2>🎸 Siap rilis lagumu?</h2>
-        <p>Tag rapi + WAV lossless = siap dikirim ke agregator. Lalu tampilkan karyamu di <b>Margonoandi</b> — profil portofolio gratis, matchmaking personil & gig, komunitas musisi.</p>
+        <p>Tag rapi + WAV lossless = siap dikirim ke agregator. Lalu tampilkan karyamu di <b>EMINOR</b> — profil portofolio gratis, matchmaking personil & gig, komunitas musisi.</p>
         <a href="{{ route('google.login') }}" class="md-cta-btn">Buat profil musisi gratis →</a>
     </div>
 
@@ -116,7 +116,7 @@
     </div>
 
     <p style="text-align:center;margin-top:2.5rem;font-size:11px;color:var(--text-3,#94a3b8);">
-        Bagian dari <a href="{{ route('home') }}" style="color:var(--ac);">Margonoandi Fanbase</a> 🎸 ·
+        Bagian dari <a href="{{ route('home') }}" style="color:var(--ac);">EMINOR Ekosistem</a> 🎸 ·
         <a href="{{ route('tools.cover-art') }}" style="color:var(--ac);">Buat Cover</a> ·
         <a href="{{ route('tools.potong-lagu') }}" style="color:var(--ac);">Potong Lagu</a>
     </p>

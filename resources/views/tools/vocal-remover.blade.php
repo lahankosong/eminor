@@ -97,7 +97,7 @@
 
     <div class="vr-cta">
         <h2>🎸 Kamu musisi atau penyanyi?</h2>
-        <p>Tampilkan karyamu di <b>Margonoandi</b> — buat <b>profil portofolio gratis</b> (kartu + QR yang bisa dibagikan), temukan <b>personil band &amp; gig</b> lewat matchmaking, dan gabung komunitas musisi Indonesia. Dimulai dari kamarmu.</p>
+        <p>Tampilkan karyamu di <b>EMINOR</b> — buat <b>profil portofolio gratis</b> (kartu + QR yang bisa dibagikan), temukan <b>personil band &amp; gig</b> lewat matchmaking, dan gabung komunitas musisi Indonesia. Dimulai dari kamarmu.</p>
         <a href="{{ route('google.login') }}" class="vr-cta-btn">Buat profil musisi gratis →</a>
     </div>
 
@@ -119,7 +119,7 @@
     </div>
 
     <p style="text-align:center;margin-top:2.5rem;font-size:11px;color:var(--text-3,#94a3b8);">
-        Bagian dari <a href="{{ route('home') }}" style="color:var(--ac);">Margonoandi Fanbase</a> — komunitas musisi Indonesia 🎸 ·
+        Bagian dari <a href="{{ route('home') }}" style="color:var(--ac);">EMINOR Ekosistem</a> — komunitas musisi Indonesia 🎸 ·
         <a href="{{ route('tools.potong-lagu') }}" style="color:var(--ac);">Pemotong Lagu</a>
     </p>
 

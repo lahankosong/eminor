@@ -1,4 +1,4 @@
-@extends('layouts.fanbase')
+﻿@extends('layouts.fanbase')
 @section('title', 'Diskografi')
 
 @push('styles')
@@ -84,7 +84,7 @@
 
     <div class="lib-hero">
         <div class="lib-badge">🎵 Music Library</div>
-        <h1>Semua Lagu Margonoandi</h1>
+        <h1>Semua Lagu EMINOR</h1>
         <p>Pop rock, indie acoustic, gospel, sampai electronic pop. Filter berdasarkan mood dan temukan lagu yang pas buat momen kamu.</p>
     </div>
 
@@ -147,7 +147,7 @@
 
     <div class="lib-cta">
         <h2>🎸 Buat musikmu sendiri</h2>
-        <p>Margonoandi menyediakan tools gratis untuk musisi Indonesia — chord builder, BPM calculator, royalty estimator, dan masih banyak lagi. Semuanya di browser, tanpa daftar.</p>
+        <p>EMINOR menyediakan tools gratis untuk musisi Indonesia — chord builder, BPM calculator, royalty estimator, dan masih banyak lagi. Semuanya di browser, tanpa daftar.</p>
         <div class="lib-cta-btns">
             <a href="{{ route('tools.index') }}" class="lib-cta-btn lib-cta-btn-primary">Explore Tools Gratis →</a>
             <a href="{{ route('google.login') }}" class="lib-cta-btn lib-cta-btn-secondary">Buat profil musisi</a>
