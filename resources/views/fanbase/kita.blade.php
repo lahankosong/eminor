@@ -444,6 +444,7 @@
 </div>
 
 {{-- POST FORM --}}
+@auth
 <div class="kita-form">
     <div class="kita-form-header">
         <img src="{{ Auth::user()->avatar }}" class="kita-form-avatar" alt="">
@@ -468,6 +469,13 @@
         </div>
     </form>
 </div>
+@else
+<div style="text-align:center;padding:1rem 1.5rem;background:var(--card);border-radius:16px;margin-bottom:1rem;">
+    <p style="font-size:13px;color:var(--text-3);margin:0 0 .6rem;">
+        <a href="{{ route('google.login') }}" style="color:var(--sky-dk);font-weight:600;">Login</a> untuk ikut cerita di Stage.
+    </p>
+</div>
+@endauth
 
 {{-- FEED (posts + member logs, urutan kronologis) --}}
 @php
@@ -648,7 +656,7 @@
                         @endforeach
                         {{-- Reply input --}}
                         <div class="kita-reply-wrap" id="kitaReplyWrap{{ $comment->id }}">
-                            <img src="{{ Auth::user()->avatar ?? asset('images/default-avatar.png') }}"
+                            <img src="{{ Auth::user()?->avatar ?? asset('images/default-avatar.png') }}"
                                  class="kita-comment-avatar" style="width:22px;height:22px;" alt="">
                             <input class="kita-comment-input" id="kitaReplyInput{{ $comment->id }}"
                                    placeholder="Balas..." style="font-size:11px;padding:5px 12px;">
@@ -661,7 +669,7 @@
             </div>
 
             <div class="kita-comment-input-wrap">
-                <img src="{{ Auth::user()->avatar }}" class="kita-comment-avatar" alt="">
+                <img src="{{ Auth::user()?->avatar ?? asset('images/default-avatar.png') }}" class="kita-comment-avatar" alt="">
                 <input type="text" class="kita-comment-input"
                        id="kitaInput{{ $post->id }}"
                        placeholder="Komentar..."
