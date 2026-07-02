@@ -1,11 +1,9 @@
 @php
     $playerSongs = collect();
     try {
-        $playerSongs = \App\Models\Song::whereNotNull('audio_file')
-            ->where('audio_file', '!=', '')
-            ->where('is_active', true)
+        $playerSongs = \App\Models\Song::where('is_active', true)
             ->orderBy('track_number')
-            ->get(['id', 'title', 'era', 'audio_file', 'youtube_id', 'slug']);
+            ->get(['id', 'title', 'era', 'audio_file', 'cover_image', 'youtube_id', 'slug']);
     } catch (\Throwable $e) {}
 @endphp
 
@@ -395,17 +393,28 @@
 <script>
 @php
 $tracksJs = $playerSongs->map(function($s) {
+    // Prioritas cover: cover_image lokal > YouTube thumbnail > kosong
+    if ($s->cover_image) {
+        $thumb = \Illuminate\Support\Str::startsWith($s->cover_image, ['http://', 'https://'])
+            ? $s->cover_image
+            : asset($s->cover_image);
+    } elseif ($s->youtube_id) {
+        $thumb = 'https://img.youtube.com/vi/' . $s->youtube_id . '/mqdefault.jpg';
+    } else {
+        $thumb = '';
+    }
     return [
         'title'  => $s->title,
         'era'    => $s->era ?? 'EMINOR',
-        'audio'  => asset($s->audio_file),
-        'thumb'  => $s->youtube_id ? 'https://img.youtube.com/vi/' . $s->youtube_id . '/mqdefault.jpg' : '',
+        'audio'  => $s->audio_file ? asset($s->audio_file) : '',
+        'thumb'  => $thumb,
         'slug'   => $s->slug,
         'local'  => false,
     ];
 });
 @endphp
-var fpTracks  = @json($tracksJs);
+// Filter: tampilkan hanya lagu yang punya audio URL dari DB
+var fpTracks  = @json($tracksJs).filter(function(t){ return t.local || t.audio; });
 var fpTotal   = fpTracks.length;
 var fpCurrent = 0;
 var fpPlaying = false;
@@ -489,12 +498,17 @@ function fpPlayTrack(index) {
     var t = fpTracks[index];
 
     fpAudio.src = t.audio;
+    fpAudio.load();
     fpAudio.play().then(function() {
         fpPlaying = true;
         fpUpdateUI();
-    }).catch(function() {
+    }).catch(function(err) {
         fpPlaying = false;
         fpUpdateUI();
+        // Kalau NotSupportedError (file tidak ada/tidak valid), lanjut ke track berikutnya
+        if (err && err.name === 'NotSupportedError' && fpTotal > 1) {
+            setTimeout(function() { fpNext(); }, 400);
+        }
     });
 
     fpUpdateAllTrackRows(index);
@@ -612,6 +626,10 @@ fpAudio.addEventListener('loadedmetadata', function() {
 });
 
 fpAudio.addEventListener('ended', fpNext);
+fpAudio.addEventListener('error', function() {
+    // File tidak ditemukan di server — skip otomatis
+    if (fpTotal > 1) { setTimeout(function() { fpNext(); }, 300); }
+});
 
 function toggleSidebarPlayer() {
     var sidebar = document.getElementById('fpsidebarPlayer');
