@@ -1,17 +1,22 @@
-﻿@php
-    $playerSongs = \App\Models\Song::whereNotNull('audio_file')
-        ->where('audio_file', '!=', '')
-        ->where('is_active', true)
-        ->orderBy('track_number')
-        ->get(['id', 'title', 'era', 'audio_file', 'youtube_id', 'slug']);
+@php
+    $playerSongs = collect();
+    try {
+        $playerSongs = \App\Models\Song::whereNotNull('audio_file')
+            ->where('audio_file', '!=', '')
+            ->where('is_active', true)
+            ->orderBy('track_number')
+            ->get(['id', 'title', 'era', 'audio_file', 'youtube_id', 'slug']);
+    } catch (\Throwable $e) {}
 @endphp
 
-@if($playerSongs->count() > 0)
+{{-- Input file tersembunyi --}}
+<input type="file" id="fpFileInput" accept="audio/*" multiple style="display:none" onchange="fpLoadLocalFiles(this)">
 
 {{-- ===== DESKTOP SIDEBAR PLAYER ===== --}}
 <div class="Ekosistem-player-sidebar" id="fpsidebarPlayer">
     <div class="fps-header">
         <span class="fps-title">&#9834; EMINOR</span>
+        <button class="fps-open-btn" onclick="document.getElementById('fpFileInput').click()" title="Buka file musik dari perangkat">📂</button>
         <button class="fps-toggle" onclick="toggleSidebarPlayer()" title="Sembunyikan">&#8722;</button>
     </div>
 
@@ -50,6 +55,7 @@
 
     {{-- Playlist --}}
     <div class="fps-playlist" id="fpPlaylist">
+        @if($playerSongs->count() > 0)
         @foreach($playerSongs as $i => $s)
         <div class="fps-track {{ $i === 0 ? 'active' : '' }}"
              id="fpTrack{{ $i }}"
@@ -62,6 +68,12 @@
             <span class="fps-track-icon" id="fpTrackIcon{{ $i }}">&#9654;</span>
         </div>
         @endforeach
+        @else
+        <div class="fps-empty-hint">
+            <span>📂</span>
+            <p>Klik 📂 di atas untuk<br>buka file musik kamu</p>
+        </div>
+        @endif
     </div>
 </div>
 
@@ -75,7 +87,7 @@
     <div class="fpm-inner" onclick="fpExpandMobile()">
         <img class="fpm-thumb" id="fpmThumb" src="" alt="">
         <div class="fpm-info">
-            <div class="fpm-title" id="fpmTitle">Pilih lagu</div>
+            <div class="fpm-title" id="fpmTitle">Ketuk untuk buka musik</div>
             <div class="fpm-progress">
                 <div class="fpm-progress-fill" id="fpmFill"></div>
             </div>
@@ -113,7 +125,13 @@
         <button class="fpe-btn" onclick="fpNext()">&#9654;&#9654;</button>
     </div>
 
-    <div class="fpe-playlist">
+    {{-- Tombol buka file di expanded mobile --}}
+    <button class="fpe-open-file-btn" onclick="document.getElementById('fpFileInput').click()">
+        📂 Buka File Musik dari Perangkat
+    </button>
+
+    <div class="fpe-playlist" id="fpePlaylistWrap">
+        @if($playerSongs->count() > 0)
         @foreach($playerSongs as $i => $s)
         <div class="fpe-track {{ $i === 0 ? 'active' : '' }}"
              id="fpeTrack{{ $i }}"
@@ -125,6 +143,12 @@
             </div>
         </div>
         @endforeach
+        @else
+        <div class="fps-empty-hint" style="padding:1.5rem 0;">
+            <span>🎵</span>
+            <p style="color:#555;font-size:12px;margin-top:4px;">Belum ada lagu.<br>Buka file dari perangkatmu!</p>
+        </div>
+        @endif
     </div>
 </div>
 <div class="fpe-overlay" id="fpeOverlay" onclick="fpCollapseMobile()"></div>
@@ -147,7 +171,12 @@
     padding: 10px 12px 8px;
     border-bottom: 1px solid #111;
 }
-.fps-title { font-size: 11px; color: #444; letter-spacing: 0.15em; text-transform: uppercase; }
+.fps-title { font-size: 11px; color: #444; letter-spacing: 0.15em; text-transform: uppercase; flex: 1; }
+.fps-open-btn {
+    background: transparent; border: none; font-size: 14px;
+    cursor: pointer; padding: 0 6px 0 0; opacity: 0.6; transition: 0.15s; line-height: 1;
+}
+.fps-open-btn:hover { opacity: 1; }
 .fps-toggle {
     background: transparent; border: none; color: #333;
     font-size: 16px; cursor: pointer; padding: 0 2px; transition: 0.15s; line-height: 1;
@@ -227,6 +256,11 @@
 .fps-track-era  { font-size: 10px; color: #333; }
 .fps-track-icon { font-size: 8px; color: #2a2a2a; flex-shrink: 0; }
 .fps-track.active .fps-track-icon { color: #4ade80; }
+
+.fps-empty-hint {
+    text-align: center; padding: 1.25rem 1rem; color: #333; font-size: 11px; line-height: 1.5;
+}
+.fps-empty-hint span { font-size: 22px; display: block; margin-bottom: 6px; }
 
 .Ekosistem-player-tab {
     position: fixed; right: 16px; bottom: 80px;
@@ -308,7 +342,7 @@
 
 .fpe-controls {
     display: flex; align-items: center; justify-content: center;
-    gap: 20px; margin-bottom: 1.5rem;
+    gap: 20px; margin-bottom: 1rem;
 }
 .fpe-btn {
     background: transparent; border: none; color: #555;
@@ -321,6 +355,14 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 18px; border: none !important; cursor: pointer;
 }
+
+.fpe-open-file-btn {
+    display: block; width: 100%; padding: 10px;
+    background: #111; border: 1px dashed #2a2a2a; border-radius: 10px;
+    color: #666; font-size: 13px; cursor: pointer; text-align: center;
+    margin-bottom: 1rem; transition: 0.15s; font-family: inherit;
+}
+.fpe-open-file-btn:hover { border-color: #555; color: #ccc; background: #161616; }
 
 .fpe-playlist {
     border-top: 1px solid #111; padding-top: 1rem;
@@ -354,11 +396,12 @@
 @php
 $tracksJs = $playerSongs->map(function($s) {
     return [
-        'title'     => $s->title,
-        'era'       => $s->era ?? 'EMINOR',
-        'audio'     => asset($s->audio_file),
-        'thumb'     => 'https://img.youtube.com/vi/' . $s->youtube_id . '/mqdefault.jpg',
-        'slug'      => $s->slug,
+        'title'  => $s->title,
+        'era'    => $s->era ?? 'EMINOR',
+        'audio'  => asset($s->audio_file),
+        'thumb'  => $s->youtube_id ? 'https://img.youtube.com/vi/' . $s->youtube_id . '/mqdefault.jpg' : '',
+        'slug'   => $s->slug,
+        'local'  => false,
     ];
 });
 @endphp
@@ -367,9 +410,80 @@ var fpTotal   = fpTracks.length;
 var fpCurrent = 0;
 var fpPlaying = false;
 var fpMuted   = false;
+var fpLocalBlobUrls = []; // track untuk cleanup
 
-var fpAudio   = document.getElementById('fpAudio');
+var fpAudio = document.getElementById('fpAudio');
 
+/* ===== LOAD FILE LOKAL ===== */
+function fpLoadLocalFiles(input) {
+    var files = Array.from(input.files);
+    if (!files.length) return;
+
+    // Revoke blob URL lama supaya tidak memory leak
+    fpLocalBlobUrls.forEach(function(url) { URL.revokeObjectURL(url); });
+    fpLocalBlobUrls = [];
+
+    // Hapus track lokal lama dari array
+    fpTracks = fpTracks.filter(function(t) { return !t.local; });
+
+    files.forEach(function(file) {
+        var url = URL.createObjectURL(file);
+        fpLocalBlobUrls.push(url);
+        // Bersihkan nama file: hapus ekstensi
+        var name = file.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
+        fpTracks.push({
+            title: name,
+            era:   'Lokal',
+            audio: url,
+            thumb: '',
+            slug:  '',
+            local: true,
+        });
+    });
+
+    fpTotal = fpTracks.length;
+    fpRenderPlaylist();
+
+    // Langsung putar file pertama yang baru diload
+    fpPlayTrack(fpTracks.length - files.length);
+    input.value = ''; // reset agar bisa pilih file yang sama lagi
+}
+
+/* ===== RENDER PLAYLIST DINAMIS ===== */
+function fpRenderPlaylist() {
+    var sidebar = document.getElementById('fpPlaylist');
+    var expanded = document.getElementById('fpePlaylistWrap');
+
+    var html = fpTracks.map(function(t, i) {
+        return '<div class="fps-track' + (i === fpCurrent ? ' active' : '') + '" id="fpTrack' + i + '" onclick="fpPlayTrack(' + i + ')">'
+            + '<div class="fps-track-num" id="fpTrackNum' + i + '">' + (i + 1) + '</div>'
+            + '<div class="fps-track-info"><div class="fps-track-title">' + fpEsc(t.title) + '</div>'
+            + '<div class="fps-track-era">' + fpEsc(t.era) + (t.local ? ' 📂' : '') + '</div></div>'
+            + '<span class="fps-track-icon" id="fpTrackIcon' + i + '">&#9654;</span></div>';
+    }).join('');
+
+    var htmlExp = fpTracks.map(function(t, i) {
+        return '<div class="fpe-track' + (i === fpCurrent ? ' active' : '') + '" id="fpeTrack' + i + '" onclick="fpPlayTrack(' + i + ')">'
+            + '<div class="fpe-track-num">' + (i + 1) + '</div>'
+            + '<div class="fpe-track-info"><div class="fpe-track-title">' + fpEsc(t.title) + '</div>'
+            + '<div class="fpe-track-era">' + fpEsc(t.era) + (t.local ? ' 📂' : '') + '</div></div>'
+            + '</div>';
+    }).join('');
+
+    if (!html) {
+        html = '<div class="fps-empty-hint"><span>📂</span><p>Klik 📂 untuk<br>buka file musik</p></div>';
+        htmlExp = '<div class="fps-empty-hint" style="padding:1.5rem 0"><span>🎵</span><p style="color:#555;font-size:12px;margin-top:4px;">Belum ada lagu.<br>Buka file dari perangkat!</p></div>';
+    }
+
+    if (sidebar)  sidebar.innerHTML  = html;
+    if (expanded) expanded.innerHTML = htmlExp;
+}
+
+function fpEsc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ===== PLAY ===== */
 function fpPlayTrack(index) {
     fpCurrent = index;
     var t = fpTracks[index];
@@ -380,53 +494,47 @@ function fpPlayTrack(index) {
         fpUpdateUI();
     }).catch(function() {
         fpPlaying = false;
+        fpUpdateUI();
     });
 
-    // Update all UIs
     fpUpdateAllTrackRows(index);
 }
 
 function fpUpdateUI() {
-    var t     = fpTracks[fpCurrent];
-    var thumb = t.thumb;
+    var t     = fpTracks[fpCurrent] || {};
+    var thumb = t.thumb || '';
 
-    // Sidebar
     var img = document.getElementById('fpThumbImg');
     if (img) img.src = thumb;
     var nt = document.getElementById('fpNowTitle');
-    if (nt) nt.textContent = t.title;
+    if (nt) nt.textContent = t.title || '—';
     var ne = document.getElementById('fpNowEra');
-    if (ne) ne.textContent = t.era;
+    if (ne) ne.textContent = (t.local ? '📂 ' : '') + (t.era || 'EMINOR');
 
-    // Play buttons
     var icon = document.getElementById('fpPlayIcon');
     if (icon) icon.innerHTML = fpPlaying ? '&#9646;&#9646;' : '&#9654;';
 
-    // Mobile sticky
     var mthumb = document.getElementById('fpmThumb');
     if (mthumb) mthumb.src = thumb;
     var mt = document.getElementById('fpmTitle');
-    if (mt) mt.textContent = t.title;
+    if (mt) mt.textContent = t.title || '—';
     var mplay = document.getElementById('fpmPlayBtn');
     if (mplay) mplay.innerHTML = fpPlaying ? '&#9646;&#9646;' : '&#9654;';
 
-    // Mobile expanded
     var ethumb = document.getElementById('fpeThumb');
     if (ethumb) ethumb.src = thumb;
     var etitle = document.getElementById('fpeTitle');
-    if (etitle) etitle.textContent = t.title;
+    if (etitle) etitle.textContent = t.title || '—';
     var eera = document.getElementById('fpeEra');
-    if (eera) eera.textContent = t.era;
+    if (eera) eera.textContent = (t.local ? '📂 ' : '') + (t.era || 'EMINOR');
     var eplay = document.getElementById('fpePlayBtn');
     if (eplay) eplay.innerHTML = fpPlaying ? '&#9646;&#9646;' : '&#9654;';
 }
 
 function fpUpdateAllTrackRows(activeIdx) {
     for (var i = 0; i < fpTotal; i++) {
-        // Sidebar
         var tr = document.getElementById('fpTrack' + i);
         if (tr) tr.classList.toggle('active', i === activeIdx);
-        // Expanded
         var er = document.getElementById('fpeTrack' + i);
         if (er) er.classList.toggle('active', i === activeIdx);
     }
@@ -434,29 +542,26 @@ function fpUpdateAllTrackRows(activeIdx) {
 
 function fpTogglePlay() {
     if (!fpAudio.src || fpAudio.src === window.location.href) {
-        fpPlayTrack(0); return;
+        if (fpTotal > 0) { fpPlayTrack(0); } else { document.getElementById('fpFileInput').click(); }
+        return;
     }
     if (fpPlaying) {
-        fpAudio.pause();
-        fpPlaying = false;
+        fpAudio.pause(); fpPlaying = false;
     } else {
-        fpAudio.play();
-        fpPlaying = true;
+        fpAudio.play(); fpPlaying = true;
     }
     fpUpdateUI();
 }
 
 function fpNext() {
-    var next = (fpCurrent + 1) % fpTotal;
-    fpPlayTrack(next);
+    if (!fpTotal) return;
+    fpPlayTrack((fpCurrent + 1) % fpTotal);
 }
 
 function fpPrev() {
-    if (fpAudio.currentTime > 3) {
-        fpAudio.currentTime = 0; return;
-    }
-    var prev = (fpCurrent - 1 + fpTotal) % fpTotal;
-    fpPlayTrack(prev);
+    if (!fpTotal) return;
+    if (fpAudio.currentTime > 3) { fpAudio.currentTime = 0; return; }
+    fpPlayTrack((fpCurrent - 1 + fpTotal) % fpTotal);
 }
 
 function fpToggleMute() {
@@ -484,17 +589,13 @@ function fpFmt(s) {
     return m + ':' + (sec < 10 ? '0' : '') + sec;
 }
 
-// Audio events
 fpAudio.addEventListener('timeupdate', function() {
     if (!fpAudio.duration) return;
     var pct = (fpAudio.currentTime / fpAudio.duration * 100).toFixed(2) + '%';
-
     var fill = document.getElementById('fpProgressFill');
     if (fill) fill.style.width = pct;
     var cur = document.getElementById('fpCurTime');
     if (cur) cur.textContent = fpFmt(fpAudio.currentTime);
-
-    // Mobile
     var mfill = document.getElementById('fpmFill');
     if (mfill) mfill.style.width = pct;
     var efill = document.getElementById('fpeFill');
@@ -512,7 +613,6 @@ fpAudio.addEventListener('loadedmetadata', function() {
 
 fpAudio.addEventListener('ended', fpNext);
 
-// Sidebar toggle
 function toggleSidebarPlayer() {
     var sidebar = document.getElementById('fpsidebarPlayer');
     var tab     = document.getElementById('fpTab');
@@ -525,7 +625,6 @@ function toggleSidebarPlayer() {
     }
 }
 
-// Mobile expand/collapse
 function fpExpandMobile() {
     document.getElementById('fpExpanded').classList.add('open');
     document.getElementById('fpeOverlay').classList.add('open');
@@ -537,28 +636,17 @@ function fpCollapseMobile() {
     document.body.style.overflow = '';
 }
 
-// Init first track thumbnail
 document.addEventListener('DOMContentLoaded', function() {
     if (fpTracks.length > 0) {
         var t = fpTracks[0];
-        var img = document.getElementById('fpThumbImg');
-        if (img) img.src = t.thumb;
-        var mt = document.getElementById('fpmThumb');
-        if (mt) mt.src = t.thumb;
-        var et = document.getElementById('fpeThumb');
-        if (et) et.src = t.thumb;
-        var nt = document.getElementById('fpNowTitle');
-        if (nt) nt.textContent = t.title;
-        var ne = document.getElementById('fpNowEra');
-        if (ne) ne.textContent = t.era;
-        var mt2 = document.getElementById('fpmTitle');
-        if (mt2) mt2.textContent = t.title;
-        var et2 = document.getElementById('fpeTitle');
-        if (et2) et2.textContent = t.title;
-        var ee  = document.getElementById('fpeEra');
-        if (ee)  ee.textContent  = t.era;
+        ['fpThumbImg','fpmThumb','fpeThumb'].forEach(function(id) {
+            var el = document.getElementById(id); if (el) el.src = t.thumb || '';
+        });
+        var nt = document.getElementById('fpNowTitle'); if (nt) nt.textContent = t.title;
+        var ne = document.getElementById('fpNowEra');   if (ne) ne.textContent = t.era;
+        var mt = document.getElementById('fpmTitle');   if (mt) mt.textContent = t.title;
+        var et = document.getElementById('fpeTitle');   if (et) et.textContent = t.title;
+        var ee = document.getElementById('fpeEra');     if (ee) ee.textContent = t.era;
     }
 });
 </script>
-
-@endif
