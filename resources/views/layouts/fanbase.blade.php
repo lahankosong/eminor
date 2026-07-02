@@ -1316,6 +1316,19 @@ document.addEventListener('DOMContentLoaded',function(){
     fbTryResume();
 });
 
+function fbShowToast(msg){
+    var el=document.getElementById('fbToast');
+    if(!el){
+        el=document.createElement('div');
+        el.id='fbToast';
+        el.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-family:inherit;z-index:9999;white-space:nowrap;pointer-events:none;transition:opacity .3s;';
+        document.body.appendChild(el);
+    }
+    el.textContent=msg; el.style.opacity='1';
+    clearTimeout(el._t);
+    el._t=setTimeout(function(){el.style.opacity='0';},4000);
+}
+
 var fbLocalBlobUrls=[];
 function fbLoadLocalFiles(input){
     var files=Array.from(input.files);
@@ -1359,7 +1372,14 @@ function fbPlayTrack(i){
     var t=fbTracks[i];
     fbAudio.src=t.audio;
     fbAudio.load();
-    fbAudio.play().then(function(){fbPlaying=true;if(!t.local)fbSaveState();fbUpdateUI();}).catch(function(){});
+    fbAudio.play().then(function(){
+        fbPlaying=true; if(!t.local)fbSaveState(); fbUpdateUI();
+    }).catch(function(err){
+        fbPlaying=false; fbUpdateUI();
+        if(err&&err.name==='NotSupportedError'&&!t.local){
+            fbShowToast('⚠️ File audio "'+t.title+'" belum ada di server. Upload dulu via cPanel.');
+        }
+    });
     document.querySelectorAll('.fb-song-item').forEach(function(el,j){el.classList.toggle('playing',j===i);});
     // catat pemutaran hanya untuk lagu dari DB
     try { if(t&&t.id) fetch('/lagu/'+t.id+'/play',{method:'POST',keepalive:true,headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}); } catch(e){}
