@@ -3,15 +3,6 @@
 
 @push('styles')
 <style>
-    /* ── Hero ── */
-    .mus-hero { background: linear-gradient(145deg, var(--sky-dk), var(--sky) 60%, var(--sky-mid)); border-radius: 20px; padding: 1.5rem; color: #fff; margin-bottom: 1.25rem; box-shadow: var(--shadow-lg); }
-    .mus-hero h2 { font-family: 'Sora',sans-serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; }
-    .mus-hero p { font-size: 13px; color: rgba(255,255,255,0.8); }
-    .mus-hero-actions { margin-top: 1rem; display: flex; gap: 8px; flex-wrap: wrap; }
-    .btn-w { padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 5px; }
-    .btn-w-solid { background: #fff; color: var(--sky-dk); }
-    .btn-w-ghost { background: rgba(255,255,255,0.18); color: #fff; }
-
     /* ── Tabs ── */
     .mus-tabs { display: flex; gap: 4px; margin-bottom: 1.25rem; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 4px; }
     .mus-tab { flex: 1; text-align: center; padding: 9px 6px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-3); transition: 0.15s; border: none; background: none; font-family: inherit; }
@@ -84,19 +75,6 @@
 @endpush
 
 @section('content')
-
-<div class="mus-hero">
-    <h2>🎸 Direktori Musisi</h2>
-    <p>Temukan personil, kolaborator, band, dan peluang gig — sesama musisi EMINOR.</p>
-    <div class="mus-hero-actions">
-        @if($myProfile)
-        <a href="{{ route('musisi.edit') }}" class="btn-w btn-w-ghost">Edit profilku</a>
-        <a href="{{ route('musisi.show', $myProfile->id) }}" class="btn-w btn-w-ghost">Lihat profil</a>
-        @else
-        <a href="{{ route('musisi.edit') }}" class="btn-w btn-w-solid">+ Lengkapi profil musisimu</a>
-        @endif
-    </div>
-</div>
 
 @if(session('success'))
 <div style="background:#0d2e1a;color:#4ade80;border:1px solid #166534;padding:10px 14px;border-radius:10px;margin-bottom:1rem;font-size:13px;">{{ session('success') }}</div>
