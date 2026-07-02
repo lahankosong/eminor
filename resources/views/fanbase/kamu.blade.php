@@ -543,19 +543,8 @@
 
 @section('content')
 
-@guest
-<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:2rem;gap:1rem;">
-    <div style="font-size:3rem;">&#128274;</div>
-    <h2 style="font-size:1.1rem;font-weight:700;color:var(--text-1);margin:0;">Tools &amp; Profil Kamu</h2>
-    <p style="font-size:13px;color:var(--text-3);max-width:300px;line-height:1.7;margin:0;">Login untuk melihat catatan, alat musik, dan profil musisimu.</p>
-    <a href="{{ route('google.login') }}" style="margin-top:.5rem;display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:30px;background:linear-gradient(135deg,var(--sky),var(--sky-dk));color:#fff;text-decoration:none;font-size:13px;font-weight:600;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-        Login dengan Google
-    </a>
-</div>
-@else
-
-{{-- PROFILE HERO --}}
+{{-- PROFILE HERO: hanya untuk user yang login --}}
+@auth
 <div class="kamu-hero kamu-hero-compact">
     <div class="kamu-hero-row">
         <img src="{{ $user->avatar ?? asset('images/default-avatar.png') }}" class="kamu-avatar-sm" alt="{{ $user->name }}">
@@ -598,15 +587,28 @@
     </div>
 </div>
 
+@endauth
+
+{{-- Banner login mini untuk guest --}}
+@guest
+<div style="text-align:center;padding:.75rem 1rem;background:var(--card);border-radius:14px;margin-bottom:1rem;border:1px solid var(--border);">
+    <p style="font-size:13px;color:var(--text-3);margin:0;">
+        <a href="{{ route('google.login') }}" style="color:var(--sky-dk);font-weight:600;">Login</a> untuk lihat profil musisi, catatan, dan statistik kamu.
+    </p>
+</div>
+@endguest
+
 {{-- TABS --}}
 <div class="kamu-tabs">
+    @auth
     <button class="kamu-tab active" onclick="kamuTab('Notes', this)">
         &#128196; Catatan
     </button>
     <button class="kamu-tab" onclick="kamuTab('Posts', this)">
         &#128172; Postingan
     </button>
-    <button class="kamu-tab" onclick="kamuTab('Tuner', this)">
+    @endauth
+    <button class="kamu-tab @guest active @endguest" onclick="kamuTab('Tuner', this)">
         &#127928; Tuner
     </button>
     <button class="kamu-tab" onclick="kamuTab('Chord', this)">
@@ -626,7 +628,8 @@
     </button>
 </div>
 
-{{-- TAB: NOTES --}}
+{{-- TAB: NOTES (hanya auth) --}}
+@auth
 <div class="kamu-tab-content active" id="kamuTabNotes" style="display:block">
 
     {{-- NOTE FORM --}}
@@ -687,7 +690,7 @@
 
 </div>
 
-{{-- TAB: POSTS --}}
+{{-- TAB: POSTS (hanya auth) --}}
 <div class="kamu-tab-content" id="kamuTabPosts">
     <p class="kamu-section-title">&#128172; Semua postinganmu di Kita</p>
 
@@ -722,9 +725,10 @@
     </div>
     @endif
 </div>
+@endauth
 
 {{-- TAB: TUNER --}}
-<div class="kamu-tab-content" id="kamuTabTuner">
+<div class="kamu-tab-content @guest active @endguest" id="kamuTabTuner">
 <div class="tuner-card">
 
     <div class="tuner-label">Tuner Gitar &mdash; Standar EADGBE</div>
@@ -1190,8 +1194,6 @@
         </div>
     </div>
 </div>
-
-@endauth
 
 @endsection
 
