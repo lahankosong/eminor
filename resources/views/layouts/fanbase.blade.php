@@ -933,8 +933,19 @@
         <p class="fb-sidebar-section" style="margin-top:1.5rem;">&#9834; Playlist</p>
         @foreach($sidebarSongs as $i => $s)
         <div class="fb-song-item" id="sbTrack{{ $i }}" onclick="fbPlayTrack({{ $i }})">
-            <img src="https://img.youtube.com/vi/{{ $s->youtube_id }}/mqdefault.jpg"
-                 class="fb-song-thumb" alt="">
+            @php
+            $_sbAudioBase = rtrim(env('AUDIO_BASE_URL', config('app.url')), '/');
+            if ($s->cover_image) {
+                $_sbThumb = \Illuminate\Support\Str::startsWith($s->cover_image, ['http://','https://']) ? $s->cover_image : $_sbAudioBase . '/' . ltrim($s->cover_image, '/');
+            } elseif ($s->youtube_id) {
+                $_sbThumb = 'https://img.youtube.com/vi/' . $s->youtube_id . '/mqdefault.jpg';
+            } else {
+                $_sbThumb = '';
+            }
+            @endphp
+            <img src="{{ $_sbThumb }}"
+                 class="fb-song-thumb" alt="{{ $s->title }}"
+                 onerror="this.style.background='#1a1a1a';this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\'%3E%3C/svg%3E'">
             <div class="fb-song-info">
                 <div class="fb-song-title">{{ $s->title }}</div>
                 <div class="fb-song-era">{{ $s->era ?? '' }}</div>
@@ -1245,12 +1256,26 @@ function fbOnbSubmit(roles){
 
 <script>
 @php
+// Base URL untuk file audio — bisa berbeda domain jika shared DB
+$_audioBase = rtrim(env('AUDIO_BASE_URL', config('app.url')), '/');
 $fbTracksData = \App\Models\Song::whereNotNull('audio_file')
     ->where('audio_file','!=','')->where('is_active',true)
     ->orderBy('track_number')
-    ->get(['id','title','era','audio_file','youtube_id'])
-    ->map(function($s){
-        return ['id'=>$s->id,'title'=>$s->title,'era'=>$s->era??'','audio'=>asset($s->audio_file),'thumb'=>'https://img.youtube.com/vi/'.$s->youtube_id.'/mqdefault.jpg'];
+    ->get(['id','title','era','audio_file','cover_image','youtube_id'])
+    ->map(function($s) use ($_audioBase){
+        $audioUrl = \Illuminate\Support\Str::startsWith($s->audio_file, ['http://','https://'])
+            ? $s->audio_file
+            : $_audioBase . '/' . ltrim($s->audio_file, '/');
+        if ($s->cover_image) {
+            $thumb = \Illuminate\Support\Str::startsWith($s->cover_image, ['http://','https://'])
+                ? $s->cover_image
+                : $_audioBase . '/' . ltrim($s->cover_image, '/');
+        } elseif ($s->youtube_id) {
+            $thumb = 'https://img.youtube.com/vi/'.$s->youtube_id.'/mqdefault.jpg';
+        } else {
+            $thumb = '';
+        }
+        return ['id'=>$s->id,'title'=>$s->title,'era'=>$s->era??'','audio'=>$audioUrl,'thumb'=>$thumb];
     });
 @endphp
 var fbTracks=@json($fbTracksData),fbTotal=fbTracks.length,fbCurrent=-1,fbPlaying=false,fbAudio=document.getElementById('fbAudio');
