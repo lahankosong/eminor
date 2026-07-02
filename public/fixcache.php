@@ -36,7 +36,7 @@ echo "\n=== Last 30 lines of laravel.log ===\n";
 $logFile = $root . '/storage/logs/laravel.log';
 if (file_exists($logFile)) {
     $lines = file($logFile);
-    $last  = array_slice($lines, -30);
+    $last  = array_slice($lines, -80);
     echo implode('', $last);
 } else {
     echo "(log file not found)\n";

@@ -593,8 +593,9 @@ class DiaController extends Controller
         } catch (\Throwable $e) {}
     }
 
-    private function userConversations(int $userId)
+    private function userConversations(?int $userId)
     {
+        if ($userId === null) return collect();
         try {
             $invitedConvIds = ConversationInvite::where('to_user_id', $userId)
                 ->where('status', 'accepted')
@@ -616,16 +617,18 @@ class DiaController extends Controller
         return $query->orderByDesc('last_message_at')->get();
     }
 
-    private function userGroups(int $userId)
+    private function userGroups(?int $userId)
     {
+        if ($userId === null) return collect();
         return Group::with(['members.user'])
             ->whereHas('members', fn($q) => $q->where('user_id', $userId))
             ->orderByDesc('last_message_at')
             ->get();
     }
 
-    private function sortedUsers(int $excludeId)
+    private function sortedUsers(?int $excludeId)
     {
+        if ($excludeId === null) return collect();
         return User::where('id', '!=', $excludeId)->get()
             ->sortByDesc(fn($u) => [
                 $u->getAttribute('is_online') ? 1 : 0,
