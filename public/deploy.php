@@ -15,7 +15,7 @@
 @set_time_limit(300);
 @ini_set('memory_limit', '256M');
 
-$github  = 'https://github.com/lahankosong/margonoandi-fanbase/archive/refs/heads/main.zip';
+$github  = 'https://github.com/lahankosong/eminor/archive/refs/heads/main.zip';
 $base    = realpath(__DIR__ . '/../');
 $envFile = $base . '/.env';
 $tmp_zip = sys_get_temp_dir() . '/fanbase_deploy.zip';
@@ -74,7 +74,7 @@ if (isset($_GET['diag'])) {
 // ── Halaman awal (konfirmasi) ─────────────────────────────────────────────────
 if (!isset($_GET['run'])) {
     echo '<h2>Info</h2>
-    <pre class="info">Repo     : lahankosong/margonoandi-fanbase (branch: main)
+    <pre class="info">Repo     : lahankosong/eminor (branch: main)
 Metode   : download ZIP &rarr; extract &rarr; copy file (tanpa exec/git/SSH)
 Cache    : dibersihkan dengan hapus file cache langsung (tanpa artisan)
 Preserve : ' . htmlspecialchars(implode(', ', $preserve)) . '

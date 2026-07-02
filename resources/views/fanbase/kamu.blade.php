@@ -543,6 +543,18 @@
 
 @section('content')
 
+@guest
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:2rem;gap:1rem;">
+    <div style="font-size:3rem;">&#128274;</div>
+    <h2 style="font-size:1.1rem;font-weight:700;color:var(--text-1);margin:0;">Tools &amp; Profil Kamu</h2>
+    <p style="font-size:13px;color:var(--text-3);max-width:300px;line-height:1.7;margin:0;">Login untuk melihat catatan, alat musik, dan profil musisimu.</p>
+    <a href="{{ route('google.login') }}" style="margin-top:.5rem;display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:30px;background:linear-gradient(135deg,var(--sky),var(--sky-dk));color:#fff;text-decoration:none;font-size:13px;font-weight:600;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Login dengan Google
+    </a>
+</div>
+@else
+
 {{-- PROFILE HERO --}}
 <div class="kamu-hero kamu-hero-compact">
     <div class="kamu-hero-row">
@@ -1178,6 +1190,8 @@
         </div>
     </div>
 </div>
+
+@endauth
 
 @endsection
 

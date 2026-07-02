@@ -15,29 +15,25 @@ class KamuController extends Controller
     public function index() {
         $user = Auth::user();
 
-        try {
-            $posts = Post::where('user_id', $user->id)->orderByDesc('created_at')->get();
-        } catch (\Throwable $e) {
-            $posts = collect();
-        }
-
-        try {
-            $notes = \App\Models\KamuNote::where('user_id', Auth::id())->get()
-                ->sortByDesc('is_pinned')->sortByDesc('created_at')->values();
-        } catch (\Throwable $e) {
-            $notes = collect();
-        }
-
-        $totalLikes    = $posts->sum('likes_count');
-        $totalComments = $posts->sum('comments_count');
-        $totalPosts    = $posts->count();
-
+        $posts = collect(); $notes = collect();
+        $totalLikes = 0; $totalComments = 0; $totalPosts = 0;
         $musician = null; $followers = 0; $following = 0;
-        try { $musician = MusicianProfile::where('user_id', $user->id)->first(); } catch (\Throwable $e) {}
-        try {
-            $followers = Follow::where('following_id', $user->id)->count();
-            $following = Follow::where('follower_id', $user->id)->count();
-        } catch (\Throwable $e) {}
+
+        if ($user) {
+            try { $posts = Post::where('user_id', $user->id)->orderByDesc('created_at')->get(); } catch (\Throwable $e) {}
+            try {
+                $notes = \App\Models\KamuNote::where('user_id', $user->id)->get()
+                    ->sortByDesc('is_pinned')->sortByDesc('created_at')->values();
+            } catch (\Throwable $e) {}
+            $totalLikes    = $posts->sum('likes_count');
+            $totalComments = $posts->sum('comments_count');
+            $totalPosts    = $posts->count();
+            try { $musician = MusicianProfile::where('user_id', $user->id)->first(); } catch (\Throwable $e) {}
+            try {
+                $followers = Follow::where('following_id', $user->id)->count();
+                $following = Follow::where('follower_id', $user->id)->count();
+            } catch (\Throwable $e) {}
+        }
 
         $articles = collect();
         try { $articles = Article::orderBy('batch')->orderBy('id')->get(['id','slug','title','category','batch','excerpt','reading_time']); } catch (\Throwable $e) {}
