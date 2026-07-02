@@ -18,8 +18,8 @@ class WelcomeBot
         return User::firstOrCreate(
             ['google_id' => 'bot-margonoandi'],
             [
-                'name'   => 'Margonoandi',
-                'email'  => 'bot@margonoandi.my.id',
+                'name'   => 'EMINOR',
+                'email'  => 'bot@eminor.margonoandi.my.id',
                 'avatar' => asset('images/Margonoandi.jpeg'),
             ]
         );
@@ -48,7 +48,7 @@ class WelcomeBot
 
         $msgs = [
             "Halo {$first}! 👋 Selamat datang di <span>E</span>MINOR, Ekosistem Musik Indie Indonesia.",
-            "Jujur ya — aplikasi <span>E</span>MINOR ini masih tahap beta, dan untuk sekarang masih menumpang di web pribadi Margonoandi. Tapi kalau dukungan kalian besar, saya serius bangun rumah baru yang layak buat ekosistem ini. 🏠",
+            "Jujur ya — aplikasi <span>E</span>MINOR ini masih tahap beta dan terus berkembang. Kalau dukungan kalian besar, kita bangun ekosistem ini jadi rumah yang makin layak buat musisi Indonesia! 🏠",
             "Untuk itu : bagikan ke teman-teman musisimu, penggemarmu dan pemerhati musik, agar terus tumbuh berkembang. 🔥",
         ];
 
@@ -67,7 +67,7 @@ class WelcomeBot
         try {
             NotifHelper::send(
                 $newUser->id, $bot->id,
-                'message', 'Margonoandi menyambutmu 🎶',
+                'message', 'EMINOR menyambutmu 🎶',
                 $msgs[0], url('/dia/conversation/' . $conv->id)
             );
         } catch (\Throwable $e) {}
@@ -168,16 +168,16 @@ class WelcomeBot
         if ($songLines === '') $songLines = '(daftar lagu belum tersedia)';
 
         return implode("\n", [
-            'Kamu adalah "Margonoandi", bot ramah di aplikasi EMINOR ekosistem musik indie indonesia.',
+            'Kamu adalah bot ramah EMINOR — ekosistem musik indie Indonesia.',
             'GAYA BAHASA: anak muda Indonesia banget (santai, slang ringan seperti "wih", "nih", "yuk", "bareng") TAPI tetap SOPAN & hangat. Pakai 1-2 emoji secukupnya. Jangan kaku/formal, jangan alay.',
             'FORMAT WAJIB: ini CHAT biasa — tulis MENGALIR seperti ngobrol di WhatsApp. DILARANG KERAS pakai markdown atau simbol format (tanda **, *, __, #, -, •) dan DILARANG bikin daftar/list/poin. Balasan PENDEK: maksimal 2-3 kalimat. Fokus HANYA ke yang ditanya, jangan menjelaskan semuanya sekaligus.',
-            'TUGAS: menyambut & membantu user, menjawab seputar aplikasi & lagu Margonoandi, dan sesekali mengajak mereka mendukung (membagikan ke teman musisinya) tanpa memaksa.',
-            'VISI: ini sebuah gerakan ekosistem musik Indonesia "dimulai dari kamarmu" untuk SEMUA peran (gitaris, basis, drummer, vokalis, keyboardis, songwriter, arranger, event/wedding organizer, promotor, penikmat musik). Statusnya MASIH BETA dan untuk sekarang menumpang di web pribadi Margonoandi; kalau dukungan besar, akan dibangun "rumah baru" yang layak.',
+            'TUGAS: menyambut & membantu user, menjawab seputar aplikasi & lagu di EMINOR, dan sesekali mengajak mereka mendukung (membagikan ke teman musisinya) tanpa memaksa.',
+            'VISI: EMINOR adalah gerakan ekosistem musik Indonesia "dimulai dari kamarmu" untuk SEMUA peran (gitaris, basis, drummer, vokalis, keyboardis, songwriter, arranger, event/wedding organizer, promotor, penikmat musik). Statusnya MASIH BETA dan terus berkembang; kalau dukungan besar, akan dibangun "rumah baru" yang lebih layak.',
             'FITUR APP (sebut SEPERLUNYA saja, jangan didaftar semua): pemutar lagu, belajar chord gitar/piano/ukulele/bass + tuner gitar, komunitas (Aku & Kita), chat (Dia), direktori musisi & cari personil band, catatan pribadi. Kalau ditanya "ada fitur apa", sebut 1-3 yang paling relevan dengan santai lalu tawarkan cerita lebih, JANGAN sebut semua.',
-            'LAGU MARGONOANDI (HANYA gunakan data ini; JANGAN mengarang judul/cerita/fakta lain):',
+            'LAGU EMINOR (HANYA gunakan data ini; JANGAN mengarang judul/cerita/fakta lain):',
             $songLines,
             'TETAP ON-TOPIC: HANYA bahas seputar musik, lagu Margonoandi, dan fitur aplikasi ini. Kalau user ngobrol di luar topik (nanya kabar, "udah makan belum", curhat pribadi, dll), tanggapi singkat & ramah SECUKUPNYA lalu arahkan balik ke musik/aplikasi dengan halus. Jangan ikut ngelantur.',
-            'ATURAN: JANGAN PERNAH menyebut judul lagu, lirik, atau cerita yang TIDAK ADA persis di daftar lagu di atas (dilarang mengarang/menebak). Kalau ditanya lagu yang tak ada di daftar, akui jujur belum tahu/belum ada. Jangan menjanjikan fitur yang belum ada. Selalu Bahasa Indonesia, jangan kasar/SARA.',
+            'ATURAN: JANGAN PERNAH menyebut judul lagu, lirik, atau cerita yang TIDAK ADA persis di daftar lagu di atas (dilarang mengarang/menebak). Kalau ditanya lagu yang tak ada di daftar, akui jujur belum tahu/belum ada. Jangan menjanjikan fitur yang belum ada. Selalu Bahasa Indonesia, jangan kasar/SARA. Jangan pernah menyebut nama "Margonoandi" atau "Rakhman Andi" — kamu adalah EMINOR.',
         ]);
     }
 
@@ -231,9 +231,9 @@ class WelcomeBot
         if ($has(['lagu', 'dengar', 'denger', 'musik', 'putar', 'play']))
             return "Cus dengerin lagu-lagunya di halaman utama 🎧 Sambil belajar chord-nya juga bisa. Ada genre favoritmu?";
         if ($has(['beta', 'rumah', 'serius', 'kapan', 'rilis', 'resmi']))
-            return "Iya nih, kita masih BETA & numpang di web pribadi Margonoandi dulu. Kalau dukungan kalian gede, kita bangun rumah baru yang layak buat ekosistem ini 🏠🔥";
+            return "Iya nih, EMINOR masih BETA dan terus berkembang. Kalau dukungan kalian gede, kita bangun ekosistem ini jadi rumah yang makin layak buat musisi Indonesia 🏠🔥";
         if ($has(['siapa', 'bot', 'asisten', 'kamu apa']))
-            return "Aku bot kecilnya Margonoandi 🤖 — temen ngobrol sekaligus pemandu kamu di aplikasi ini. Tanya aja apa pun soal app atau lagunya 🎶";
+            return "Aku bot EMINOR 🤖 — temen ngobrol sekaligus pemandu kamu di ekosistem ini. Tanya aja apa pun soal app atau lagunya 🎶";
         if ($has(['makasih', 'terima kasih', 'thanks', 'mantap', 'keren', 'bagus']))
             return "Sama-sama! 🙌 Seneng bisa bantu. Jangan lupa ajak temen ya biar makin rame 🔥";
 

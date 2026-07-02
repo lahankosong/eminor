@@ -153,9 +153,9 @@ class MusicianController extends Controller
             $u     = $profile->user;
             $roles = $profile->rolesArray();
             $desc  = \Illuminate\Support\Str::limit(strip_tags((string) $profile->bio), 150)
-                  ?: ('Musisi' . ($roles ? ' — ' . implode(', ', array_slice($roles, 0, 3)) : '') . ' di komunitas Margonoandi.');
+                  ?: ('Musisi' . ($roles ? ' — ' . implode(', ', array_slice($roles, 0, 3)) : '') . ' di komunitas EMINOR.');
             $seo = [
-                'title'       => ($u->name ?? 'Musisi') . ' — Musisi di Margonoandi',
+                'title'       => ($u->name ?? 'Musisi') . ' — Musisi di EMINOR',
                 'description' => $desc,
                 'image'       => $profile->photoUrl(),
                 'url'         => route('musisi.show', $profile->id),

@@ -150,7 +150,7 @@ class AdminController extends Controller
 
         $corpus = Str::limit(implode("\n", array_map(fn ($t) => '- ' . trim($t), $src['texts'])), 8000);
         $system = implode("\n", [
-            'Kamu analis komunitas untuk fanbase musik Margonoandi.',
+            'Kamu analis komunitas untuk Ekosistem musik EMINOR.',
             'Dari kumpulan POSTINGAN & KOMENTAR publik komunitas di bawah, buat analisis ringkas dalam Bahasa Indonesia yang rapi (boleh pakai penomoran biasa).',
             'Struktur keluaran:',
             '1) TOPIK YANG SEDANG DIBICARAKAN — 5-7 tema utama (singkat per poin).',
@@ -213,7 +213,7 @@ class AdminController extends Controller
               . 'SEMUA JUDUL LAGU: ' . $allTitles;
 
         $system = implode("\n", [
-            'Kamu SEO specialist untuk situs fanbase musik Margonoandi (margonoandi.my.id): lagu, lirik, chord, komunitas musisi Indonesia.',
+            'Kamu SEO specialist untuk situs ekosistem musik EMINOR (eminor.margonoandi.my.id): lagu, lirik, chord, komunitas musisi Indonesia.',
             'Dari DATA INTERNAL di bawah, buat SARAN SEO PRAKTIS (Bahasa Indonesia) yang siap pakai. Struktur:',
             '1) META DESCRIPTION HOMEPAGE - 3 variasi (maks ~155 karakter, menarik).',
             '2) IDE KONTEN/HALAMAN - 5 ide (judul + 1 kalimat) yang menargetkan apa yang DICARI/DIBICARAKAN audiens.',
