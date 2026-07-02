@@ -719,6 +719,16 @@
             font-size:10px; color:var(--text-4); font-weight:500;
         }
 
+        /* Tombol buka file lokal */
+        .fb-open-file-btn {
+            display:block; width:100%; padding:10px 14px; margin:10px 0 4px;
+            background:rgba(255,255,255,0.05); border:1px dashed rgba(255,255,255,0.15);
+            border-radius:10px; color:rgba(255,255,255,0.5); font-size:13px;
+            cursor:pointer; text-align:center; font-family:inherit; transition:0.15s;
+            box-sizing:border-box;
+        }
+        .fb-open-file-btn:hover { border-color:rgba(255,255,255,0.4); color:#fff; }
+
         /* Track list */
         .fb-playlist-tracks { overflow-y:auto; flex:1; }
         .fb-playlist-track {
@@ -786,7 +796,7 @@
 
 {{-- TOP BAR --}}
 <div class="fb-topbar">
-    <a href="{{ route('aku') }}" class="fb-brand">EMINOR <span>· Ekosistem</span></a>
+    <a href="{{ route('aku') }}" class="fb-brand">EMINOR <span>- find our stage</span></a>
     <div class="fb-topbar-right">
         @auth
         <a href="{{ route('kamu') }}" class="fb-notif-btn {{ request()->routeIs('kamu','musisi*') ? 'active' : '' }}" title="Studio / Musisi" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
@@ -1149,8 +1159,15 @@
             <span id="fbPopupDur">0:00</span>
         </div>
     </div>
+    {{-- Tombol buka file lokal --}}
+    <button class="fb-open-file-btn" onclick="document.getElementById('fbFileInput').click()">
+        📂 Buka File Musik dari Perangkat
+    </button>
     <div class="fb-playlist-tracks" id="fbPlaylistTracks"></div>
 </div>
+
+{{-- Input file tersembunyi --}}
+<input type="file" id="fbFileInput" accept="audio/*" multiple style="display:none" onchange="fbLoadLocalFiles(this)">
 
 {{-- BOTTOM NAV (mobile) --}}
 <nav class="fb-bottom-nav">
@@ -1299,14 +1316,52 @@ document.addEventListener('DOMContentLoaded',function(){
     fbTryResume();
 });
 
+var fbLocalBlobUrls=[];
+function fbLoadLocalFiles(input){
+    var files=Array.from(input.files);
+    if(!files.length)return;
+    // Cleanup blob lama
+    fbLocalBlobUrls.forEach(function(u){URL.revokeObjectURL(u);});
+    fbLocalBlobUrls=[];
+    // Hapus track lokal lama
+    fbTracks=fbTracks.filter(function(t){return !t.local;});
+    files.forEach(function(file){
+        var url=URL.createObjectURL(file);
+        fbLocalBlobUrls.push(url);
+        var name=file.name.replace(/\.[^/.]+$/,'').replace(/_/g,' ');
+        fbTracks.push({id:null,title:name,era:'Lokal 📂',audio:url,thumb:'',local:true});
+    });
+    fbTotal=fbTracks.length;
+    // Re-render daftar lagu di popup
+    var list=document.getElementById('fbPlaylistTracks');
+    if(list){
+        list.innerHTML='';
+        fbTracks.forEach(function(t,i){
+            var d=document.createElement('div');
+            d.className='fb-playlist-track';
+            d.id='fbPopupTrack'+i;
+            d.onclick=function(){fbPlayTrack(i);};
+            d.innerHTML='<span class="fb-playlist-track-num" id="fbPopupNum'+i+'">'+(i+1)+'</span>'+
+                (t.thumb?'<img src="'+escHtml(t.thumb)+'" class="fb-playlist-track-thumb" alt="">':'<div class="fb-playlist-track-thumb" style="background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:14px;">🎵</div>')+
+                '<div style="flex:1;min-width:0;"><div class="fb-playlist-track-title">'+escHtml(t.title)+'</div>'+
+                '<div class="fb-playlist-track-era">'+escHtml(t.era)+'</div></div>';
+            list.appendChild(d);
+        });
+    }
+    input.value='';
+    // Langsung putar file lokal pertama
+    fbPlayTrack(fbTracks.length-files.length);
+}
+
 function fbPlayTrack(i){
     if(!fbTotal)return;
     fbCurrent=i;
     var t=fbTracks[i];
     fbAudio.src=t.audio;
-    fbAudio.play().then(function(){fbPlaying=true;fbSaveState();fbUpdateUI();}).catch(function(){});
+    fbAudio.load();
+    fbAudio.play().then(function(){fbPlaying=true;if(!t.local)fbSaveState();fbUpdateUI();}).catch(function(){});
     document.querySelectorAll('.fb-song-item').forEach(function(el,j){el.classList.toggle('playing',j===i);});
-    // catat pemutaran (fire-and-forget)
+    // catat pemutaran hanya untuk lagu dari DB
     try { if(t&&t.id) fetch('/lagu/'+t.id+'/play',{method:'POST',keepalive:true,headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}}); } catch(e){}
 }
 function fbTogglePlay(){
